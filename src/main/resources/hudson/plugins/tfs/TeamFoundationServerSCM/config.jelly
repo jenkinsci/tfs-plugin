@@ -1,0 +1,24 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="Server URL" help="/plugin/tfs/server.html">
+        <f:textbox name="tfs.server" value="${scm.server}"/>
+    </f:entry>
+    
+    <f:entry title="Name of project" help="/plugin/tfs/project.html">
+        <f:textbox name="tfs.project" value="${scm.project}"
+             checkUrl="'/fieldCheck?errorText='+escape('${%Project is mandatory.}')+'&amp;value='+escape(this.value)"/>
+    </f:entry>
+
+    <f:advanced>
+    
+        <f:entry title="Clean copy">
+            <f:checkbox name="tfs.cleanCopy" checked="${scm.cleanCopy}"/>
+                If checked, Hudson will delete the directory and all its contents before downloading the files
+                from the repository for every build.
+        </f:entry>
+
+        <f:entry title="Workspace name" help="/plugin/tfs/workspacename.html">
+            <f:textbox name="tfs.workspaceName" value="${scm.workspaceName}"/>
+        </f:entry>
+
+    </f:advanced>
+</j:jelly>
