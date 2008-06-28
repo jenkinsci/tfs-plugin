@@ -2,7 +2,7 @@ package hudson.plugins.tfs.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import hudson.plugins.tfs.TestUtil;
+import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.model.TeamFoundationCredentials;
 import hudson.plugins.tfs.model.TeamFoundationProject;
 import hudson.util.ArgumentListBuilder;
@@ -26,8 +26,8 @@ public class ToolArgumentBuilderTest {
     
     @Test
     public void assertBriefHistoryCommands() {
-        Calendar fromTimestamp = TestUtil.getCalendar(2006, 11, 01, 01, 01, 01);
-        Calendar toTimestamp = TestUtil.getCalendar(2008, 05, 27, 20, 00, 0);
+        Calendar fromTimestamp = Util.getCalendar(2006, 11, 01, 01, 01, 01);
+        Calendar toTimestamp = Util.getCalendar(2008, 05, 27, 20, 00, 0);
         
         ArgumentListBuilder commands = builder.getBriefHistoryArguments(fromTimestamp, toTimestamp);
         assertNotNull("Arguments were null", commands);
@@ -38,8 +38,8 @@ public class ToolArgumentBuilderTest {
     public void assertBriefHistoryCommandsWithCredentials() {
         project.setCredentials(new TeamFoundationCredentials("user", "password", "domain"));
         
-        Calendar fromTimestamp = TestUtil.getCalendar(2006, 11, 01,01, 01, 01);
-        Calendar toTimestamp = TestUtil.getCalendar(2008, 05, 27, 20, 00, 0);
+        Calendar fromTimestamp = Util.getCalendar(2006, 11, 01,01, 01, 01);
+        Calendar toTimestamp = Util.getCalendar(2008, 05, 27, 20, 00, 0);
         
         ArgumentListBuilder commands = builder.getBriefHistoryArguments(fromTimestamp, toTimestamp);
         assertNotNull("Arguments were null", commands);
@@ -48,8 +48,8 @@ public class ToolArgumentBuilderTest {
 
     @Test
     public void assertDetailedHistoryCommands() {
-        Calendar fromTimestamp = TestUtil.getCalendar(2006, 11, 01, 01, 01, 01);
-        Calendar toTimestamp = TestUtil.getCalendar(2008, 05, 27, 20, 00, 0);
+        Calendar fromTimestamp = Util.getCalendar(2006, 11, 01, 01, 01, 01);
+        Calendar toTimestamp = Util.getCalendar(2008, 05, 27, 20, 00, 0);
         
         ArgumentListBuilder commands = builder.getDetailedHistoryArguments(fromTimestamp, toTimestamp);
         assertNotNull("Arguments were null", commands);

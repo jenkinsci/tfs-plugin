@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 
-import hudson.plugins.tfs.TestUtil;
+import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.model.TeamFoundationChangeSet;
 import hudson.plugins.tfs.model.TeamFoundationProject;
@@ -56,7 +56,7 @@ public class DefaultHistoryActionTest {
         stub(tool.execute(isA(String[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-1.log")));
         
         DefaultHistoryAction action = new DefaultHistoryAction();
-        List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, TestUtil.getCalendar(2006, 12, 1), Calendar.getInstance());
+        List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Util.getCalendar(2006, 12, 1), Calendar.getInstance());
         assertNotNull("The list of change sets was null", changeSets);
         assertEquals("The number of change sets in the list was incorrect", 1, changeSets.size());
         
@@ -76,7 +76,7 @@ public class DefaultHistoryActionTest {
         stub(tool.execute(isA(String[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-2.log")));
         
         DefaultHistoryAction action = new DefaultHistoryAction();
-        List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, TestUtil.getCalendar(2006, 12, 1), Calendar.getInstance());
+        List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Util.getCalendar(2006, 12, 1), Calendar.getInstance());
         assertNotNull("The list of change sets was null", changeSets);
         assertEquals("The number of change sets in the list was incorrect", 2, changeSets.size());
         

@@ -31,7 +31,7 @@ public class TfToolTest {
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-        workspace = TestUtil.createTempFilePath();
+        workspace = Util.createTempFilePath();
         tool = new TfTool("tf", launcher, taskListener, workspace);
     }
     

@@ -1,16 +1,19 @@
 package hudson.plugins.tfs;
 
 import hudson.FilePath;
-import hudson.Util;
+import hudson.model.Hudson;
 
 import java.io.File;
 import java.util.Calendar;
 import java.util.TimeZone;
 
 import org.apache.webdav.lib.properties.GetContentLengthProperty;
+import org.junit.Ignore;
 
-public class TestUtil {
+public class Util {
 
+    private Util() {
+    }
 
     public static Calendar getCalendar(int year, int month, int day) {
         return getCalendar(year, month, day, 0, 0, 0);
@@ -31,7 +34,7 @@ public class TestUtil {
     }
     
     public static FilePath createTempFilePath() throws Exception {
-        File parentFile = Util.createTempDir();
+        File parentFile = hudson.Util.createTempDir();
         FilePath workspace = new FilePath(parentFile);
         parentFile.delete();
         workspace.mkdirs();
