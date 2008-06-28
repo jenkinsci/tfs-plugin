@@ -2,6 +2,8 @@ package hudson.plugins.tfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -17,7 +19,13 @@ import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.action.DefaultGetAction;
+import hudson.plugins.tfs.action.DefaultHistoryAction;
+import hudson.plugins.tfs.action.DefaultPollAction;
+import hudson.plugins.tfs.model.TeamFoundationChangeSet;
+import hudson.plugins.tfs.model.TeamFoundationProject;
 import hudson.scm.ChangeLogParser;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
@@ -44,6 +52,10 @@ public class TeamFoundationServerScm extends SCM {
         this.workspaceName = workspaceName;
     }
 
+    private TeamFoundationProject createTeamFoundationProject() {
+        return new TeamFoundationProject(server, project);
+    }
+
     public String getServer() {
         return server;
     }
@@ -61,15 +73,44 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public boolean checkout(AbstractBuild arg0, Launcher arg1, FilePath arg2, BuildListener arg3, File arg4) throws IOException, InterruptedException {
-        // TODO Auto-generated method stub
+    public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspace, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
+        TfTool tool = new TfTool(getDescriptor().tfExecutable, launcher, listener, workspace);
+        
+        DefaultGetAction action = new DefaultGetAction();
+        action.getFiles(tool, cleanCopy);
+        
+        if (build.getPreviousBuild() == null) {
+            createEmptyChangeLog(changelogFile, listener, "changesets");
+        } else {
+            DefaultHistoryAction historyAction = new DefaultHistoryAction();
+            List<TeamFoundationChangeSet> changeSets = historyAction.getChangeSets(tool, createTeamFoundationProject(), build.getPreviousBuild().getTimestamp(), Calendar.getInstance());
+            
+            ChangeSetWriter writer = new ChangeSetWriter();
+            writer.write(changelogFile, changeSets);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean pollChanges(AbstractProject hudsonProject, Launcher launcher, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
+        Run<?,?> lastBuild = hudsonProject.getLastBuild();
+        if (lastBuild == null) {
+            return true;
+        } else {
+            TfTool tool = new TfTool(getDescriptor().tfExecutable, launcher, listener, workspace);
+            DefaultPollAction action = new DefaultPollAction();
+            return action.hasChanges(tool , createTeamFoundationProject(), lastBuild.getTimestamp());
+        }
+    }
+
+    @Override
+    public boolean requiresWorkspaceForPolling() {
         return false;
     }
 
     @Override
-    public boolean pollChanges(AbstractProject arg0, Launcher arg1, FilePath arg2, TaskListener arg3) throws IOException, InterruptedException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean supportsPolling() {
+        return true;
     }
 
     @Override
@@ -79,7 +120,7 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public SCMDescriptor<TeamFoundationServerScm> getDescriptor() {
+    public DescriptorImpl getDescriptor() {
         return PluginImpl.TFS_DESCRIPTOR;
     }
 
