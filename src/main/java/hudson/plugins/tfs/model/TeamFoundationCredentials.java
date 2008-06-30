@@ -23,9 +23,4 @@ public class TeamFoundationCredentials {
     public String getDomain() {
         return domain;
     }
-
-    public String getLoginStr() {
-        return username + "@" + domain + "," + password;
-    }
-
 }

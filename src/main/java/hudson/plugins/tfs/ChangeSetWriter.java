@@ -1,15 +1,62 @@
 package hudson.plugins.tfs;
 
+import hudson.Util;
 import hudson.plugins.tfs.model.TeamFoundationChangeSet;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.List;
 
+/**
+ * Team Foundation change log writer.
+ * 
+ * @author Erik Ramfelt
+ */
 public class ChangeSetWriter {
 
-    public void write(File changelogFile, List<TeamFoundationChangeSet> changeSets) {
-        // TODO Auto-generated method stub
-        
+    /**
+     * Writes the list of change sets to the file
+     * @param changeSets list of change sets
+     * @param changelogFile file to write change sets to
+     */
+    public void write(List<TeamFoundationChangeSet> changeSets, File changelogFile) throws IOException {
+        FileWriter writer = new FileWriter(changelogFile);
+        write(changeSets, writer);
+        writer.close();
     }
 
+    /**
+     * Writes the list of change sets to the writer
+     * @param changeSets list of change sets
+     * @param output output writer
+     */    
+    public void write(List<TeamFoundationChangeSet> changeSets, Writer output) {
+        PrintWriter writer = new PrintWriter(output);
+        
+        writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        writer.println("<changelog>");
+        
+        for (TeamFoundationChangeSet changeSet : changeSets) {
+            writer.println(String.format("\t<changeset version=\"%s\">", changeSet.getVersion()));
+            write(changeSet, writer);
+            writer.println("\t</changeset>");
+        }
+        
+        writer.println("</changelog>");
+        writer.flush();
+    }
+
+    private void write(TeamFoundationChangeSet changeSet, PrintWriter writer) {
+        writer.println(String.format("\t\t<date>%s</date>", Util.XS_DATETIME_FORMATTER.format(changeSet.getDate())));
+        writer.println(String.format("\t\t<user>%s</user>", changeSet.getUser()));
+        writer.println(String.format("\t\t<comment>%s</comment>", changeSet.getComment()));
+        writer.println("\t\t<items>");
+        for (TeamFoundationChangeSet.Item item : changeSet.getItems()) {
+            writer.println(String.format("\t\t\t<item action=\"%s\">%s</item>", item.getAction(), item.getPath()));
+        }
+        writer.println("\t\t</items>");
+    }
 }

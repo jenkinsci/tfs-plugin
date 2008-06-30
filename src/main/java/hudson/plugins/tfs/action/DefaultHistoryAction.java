@@ -4,6 +4,7 @@ import hudson.AbortException;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.model.TeamFoundationChangeSet;
 import hudson.plugins.tfs.model.TeamFoundationProject;
+import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import hudson.plugins.tfs.util.ToolArgumentBuilder;
 
 import java.io.BufferedReader;
@@ -48,7 +49,8 @@ public class DefaultHistoryAction {
     public List<TeamFoundationChangeSet> getChangeSets(TfTool tool, TeamFoundationProject project, 
             Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException {
         ToolArgumentBuilder builder = new ToolArgumentBuilder(project);
-        BufferedReader reader = new BufferedReader(tool.execute(builder.getDetailedHistoryArguments(fromTimestamp, toTimestamp).toCommandArray()));
+        MaskedArgumentListBuilder arguments = builder.getDetailedHistoryArguments(fromTimestamp, toTimestamp);        
+        BufferedReader reader = new BufferedReader(tool.execute(arguments.toCommandArray(), arguments.toMaskArray()));
         try {
             return parseDetailedHistoryOutput(reader, fromTimestamp.getTime());
         } catch (ParseException pe) {

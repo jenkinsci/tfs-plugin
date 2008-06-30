@@ -7,8 +7,6 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
-import net.sf.json.JSONObject;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -83,10 +81,13 @@ public class TeamFoundationServerScm extends SCM {
             createEmptyChangeLog(changelogFile, listener, "changesets");
         } else {
             DefaultHistoryAction historyAction = new DefaultHistoryAction();
-            List<TeamFoundationChangeSet> changeSets = historyAction.getChangeSets(tool, createTeamFoundationProject(), build.getPreviousBuild().getTimestamp(), Calendar.getInstance());
-            
+            List<TeamFoundationChangeSet> changeSets = historyAction.getChangeSets(tool, 
+                    createTeamFoundationProject(), 
+                    build.getPreviousBuild().getTimestamp(), 
+                    Calendar.getInstance());
+
             ChangeSetWriter writer = new ChangeSetWriter();
-            writer.write(changelogFile, changeSets);
+            writer.write(changeSets, changelogFile);
         }
         return true;
     }
@@ -115,8 +116,7 @@ public class TeamFoundationServerScm extends SCM {
 
     @Override
     public ChangeLogParser createChangeLogParser() {
-        // TODO Auto-generated method stub
-        return null;
+        return new ChangeSetReader();
     }
 
     @Override
@@ -130,6 +130,7 @@ public class TeamFoundationServerScm extends SCM {
         
         protected DescriptorImpl() {
             super(TeamFoundationServerScm.class, null);
+            load();
         }
 
         public String getTfExecutable() {
@@ -154,11 +155,6 @@ public class TeamFoundationServerScm extends SCM {
         @Override
         public String getDisplayName() {
             return "Team Foundation Server";
-        }
-        
-        @Override
-        public TeamFoundationServerScm newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return req.bindJSON(TeamFoundationServerScm.class, formData);
         }
     }
 }

@@ -2,6 +2,7 @@ package hudson.plugins.tfs.action;
 
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.model.TeamFoundationProject;
+import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import hudson.plugins.tfs.util.ToolArgumentBuilder;
 
 import java.io.BufferedReader;
@@ -25,7 +26,8 @@ public class DefaultPollAction {
      */
     public boolean hasChanges( TfTool tool, TeamFoundationProject project, Calendar timestamp) throws IOException, InterruptedException {
         ToolArgumentBuilder builder = new ToolArgumentBuilder(project);
-        Reader reader = tool.execute(builder.getBriefHistoryArguments(timestamp, Calendar.getInstance()).toCommandArray());
+        MaskedArgumentListBuilder arguments = builder.getBriefHistoryArguments(timestamp, Calendar.getInstance());
+        Reader reader = tool.execute(arguments.toCommandArray(), arguments.toMaskArray());
         boolean hasChanges = parseBriefHistoryOutput(new BufferedReader(reader));
         reader.close();
         

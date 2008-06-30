@@ -1,19 +1,18 @@
 package hudson.plugins.tfs.util;
 
+import hudson.Util;
 import hudson.plugins.tfs.model.TeamFoundationCredentials;
 import hudson.plugins.tfs.model.TeamFoundationProject;
-import hudson.util.ArgumentListBuilder;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.TimeZone;
 
+/**
+ * Builds arguments for the Team Foundation command-line client.
+ * 
+ * @author Erik Ramfelt
+ */
 public class ToolArgumentBuilder {
 
-    /** UTC Date format - best one to pass dates across the wire. */
-    private static final String TFS_UTC_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    
     private final TeamFoundationProject project;
 
     public ToolArgumentBuilder(TeamFoundationProject project) {
@@ -21,72 +20,132 @@ public class ToolArgumentBuilder {
     }
 
     /**
-     * Build up the arguments necessary for a brief history command.
+     * Returns arguments for the "history /format:brief" command
+     * Describes previous changes made to one or more files or folders.
      * @param fromTimestamp the from time stamp
      * @param toTimestamp the to time stamp
-     * @return an ArgumentListBuilder containing the arguments for the TF tool.
+     * @param formatType type of format to get
+     * @return arguments for the "history /format:brief" command
      */
-    public ArgumentListBuilder getBriefHistoryArguments(Calendar fromTimestamp, Calendar toTimestamp) {
+    public MaskedArgumentListBuilder getBriefHistoryArguments(Calendar fromTimestamp, Calendar toTimestamp) {
         return getHistoryArguments(fromTimestamp, toTimestamp, "brief");
     }
 
     /**
-     * Build up the arguments necessary for a detailed history command.
+     * Returns arguments for the "history /format:detailed" command
+     * Describes previous changes made to one or more files or folders.
      * @param fromTimestamp the from time stamp
      * @param toTimestamp the to time stamp
-     * @return an ArgumentListBuilder containing the arguments for the TF tool.
+     * @param formatType type of format to get
+     * @return arguments for the "history /format:detailed" command
      */
-    public ArgumentListBuilder getDetailedHistoryArguments(Calendar fromTimestamp, Calendar toTimestamp) {
+    public MaskedArgumentListBuilder getDetailedHistoryArguments(Calendar fromTimestamp, Calendar toTimestamp) {
         return getHistoryArguments(fromTimestamp, toTimestamp, "detailed");
     }
-
+    
     /**
-     * Build up the arguments necessary for a history command.
-     * @param project the project to poll for changes
+     * Returns arguments for the "history" command
+     * Describes previous changes made to one or more files or folders.
      * @param fromTimestamp the from time stamp
      * @param toTimestamp the to time stamp
      * @param formatType type of format to get
-     * @return an ArgumentListBuilder containing the arguments for the TF tool.
+     * @return arguments for the "history" command
      */
-    public ArgumentListBuilder getHistoryArguments(TeamFoundationProject project, Calendar fromTimestamp, Calendar toTimestamp, String formatType) {
-        return getHistoryArguments(fromTimestamp, toTimestamp, formatType);
-    }
-
-    /**
-     * Build up the arguments necessary for a history command.
-     * @param fromTimestamp the from time stamp
-     * @param toTimestamp the to time stamp
-     * @param formatType type of format to get
-     * @return an ArgumentListBuilder containing the arguments for the TF tool.
-     */
-    public ArgumentListBuilder getHistoryArguments(Calendar fromTimestamp, Calendar toTimestamp, String formatType) {
-        ArgumentListBuilder arguments = new ArgumentListBuilder();
-        
+    public MaskedArgumentListBuilder getHistoryArguments(Calendar fromTimestamp, Calendar toTimestamp, String formatType) {
+        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("history");
         arguments.add("/noprompt");
-        arguments.add("/server:" + project.getServer());
+        arguments.add(String.format("/server:%s",  project.getServer()));
         arguments.add(project.getProject());
-        arguments.add("/version:D" + formatUTCDate(fromTimestamp) + "~D" + formatUTCDate(toTimestamp));
+        arguments.add(String.format("/version:D%s~D%s", Util.XS_DATETIME_FORMATTER.format(fromTimestamp.getTime()), 
+                Util.XS_DATETIME_FORMATTER.format(toTimestamp.getTime())));
         arguments.add("/recursive");
-        arguments.add("/format:" + formatType);
-        
-        TeamFoundationCredentials credentials = project.getCredentials();
-        if (credentials != null) {
-            arguments.add("/login:" + credentials.getLoginStr());            
-        }
-        
+        arguments.add(String.format("/format:%s", formatType));        
+        addCredentials(project.getCredentials(), arguments);        
         return arguments;
     }
 
     /**
-     * Convert the passed date into the UTC Date format best used when talking
-     * to Team Foundation Server command line.
-     * @param timestamp calendar to format
-     * @return a formatted UTC date string
+     * Returns arguments for the "workspace /new" command
+     * Enables you to create, delete, and modify properties and mappings associated with a workspace.
+     * @param workspaceName the name of the workspace to create
+     * @return arguments for the "workspace /new" command
      */
-    private String formatUTCDate(Calendar timestamp) {
-        DateFormat f = new SimpleDateFormat(TFS_UTC_DATE_FORMAT);
-        f.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return f.format(timestamp.getTime());
+    public MaskedArgumentListBuilder getNewWorkspaceArguments(String workspacename) {
+        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
+        arguments.add("workspace");
+        arguments.add("/new");
+        arguments.add(String.format("/server:%s", project.getServer()));
+        addCredentials(project.getCredentials(), arguments);
+        if (workspacename != null) {
+            arguments.add(workspacename);
+        }        
+        return arguments;
+    }
+
+    /**
+     * Returns arguments for the "workspace /delete" command
+     * Enables you to create, delete, and modify properties and mappings associated with a workspace.
+     * @param workspaceName the name of the workspace to delete
+     * @return arguments for the "workspace /delete" command
+     */
+    public MaskedArgumentListBuilder getDeleteWorkspaceArguments(String workspaceName) {
+        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
+        arguments.add("workspace");
+        arguments.add(String.format("/remove:%s", workspaceName));
+        arguments.add(String.format("/server:%s", project.getServer()));
+        addCredentials(project.getCredentials(), arguments);        
+        return arguments;
+    }
+
+    /**
+     * Returns arguments for the "workfold" command.
+     * Creates, modifies, or displays information about the mappings between your 
+     * workspace folders and the source control server folders to which they correspond.
+     * @param localFolder the local folder
+     * @param workspaceName the name of the workspace, optional
+     * @return arguments for the "workfold" command
+     */
+    public MaskedArgumentListBuilder getWorkfoldArguments(String localFolder, String workspaceName) {
+        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
+        arguments.add("workfold");
+        arguments.add(String.format("/server:%s", project.getServer()));
+        addCredentials(project.getCredentials(), arguments);
+        if (workspaceName != null) {
+            arguments.add(String.format("/workspace:%s", workspaceName));
+        }
+        arguments.add(project.getProject());
+        arguments.add(localFolder);        
+        return arguments;
+    }
+
+    /**
+     * Returns arguments for the "get" command.
+     * Retrieves a read-only copy of one or more files from the source control 
+     * server to the local disk. Any intermediate folders are created if necessary.
+     * <p/>
+     * The version to retrieve may be specified through the 'version' option or as a 
+     * version specification suffix to the item specification (example: '$/file.txt;C34').
+     * @return arguments for the "get" command.
+     */
+    public MaskedArgumentListBuilder getGetArguments() {
+        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
+        arguments.add("get");
+        arguments.add("/recursive");
+        arguments.add(String.format("/server:%s", project.getServer()));
+        addCredentials(project.getCredentials(), arguments);
+        return arguments;
+    }
+    
+    /**
+     * Add credentials to the arguments if they are not null
+     * @param credentials the credentials
+     * @param arguments the arguments to add the credentials string too.
+     */
+    private void addCredentials(TeamFoundationCredentials credentials, MaskedArgumentListBuilder arguments) {
+        if (credentials != null) {
+            arguments.addMaskedArgument(String.format("/login:%s@%s,%s", 
+                    credentials.getUsername(), credentials.getDomain(), credentials.getPassword()));             
+        }
     }
 }

@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 
-import hudson.plugins.tfs.Util;
+import hudson.AbortException;
+import hudson.model.TaskListener;
 import hudson.plugins.tfs.TfTool;
+import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.model.TeamFoundationChangeSet;
 import hudson.plugins.tfs.model.TeamFoundationProject;
 import hudson.plugins.tfs.model.TeamFoundationChangeSet.Item;
@@ -24,6 +26,7 @@ public class DefaultHistoryActionTest {
 
     private TeamFoundationProject project;
     @Mock TfTool tool;
+    @Mock TaskListener listener;
 
     @Before
     public void setup() throws Exception {
@@ -33,7 +36,7 @@ public class DefaultHistoryActionTest {
     
     @Test
     public void assertParsingOfEmptyReader() throws Exception {
-        stub(tool.execute(isA(String[].class))).toReturn(new StringReader(""));
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new StringReader(""));
         
         DefaultHistoryAction action = new DefaultHistoryAction();
         List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Calendar.getInstance(), Calendar.getInstance());
@@ -43,7 +46,7 @@ public class DefaultHistoryActionTest {
     
     @Test
     public void assertChangesWithEmptyToolOutput() throws Exception {
-        stub(tool.execute(isA(String[].class))).toReturn(new StringReader("No history entries were found for the item and version combination specified.\n\n"));
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new StringReader("No history entries were found for the item and version combination specified.\n\n"));
         
         DefaultHistoryAction action = new DefaultHistoryAction();
         List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Calendar.getInstance(), Calendar.getInstance());
@@ -53,7 +56,7 @@ public class DefaultHistoryActionTest {
     
     @Test
     public void assertOneChangeSetFromFile() throws Exception {
-        stub(tool.execute(isA(String[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-1.log")));
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-1.log")));
         
         DefaultHistoryAction action = new DefaultHistoryAction();
         List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Util.getCalendar(2006, 12, 1), Calendar.getInstance());
@@ -73,7 +76,7 @@ public class DefaultHistoryActionTest {
     
     @Test
     public void assertTwoChangeSetFromFile() throws Exception {
-        stub(tool.execute(isA(String[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-2.log")));
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-2.log")));
         
         DefaultHistoryAction action = new DefaultHistoryAction();
         List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Util.getCalendar(2006, 12, 1), Calendar.getInstance());
@@ -91,5 +94,32 @@ public class DefaultHistoryActionTest {
         assertEquals("The user was incorrect", "SND\\redsolo_cp", changeSet.getUser());
         //assertEquals("The date was incorrect", TestUtil.getCalendar(2008, 06, 27, 13, 19, 49).getTime(), changeSet.getDate());
         assertEquals("The comment was incorrect", "first file", changeSet.getComment());
+    }
+    
+    @Test(expected=AbortException.class)
+    public void assertFatalExceptionWhenParsingInvalidDate() throws Exception {
+        stub(tool.getListener()).toReturn(listener);
+        stub(listener.fatalError(isA(String.class))).toReturn(null);
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new StringReader(
+                "-----------------------------------------\n" +
+                "Changeset: 12492\n" +
+                "User:      SND\\redsolo_cp\n" +
+                "Date:      this is no date\n" +
+                "\n" +
+                "Comment:\n" +
+                "  first file"));
+        
+        DefaultHistoryAction action = new DefaultHistoryAction();
+        action.getChangeSets(tool, project, Util.getCalendar(2006, 12, 1), Calendar.getInstance());
+    }
+
+    @Test
+    public void assertOldChangeSetAreIgnored() throws Exception {
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-2.log")));
+        
+        DefaultHistoryAction action = new DefaultHistoryAction();
+        List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Util.getCalendar(2008, 06, 15), Calendar.getInstance());
+        assertNotNull("The list of change sets was null", changeSets);
+        assertEquals("The number of change sets in the list was incorrect", 1, changeSets.size());
     }
 }

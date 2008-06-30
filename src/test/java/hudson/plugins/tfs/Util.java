@@ -1,14 +1,10 @@
 package hudson.plugins.tfs;
 
 import hudson.FilePath;
-import hudson.model.Hudson;
 
 import java.io.File;
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import org.apache.webdav.lib.properties.GetContentLengthProperty;
-import org.junit.Ignore;
 
 public class Util {
 
@@ -22,9 +18,8 @@ public class Util {
     public static Calendar getCalendar(int year, int month, int day, int hour, int min, int sec) {
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
-        //calendar.set(year, month, day, hour, min, sec);
         calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, month);
+        calendar.set(Calendar.MONTH, month - 1);
         calendar.set(Calendar.DATE, day);
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, min);
@@ -39,5 +34,18 @@ public class Util {
         parentFile.delete();
         workspace.mkdirs();
         return workspace;
+    }
+
+    /**
+     * Create a boxed copy of the boolean array since JUnit assertArrayEquals() does not take boolean[]
+     * @param array copy from
+     * @return a boxed copy of the array
+     */
+    public static Boolean[] toBoxedArray(boolean[] array) {
+        Boolean[] copy = new Boolean[array.length];
+        for (int i = 0; i < array.length; i++) {
+            copy[i] = array[i];
+        }
+        return copy;
     }
 }

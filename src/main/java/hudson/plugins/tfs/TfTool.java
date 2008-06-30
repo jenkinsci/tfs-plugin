@@ -42,15 +42,34 @@ public class TfTool {
      * @return a Reader containing the console output
      */
     public Reader execute(String[] arguments) throws IOException, InterruptedException {
-        
+        return execute(arguments, null);
+    }
+
+    /**
+     * Execute the arguments, and return the console output as a Reader
+     * @param arguments arguments to send to the command-line client.
+     * @param masks which of the commands that should be masked from the console.
+     * @return a Reader containing the console output
+     */
+    public Reader execute(String[] arguments, boolean[] masks) throws IOException, InterruptedException {
+
         String[] toolArguments = new String[arguments.length + 1];
         toolArguments[0] = executable;
         for (int i = 0; i < arguments.length; i++) {
             toolArguments[i + 1] = arguments[i];
         }
         
+        boolean[] toolMasks = new boolean[arguments.length + 1];
+        if (masks != null) {
+            toolMasks = new boolean[masks.length + 1];
+            toolMasks[0] = false;
+            for (int i = 0; i < masks.length; i++) {
+                toolMasks[i + 1] = masks[i];
+            }
+        }
+        
         ByteArrayOutputStream consoleStream = new ByteArrayOutputStream();
-        Proc proc = launcher.launch(toolArguments, new String[]{}, 
+        Proc proc = launcher.launch(toolArguments, toolMasks, new String[]{}, 
                 null, new ForkOutputStream(consoleStream, listener.getLogger()), 
                 workspace);
         consoleStream.close();

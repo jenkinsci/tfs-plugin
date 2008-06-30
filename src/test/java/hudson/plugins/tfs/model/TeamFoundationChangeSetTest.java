@@ -6,12 +6,19 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import hudson.plugins.tfs.model.TeamFoundationChangeSet.Item;
+import hudson.scm.EditType;
 
 import org.junit.Test;
 
 
 public class TeamFoundationChangeSetTest {
 
+    @Test
+    public void assertMsgReturnsComment() {
+        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, null, "comment");
+        assertSame("The getMsg() did not return the comment", "comment", changeset.getMsg());
+    }
+    
     @Test
     public void assertAffectedPathsReturnsPaths() {
         TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, null, null);
@@ -23,5 +30,23 @@ public class TeamFoundationChangeSetTest {
         Iterator<String> iterator = paths.iterator();
         assertEquals("The first path is incorrect", "filename", iterator.next());
         assertEquals("The first path is incorrect", "filename2", iterator.next());
+    }
+    
+    @Test
+    public void assertAddedItemReturnsAddEditType() {
+        Item item = new Item("path", "add");
+        assertSame("Incorrect edit type returned for Add action", EditType.ADD, item.getEditType());
+    }
+    
+    @Test
+    public void assertDeletedItemReturnsDeleteEditType() {
+        Item item = new Item("path", "delete");
+        assertSame("Incorrect edit type returned for Delete action", EditType.DELETE, item.getEditType());
+    }
+    
+    @Test
+    public void assertModifiedItemReturnsEditEditType() {
+        Item item = new Item("path", "edit");
+        assertSame("Incorrect edit type returned for Edit action", EditType.EDIT, item.getEditType());
     }
 }

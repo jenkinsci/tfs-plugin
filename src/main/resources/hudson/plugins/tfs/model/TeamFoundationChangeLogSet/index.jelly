@@ -1,0 +1,29 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <h2>${%Summary}</h2>
+  <ol>
+    <j:forEach var="cs" items="${it.logs}">
+      <li><st:out value="${cs.msg}"/></li>
+    </j:forEach>
+  </ol>
+  <table class="pane" style="border:none">
+    <j:forEach var="cs" items="${it.logs}" varStatus="loop">
+      <tr class="pane">
+        <td colspan="2" class="changeset">
+          <a name="detail${loop.index}"></a>
+          <div class="changeset-message">
+            <b>
+              ${%Version} ${cs.version} by <a href="${rootURL}/${cs.author.url}/">${cs.author}</a>:
+            </b><br/>
+            ${cs.msgAnnotated}
+          </div>
+        </td>
+      </tr>
+      <j:forEach var="item" items="${cs.items}">
+        <tr>
+          <td><t:editTypeIcon type="${item.editType}" /></td>
+          <td>${p.value}</a></td>
+        </tr>
+      </j:forEach>
+    </j:forEach>
+  </table>
+</j:jelly>

@@ -27,7 +27,7 @@ public class DefaultPollActionTest {
     
     @Test
     public void assertNoChangesWithEmptyOutput() throws Exception {
-        stub(tool.execute(isA(String[].class))).toReturn(new StringReader(""));
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new StringReader(""));
         
         DefaultPollAction action = new DefaultPollAction();
         boolean hasChanges = action.hasChanges(tool, project, Calendar.getInstance());
@@ -36,7 +36,7 @@ public class DefaultPollActionTest {
     
     @Test
     public void assertChangesWithEmptyToolOutput() throws Exception {
-        stub(tool.execute(isA(String[].class))).toReturn(new StringReader("No history entries were found for the item and version combination specified.\n\n"));
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new StringReader("No history entries were found for the item and version combination specified.\n\n"));
         
         DefaultPollAction action = new DefaultPollAction();
         boolean hasChanges = action.hasChanges(tool, project, Calendar.getInstance());
@@ -45,7 +45,7 @@ public class DefaultPollActionTest {
     
     @Test
     public void assertChangesWithChangeOutput() throws Exception {
-        stub(tool.execute(isA(String[].class))).toReturn(new StringReader(
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new StringReader(
                 "Changeset User           Date                 Comment\n" +
                 "--------- -------------- -------------------- ----------------------------------------------------------------------------\n" +
                 "\n" +
