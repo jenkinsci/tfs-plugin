@@ -113,9 +113,9 @@ public class DefaultHistoryAction {
             Date modifiedTime = parseDate(m.group(3));
             
             // CC-735.  Ignore changesets that occured before the specified lastBuild.
-            if (modifiedTime.compareTo(lastBuildDate) < 0) {
-                return null;
-            }
+//            if (modifiedTime.compareTo(lastBuildDate) < 0) {
+//                return null;
+//            }
 
             // Remove the indentation from the comment
             String comment = m.group(4).replaceAll("\n  ", "\n");
@@ -127,7 +127,9 @@ public class DefaultHistoryAction {
             // Parse the items.
             Matcher itemMatcher = PATTERN_ITEM.matcher(m.group(5));
             while (itemMatcher.find()) {
-                changeset = new TeamFoundationChangeSet(revision, modifiedTime, userName, comment);
+                if (changeset == null) {
+                    changeset = new TeamFoundationChangeSet(revision, modifiedTime, userName, comment);
+                }
 
                 // In a similar way to Subversion, TFS will record additions
                 // of folders etc
@@ -140,6 +142,7 @@ public class DefaultHistoryAction {
                 // $/path/foldername
                 //
                 String path = itemMatcher.group(2);
+                String action = itemMatcher.group(1).trim();
                 if (!path.startsWith("$/")) {
                     // If this happens then we have a bug, output some data
                     // to make it easy to figure out what the problem was so
@@ -149,7 +152,6 @@ public class DefaultHistoryAction {
                             + "be a valid TFS path.  Please report this as a bug.  Changeset" + "data = \"\n"
                             + changeSetString + "\n\".", itemMatcher.start());
                 }
-                String action = itemMatcher.group(1).trim();
                 changeset.getItems().add(new TeamFoundationChangeSet.Item(path, action));
             }
         }

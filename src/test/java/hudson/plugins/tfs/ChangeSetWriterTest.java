@@ -21,7 +21,7 @@ public class ChangeSetWriterTest {
 
     @Test
     public void assertWriterOutputsCorrectChangeLogXml() throws Exception {
-        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("1122", Util.getCalendar(2008, 12, 12).getTime(), "user", "comment");
+        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("1122", Util.getCalendar(2008, 12, 12).getTime(), "rnd\\user", "comment");
         changeset.getItems().add(new TeamFoundationChangeSet.Item("path", "add"));
         changeset.getItems().add(new TeamFoundationChangeSet.Item("path2", "delete"));
         ArrayList<TeamFoundationChangeSet> sets = new ArrayList<TeamFoundationChangeSet>();
@@ -33,7 +33,7 @@ public class ChangeSetWriterTest {
         assertXMLEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><changelog>" +
                             "<changeset version=\"1122\">" +
                                 "<date>2008-12-12T00:00:00Z</date>" +
-                                "<user>user</user>" +
+                                "<user>rnd\\user</user>" +
                                 "<comment>comment</comment>" +
                                 "<items>" +
                                     "<item action=\"add\">path</item>" +

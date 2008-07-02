@@ -19,6 +19,7 @@ public class TeamFoundationChangeSet extends ChangeLogSet.Entry {
 
     private String version;
     private String user;
+    private String domain;
     private Date date;
     private String comment;
     
@@ -31,9 +32,9 @@ public class TeamFoundationChangeSet extends ChangeLogSet.Entry {
     public TeamFoundationChangeSet(String version, Date date, String user, String comment) {
         this.version = version;
         this.date = date;
-        this.user = user;
         this.comment = comment;
         items = new ArrayList<Item>();
+        setUser(user);
     }
     
     @Override
@@ -65,12 +66,23 @@ public class TeamFoundationChangeSet extends ChangeLogSet.Entry {
     }
 
     @Exported
+    public Object getDomain() {
+        return domain;
+    }
+
+    @Exported
     public String getUser() {
         return user;
     }
     
-    public void setUser(String user) {
-        this.user = user;
+    public void setUser(String user) {        
+        String[] split = user.split("\\\\");
+        if (split.length == 2) {
+            this.domain = split[0];
+            this.user = split[1];
+        } else {
+            this.user = user;
+        }
     }
 
     @Exported

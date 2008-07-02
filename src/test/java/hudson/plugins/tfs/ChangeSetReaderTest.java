@@ -17,7 +17,7 @@ public class ChangeSetReaderTest {
         Reader reader = new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?><changelog>" +
                             "<changeset version=\"1122\">" +
                                 "<date>2009-01-12T00:00:00Z</date>" +
-                                "<user>user</user>" +
+                                "<user>snd\\user</user>" +
                                 "<comment>comment</comment>" +
                                 "<items>" +
                                     "<item action=\"add\">path</item>" +
@@ -31,6 +31,7 @@ public class ChangeSetReaderTest {
         
         TeamFoundationChangeSet changeset = logset.iterator().next();
         assertEquals("User is incorrect", "user", changeset.getUser());
+        assertEquals("Domain is incorrect", "snd", changeset.getDomain());
         assertEquals("Comment is incorrect", "comment", changeset.getComment());
         assertEquals("Version is incorrect", "1122", changeset.getVersion());
         assertEquals("Date is incorrect", Util.getCalendar(2009, 1, 12).getTime(), changeset.getDate());

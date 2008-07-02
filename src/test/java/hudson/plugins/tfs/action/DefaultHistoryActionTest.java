@@ -65,7 +65,8 @@ public class DefaultHistoryActionTest {
         
         TeamFoundationChangeSet changeSet = changeSets.get(0);
         assertEquals("The versionwas incorrect", "12472", changeSet.getVersion());
-        assertEquals("The user was incorrect", "RNO\\_MCLWEB", changeSet.getUser());
+        assertEquals("The user was incorrect", "_MCLWEB", changeSet.getUser());
+        assertEquals("The user was incorrect", "RNO", changeSet.getDomain());
         //assertEquals("The date was incorrect", TestUtil.getCalendar(2008, 06, 27, 11, 16, 06).getTime(), changeSet.getDate());
         assertEquals("The comment was incorrect", "Created team project folder $/tfsandbox via the Team Project Creation Wizard", changeSet.getComment());
         
@@ -85,15 +86,30 @@ public class DefaultHistoryActionTest {
         
         TeamFoundationChangeSet changeSet = changeSets.get(0);
         assertEquals("The version was incorrect", "12472", changeSet.getVersion());
-        assertEquals("The user was incorrect", "RNO\\_MCLWEB", changeSet.getUser());
+        assertEquals("The user was incorrect", "_MCLWEB", changeSet.getUser());
+        assertEquals("The user was incorrect", "RNO", changeSet.getDomain());
         //assertEquals("The date was incorrect", TestUtil.getCalendar(2008, 06, 27, 11, 16, 06).getTime(), changeSet.getDate());
         assertEquals("The comment was incorrect", "Created team project folder $/tfsandbox via the Team Project Creation Wizard", changeSet.getComment());
 
         changeSet = changeSets.get(1);
         assertEquals("The version was incorrect", "12492", changeSet.getVersion());
-        assertEquals("The user was incorrect", "SND\\redsolo_cp", changeSet.getUser());
+        assertEquals("The user was incorrect", "redsolo_cp", changeSet.getUser());
+        assertEquals("The user was incorrect", "SND", changeSet.getDomain());
         //assertEquals("The date was incorrect", TestUtil.getCalendar(2008, 06, 27, 13, 19, 49).getTime(), changeSet.getDate());
         assertEquals("The comment was incorrect", "first file", changeSet.getComment());
+    }
+    
+    @Test
+    public void assertTwoItemsInAChangeSet() throws Exception {
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-3.log")));
+        
+        DefaultHistoryAction action = new DefaultHistoryAction();
+        List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Util.getCalendar(2006, 12, 1), Calendar.getInstance());
+        assertNotNull("The list of change sets was null", changeSets);
+        assertEquals("The number of change sets in the list was incorrect", 4, changeSets.size());
+        
+        List<Item> items = changeSets.get(3).getItems();
+        assertEquals("Number of items in change set was incorrect", 2, items.size());
     }
     
     @Test(expected=AbortException.class)
@@ -113,7 +129,7 @@ public class DefaultHistoryActionTest {
         action.getChangeSets(tool, project, Util.getCalendar(2006, 12, 1), Calendar.getInstance());
     }
 
-    @Test
+    /*@Test
     public void assertOldChangeSetAreIgnored() throws Exception {
         stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new InputStreamReader(DefaultHistoryActionTest.class.getResourceAsStream("tf-changeset-2.log")));
         
@@ -121,5 +137,5 @@ public class DefaultHistoryActionTest {
         List<TeamFoundationChangeSet> changeSets = action.getChangeSets(tool, project, Util.getCalendar(2008, 06, 15), Calendar.getInstance());
         assertNotNull("The list of change sets was null", changeSets);
         assertEquals("The number of change sets in the list was incorrect", 1, changeSets.size());
-    }
+    }*/
 }

@@ -15,13 +15,13 @@ public class TeamFoundationChangeSetTest {
 
     @Test
     public void assertMsgReturnsComment() {
-        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, null, "comment");
+        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, "snd\\user", "comment");
         assertSame("The getMsg() did not return the comment", "comment", changeset.getMsg());
     }
     
     @Test
     public void assertAffectedPathsReturnsPaths() {
-        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, null, null);
+        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, "snd\\user", "comment");
         changeset.getItems().add(new Item("filename", "add"));
         changeset.getItems().add(new Item("filename2", "edit"));
         Collection<String> paths = changeset.getAffectedPaths();
@@ -48,5 +48,17 @@ public class TeamFoundationChangeSetTest {
     public void assertModifiedItemReturnsEditEditType() {
         Item item = new Item("path", "edit");
         assertSame("Incorrect edit type returned for Edit action", EditType.EDIT, item.getEditType());
+    }
+    
+    @Test
+    public void assertUserNameIsSetCorrectly() {
+        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, "RNO\\_MCLWEB", "comment");
+        assertEquals("The user name was incorrect", "_MCLWEB", changeset.getUser());
+    }
+    
+    @Test
+    public void assertDomainNameIsSetCorrectly() {
+        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, "RNO\\_MCLWEB", "comment");
+        assertEquals("The domain name was incorrect", "RNO", changeset.getDomain());
     }
 }

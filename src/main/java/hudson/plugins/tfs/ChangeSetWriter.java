@@ -51,7 +51,7 @@ public class ChangeSetWriter {
 
     private void write(TeamFoundationChangeSet changeSet, PrintWriter writer) {
         writer.println(String.format("\t\t<date>%s</date>", Util.XS_DATETIME_FORMATTER.format(changeSet.getDate())));
-        writer.println(String.format("\t\t<user>%s</user>", changeSet.getUser()));
+        writer.println(String.format("\t\t<user>%s\\%s</user>", changeSet.getDomain(), changeSet.getUser()));
         writer.println(String.format("\t\t<comment>%s</comment>", changeSet.getComment()));
         writer.println("\t\t<items>");
         for (TeamFoundationChangeSet.Item item : changeSet.getItems()) {

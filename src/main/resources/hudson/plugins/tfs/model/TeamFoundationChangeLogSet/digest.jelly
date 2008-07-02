@@ -6,7 +6,7 @@
     <j:otherwise>
       Changes
       <ol>
-        <j:forEach var="cs" items="${it.logs}" varStatus="loop">
+        <j:forEach var="cs" items="${it.items}" varStatus="loop">
           <li>
             ${cs.msgAnnotated} (<a href="changes#detail${loop.index}">detail</a>)
           </li>

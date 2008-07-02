@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class TeamFoundationChangeLogSet extends ChangeLogSet<TeamFoundationChangeSet> {
 
-    List<TeamFoundationChangeSet> changesets;
+    private final List<TeamFoundationChangeSet> changesets;
     
     public TeamFoundationChangeLogSet(AbstractBuild<?, ?> build, List<TeamFoundationChangeSet> changesets) {
         super(build);
