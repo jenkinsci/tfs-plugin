@@ -167,7 +167,7 @@ public class DefaultHistoryAction {
     }
     
     @SuppressWarnings("deprecation")
-    private static Date parseDate(String dateString) throws ParseException {
+    static Date parseDate(String dateString) throws ParseException {
         Date date = null;
         try {
             // Use the deprecated Date.parse method as this is very good at detecting
@@ -186,7 +186,7 @@ public class DefaultHistoryAction {
         return date;
     }
 
-    private static Date parseWithFormats(String input, DateFormat[] formats) throws ParseException {
+    static Date parseWithFormats(String input, DateFormat[] formats) throws ParseException {
         ParseException parseException = null;
         for (int i = 0; i < formats.length; i++) {
             try {
@@ -203,7 +203,7 @@ public class DefaultHistoryAction {
      * Build an array of DateFormats that are commonly used for this locale
      * and timezone.
      */
-    private static DateFormat[] createDateFormatsForLocaleAndTimeZone(Locale locale, TimeZone timeZone) {
+    static DateFormat[] createDateFormatsForLocaleAndTimeZone(Locale locale, TimeZone timeZone) {
         if (locale == null) {
             locale = Locale.getDefault();
         }
