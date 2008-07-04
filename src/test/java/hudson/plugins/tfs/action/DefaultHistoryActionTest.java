@@ -130,11 +130,6 @@ public class DefaultHistoryActionTest {
         DefaultHistoryAction action = new DefaultHistoryAction();
         action.getChangeSets(tool, project, Util.getCalendar(2006, 12, 1), Calendar.getInstance());
     }
-    
-    @Test
-    public void assertParsingOfDatesWorks() throws ParseException {
-        Date date = DefaultHistoryAction.parseDate("2008-jun-27 11:16:06");
-    }
 
     /*@Test
     public void assertOldChangeSetAreIgnored() throws Exception {
