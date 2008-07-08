@@ -1,7 +1,7 @@
 package hudson.plugins.tfs;
 
 import hudson.Util;
-import hudson.plugins.tfs.model.TeamFoundationChangeSet;
+import hudson.plugins.tfs.model.ChangeSet;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * Team Foundation change log writer.
@@ -22,10 +24,13 @@ public class ChangeSetWriter {
      * @param changeSets list of change sets
      * @param changelogFile file to write change sets to
      */
-    public void write(List<TeamFoundationChangeSet> changeSets, File changelogFile) throws IOException {
+    public void write(List<ChangeSet> changeSets, File changelogFile) throws IOException {
         FileWriter writer = new FileWriter(changelogFile);
-        write(changeSets, writer);
-        writer.close();
+        try {
+            write(changeSets, writer);
+        } finally {
+            IOUtils.closeQuietly(writer);
+        }
     }
 
     /**
@@ -33,13 +38,13 @@ public class ChangeSetWriter {
      * @param changeSets list of change sets
      * @param output output writer
      */    
-    public void write(List<TeamFoundationChangeSet> changeSets, Writer output) {
+    public void write(List<ChangeSet> changeSets, Writer output) {
         PrintWriter writer = new PrintWriter(output);
         
         writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         writer.println("<changelog>");
         
-        for (TeamFoundationChangeSet changeSet : changeSets) {
+        for (ChangeSet changeSet : changeSets) {
             writer.println(String.format("\t<changeset version=\"%s\">", changeSet.getVersion()));
             write(changeSet, writer);
             writer.println("\t</changeset>");
@@ -49,12 +54,12 @@ public class ChangeSetWriter {
         writer.flush();
     }
 
-    private void write(TeamFoundationChangeSet changeSet, PrintWriter writer) {
+    private void write(ChangeSet changeSet, PrintWriter writer) {
         writer.println(String.format("\t\t<date>%s</date>", Util.XS_DATETIME_FORMATTER.format(changeSet.getDate())));
         writer.println(String.format("\t\t<user>%s\\%s</user>", changeSet.getDomain(), changeSet.getUser()));
         writer.println(String.format("\t\t<comment>%s</comment>", changeSet.getComment()));
         writer.println("\t\t<items>");
-        for (TeamFoundationChangeSet.Item item : changeSet.getItems()) {
+        for (ChangeSet.Item item : changeSet.getItems()) {
             writer.println(String.format("\t\t\t<item action=\"%s\">%s</item>", item.getAction(), item.getPath()));
         }
         writer.println("\t\t</items>");

@@ -1,7 +1,6 @@
 package hudson.plugins.tfs.model;
 
 import hudson.model.AbstractBuild;
-import hudson.scm.ChangeLogSet;
 
 import java.util.Iterator;
 import java.util.List;
@@ -12,14 +11,14 @@ import java.util.List;
  * 
  * @author Erik Ramfelt
  */
-public class TeamFoundationChangeLogSet extends ChangeLogSet<TeamFoundationChangeSet> {
+public class ChangeLogSet extends hudson.scm.ChangeLogSet<ChangeSet> {
 
-    private final List<TeamFoundationChangeSet> changesets;
+    private final List<ChangeSet> changesets;
     
-    public TeamFoundationChangeLogSet(AbstractBuild<?, ?> build, List<TeamFoundationChangeSet> changesets) {
+    public ChangeLogSet(AbstractBuild<?, ?> build, List<ChangeSet> changesets) {
         super(build);
         this.changesets = changesets;
-        for (TeamFoundationChangeSet changeset : changesets) {
+        for (ChangeSet changeset : changesets) {
             changeset.setParent(this);
         }
     }
@@ -29,7 +28,7 @@ public class TeamFoundationChangeLogSet extends ChangeLogSet<TeamFoundationChang
         return changesets.isEmpty();
     }
 
-    public Iterator<TeamFoundationChangeSet> iterator() {
+    public Iterator<ChangeSet> iterator() {
         return changesets.iterator();
     }
 }

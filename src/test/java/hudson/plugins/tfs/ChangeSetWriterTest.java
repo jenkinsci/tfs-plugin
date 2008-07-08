@@ -4,7 +4,7 @@ import static org.custommonkey.xmlunit.XMLAssert.*;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
-import hudson.plugins.tfs.model.TeamFoundationChangeSet;
+import hudson.plugins.tfs.model.ChangeSet;
 
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
@@ -21,10 +21,10 @@ public class ChangeSetWriterTest {
 
     @Test
     public void assertWriterOutputsCorrectChangeLogXml() throws Exception {
-        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("1122", Util.getCalendar(2008, 12, 12).getTime(), "rnd\\user", "comment");
-        changeset.getItems().add(new TeamFoundationChangeSet.Item("path", "add"));
-        changeset.getItems().add(new TeamFoundationChangeSet.Item("path2", "delete"));
-        ArrayList<TeamFoundationChangeSet> sets = new ArrayList<TeamFoundationChangeSet>();
+        ChangeSet changeset = new ChangeSet("1122", Util.getCalendar(2008, 12, 12).getTime(), "rnd\\user", "comment");
+        changeset.getItems().add(new ChangeSet.Item("path", "add"));
+        changeset.getItems().add(new ChangeSet.Item("path2", "delete"));
+        ArrayList<ChangeSet> sets = new ArrayList<ChangeSet>();
         sets.add(changeset);
 
         ChangeSetWriter changesetWriter = new ChangeSetWriter();

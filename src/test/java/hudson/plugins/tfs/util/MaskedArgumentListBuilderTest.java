@@ -24,7 +24,7 @@ public class MaskedArgumentListBuilderTest {
     public void assertLastArgumentIsMasked() {
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
         builder.add("arg");
-        builder.addMaskedArgument("ismasked");
+        builder.addMasked("ismasked");
         
         assertTrue("There should be masked arguments", builder.hasMaskedArguments());
         boolean[] array = builder.toMaskArray();
@@ -36,9 +36,9 @@ public class MaskedArgumentListBuilderTest {
     public void assertSeveralMaskedArguments() {
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
         builder.add("arg");
-        builder.addMaskedArgument("ismasked");
+        builder.addMasked("ismasked");
         builder.add("non masked arg");
-        builder.addMaskedArgument("ismasked2");
+        builder.addMasked("ismasked2");
         
         assertTrue("There should be masked arguments", builder.hasMaskedArguments());
         boolean[] array = builder.toMaskArray();
@@ -49,7 +49,7 @@ public class MaskedArgumentListBuilderTest {
     @Test
     public void assertPrependAfterAddingMasked() {
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
-        builder.addMaskedArgument("ismasked");
+        builder.addMasked("ismasked");
         builder.add("arg");
         builder.prepend("first", "second");
         
@@ -63,7 +63,7 @@ public class MaskedArgumentListBuilderTest {
     public void assertPrependBeforeAddingMasked() {
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
         builder.prepend("first", "second");
-        builder.addMaskedArgument("ismasked");
+        builder.addMasked("ismasked");
         builder.add("arg");
         
         assertTrue("There should be masked arguments", builder.hasMaskedArguments());

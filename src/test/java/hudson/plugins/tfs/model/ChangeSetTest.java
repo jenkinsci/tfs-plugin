@@ -5,23 +5,23 @@ import static org.junit.Assert.*;
 import java.util.Collection;
 import java.util.Iterator;
 
-import hudson.plugins.tfs.model.TeamFoundationChangeSet.Item;
+import hudson.plugins.tfs.model.ChangeSet.Item;
 import hudson.scm.EditType;
 
 import org.junit.Test;
 
 
-public class TeamFoundationChangeSetTest {
+public class ChangeSetTest {
 
     @Test
     public void assertMsgReturnsComment() {
-        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, "snd\\user", "comment");
+        ChangeSet changeset = new ChangeSet("0", null, "snd\\user", "comment");
         assertSame("The getMsg() did not return the comment", "comment", changeset.getMsg());
     }
     
     @Test
     public void assertAffectedPathsReturnsPaths() {
-        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, "snd\\user", "comment");
+        ChangeSet changeset = new ChangeSet("0", null, "snd\\user", "comment");
         changeset.getItems().add(new Item("filename", "add"));
         changeset.getItems().add(new Item("filename2", "edit"));
         Collection<String> paths = changeset.getAffectedPaths();
@@ -52,13 +52,13 @@ public class TeamFoundationChangeSetTest {
     
     @Test
     public void assertUserNameIsSetCorrectly() {
-        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, "RNO\\_MCLWEB", "comment");
+        ChangeSet changeset = new ChangeSet("0", null, "RNO\\_MCLWEB", "comment");
         assertEquals("The user name was incorrect", "_MCLWEB", changeset.getUser());
     }
     
     @Test
     public void assertDomainNameIsSetCorrectly() {
-        TeamFoundationChangeSet changeset = new TeamFoundationChangeSet("0", null, "RNO\\_MCLWEB", "comment");
+        ChangeSet changeset = new ChangeSet("0", null, "RNO\\_MCLWEB", "comment");
         assertEquals("The domain name was incorrect", "RNO", changeset.getDomain());
     }
 }

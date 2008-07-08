@@ -1,9 +1,9 @@
 package hudson.plugins.tfs;
 
 import static org.junit.Assert.*;
-import hudson.plugins.tfs.model.TeamFoundationChangeLogSet;
-import hudson.plugins.tfs.model.TeamFoundationChangeSet;
-import hudson.plugins.tfs.model.TeamFoundationChangeSet.Item;
+import hudson.plugins.tfs.model.ChangeLogSet;
+import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.model.ChangeSet.Item;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -27,9 +27,9 @@ public class ChangeSetReaderTest {
                         "</changelog>");
         
         ChangeSetReader changesetReader = new ChangeSetReader();
-        TeamFoundationChangeLogSet logset = changesetReader.parse(null, reader);
+        ChangeLogSet logset = changesetReader.parse(null, reader);
         
-        TeamFoundationChangeSet changeset = logset.iterator().next();
+        ChangeSet changeset = logset.iterator().next();
         assertEquals("User is incorrect", "user", changeset.getUser());
         assertEquals("Domain is incorrect", "snd", changeset.getDomain());
         assertEquals("Comment is incorrect", "comment", changeset.getComment());

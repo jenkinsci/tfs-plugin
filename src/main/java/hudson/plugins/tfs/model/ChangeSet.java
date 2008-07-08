@@ -15,7 +15,7 @@ import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
 
 @ExportedBean(defaultVisibility=999)
-public class TeamFoundationChangeSet extends ChangeLogSet.Entry {
+public class ChangeSet extends ChangeLogSet.Entry {
 
     private String version;
     private String user;
@@ -25,11 +25,11 @@ public class TeamFoundationChangeSet extends ChangeLogSet.Entry {
     
     private List<Item> items;
 
-    public TeamFoundationChangeSet() {
+    public ChangeSet() {
         this("", null, "", "");
     }
     
-    public TeamFoundationChangeSet(String version, Date date, String user, String comment) {
+    public ChangeSet(String version, Date date, String user, String comment) {
         this.version = version;
         this.date = date;
         this.comment = comment;
@@ -108,7 +108,7 @@ public class TeamFoundationChangeSet extends ChangeLogSet.Entry {
         return items;
     }
     
-    public void add(TeamFoundationChangeSet.Item item) {
+    public void add(ChangeSet.Item item) {
         items.add(item);
     }
 

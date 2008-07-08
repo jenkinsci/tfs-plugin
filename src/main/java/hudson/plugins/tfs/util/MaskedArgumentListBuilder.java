@@ -55,7 +55,7 @@ public class MaskedArgumentListBuilder extends ArgumentListBuilder{
      * Add a masked argument
      * @param string the argument
      */
-    public void addMaskedArgument(String string) {
+    public void addMasked(String string) {
         if (maskedArgumentIndex == null) {
             maskedArgumentIndex = new HashSet<Integer>();
         }
