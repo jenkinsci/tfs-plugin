@@ -10,6 +10,7 @@ import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import java.io.StringReader;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.Test;
 
@@ -70,5 +71,27 @@ public class BriefHistoryCommandTest extends SwedishLocaleTestCase {
         BriefHistoryCommand command = new BriefHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 06, 21), null);
         List<ChangeSet> list = command.parse(reader);
         assertEquals("Number of change sets was incorrect", 3, list.size());
+        assertEquals("Version was incorrect", "12495", list.get(0).getVersion());
+        assertEquals("User was incorrect", "redsolo_cp", list.get(0).getUser());
+        assertEquals("Domain was incorrect", "SND", list.get(0).getDomain());
+        assertEquals("Comment was incorrect", "changed and created one", list.get(0).getComment());
+    }
+    
+    @Test
+    public void assertPollChangesWithUsLocaleOutput() throws Exception {
+        Locale.setDefault(Locale.US);
+        StringReader reader = new StringReader(
+                "Changeset User         Date                 Comment\n" +
+                "--------- ------------ ----------------------- ----------------------------------------------------------------------------\n" +
+                "\n" +
+                "59977     TLR\\U0000000 Jul 9, 2008 10:23:46 AM Test for Hudson TFS\n");
+        
+        BriefHistoryCommand command = new BriefHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 06, 01), null);
+        List<ChangeSet> list = command.parse(reader);
+        assertEquals("Number of change sets was incorrect", 1, list.size());
+        assertEquals("Version was incorrect", "59977", list.get(0).getVersion());
+        assertEquals("User was incorrect", "U0000000", list.get(0).getUser());
+        assertEquals("Domain was incorrect", "TLR", list.get(0).getDomain());
+        assertEquals("Comment was incorrect", "Test for Hudson TFS", list.get(0).getComment());
     }
 }

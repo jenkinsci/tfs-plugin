@@ -21,7 +21,8 @@ import java.util.regex.Pattern;
  * @author Erik Ramfelt
  */
 public class BriefHistoryCommand implements ParseableCommand<List<ChangeSet>> {
-    private static final Pattern PATTERN_BRIEF_CHANGESET = Pattern.compile("^(\\d*)\\s+(\\S+)\\s+(\\S+\\s+\\S+)\\s+(.*)");
+    static final Pattern CHANGESET_PATTERN = Pattern.compile("^\\d*\\s+\\S+\\s+.*");
+    static final Pattern SEPARATOR_PATTERN = Pattern.compile("(-+)(\\s+)(-+)(\\s+)(-+)(\\s+)(-+)");
     
     private final String projectPath;
     private final Calendar toTimestamp;
@@ -63,17 +64,37 @@ public class BriefHistoryCommand implements ParseableCommand<List<ChangeSet>> {
      */
     public List<ChangeSet> parse(Reader consoleReader) throws ParseException, IOException {
         List<ChangeSet> list = new ArrayList<ChangeSet>();
+
+        int[] colStart = new int[4];
+        int[] colLength = new int[4];
         
         BufferedReader reader = new BufferedReader(consoleReader);        
         String line = reader.readLine();
-        while (line != null) {            
-            Matcher matcher = PATTERN_BRIEF_CHANGESET.matcher(line);
-            if (matcher.find()) {
+        
+        // Need to find out how long the columns are, as the date column is variable
+        // and it does not have a common separator so it can be extracted using a 
+        // regex. This is not pretty, and if anyone have any idea to improve this
+        // let me know!!!
+        while (line != null) {
+            Matcher matcher = SEPARATOR_PATTERN.matcher(line);
+            if (matcher.matches()) {
+                for (int i = 0; i < (colLength.length-1); i++) {
+                    colLength[i] = colStart[i] + matcher.group(i*2 + 1).length();
+                    colStart[i+1] = colLength[i] + matcher.group(i*2+2).length();
+                }
+                break;
+            }
+            line = reader.readLine();
+        }
+        
+        line = reader.readLine();
+        while (line != null) {
+            if (CHANGESET_PATTERN.matcher(line).matches()) {
                 ChangeSet changeset = new ChangeSet(
-                        matcher.group(1), 
-                        DateUtil.parseDate(matcher.group(3)),
-                        matcher.group(2),
-                        matcher.group(4));
+                    line.substring(colStart[0], colLength[0]).trim(),
+                    DateUtil.parseDate(line.substring(colStart[2], colLength[2]).trim()),
+                    line.substring(colStart[1], colLength[1]).trim(),
+                    line.substring(colStart[3]));
                 if (changeset.getDate().after(fromTimestamp.getTime())) { 
                     list.add(changeset);
                 }
