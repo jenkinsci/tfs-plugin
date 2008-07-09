@@ -145,7 +145,7 @@ public class TeamFoundationServerScm extends SCM {
             Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace));
             try {
                 return (server.getProject(this.projectPath).getBriefHistory(
-                            lastBuild.getPreviousBuild().getTimestamp(), 
+                            lastBuild.getTimestamp(), 
                             Calendar.getInstance()
                         ).size() > 0);
             } catch (ParseException pe) {
