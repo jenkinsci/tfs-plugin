@@ -156,7 +156,7 @@ public class TeamFoundationServerScm extends SCM {
     }
     
     protected Server createServer(TfTool tool) {
-        return new Server(tool, this.serverUrl, this.userName, this.userPassword);
+        return new Server(tool, getServerUrl(), getUserName(), getUserPassword());
     }
 
     @Override
@@ -203,12 +203,10 @@ public class TeamFoundationServerScm extends SCM {
         }
         
         public void doUsernameCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            System.out.println("UERNAMECHEKC");
             new FormFieldValidator(req, rsp, false) {
                 @Override
                 protected void check() throws IOException, ServletException {
                     String value = fixEmpty(request.getParameter("value"));
-                    System.out.println("value=" + value);
                     if ((value == null) || 
                             value.matches(DOMAIN_SLASH_USER_REGEX) || 
                             value.matches(USER_AT_DOMAIN_REGEX)) {
