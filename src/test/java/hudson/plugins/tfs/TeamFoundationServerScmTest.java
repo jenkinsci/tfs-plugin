@@ -15,7 +15,7 @@ public class TeamFoundationServerScmTest {
         AbstractProject<?, ?> project = mock(AbstractProject.class);
         stub(project.getName()).toReturn("ThisIsAJob");
         
-        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", "erik_${JOB_NAME}", "user", "password");
+        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}", "user", "password");
         assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getNormalizedWorkspaceName(project));
     }
     
@@ -29,13 +29,13 @@ public class TeamFoundationServerScmTest {
     
     @Test
     public void assertDefaultValueIsUsedForEmptyLocalPath() {
-        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "", "workspace", "user", "password");
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "", false, "workspace", "user", "password");
         assertEquals("Default value for work folder was incorrect", ".", scm.getLocalPath());
     }
     
     @Test
     public void assertDefaultValueIsUsedForEmptyWorkspaceName() {
-        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", ".", "", "user", "password");
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", ".", false, "", "user", "password");
         assertEquals("Default value for workspace was incorrect", "Hudson-${JOB_NAME}", scm.getWorkspaceName());
     }
 }

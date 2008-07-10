@@ -9,12 +9,26 @@
              checkUrl="'/fieldCheck?errorText='+escape('${%Project path is mandatory.}')+'&amp;value='+escape(this.value)"/>
     </f:entry>
 
-    <f:advanced>
-    
-    <f:entry title="Local workfolder" help="/plugin/tfs/workfolder.html">
-        <f:textbox name="tfs.localPath" value="${h.defaulted(scm.localPath, '.')}"
-             checkUrl="'/fieldCheck?warningText='+escape('${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}')+'&amp;value='+escape(this.value)"/>
+    <f:entry title="Login name" help="/plugin/tfs/username.html">
+        <f:textbox name="tfs.userName" value="${scm.userName}"
+          checkUrl="'${rootURL}/scm/TeamFoundationServerScm/usernameCheck?value='+escape(this.value)"/>
+        <i>(including domain name)</i>
     </f:entry>
+    
+    <f:entry title="User password">
+        <input type="password" class="setting-input" name="tfs.userPassword" value="${scm.userPassword}"/>
+    </f:entry>
+
+    <f:advanced>
+
+		<f:entry title="Use update" description="If checked, Hudson will not delete the workspace at end of each build, making the build faster. But this causes the artifacts from the previous build to remain when a new build starts.">
+			<f:checkbox name="tfs.useUpdate" checked="${h.defaultToTrue(scm.useUpdate)}"/>
+		</f:entry>
+    
+	    <f:entry title="Local workfolder" help="/plugin/tfs/workfolder.html">
+	        <f:textbox name="tfs.localPath" value="${h.defaulted(scm.localPath, '.')}"
+	             checkUrl="'/fieldCheck?warningText='+escape('${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}')+'&amp;value='+escape(this.value)"/>
+	    </f:entry>
 <!--     
         <f:entry title="Clean copy">
             <f:checkbox name="tfs.cleanCopy" checked="${scm.cleanCopy}"/>
@@ -25,16 +39,6 @@
         <f:entry title="Workspace name" help="/plugin/tfs/workspacename.html">
             <f:textbox name="tfs.workspaceName" value="${h.defaulted(scm.workspaceName, 'Hudson-${JOB_NAME}')}"
              checkUrl="'/fieldCheck?warningText='+escape('${%Workspace is mandatory, empty field will use default workspace name (Hudson-JOB_NAME)}')+'&amp;value='+escape(this.value)"/>
-        </f:entry>
-
-        <f:entry title="Login name" help="/plugin/tfs/username.html">
-            <f:textbox name="tfs.userName" value="${scm.userName}"
-              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/usernameCheck?value='+escape(this.value)"/>
-            <i>(including domain name)</i>
-        </f:entry>
-        
-        <f:entry title="User password">
-            <input type="password" class="setting-input" name="tfs.userPassword" value="${scm.userPassword}"/>
         </f:entry>
     </f:advanced>
 </j:jelly>

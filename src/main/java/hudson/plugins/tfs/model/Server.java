@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import hudson.Util;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
@@ -44,7 +45,7 @@ public class Server {
     
     public Reader execute(MaskedArgumentListBuilder arguments) throws IOException, InterruptedException {
         arguments.add(String.format("/server:%s", url));
-        if ((username != null) && (password != null)) {
+        if ((Util.fixEmpty(username) != null) && (password != null)) {
             arguments.addMasked(String.format("/login:%s,%s", username, password));
         }
         return tool.execute(arguments.toCommandArray(), arguments.toMaskArray());

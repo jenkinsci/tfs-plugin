@@ -11,6 +11,8 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 public class Project {
 
@@ -67,5 +69,22 @@ public class Project {
     public void getFiles(String localPath) throws IOException, InterruptedException {
         UpdateWorkfolderCommand command = new UpdateWorkfolderCommand(localPath);
         server.execute(command.getArguments()).close();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(13, 27).append(projectPath).toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if ((obj == null) || (getClass() != obj.getClass()))
+            return false;
+        final Project other = (Project) obj;
+        EqualsBuilder builder = new EqualsBuilder();
+        builder.append(this.projectPath, other.projectPath);
+        return builder.isEquals();
     }
 }

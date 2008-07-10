@@ -74,4 +74,24 @@ public class ServerTest {
                 new String[]{"argument", "/server:https://tfs02.codeplex.com"}, 
                 new boolean[]{false, false});
     }
+    
+    @Test
+    public void assertExecuteIsNotAddingUserCredentialsForEmptyName() throws IOException, InterruptedException {
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new StringReader(""));
+        Server server = new Server(tool, "https://tfs02.codeplex.com", "", "");
+        server.execute((MaskedArgumentListBuilder) new MaskedArgumentListBuilder().add("argument"));
+        verify(tool).execute(
+                new String[]{"argument", "/server:https://tfs02.codeplex.com"}, 
+                new boolean[]{false, false});
+    }
+    
+    @Test
+    public void assertExecuteIsAddingUserCredentialsForEmptyPassword() throws IOException, InterruptedException {
+        stub(tool.execute(isA(String[].class), isA(boolean[].class))).toReturn(new StringReader(""));
+        Server server = new Server(tool, "https://tfs02.codeplex.com", "aname", "");
+        server.execute((MaskedArgumentListBuilder) new MaskedArgumentListBuilder().add("argument"));
+        verify(tool).execute(
+                new String[]{"argument", "/server:https://tfs02.codeplex.com", "/login:aname,"}, 
+                new boolean[]{false, false, true});
+    }
 }

@@ -25,10 +25,9 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
-import hudson.plugins.tfs.model.Project;
-import hudson.plugins.tfs.model.Workspace;
 import hudson.scm.ChangeLogParser;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
@@ -48,15 +47,16 @@ public class TeamFoundationServerScm extends SCM {
     private final String workspaceName;
     private final String userPassword;
     private final String userName;
+    private final boolean useUpdate;
 
     private transient String normalizedWorkspaceName;
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, /*boolean cleanCopy, */String workspaceName, String userName, String userPassword) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
+        this.useUpdate = useUpdate;
         this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
-        //this.cleanCopy = cleanCopy;
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}" : workspaceName);
         this.userName = userName;
         this.userPassword = Scrambler.scramble(userPassword);
@@ -76,6 +76,10 @@ public class TeamFoundationServerScm extends SCM {
 
     public String getLocalPath() {
         return localPath;
+    }
+
+    public boolean isUseUpdate() {
+        return useUpdate;
     }
 
     public String getUserPassword() {
@@ -104,35 +108,17 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath));
-        Project project = server.getProject(this.projectPath);
         
-        Workspace workspace = null;
+        CheckoutAction action = new CheckoutAction(getNormalizedWorkspaceName(build.getProject()), 
+                projectPath, localPath, useUpdate);
         try {
-            
-            workspace = server.getWorkspaces().newWorkspace(getNormalizedWorkspaceName(build.getProject()));
-            workspace.mapWorkfolder(project, this.localPath);
-            project.getFiles(this.localPath);
-
-            if (build.getPreviousBuild() == null) {
-                createEmptyChangeLog(changelogFile, listener, "changesets");
-            } else {
-                List<ChangeSet> changeSets;
-                changeSets = project.getDetailedHistory(
-                        build.getPreviousBuild().getTimestamp(), 
-                        Calendar.getInstance());
-                ChangeSetWriter writer = new ChangeSetWriter();
-                writer.write(changeSets, changelogFile);
-            } 
-            
+            List<ChangeSet> list = action.checkout(server, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null));
+            ChangeSetWriter writer = new ChangeSetWriter();
+            writer.write(list, changelogFile);
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
-        } finally {
-            if (workspace != null) {
-                server.getWorkspaces().deleteWorkspace(workspace);
-            }
         }
-        
         return true;
     }
 
