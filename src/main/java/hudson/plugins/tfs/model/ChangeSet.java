@@ -22,6 +22,7 @@ public class ChangeSet extends ChangeLogSet.Entry {
     private String domain;
     private Date date;
     private String comment;
+    private final SimpleDateFormat TFS_DATETIME_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     
     private List<Item> items;
 
@@ -91,7 +92,7 @@ public class ChangeSet extends ChangeLogSet.Entry {
     }
     
     public void setDateStr(String dateStr) throws ParseException {
-        date = Util.XS_DATETIME_FORMATTER.parse(dateStr);
+        date = TFS_DATETIME_FORMATTER.parse(dateStr);
     }
 
     @Exported
