@@ -22,7 +22,7 @@ public class ListWorkspacesCommandTest {
     public void assertArguments() {
         MaskedArgumentListBuilder arguments = new ListWorkspacesCommand(null).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("workspaces /format:detailed", arguments.toStringWithQuote());
+        assertEquals("workspaces /format:brief", arguments.toStringWithQuote());
     }
 
     @Test

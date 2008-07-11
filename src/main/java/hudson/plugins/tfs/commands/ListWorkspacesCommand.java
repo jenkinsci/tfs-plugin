@@ -27,7 +27,7 @@ public class ListWorkspacesCommand implements ParseableCommand<List<Workspace>> 
     public MaskedArgumentListBuilder getArguments() {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("workspaces");
-        arguments.add("/format:detailed");
+        arguments.add("/format:brief");
         return arguments;
     }
     
