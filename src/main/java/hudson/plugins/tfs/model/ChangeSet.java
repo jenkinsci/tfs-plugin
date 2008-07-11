@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
