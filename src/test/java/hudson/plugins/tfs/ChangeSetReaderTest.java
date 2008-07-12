@@ -34,7 +34,7 @@ public class ChangeSetReaderTest {
         assertEquals("Domain is incorrect", "snd", changeset.getDomain());
         assertEquals("Comment is incorrect", "comment", changeset.getComment());
         assertEquals("Version is incorrect", "1122", changeset.getVersion());
-        //assertEquals("Date is incorrect", Util.getCalendar(2009, 1, 12).getTime(), changeset.getDate());
+        assertEquals("Date is incorrect", Util.getCalendar(2009, 1, 12).getTime(), changeset.getDate());
         
         assertEquals("Number of items in change set was incorrect", 2, changeset.getItems().size());
         Item item = changeset.getItems().get(0);

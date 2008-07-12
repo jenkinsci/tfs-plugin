@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.SimpleTimeZone;
 
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import hudson.Util;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
@@ -23,9 +23,16 @@ public class ChangeSet extends ChangeLogSet.Entry {
     private String domain;
     private Date date;
     private String comment;
-    private final SimpleDateFormat TFS_DATETIME_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    
     private List<Item> items;
+    
+    private static final ThreadLocal<SimpleDateFormat> TFS_DATETIME_FORMATTER = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            dateFormat.setTimeZone(new SimpleTimeZone(0,"GMT"));
+            return dateFormat;
+        }
+    };
 
     public ChangeSet() {
         this("", null, "", "");
@@ -93,7 +100,7 @@ public class ChangeSet extends ChangeLogSet.Entry {
     }
     
     public void setDateStr(String dateStr) throws ParseException {
-        date = TFS_DATETIME_FORMATTER.parse(dateStr);
+        date = TFS_DATETIME_FORMATTER.get().parse(dateStr);
     }
 
     @Exported
