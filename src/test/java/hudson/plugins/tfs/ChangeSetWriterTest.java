@@ -42,4 +42,22 @@ public class ChangeSetWriterTest {
                             "</changeset>" +
         		"</changelog>", output.getBuffer().toString());
     }
+
+    @Test
+    public void assertWriterIgnoredNullDomain() throws Exception {
+        ChangeSet changeset = new ChangeSet("1122", Util.getCalendar(2008, 12, 12).getTime(), "user", "comment");
+        ArrayList<ChangeSet> sets = new ArrayList<ChangeSet>();
+        sets.add(changeset);
+
+        ChangeSetWriter changesetWriter = new ChangeSetWriter();
+        StringWriter output = new StringWriter();
+        changesetWriter.write(sets, output);
+        assertXMLEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?><changelog>" +
+                            "<changeset version=\"1122\">" +
+                                "<date>2008-12-12T00:00:00Z</date>" +
+                                "<user>user</user>" +
+                                "<comment>comment</comment>" +
+                            "</changeset>" +
+                        "</changelog>", output.getBuffer().toString());
+    }
 }

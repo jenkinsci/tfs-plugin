@@ -12,7 +12,10 @@
           <a name="detail${loop.index}"></a>
           <div class="changeset-message">
             <b>
-              ${%Version} ${cs.version} by <a href="${rootURL}/${cs.author.url}/">${cs.user}</a>@${cs.domain}:
+              ${%Version} ${cs.version} by <a href="${rootURL}/${cs.author.url}/">${cs.user}</a>
+              <j:if test="${cs.domain!=null}">
+              	@${cs.domain}
+              </j:if>
             </b><br/>
             ${cs.msgAnnotated}
           </div>

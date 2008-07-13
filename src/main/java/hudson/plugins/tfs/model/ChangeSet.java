@@ -75,7 +75,7 @@ public class ChangeSet extends ChangeLogSet.Entry {
     }
 
     @Exported
-    public Object getDomain() {
+    public String getDomain() {
         return domain;
     }
 
@@ -91,6 +91,7 @@ public class ChangeSet extends ChangeLogSet.Entry {
             this.user = split[1];
         } else {
             this.user = user;
+            this.domain = null;
         }
     }
 

@@ -56,12 +56,18 @@ public class ChangeSetWriter {
 
     private void write(ChangeSet changeSet, PrintWriter writer) {
         writer.println(String.format("\t\t<date>%s</date>", Util.XS_DATETIME_FORMATTER.format(changeSet.getDate())));
-        writer.println(String.format("\t\t<user>%s\\%s</user>", changeSet.getDomain(), changeSet.getUser()));
-        writer.println(String.format("\t\t<comment>%s</comment>", changeSet.getComment()));
-        writer.println("\t\t<items>");
-        for (ChangeSet.Item item : changeSet.getItems()) {
-            writer.println(String.format("\t\t\t<item action=\"%s\">%s</item>", item.getAction(), item.getPath()));
+        if (Util.fixEmpty(changeSet.getDomain()) == null) {
+            writer.println(String.format("\t\t<user>%s</user>", changeSet.getUser()));
+        } else {
+            writer.println(String.format("\t\t<user>%s\\%s</user>", changeSet.getDomain(), changeSet.getUser()));
         }
-        writer.println("\t\t</items>");
+        writer.println(String.format("\t\t<comment>%s</comment>", changeSet.getComment()));
+        if (changeSet.getItems().size() > 0) {
+            writer.println("\t\t<items>");
+            for (ChangeSet.Item item : changeSet.getItems()) {
+                writer.println(String.format("\t\t\t<item action=\"%s\">%s</item>", item.getAction(), item.getPath()));
+            }
+            writer.println("\t\t</items>");
+        }
     }
 }
