@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <h2>${%Summary}</h2>
   <ol>
-    <j:forEach var="cs" items="${it.logs}">
+    <j:forEach var="cs" items="${it.items}">
       <li><st:out value="${cs.msg}"/></li>
     </j:forEach>
   </ol>
