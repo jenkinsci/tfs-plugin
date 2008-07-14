@@ -23,6 +23,7 @@ import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Hudson;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
@@ -202,6 +203,16 @@ public class TeamFoundationServerScm extends SCM {
                     error("Login name must contain the name of the domain and user");
                 }
             }.process();
+        }
+        
+        public void doFieldCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+            try {
+                int hudsonMinorVersion = Integer.parseInt(Hudson.VERSION.substring(Hudson.VERSION.indexOf('.') + 1));
+                if (hudsonMinorVersion >= 216) {
+                    Hudson.getInstance().doFieldCheck(req, rsp);
+                }
+            } catch (NumberFormatException nfe) {
+            }
         }
         
         @Override

@@ -1,12 +1,12 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:entry title="Server URL" help="/plugin/tfs/server.html">
         <f:textbox name="tfs.serverUrl" value="${scm.serverUrl}"
-             checkUrl="'/fieldCheck?errorText='+escape('${%Server URL is mandatory.}')+'&amp;value='+escape(this.value)"/>
+             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/fieldCheck?errorText='+escape('${%Server URL is mandatory.}')+'&amp;value='+escape(this.value)"/>
     </f:entry>
     
     <f:entry title="Project path" help="/plugin/tfs/project.html">
         <f:textbox name="tfs.projectPath" value="${scm.projectPath}"
-             checkUrl="'/fieldCheck?errorText='+escape('${%Project path is mandatory.}')+'&amp;value='+escape(this.value)"/>
+             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/fieldCheck?errorText='+escape('${%Project path is mandatory.}')+'&amp;value='+escape(this.value)"/>
     </f:entry>
 
     <f:entry title="Login name" help="/plugin/tfs/username.html">
@@ -27,7 +27,7 @@
     
 	    <f:entry title="Local workfolder" help="/plugin/tfs/workfolder.html">
 	        <f:textbox name="tfs.localPath" value="${h.defaulted(scm.localPath, '.')}"
-	             checkUrl="'/fieldCheck?warningText='+escape('${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}')+'&amp;value='+escape(this.value)"/>
+	             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/fieldCheck?warningText='+escape('${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}')+'&amp;value='+escape(this.value)"/>
 	    </f:entry>
 <!--     
         <f:entry title="Clean copy">
@@ -38,7 +38,7 @@
  -->
         <f:entry title="Workspace name" help="/plugin/tfs/workspacename.html">
             <f:textbox name="tfs.workspaceName" value="${h.defaulted(scm.workspaceName, 'Hudson-${JOB_NAME}')}"
-             checkUrl="'/fieldCheck?warningText='+escape('${%Workspace is mandatory, empty field will use default workspace name (Hudson-JOB_NAME)}')+'&amp;value='+escape(this.value)"/>
+             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/fieldCheck?warningText='+escape('${%Workspace is mandatory, empty field will use default workspace name (Hudson-JOB_NAME)}')+'&amp;value='+escape(this.value)"/>
         </f:entry>
     </f:advanced>
 </j:jelly>
