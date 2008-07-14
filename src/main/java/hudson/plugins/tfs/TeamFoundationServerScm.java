@@ -131,7 +131,7 @@ public class TeamFoundationServerScm extends SCM {
         } else {
             Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace));
             try {
-                return (server.getProject(this.projectPath).getBriefHistory(
+                return (server.getProject(this.projectPath).getDetailedHistory(
                             lastBuild.getTimestamp(), 
                             Calendar.getInstance()
                         ).size() > 0);
@@ -162,6 +162,11 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
+    public FilePath getModuleRoot(FilePath workspace) {
+        return workspace.child(localPath);
+    }
+
+    @Override
     public DescriptorImpl getDescriptor() {
         return PluginImpl.TFS_DESCRIPTOR;
     }
@@ -170,6 +175,7 @@ public class TeamFoundationServerScm extends SCM {
         
         public static final String USER_AT_DOMAIN_REGEX = "\\w+@\\w+";
         public static final String DOMAIN_SLASH_USER_REGEX = "\\w+\\\\\\w+";
+        public static final String PROJECT_PATH_REGEX = "^\\$\\/.*";
         private String tfExecutable;
         
         protected DescriptorImpl() {
@@ -189,20 +195,40 @@ public class TeamFoundationServerScm extends SCM {
             new FormFieldValidator.Executable(req, rsp).process();
         }
         
-        public void doUsernameCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+        private void doRegexCheck(final String[] regexArray, final String noMatchText, final String nullText,  
+                StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
             new FormFieldValidator(req, rsp, false) {
                 @Override
                 protected void check() throws IOException, ServletException {
                     String value = fixEmpty(request.getParameter("value"));
-                    if ((value == null) || 
-                            value.matches(DOMAIN_SLASH_USER_REGEX) || 
-                            value.matches(USER_AT_DOMAIN_REGEX)) {
-                        ok();
+                    if (value == null) {
+                        if (nullText == null) {
+                            ok();
+                        } else {
+                            error(nullText);
+                        }
                         return;
                     }
-                    error("Login name must contain the name of the domain and user");
+                    for (String regex : regexArray) {
+                        if (value.matches(regex)) {
+                            ok();
+                            return;
+                        }
+                    }
+                    error(noMatchText);
                 }
             }.process();
+        }
+        
+        public void doUsernameCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+            doRegexCheck(new String[]{DOMAIN_SLASH_USER_REGEX, USER_AT_DOMAIN_REGEX}, 
+                    "Login name must contain the name of the domain and user", null, req, rsp );
+        }
+        
+        public void doProjectPathCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+            doRegexCheck(new String[]{PROJECT_PATH_REGEX}, 
+                    "Project path must begin with '$/'.", 
+                    "Project path is mandatory.", req, rsp );
         }
         
         public void doFieldCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {

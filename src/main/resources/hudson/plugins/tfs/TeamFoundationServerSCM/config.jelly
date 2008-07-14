@@ -6,7 +6,7 @@
     
     <f:entry title="Project path" help="/plugin/tfs/project.html">
         <f:textbox name="tfs.projectPath" value="${scm.projectPath}"
-             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/fieldCheck?errorText='+escape('${%Project path is mandatory.}')+'&amp;value='+escape(this.value)"/>
+             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/projectPathCheck?value='+escape(this.value)"/>
     </f:entry>
 
     <f:entry title="Login name" help="/plugin/tfs/username.html">
