@@ -16,6 +16,7 @@ public class NewWorkspaceCommand extends AbstractCommand {
         arguments.add("workspace");
         arguments.add("/new");
         arguments.add(workspaceName);
+        arguments.add("/noprompt");
         addServerArgument(arguments);
         addLoginArgument(arguments);
         return arguments;

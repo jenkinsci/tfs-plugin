@@ -20,6 +20,6 @@ public class NewWorkspaceCommandTest {
         
         MaskedArgumentListBuilder arguments = new NewWorkspaceCommand(config, "TheWorkspaceName").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("workspace /new TheWorkspaceName /server:https//tfs02.codeplex.com /login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("workspace /new TheWorkspaceName /noprompt /server:https//tfs02.codeplex.com /login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 }

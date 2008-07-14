@@ -8,13 +8,13 @@ import static org.mockito.Mockito.stub;
 import java.io.StringReader;
 import java.util.List;
 
-import hudson.plugins.tfs.commands.UpdateWorkfolderCommand;
+import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import org.junit.Test;
 
 
-public class UpdateWorkfolderCommandTest {
+public class GetFilesToWorkFolderCommandTest {
 
     @Test
     public void assertArguments() {
@@ -22,9 +22,9 @@ public class UpdateWorkfolderCommandTest {
         stub(config.getUserName()).toReturn("snd\\user_cp");
         stub(config.getUserPassword()).toReturn("password");
         
-        MaskedArgumentListBuilder arguments = new UpdateWorkfolderCommand(config, "localPath").getArguments();
+        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("get localPath /recursive /login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("get localPath /recursive /noprompt /login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test
@@ -33,21 +33,21 @@ public class UpdateWorkfolderCommandTest {
         stub(config.getUserName()).toReturn("snd\\user_cp");
         stub(config.getUserPassword()).toReturn("password");
         
-        MaskedArgumentListBuilder arguments = new UpdateWorkfolderCommand(config, "localPath", true).getArguments();
+        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", true).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("get localPath /recursive /preview /login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("get localPath /recursive /preview /noprompt /login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test
     public void assertEmptyListWithEmptyOutput() throws Exception {
-        UpdateWorkfolderCommand command = new UpdateWorkfolderCommand(mock(ServerConfigurationProvider.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".");
         List<String> list = command.parse(new StringReader(""));
         assertEquals("Number of files was incorrect", 0, list.size());
     }
 
     @Test
     public void assertEmptyListWithNoChangesOutput() throws Exception {
-        UpdateWorkfolderCommand command = new UpdateWorkfolderCommand(mock(ServerConfigurationProvider.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".");
         List<String> list = command.parse(new StringReader("All files are up to date.\n"));
         assertEquals("Number of files was incorrect", 0, list.size());
     }    
@@ -64,7 +64,7 @@ public class UpdateWorkfolderCommandTest {
                 "\n" +
                 "C:\\Projects\\tfs\\tfsandbox_ms\\path1:\n" +
                 "Getting pom2.xml\n");
-        UpdateWorkfolderCommand command = new UpdateWorkfolderCommand(mock(ServerConfigurationProvider.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".");
         List<String> list = command.parse(reader);
         assertEquals("Number of files was incorrect", 4, list.size());
         assertEquals("File name was incorrect", "C:\\Projects\\tfs\\tfsandbox_ms\\path1", list.get(0));

@@ -2,7 +2,7 @@ package hudson.plugins.tfs.model;
 
 import hudson.plugins.tfs.commands.BriefHistoryCommand;
 import hudson.plugins.tfs.commands.DetailedHistoryCommand;
-import hudson.plugins.tfs.commands.UpdateWorkfolderCommand;
+import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -67,7 +67,7 @@ public class Project {
      * @param localPath the local path to get all files into
      */
     public void getFiles(String localPath) throws IOException, InterruptedException {
-        UpdateWorkfolderCommand command = new UpdateWorkfolderCommand(server, localPath);
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath);
         server.execute(command.getArguments()).close();
     }
 

@@ -11,20 +11,20 @@ import java.util.regex.Pattern;
 
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
-public class UpdateWorkfolderCommand extends AbstractCommand implements ParseableCommand<List<String>> {
+public class GetFilesToWorkFolderCommand extends AbstractCommand implements ParseableCommand<List<String>> {
     private static final Pattern ITEM_PATTERN = Pattern.compile("\\w+\\s+(.*)");
     private static final Pattern PATH_PATTERN = Pattern.compile("(.+):");
     
     private final String workFolder;
     private final boolean preview;
 
-    public UpdateWorkfolderCommand(ServerConfigurationProvider provider, String workFolder, boolean preview) {
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder, boolean preview) {
         super(provider);
         this.workFolder = workFolder;
         this.preview = preview;
     }
 
-    public UpdateWorkfolderCommand(ServerConfigurationProvider provider, String workFolder) {
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder) {
         this(provider, workFolder, false);
     }
 
@@ -36,6 +36,7 @@ public class UpdateWorkfolderCommand extends AbstractCommand implements Parseabl
         if (preview) {
             arguments.add("/preview");
         }
+        arguments.add("/noprompt");
         addLoginArgument(arguments);
         return arguments;
     }
