@@ -29,12 +29,12 @@ public class Workspace {
     }
 
     public void mapWorkfolder(Project project, String workFolder) throws IOException, InterruptedException {
-        MapWorkfolderCommand command = new MapWorkfolderCommand(project.getProjectPath(), workFolder, name);
+        MapWorkfolderCommand command = new MapWorkfolderCommand(server, project.getProjectPath(), workFolder, name);
         server.execute(command.getArguments()).close();
     }
 
     public void unmapWorkfolder(String workFolder) throws IOException, InterruptedException {
-        UnmapWorkfolderCommand command = new UnmapWorkfolderCommand(workFolder, name);
+        UnmapWorkfolderCommand command = new UnmapWorkfolderCommand(server, workFolder, name);
         server.execute(command.getArguments());
     }
 

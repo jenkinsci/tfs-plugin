@@ -32,7 +32,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @return the list of workspaces at the server
      */
     private List<Workspace> getListFromServer() throws IOException, InterruptedException {
-        ListWorkspacesCommand command = new ListWorkspacesCommand(this);
+        ListWorkspacesCommand command = new ListWorkspacesCommand(this, server);
         Reader reader = null;
         try {
             reader = server.execute(command.getArguments());
@@ -84,7 +84,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @return a workspace
      */
     public Workspace newWorkspace(String name) throws IOException, InterruptedException {
-        NewWorkspaceCommand command = new NewWorkspaceCommand(name);
+        NewWorkspaceCommand command = new NewWorkspaceCommand(server, name);
         server.execute(command.getArguments()).close();        
         Workspace workspace = new Workspace(server, name);
         workspaces.put(name, workspace);
@@ -96,7 +96,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param workspace the workspace to delete
      */
     public void deleteWorkspace(Workspace workspace) throws IOException, InterruptedException {
-        DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(workspace.getName());
+        DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(server, workspace.getName());
         workspaces.remove(workspace.getName());
         server.execute(command.getArguments()).close();
     }

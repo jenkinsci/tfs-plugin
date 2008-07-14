@@ -35,7 +35,7 @@ public class Project {
      * @return a list of change sets
      */
     public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
-        DetailedHistoryCommand command = new DetailedHistoryCommand(projectPath, fromTimestamp, toTimestamp);
+        DetailedHistoryCommand command = new DetailedHistoryCommand(server, projectPath, fromTimestamp, toTimestamp);
         Reader reader = null;
         try {
             reader = server.execute(command.getArguments());
@@ -52,7 +52,7 @@ public class Project {
      * @return a list of change sets
      */
     public List<ChangeSet> getBriefHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
-        BriefHistoryCommand command = new BriefHistoryCommand(projectPath, fromTimestamp, toTimestamp);
+        BriefHistoryCommand command = new BriefHistoryCommand(server, projectPath, fromTimestamp, toTimestamp);
         Reader reader = null;
         try {
             reader = server.execute(command.getArguments());
@@ -67,7 +67,7 @@ public class Project {
      * @param localPath the local path to get all files into
      */
     public void getFiles(String localPath) throws IOException, InterruptedException {
-        UpdateWorkfolderCommand command = new UpdateWorkfolderCommand(localPath);
+        UpdateWorkfolderCommand command = new UpdateWorkfolderCommand(server, localPath);
         server.execute(command.getArguments()).close();
     }
 

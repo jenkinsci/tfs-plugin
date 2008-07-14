@@ -1,6 +1,8 @@
 package hudson.plugins.tfs.commands;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.model.ChangeSet;
@@ -20,17 +22,22 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
 
     @Test
     public void assertBriefHistoryArguments() {
+        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
+        stub(config.getUrl()).toReturn("https//tfs02.codeplex.com");
+        stub(config.getUserName()).toReturn("snd\\user_cp");
+        stub(config.getUserPassword()).toReturn("password");
+        
         Calendar fromTimestamp = Util.getCalendar(2006, 12, 01, 01, 01, 01);
         Calendar toTimestamp = Util.getCalendar(2008, 06, 27, 20, 00, 0);
         
-        MaskedArgumentListBuilder arguments = new DetailedHistoryCommand("$/tfsandbox", fromTimestamp, toTimestamp).getArguments();
+        MaskedArgumentListBuilder arguments = new DetailedHistoryCommand(config, "$/tfsandbox", fromTimestamp, toTimestamp).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("history $/tfsandbox /noprompt /version:D2006-12-01T01:01:01Z~D2008-06-27T20:00:00Z /recursive /format:detailed", arguments.toStringWithQuote());
+        assertEquals("history $/tfsandbox /noprompt /version:D2006-12-01T01:01:01Z~D2008-06-27T20:00:00Z /recursive /format:detailed /server:https//tfs02.codeplex.com /login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
     
     @Test
     public void assertParsingOfEmptyReader() throws Exception {
-        DetailedHistoryCommand command = new DetailedHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         List<ChangeSet> list = command.parse(new StringReader(""));
         assertNotNull("The list of change sets was null", list);
         assertTrue("The list of change sets was not empty", list.isEmpty());   
@@ -39,7 +46,7 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
     @Test
     public void assertChangesWithEmptyToolOutput() throws Exception {
         StringReader reader = new StringReader("No history entries were found for the item and version combination specified.\n\n");
-        DetailedHistoryCommand command = new DetailedHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         List<ChangeSet> list = command.parse(reader);
         assertNotNull("The list of change sets was null", list);
         assertTrue("The list of change sets was not empty", list.isEmpty());
@@ -48,7 +55,7 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
     @Test
     public void assertOneChangeSetFromFile() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-1.txt"));
-        DetailedHistoryCommand command = new DetailedHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         List<ChangeSet> list = command.parse(reader);
 
         assertNotNull("The list of change sets was null", list);
@@ -69,7 +76,7 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
     @Test
     public void assertTwoChangeSetFromFile() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-2.txt"));
-        DetailedHistoryCommand command = new DetailedHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         List<ChangeSet> list = command.parse(reader);
 
         assertNotNull("The list of change sets was null", list);
@@ -93,7 +100,7 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
     @Test
     public void assertTwoItemsInAChangeSet() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-3.txt"));
-        DetailedHistoryCommand command = new DetailedHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         List<ChangeSet> list = command.parse(reader);
         
         assertNotNull("The list of change sets was null", list);
@@ -113,14 +120,14 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
                 "\n" +
                 "Comment:\n" +
                 "  first file");
-        DetailedHistoryCommand command = new DetailedHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         command.parse(reader);
     }
 
     @Test
     public void assertOldChangeSetAreIgnored() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-2.txt"));
-        DetailedHistoryCommand command = new DetailedHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 06, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 06, 15), Calendar.getInstance());
         List<ChangeSet> list = command.parse(reader);
         assertNotNull("The list of change sets was null", list);
         assertEquals("The number of change sets in the list was incorrect", 1, list.size());
@@ -139,7 +146,7 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
                 "\n" +
                 "Items:\n" +
                 "    add tfsandbox\n");
-        DetailedHistoryCommand command = new DetailedHistoryCommand("$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         command.parse(reader);
     }
 }

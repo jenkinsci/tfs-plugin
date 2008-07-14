@@ -1,7 +1,7 @@
 package hudson.plugins.tfs.model;
 
-import hudson.Util;
 import hudson.plugins.tfs.TfTool;
+import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import java.io.IOException;
@@ -9,11 +9,11 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Server {
+public class Server implements ServerConfigurationProvider {
     
     private final String url;
-    private final String username;
-    private final String password;
+    private final String userName;
+    private final String userPassword;
     private Workspaces workspaces;
     private Map<String, Project> projects = new HashMap<String, Project>();
     private final TfTool tool;
@@ -21,8 +21,8 @@ public class Server {
     public Server(TfTool tool, String url, String username, String password) {
         this.tool = tool;
         this.url = url;
-        this.username = username;
-        this.password = password;
+        this.userName = username;
+        this.userPassword = password;
     }
 
     Server(String url) {
@@ -44,14 +44,18 @@ public class Server {
     }
     
     public Reader execute(MaskedArgumentListBuilder arguments) throws IOException, InterruptedException {
-        arguments.add(String.format("/server:%s", url));
-        if ((Util.fixEmpty(username) != null) && (password != null)) {
-            arguments.addMasked(String.format("/login:%s,%s", username, password));
-        }
         return tool.execute(arguments.toCommandArray(), arguments.toMaskArray());
     }
 
     public String getUrl() {
         return url;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
     }
 }

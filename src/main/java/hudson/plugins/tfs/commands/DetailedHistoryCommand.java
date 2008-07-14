@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DetailedHistoryCommand implements ParseableCommand<List<ChangeSet>> {
+public class DetailedHistoryCommand extends AbstractCommand implements ParseableCommand<List<ChangeSet>> {
 
     private static final String CHANGESET_SEPERATOR = "------------";
     
@@ -42,7 +42,9 @@ public class DetailedHistoryCommand implements ParseableCommand<List<ChangeSet>>
     private final Calendar toTimestamp;
 
     
-    public DetailedHistoryCommand(String projectPath, Calendar fromTimestamp, Calendar toTimestamp) {
+    public DetailedHistoryCommand(ServerConfigurationProvider provider,  
+            String projectPath, Calendar fromTimestamp, Calendar toTimestamp) {
+        super(provider);
         this.projectPath = projectPath;
         this.fromTimestamp = fromTimestamp;
         this.toTimestamp = toTimestamp;
@@ -58,6 +60,8 @@ public class DetailedHistoryCommand implements ParseableCommand<List<ChangeSet>>
                 Util.XS_DATETIME_FORMATTER.format(toTimestamp.getTime())));
         arguments.add("/recursive");
         arguments.add("/format:detailed");        
+        addServerArgument(arguments);
+        addLoginArgument(arguments);
         return arguments;
     }
     

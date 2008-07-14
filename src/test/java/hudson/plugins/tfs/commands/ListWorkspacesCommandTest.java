@@ -1,6 +1,8 @@
 package hudson.plugins.tfs.commands;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.stub;
 
 import java.io.StringReader;
 import java.util.List;
@@ -20,14 +22,19 @@ public class ListWorkspacesCommandTest {
     
     @Test
     public void assertArguments() {
-        MaskedArgumentListBuilder arguments = new ListWorkspacesCommand(null).getArguments();
+        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
+        stub(config.getUrl()).toReturn("https//tfs02.codeplex.com");
+        stub(config.getUserName()).toReturn("snd\\user_cp");
+        stub(config.getUserPassword()).toReturn("password");
+        
+        MaskedArgumentListBuilder arguments = new ListWorkspacesCommand(null,config).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("workspaces /format:brief", arguments.toStringWithQuote());
+        assertEquals("workspaces /format:brief /server:https//tfs02.codeplex.com /login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test
     public void assertEmptyListWithEmptyOutput() throws Exception {
-        ListWorkspacesCommand command = new ListWorkspacesCommand(null);
+        ListWorkspacesCommand command = new ListWorkspacesCommand(null, mock(ServerConfigurationProvider.class));
         List<Workspace> list = command.parse(new StringReader(""));
         assertNotNull("List can not be null", list);
         assertEquals("Number of workspaces was incorrect", 0, list.size());
@@ -44,7 +51,7 @@ public class ListWorkspacesCommandTest {
                 "\n" +
                 "asterix2  SND\\redsolo_cp ASTERIX\n");
 
-        new ListWorkspacesCommand(factory).parse(reader);
+        new ListWorkspacesCommand(factory, mock(ServerConfigurationProvider.class)).parse(reader);
         Mockito.verify(factory).createWorkspace("asterix2", "ASTERIX", "SND\\redsolo_cp", "");
     }
 
@@ -58,7 +65,9 @@ public class ListWorkspacesCommandTest {
                 "asterix2  SND\\redsolo_cp ASTERIX\n" +
                 "astreix   SND\\redsolo_cp ASTERIX This is a comment\n");
         
-        ListWorkspacesCommand command = new ListWorkspacesCommand(new Workspaces(Mockito.mock(Server.class)));
+        ListWorkspacesCommand command = new ListWorkspacesCommand(
+                new Workspaces(Mockito.mock(Server.class)), 
+                mock(ServerConfigurationProvider.class));
         List<Workspace> list = command.parse(reader);
         assertNotNull("List can not be null", list);
         assertEquals("Number of workspaces was incorrect", 2, list.size());

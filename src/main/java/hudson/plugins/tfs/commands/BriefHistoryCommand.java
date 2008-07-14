@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * 
  * @author Erik Ramfelt
  */
-public class BriefHistoryCommand implements ParseableCommand<List<ChangeSet>> {
+public class BriefHistoryCommand extends AbstractCommand implements ParseableCommand<List<ChangeSet>> {
     static final Pattern CHANGESET_PATTERN = Pattern.compile("^\\d*\\s+\\S+\\s+.*");
     static final Pattern SEPARATOR_PATTERN = Pattern.compile("(-+)(\\s+)(-+)(\\s+)(-+)(\\s+)(-+)");
     
@@ -34,7 +34,9 @@ public class BriefHistoryCommand implements ParseableCommand<List<ChangeSet>> {
      * @param fromTimestamp the timestamp to get history from
      * @param toTimestamp the timestamp to get history to
      */
-    public BriefHistoryCommand(String projectPath, Calendar fromTimestamp, Calendar toTimestamp) {
+    public BriefHistoryCommand(ServerConfigurationProvider provider,
+            String projectPath, Calendar fromTimestamp, Calendar toTimestamp) {
+        super(provider);
         this.projectPath = projectPath;
         this.fromTimestamp = fromTimestamp;
         this.toTimestamp = toTimestamp;
@@ -53,7 +55,9 @@ public class BriefHistoryCommand implements ParseableCommand<List<ChangeSet>> {
                 Util.XS_DATETIME_FORMATTER.format(fromTimestamp.getTime()), 
                 Util.XS_DATETIME_FORMATTER.format(toTimestamp.getTime())));
         arguments.add("/recursive");
-        arguments.add("/format:brief");        
+        arguments.add("/format:brief");
+        addServerArgument(arguments);
+        addLoginArgument(arguments);
         return arguments;
     }
    
