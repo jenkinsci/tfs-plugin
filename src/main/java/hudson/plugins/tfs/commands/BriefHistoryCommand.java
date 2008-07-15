@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.commands;
 
-import hudson.Util;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
@@ -52,8 +51,8 @@ public class BriefHistoryCommand extends AbstractCommand implements ParseableCom
         arguments.add(projectPath);
         arguments.add("/noprompt");
         arguments.add(String.format("/version:D%s~D%s", 
-                Util.XS_DATETIME_FORMATTER.format(fromTimestamp.getTime()), 
-                Util.XS_DATETIME_FORMATTER.format(toTimestamp.getTime())));
+                DateUtil.TFS_DATETIME_FORMATTER.get().format(fromTimestamp.getTime()), 
+                DateUtil.TFS_DATETIME_FORMATTER.get().format(toTimestamp.getTime())));
         arguments.add("/recursive");
         arguments.add("/format:brief");
         addServerArgument(arguments);

@@ -2,16 +2,27 @@ package hudson.plugins.tfs.util;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
 public class DateUtil {
 
     private DateUtil() {        
     }
+
+    public static final ThreadLocal<SimpleDateFormat> TFS_DATETIME_FORMATTER = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            dateFormat.setTimeZone(new SimpleTimeZone(0,"GMT"));
+            return dateFormat;
+        }
+    };
     
     @SuppressWarnings("deprecation")
     public static Date parseDate(String dateString) throws ParseException {

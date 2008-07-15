@@ -2,6 +2,7 @@ package hudson.plugins.tfs;
 
 import hudson.Util;
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.util.DateUtil;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -55,7 +56,7 @@ public class ChangeSetWriter {
     }
 
     private void write(ChangeSet changeSet, PrintWriter writer) {
-        writer.println(String.format("\t\t<date>%s</date>", Util.XS_DATETIME_FORMATTER.format(changeSet.getDate())));
+        writer.println(String.format("\t\t<date>%s</date>", DateUtil.TFS_DATETIME_FORMATTER.get().format(changeSet.getDate())));
         if (Util.fixEmpty(changeSet.getDomain()) == null) {
             writer.println(String.format("\t\t<user>%s</user>", changeSet.getUser()));
         } else {
