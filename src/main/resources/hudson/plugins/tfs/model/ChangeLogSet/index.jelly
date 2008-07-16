@@ -1,4 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <j:set var="browser" value="${it.build.parent.scm.effectiveBrowser}"/>
+  
   <h2>${%Summary}</h2>
   <ol>
     <j:forEach var="cs" items="${it.items}">
@@ -12,10 +14,12 @@
           <a name="detail${loop.index}"></a>
           <div class="changeset-message">
             <b>
-              ${%Version} ${cs.version} by <a href="${rootURL}/${cs.author.url}/">${cs.user}</a>
+              ${%Version} 
+              <a href="${browser.getChangeSetLink(cs)}">${cs.version}</a> 
+              by <a href="${rootURL}/${cs.author.url}/">${cs.user}</a>
               <j:if test="${cs.domain!=null}">
               	@${cs.domain}
-              </j:if>
+              </j:if>:
             </b><br/>
             ${cs.msgAnnotated}
           </div>

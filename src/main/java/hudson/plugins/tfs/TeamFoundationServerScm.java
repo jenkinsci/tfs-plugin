@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 
+import net.sf.json.JSONObject;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -30,6 +32,7 @@ import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.scm.ChangeLogParser;
+import hudson.scm.RepositoryBrowsers;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.FormFieldValidator;
@@ -49,6 +52,8 @@ public class TeamFoundationServerScm extends SCM {
     private final String userPassword;
     private final String userName;
     private final boolean useUpdate;
+    
+    private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
 
@@ -167,6 +172,11 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
+    public TeamFoundationServerRepositoryBrowser getBrowser() {
+        return repositoryBrowser;
+    }
+
+    @Override
     public DescriptorImpl getDescriptor() {
         return PluginImpl.TFS_DESCRIPTOR;
     }
@@ -179,7 +189,7 @@ public class TeamFoundationServerScm extends SCM {
         private String tfExecutable;
         
         protected DescriptorImpl() {
-            super(TeamFoundationServerScm.class, null);
+            super(TeamFoundationServerScm.class, TeamFoundationServerRepositoryBrowser.class);
             load();
         }
 
@@ -191,10 +201,17 @@ public class TeamFoundationServerScm extends SCM {
             }
         }
         
+        @Override
+        public SCM newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            TeamFoundationServerScm scm = (TeamFoundationServerScm) super.newInstance(req, formData);
+            scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class,req,formData,"browser");
+            return scm;
+        }
+        
         public void doExecutableCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
             new FormFieldValidator.Executable(req, rsp).process();
         }
-        
+
         private void doRegexCheck(final String[] regexArray, final String noMatchText, final String nullText,  
                 StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
             new FormFieldValidator(req, rsp, false) {

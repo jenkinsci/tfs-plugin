@@ -41,4 +41,6 @@
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/fieldCheck?warningText='+escape('${%Workspace is mandatory, empty field will use default workspace name (Hudson-JOB_NAME)}')+'&amp;value='+escape(this.value)"/>
         </f:entry>
     </f:advanced>
+    
+    <t:listScmBrowsers name="tfs.browser" />
 </j:jelly>
