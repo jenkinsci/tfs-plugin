@@ -29,6 +29,7 @@ import hudson.model.Hudson;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
+import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.scm.ChangeLogParser;

@@ -1,4 +1,4 @@
-package hudson.plugins.tfs;
+package hudson.plugins.tfs.browsers;
 
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.scm.RepositoryBrowser;
