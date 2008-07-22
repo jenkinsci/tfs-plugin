@@ -11,7 +11,6 @@ import org.kohsuke.stapler.export.ExportedBean;
 
 import hudson.model.User;
 import hudson.plugins.tfs.util.DateUtil;
-import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
 
 @ExportedBean(defaultVisibility=999)
@@ -43,6 +42,11 @@ public class ChangeSet extends ChangeLogSet.Entry {
             paths.add(item.getPath());
         }
         return paths;
+    }
+
+    @Override
+    public ChangeLogSet getParent() {
+        return (ChangeLogSet)super.getParent();
     }
 
     @Override
@@ -113,7 +117,7 @@ public class ChangeSet extends ChangeLogSet.Entry {
     }
 
     @Override
-    protected void setParent(ChangeLogSet parent) {
+    protected void setParent(hudson.scm.ChangeLogSet parent) {
         super.setParent(parent);
     }
     
