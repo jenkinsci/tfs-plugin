@@ -119,7 +119,7 @@ public class TeamFoundationServerScm extends SCM {
         CheckoutAction action = new CheckoutAction(getNormalizedWorkspaceName(build.getProject()), 
                 projectPath, localPath, useUpdate);
         try {
-            List<ChangeSet> list = action.checkout(server, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null));
+            List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null));
             ChangeSetWriter writer = new ChangeSetWriter();
             writer.write(list, changelogFile);
         } catch (ParseException pe) {

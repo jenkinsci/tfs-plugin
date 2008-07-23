@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import hudson.FilePath;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.Server;
@@ -26,7 +27,7 @@ public class CheckoutAction {
         this.useUpdate = useUpdate;
     }
 
-    public List<ChangeSet> checkout(Server server, Calendar lastBuildTimestamp) throws IOException, InterruptedException, ParseException {
+    public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp) throws IOException, InterruptedException, ParseException {
         
         Workspace workspace = new Workspace(server, workspaceName);
         Workspaces workspaces = server.getWorkspaces();
@@ -34,6 +35,10 @@ public class CheckoutAction {
 
         try {
             if (! workspaces.exists(workspace)) {
+                FilePath localFolderPath = workspacePath.child(localFolder);
+                if (!useUpdate && localFolderPath.exists()) {
+                    localFolderPath.deleteContents();
+                }
                 workspace = workspaces.newWorkspace(workspaceName);
                 workspace.mapWorkfolder(project, localFolder);
             }
