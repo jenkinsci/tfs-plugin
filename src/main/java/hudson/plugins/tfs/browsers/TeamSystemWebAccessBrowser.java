@@ -6,6 +6,7 @@ import hudson.model.Descriptor;
 import hudson.plugins.tfs.PluginImpl;
 import hudson.plugins.tfs.TeamFoundationServerScm;
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.scm.EditType;
 import hudson.scm.RepositoryBrowser;
 import hudson.scm.SCM;
 
@@ -39,18 +40,58 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         }
     }
 
-    /**
-     * http://server:port/UI/Pages/Scc/ViewChangeset.aspx?changeset=62643
-     */
-    @Override
-    public URL getChangeSetLink(ChangeSet changeSet) throws IOException {
-        String baseUrl = "";
+    private String getBaseUrlString(ChangeSet changeSet) {
+        String baseUrl;
         if (url != null) {
             baseUrl = DescriptorImpl.getBaseUrl(url);
         } else {
-            baseUrl = String.format("%s/UI/Pages/Scc/", getServerConfiguration(changeSet)); 
+            baseUrl = String.format("%s/", getServerConfiguration(changeSet)); 
         }
-        return new URL(String.format("%sViewChangeset.aspx?changeset=%s", baseUrl, changeSet.getVersion()));
+        return baseUrl;
+    }
+
+    /**
+     * http://tswaserver:8090/cs.aspx?cs=99
+     */
+    @Override
+    public URL getChangeSetLink(ChangeSet changeSet) throws IOException {
+        return new URL(String.format("%scs.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
+    }
+
+    /**
+     * http://tswaserver:8090/view.aspx?path=$/Project/Folder/file.cs&cs=99
+     * @param item
+     * @return
+     */
+    public URL getFileLink(ChangeSet.Item item) throws IOException {
+        return new URL(String.format("%sview.aspx?path=%s&cs=%s", getBaseUrlString(item.getParent()), item.getPath(), item.getParent().getVersion()));
+    }
+
+    /**
+     * http://tswaserver:8090/diff.aspx?opath=$/Project/Folder/file.cs&ocs=99&mpath=$/Project/Folder/file.cs&mcs=98
+     * @param item
+     * @return
+     * @throws IOException
+     */
+    public URL getDiffLink(ChangeSet.Item item) throws IOException {
+        ChangeSet parent = item.getParent();
+        if (item.getEditType() != EditType.EDIT) {
+            return null;
+        }
+        try {
+            return new URL(String.format("%sdiff.aspx?opath=%s&ocs=%s&mpath=%s&mcs=%s", 
+                    getBaseUrlString(parent), 
+                    item.getPath(),
+                    parent.getVersion(), 
+                    item.getPath(),
+                    getPreviousChangeSetVersion(parent)));
+        } catch (NumberFormatException nfe) {
+            return null;
+        }
+    }
+    
+    private String getPreviousChangeSetVersion(ChangeSet changeset) throws NumberFormatException {
+        return Integer.toString(Integer.parseInt(changeset.getVersion()) - 1);
     }
 
     public DescriptorImpl getDescriptor() {

@@ -28,7 +28,14 @@
       <j:forEach var="item" items="${cs.items}">
         <tr>
           <td><t:editTypeIcon type="${item.editType}" /></td>
-          <td>${item.path}</td>
+          <td>
+          	<a href="${browser.getFileLink(item)}">${item.path}</a>
+          	<j:set var="diff" value="${browser.getDiffLink(item)}"/>
+            <j:if test="${diff!=null}">
+              <st:nbsp/>
+              <a href="${diff}">(diff)</a>
+            </j:if>
+          </td>
         </tr>
       </j:forEach>
     </j:forEach>

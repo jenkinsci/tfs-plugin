@@ -45,4 +45,27 @@ public class ChangeSetReaderTest {
         assertEquals("Action is incorrect", "delete", item.getAction());
         assertEquals("Path is incorrect", "path2", item.getPath());
     }
+
+    @Test
+    public void assertItemHasParent() throws Exception {
+        Reader reader = new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?><changelog>" +
+                            "<changeset version=\"1122\">" +
+                                "<date>2009-01-12T00:00:00Z</date>" +
+                                "<user>snd\\user</user>" +
+                                "<comment>comment</comment>" +
+                                "<items>" +
+                                    "<item action=\"add\">path</item>" +
+                                    "<item action=\"delete\">path2</item>" +
+                                "</items>" +
+                            "</changeset>" +
+                        "</changelog>");
+        
+        ChangeSetReader changesetReader = new ChangeSetReader();
+        ChangeLogSet logset = changesetReader.parse(null, reader);
+        
+        ChangeSet changeset = logset.iterator().next();
+        Item item = changeset.getItems().get(0);
+        assertNotNull("The item's parent change set cant be null", item.getParent());
+        assertSame("The item's parent is not the same as the change set it belongs to", changeset, item.getParent());
+    }
 }

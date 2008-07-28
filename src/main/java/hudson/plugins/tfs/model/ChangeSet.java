@@ -114,6 +114,7 @@ public class ChangeSet extends ChangeLogSet.Entry {
     
     public void add(ChangeSet.Item item) {
         items.add(item);
+        item.setParent(this);
     }
 
     @Override
@@ -125,6 +126,7 @@ public class ChangeSet extends ChangeLogSet.Entry {
     public static class Item {
         private String path;
         private String action;
+        private ChangeSet parent;
 
         public Item() {
             this("","");
@@ -133,6 +135,14 @@ public class ChangeSet extends ChangeLogSet.Entry {
         public Item(String path, String action) {
             this.path = path;
             this.action = action;
+        }
+
+        public ChangeSet getParent() {
+            return parent;
+        }
+
+        void setParent(ChangeSet parent) {
+            this.parent = parent;
         }
 
         @Exported
