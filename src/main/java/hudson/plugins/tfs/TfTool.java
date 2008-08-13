@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.logging.Logger;
 
 import hudson.AbortException;
 import hudson.FilePath;
@@ -24,6 +25,8 @@ public class TfTool {
     private TaskListener listener;
     private FilePath workspace;
     private final String executable;
+    
+    private static final Logger LOGGER = Logger.getLogger(TfTool.class.getName());
     
     public TfTool(String executable, Launcher launcher, TaskListener listener, FilePath workspace) {
         this.executable = executable;
@@ -75,6 +78,7 @@ public class TfTool {
         consoleStream.close();
         
         int result = proc.join();
+        LOGGER.fine(String.format("The TFS command '%s' returned with an error code of %d", toolArguments[1], result));
         if (result == 0) {
             return new InputStreamReader(new ByteArrayInputStream(consoleStream.toByteArray()));
         } else {
