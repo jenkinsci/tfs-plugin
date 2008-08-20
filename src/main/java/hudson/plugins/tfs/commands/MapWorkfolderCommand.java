@@ -24,11 +24,11 @@ public class MapWorkfolderCommand extends AbstractCommand {
     public MaskedArgumentListBuilder getArguments() {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("workfold");        
-        arguments.add("/map");
+        arguments.add("-map");
         arguments.add(projectPath);
         arguments.add(workFolder);
         if (workspaceName != null) {
-            arguments.add(String.format("/workspace:%s", workspaceName));
+            arguments.add(String.format("-workspace:%s", workspaceName));
         }        
         addServerArgument(arguments);
         addLoginArgument(arguments);

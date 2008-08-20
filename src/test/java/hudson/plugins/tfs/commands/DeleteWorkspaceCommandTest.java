@@ -21,6 +21,6 @@ public class DeleteWorkspaceCommandTest {
         
         MaskedArgumentListBuilder arguments = new DeleteWorkspaceCommand(config, "workspacename").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("workspace /delete workspacename /server:https//tfs02.codeplex.com /login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("workspace -delete workspacename -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 }

@@ -13,12 +13,12 @@ public abstract class AbstractCommand implements Command {
     }
 
     protected void addServerArgument(ArgumentListBuilder arguments) {
-        arguments.add(String.format("/server:%s", config.getUrl()));
+        arguments.add(String.format("-server:%s", config.getUrl()));
     }
     
     protected void addLoginArgument(MaskedArgumentListBuilder arguments) {
         if ((Util.fixEmpty(config.getUserName()) != null) && (config.getUserPassword()!= null)) {
-            arguments.addMasked(String.format("/login:%s,%s", 
+            arguments.addMasked(String.format("-login:%s,%s", 
                     config.getUserName(), 
                     config.getUserPassword()));
         }

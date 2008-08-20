@@ -18,7 +18,7 @@ public class AbstractCommandTest {
         AbstractCommand command = new AbstractCommandImpl(config);
         ArgumentListBuilder builder = new ArgumentListBuilder();
         command.addServerArgument(builder);
-        assertEquals("The server URL was incorrect", "/server:https://tfs02.codeplex.com", builder.toCommandArray()[0]);
+        assertEquals("The server URL was incorrect", "-server:https://tfs02.codeplex.com", builder.toCommandArray()[0]);
     }
     
     @Test
@@ -30,7 +30,7 @@ public class AbstractCommandTest {
         AbstractCommand command = new AbstractCommandImpl(config);
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
         command.addLoginArgument(builder);
-        assertEquals("The login argument was incorrect", "/login:user,password", builder.toCommandArray()[0]);
+        assertEquals("The login argument was incorrect", "-login:user,password", builder.toCommandArray()[0]);
         assertTrue("The login argument was not masked", builder.toMaskArray()[0]);
     }
     
@@ -69,7 +69,7 @@ public class AbstractCommandTest {
         AbstractCommand command = new AbstractCommandImpl(config);
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
         command.addLoginArgument(builder);
-        assertEquals("The login argument was incorrect", "/login:aname,", builder.toCommandArray()[0]);
+        assertEquals("The login argument was incorrect", "-login:aname,", builder.toCommandArray()[0]);
         assertTrue("The login argument was not masked", builder.toMaskArray()[0]);
     }
     

@@ -30,7 +30,7 @@ public class BriefHistoryCommandTest extends SwedishLocaleTestCase {
         
         MaskedArgumentListBuilder arguments = new BriefHistoryCommand(config, "$/tfsandbox", fromTimestamp, toTimestamp).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("history $/tfsandbox /noprompt /version:D2006-12-01T01:01:01Z~D2008-06-27T20:00:00Z /recursive /format:brief /server:https//tfs02.codeplex.com /login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("history $/tfsandbox -noprompt -version:D2006-12-01T01:01:01Z~D2008-06-27T20:00:00Z -recursive -format:brief -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test

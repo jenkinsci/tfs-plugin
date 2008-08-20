@@ -53,12 +53,12 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("history");
         arguments.add(projectPath);
-        arguments.add("/noprompt");
-        arguments.add(String.format("/version:D%s~D%s", 
+        arguments.add("-noprompt");
+        arguments.add(String.format("-version:D%s~D%s", 
                 DateUtil.TFS_DATETIME_FORMATTER.get().format(fromTimestamp.getTime()), 
                 DateUtil.TFS_DATETIME_FORMATTER.get().format(toTimestamp.getTime())));
-        arguments.add("/recursive");
-        arguments.add("/format:detailed");        
+        arguments.add("-recursive");
+        arguments.add("-format:detailed");        
         addServerArgument(arguments);
         addLoginArgument(arguments);
         return arguments;

@@ -24,7 +24,7 @@ public class GetFilesToWorkFolderCommandTest {
         
         MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("get localPath /recursive /noprompt /login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("get localPath -recursive -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test
@@ -35,7 +35,7 @@ public class GetFilesToWorkFolderCommandTest {
         
         MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", true).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("get localPath /recursive /preview /noprompt /login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("get localPath -recursive -preview -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test

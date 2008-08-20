@@ -32,11 +32,11 @@ public class GetFilesToWorkFolderCommand extends AbstractCommand implements Pars
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("get");
         arguments.add(workFolder);
-        arguments.add("/recursive");
+        arguments.add("-recursive");
         if (preview) {
-            arguments.add("/preview");
+            arguments.add("-preview");
         }
-        arguments.add("/noprompt");
+        arguments.add("-noprompt");
         addLoginArgument(arguments);
         return arguments;
     }

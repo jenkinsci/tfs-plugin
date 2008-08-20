@@ -20,10 +20,10 @@ public class UnmapWorkfolderCommand extends AbstractCommand {
     public MaskedArgumentListBuilder getArguments() {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("workfold");        
-        arguments.add("/unmap");
+        arguments.add("-unmap");
         arguments.add(localFolder);
         if (workspaceName != null) {
-            arguments.add(String.format("/workspace:%s", workspaceName));
+            arguments.add(String.format("-workspace:%s", workspaceName));
         }        
         addServerArgument(arguments);
         addLoginArgument(arguments);

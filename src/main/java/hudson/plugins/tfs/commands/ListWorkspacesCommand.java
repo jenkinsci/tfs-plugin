@@ -28,7 +28,7 @@ public class ListWorkspacesCommand extends AbstractCommand implements ParseableC
     public MaskedArgumentListBuilder getArguments() {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("workspaces");
-        arguments.add("/format:brief");
+        arguments.add("-format:brief");
         addServerArgument(arguments);
         addLoginArgument(arguments);
         return arguments;

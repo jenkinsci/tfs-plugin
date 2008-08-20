@@ -29,7 +29,7 @@ public class ListWorkspacesCommandTest {
         
         MaskedArgumentListBuilder arguments = new ListWorkspacesCommand(null,config).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("workspaces /format:brief /server:https//tfs02.codeplex.com /login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("workspaces -format:brief -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test
