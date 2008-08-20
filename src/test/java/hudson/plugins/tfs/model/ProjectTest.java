@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
 
@@ -37,6 +38,16 @@ public class ProjectTest extends SwedishLocaleTestCase {
     }
 
     @Test
+    public void assertGetDetailedHistoryClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        Server server = mock(Server.class);
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);
+        new Project(server, "$/serverpath").getDetailedHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
+
+        verify(spy).close();
+    }
+    
+    @Test
     public void assertGetBriefHistory() throws Exception {
         Server server = mock(Server.class);
         stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
@@ -50,6 +61,16 @@ public class ProjectTest extends SwedishLocaleTestCase {
         assertEquals("The number of change sets in list was incorrect", 1, list.size());
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
     }
+
+    @Test
+    public void assertGetBriefHistoryClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        Server server = mock(Server.class);
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);
+        new Project(server, "$/serverpath").getBriefHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
+
+        verify(spy).close();
+    }
     
     @Test
     public void assertGetFiles() throws Exception {
@@ -58,5 +79,15 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Project project = new Project(server, "$/serverpath");
         project.getFiles(".");
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
+    }
+
+    @Test
+    public void assertGetFilesClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        Server server = mock(Server.class);
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);
+        new Project(server, "$/serverpath").getFiles("localpath");
+
+        verify(spy).close();
     }
 }

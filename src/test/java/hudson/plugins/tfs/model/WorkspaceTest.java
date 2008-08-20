@@ -5,6 +5,7 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
+import java.io.Reader;
 import java.io.StringReader;
 
 import org.junit.Before;
@@ -31,11 +32,27 @@ public class WorkspaceTest {
     }
     
     @Test
+    public void assertMapWorkfolderClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        new Workspace(server, "name").mapWorkfolder(new Project(server, "$/serverpath"), ".");        
+        verify(spy).close();
+    }
+    
+    @Test
     public void assertUnmapWorkfolderIsExecuted() throws Exception {
         stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));        
         Workspace workspace = new Workspace(server, "name");
         workspace.unmapWorkfolder(".");        
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
+    }
+    
+    @Test
+    public void assertUnmapWorkfolderClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        new Workspace(server, "name").unmapWorkfolder("$/serverpath");        
+        verify(spy).close();
     }
     
     @Test

@@ -35,7 +35,7 @@ public class Workspace {
 
     public void unmapWorkfolder(String workFolder) throws IOException, InterruptedException {
         UnmapWorkfolderCommand command = new UnmapWorkfolderCommand(server, workFolder, name);
-        server.execute(command.getArguments());
+        server.execute(command.getArguments()).close();
     }
 
     public boolean exists() throws IOException, InterruptedException {

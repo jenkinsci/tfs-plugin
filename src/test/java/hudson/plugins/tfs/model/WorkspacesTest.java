@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import java.io.Reader;
 import java.io.StringReader;
 
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
@@ -125,5 +126,37 @@ public class WorkspacesTest {
         Workspace workspace = factory.createWorkspace("name", "computer", "owner", "comment");
         assertEquals("Workspace name was incorrect", "name", workspace.getName());
         assertEquals("Workspace comment was incorrect", "comment", workspace.getComment());
+    }
+    
+    @Test
+    public void assertListWorkspacesClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        new Workspaces(server).exists(new Workspace(server, "name1"));        
+        verify(spy).close();
+    }
+    
+    @Test
+    public void assertNewWorkspaceClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);
+        new Workspaces(server).newWorkspace("name1");        
+        verify(spy).close();
+    }
+    
+    @Test
+    public void assertGetWorkspacesClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        new Workspaces(server).getWorkspace("name1");        
+        verify(spy).close();
+    }
+    
+    @Test
+    public void assertDeleteWorkspaceClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        new Workspaces(server).deleteWorkspace(new Workspace(server, "name"));        
+        verify(spy).close();
     }
 }
