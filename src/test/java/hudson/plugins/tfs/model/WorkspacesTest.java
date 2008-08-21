@@ -65,6 +65,17 @@ public class WorkspacesTest {
     }
 
     @Test
+    public void assertWorkspaceExistsWithOnlyName() throws Exception {
+        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
+                "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
+                "\n" +
+                "name1  SND\\redsolo_cp COMPUTER\n"));
+        
+        Workspaces workspaces = new Workspaces(server);
+        assertTrue("The workspace was reported as non existant", workspaces.exists("name1"));
+    }
+
+    @Test
     public void assertNewWorkspaceIsAddedToMap() throws Exception {
         stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));
         

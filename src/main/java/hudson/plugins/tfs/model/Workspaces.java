@@ -67,15 +67,24 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     }
 
     /**
+     * Returns the if the workspace with the specified name exists on the server
+     * @param workspaceName the name of the workspace 
+     * @return true if the workspace exists on server; false otherwise
+     */
+    public boolean exists(String workspaceName) throws IOException, InterruptedException {
+        if (!workspaces.containsKey(workspaceName)) {
+            populateMapFromServer();
+        }
+        return workspaces.containsKey(workspaceName);
+    }
+
+    /**
      * Returns the if the workspace exists on the server
      * @param workspace the workspace 
      * @return true if the workspace exists on server; false otherwise
      */
     public boolean exists(Workspace workspace) throws IOException, InterruptedException {
-        if (!workspaces.containsKey(workspace.getName())) {
-            populateMapFromServer();
-        }
-        return workspaces.containsKey(workspace.getName());
+        return exists(workspace.getName());
     }
 
     /**
