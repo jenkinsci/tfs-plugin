@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 public class ListWorkspacesCommandTest {
-    
+
     @Test
     public void assertArguments() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
@@ -30,6 +30,18 @@ public class ListWorkspacesCommandTest {
         MaskedArgumentListBuilder arguments = new ListWorkspacesCommand(null,config).getArguments();
         assertNotNull("Arguments were null", arguments);
         assertEquals("workspaces -format:brief -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+    }
+    
+    @Test
+    public void assertArgumentsWithComputer() {
+        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
+        stub(config.getUrl()).toReturn("https//tfs02.codeplex.com");
+        stub(config.getUserName()).toReturn("snd\\user_cp");
+        stub(config.getUserPassword()).toReturn("password");
+        
+        MaskedArgumentListBuilder arguments = new ListWorkspacesCommand(null,config,"akira").getArguments();
+        assertNotNull("Arguments were null", arguments);
+        assertEquals("workspaces -format:brief -computer:akira -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test

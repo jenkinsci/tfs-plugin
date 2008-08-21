@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Logger;
 
 import hudson.AbortException;
@@ -12,6 +14,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Proc;
 import hudson.model.TaskListener;
+import hudson.remoting.Callable;
 import hudson.util.ForkOutputStream;
 
 /**
@@ -37,6 +40,24 @@ public class TfTool {
 
     public TaskListener getListener() {
         return listener;
+    }
+    
+    /**
+     * Returns the host name of the computer that is running the TF tool
+     * @return the host name; or null if there was a problem looking it up
+     */
+    public String getHostname() throws IOException, InterruptedException {
+        try {
+            return workspace.act(new Callable<String, UnknownHostException>() {
+                private static final long serialVersionUID = 1L;
+                public String call() throws UnknownHostException {
+                    return InetAddress.getLocalHost().getHostName();
+                }            
+            });
+        } catch (UnknownHostException e) {
+            LOGGER.warning("Could not resolve local hostname needed to list workspaces. " + e);
+            return null;
+        }
     }
 
     /**

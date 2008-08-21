@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.commands;
 
+import hudson.Util;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
@@ -15,13 +16,19 @@ public class ListWorkspacesCommand extends AbstractCommand implements ParseableC
     static final Pattern BRIEF_WORKSPACE_LIST_PATTERN = 
         Pattern.compile("(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*(.*)");
     private final WorkspaceFactory factory;
+    private final String computer;
 
     public interface WorkspaceFactory {
         Workspace createWorkspace(String name, String computer, String owner, String comment);
     }
     
     public ListWorkspacesCommand(WorkspaceFactory factory, ServerConfigurationProvider provider) {
-        super(provider);
+        this(factory, provider, null);
+    }
+
+    public ListWorkspacesCommand(WorkspaceFactory factory, ServerConfigurationProvider config, String computer) {
+        super(config);
+        this.computer = computer;
         this.factory = factory;
     }
 
@@ -29,6 +36,9 @@ public class ListWorkspacesCommand extends AbstractCommand implements ParseableC
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("workspaces");
         arguments.add("-format:brief");
+        if (Util.fixEmpty(computer) != null) {
+            arguments.add(String.format("-computer:%s", computer));
+        }
         addServerArgument(arguments);
         addLoginArgument(arguments);
         return arguments;

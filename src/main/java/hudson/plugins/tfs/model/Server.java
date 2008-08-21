@@ -58,4 +58,8 @@ public class Server implements ServerConfigurationProvider {
     public String getUserPassword() {
         return userPassword;
     }
+
+    public String getLocalHostname() throws IOException, InterruptedException {
+        return tool.getHostname();
+    }
 }

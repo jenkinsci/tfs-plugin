@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import hudson.plugins.tfs.TfTool;
 
@@ -39,5 +40,13 @@ public class ServerTest {
         Server server = new Server("url");
         assertNotSame("getProject() did not return different objects", 
                 server.getProject("$/projectPath"), server.getProject("$/otherPath"));
+    }
+    
+    @Test
+    public void assertLocalHostnameIsRetrievedFromTfTool() throws Exception {
+        stub(tool.getHostname()).toReturn("thehostname");
+        Server server = new Server(tool, "url", null, null);
+        assertEquals("Hostname was incorrect", "thehostname", server.getLocalHostname());
+        verify(tool).getHostname();
     }
 }
