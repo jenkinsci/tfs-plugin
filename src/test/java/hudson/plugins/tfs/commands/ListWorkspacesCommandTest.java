@@ -93,6 +93,24 @@ public class ListWorkspacesCommandTest {
         assertEquals("The computer name is incorrect", "ASTERIX", workspace.getComputer());
         assertEquals("The comment is incorrect", "This is a comment", workspace.getComment());
     }
+
+    @Test
+    public void assertListWithWorkspaceContainingSpace() throws Exception {
+        StringReader reader = new StringReader(
+                "Server: https://tfs02.codeplex.com/\n" +
+                "Workspace          Owner      Computer Comment\n" +
+                "------------------ ---------- -------- ----------------------------------------\n" +
+                "Hudson-node lookup redsolo_cp ASTERIX\n");
+        
+        ListWorkspacesCommand command = new ListWorkspacesCommand(
+                new Workspaces(Mockito.mock(Server.class)), 
+                mock(ServerConfigurationProvider.class));
+        List<Workspace> list = command.parse(reader);
+        assertNotNull("List can not be null", list);
+        assertEquals("Number of workspaces was incorrect", 1, list.size());
+        Workspace workspace = list.get(0);
+        assertEquals("The workspace name is incorrect", "Hudson-node lookup", workspace.getName());
+    }
     @Test 
     public void assertRegexWorks2() {
         Matcher matcher = ListWorkspacesCommand.BRIEF_WORKSPACE_LIST_PATTERN.matcher("astreix   SND\\redsolo_cp ASTERIX  This is a comment");
