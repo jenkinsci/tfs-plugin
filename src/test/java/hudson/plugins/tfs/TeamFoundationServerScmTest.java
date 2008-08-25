@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Computer;
 
 import org.junit.After;
 import org.junit.Test;
@@ -27,7 +29,7 @@ public class TeamFoundationServerScmTest {
         stub(project.getName()).toReturn("ThisIsAJob");
         
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}", "user", "password");
-        assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getNormalizedWorkspaceName(project));
+        assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getNormalizedWorkspaceName(project, mock(Launcher.class)));
     }
     
     @Test 

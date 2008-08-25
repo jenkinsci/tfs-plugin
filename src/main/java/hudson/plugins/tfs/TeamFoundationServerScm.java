@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 
@@ -32,6 +30,7 @@ import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.util.BuildVariableResolver;
 import hudson.scm.ChangeLogParser;
 import hudson.scm.RepositoryBrowsers;
 import hudson.scm.SCM;
@@ -97,17 +96,9 @@ public class TeamFoundationServerScm extends SCM {
         return userName;
     }
 
-    public String getNormalizedWorkspaceName(AbstractProject<?,?> project) {
+    public String getNormalizedWorkspaceName(AbstractProject<?,?> project, Launcher launcher) {
         if (normalizedWorkspaceName == null) {
-            normalizedWorkspaceName = workspaceName;
-            Matcher matcher = Pattern.compile("\\$\\{JOB_NAME\\}", Pattern.CASE_INSENSITIVE).matcher(normalizedWorkspaceName);
-            if (matcher.find()) {
-                normalizedWorkspaceName = matcher.replaceAll(project.getName());
-            }
-            matcher = Pattern.compile("\\$\\{USER_NAME\\}", Pattern.CASE_INSENSITIVE).matcher(normalizedWorkspaceName);
-            if (matcher.find()) {
-                normalizedWorkspaceName = matcher.replaceAll(System.getProperty("user.name"));
-            }
+            normalizedWorkspaceName = Util.replaceMacro(workspaceName, new BuildVariableResolver(project, launcher));
         }
         return normalizedWorkspaceName;
     }
@@ -116,7 +107,7 @@ public class TeamFoundationServerScm extends SCM {
     public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath));
         
-        CheckoutAction action = new CheckoutAction(getNormalizedWorkspaceName(build.getProject()), 
+        CheckoutAction action = new CheckoutAction(getNormalizedWorkspaceName(build.getProject(), launcher), 
                 projectPath, localPath, useUpdate);
         try {
             List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null));
