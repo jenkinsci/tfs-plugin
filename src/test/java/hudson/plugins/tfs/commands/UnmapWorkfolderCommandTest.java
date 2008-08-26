@@ -21,7 +21,7 @@ public class UnmapWorkfolderCommandTest {
         
         MaskedArgumentListBuilder arguments = new UnmapWorkfolderCommand(config, "localFolder").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("workfold -unmap localFolder -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("workfold -unmap localFolder -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
     
     @Test
@@ -33,6 +33,6 @@ public class UnmapWorkfolderCommandTest {
         
         MaskedArgumentListBuilder arguments = new UnmapWorkfolderCommand(config, "localFolder", "workspaceName").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("workfold -unmap localFolder -workspace:workspaceName -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("workfold -unmap localFolder -workspace:workspaceName;snd\\user_cp -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 }

@@ -49,6 +49,7 @@ public class CheckoutActionTest {
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, ".");
         verify(project).getFiles(".");
+        verify(workspace).unmapWorkfolder(".");
         verify(workspaces).deleteWorkspace(workspace);
     }
 
@@ -117,6 +118,7 @@ public class CheckoutActionTest {
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, ".");
         verify(project).getFiles(".");
+        verify(workspace).unmapWorkfolder(".");
         verify(workspaces).deleteWorkspace(isA(Workspace.class));
     }
 

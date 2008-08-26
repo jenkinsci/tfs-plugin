@@ -52,6 +52,7 @@ public class CheckoutAction {
             }
         } finally {        
             if ((!useUpdate) && (workspace != null)) {
+                workspace.unmapWorkfolder(localFolder);
                 workspaces.deleteWorkspace(workspace);
             }
         }
