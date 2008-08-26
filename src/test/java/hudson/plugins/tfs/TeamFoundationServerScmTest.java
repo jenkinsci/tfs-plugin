@@ -3,6 +3,7 @@ package hudson.plugins.tfs;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,5 +92,15 @@ public class TeamFoundationServerScmTest {
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
         assertEquals("The workspace name was incorrect", "WORKSPACE_SAMPLE", env.get(TeamFoundationServerScm.WORKSPACE_ENV_STR));
+    }
+    
+    @Test
+    public void assertWorksfolderPathIsAddedToEnvVars() throws Exception {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
+        
+        Map<String, String> env = new HashMap<String, String>();
+        env.put("WORKSPACE", "/this/is/a");
+        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        assertEquals("The workfolder path was incorrect", "/this/is/a" + File.separator + "PATH", env.get(TeamFoundationServerScm.WORKFOLDER_ENV_STR));
     }
 }

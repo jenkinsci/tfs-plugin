@@ -47,6 +47,8 @@ import hudson.util.Scrambler;
 public class TeamFoundationServerScm extends SCM {
 
     public static final String WORKSPACE_ENV_STR = "TFS_WORKSPACE";
+
+    public static final String WORKFOLDER_ENV_STR = "TFS_WORKFOLDER";
     
     private final String serverUrl;
     private final String projectPath;
@@ -176,6 +178,9 @@ public class TeamFoundationServerScm extends SCM {
         super.buildEnvVars(build, env);
         if (normalizedWorkspaceName != null) {
             env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
+        }
+        if (env.containsKey("WORKSPACE")) {
+            env.put(WORKFOLDER_ENV_STR, env.get("WORKSPACE") + File.separator + localPath);
         }
     }
 
