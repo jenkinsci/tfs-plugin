@@ -19,7 +19,9 @@ import hudson.util.VariableResolver;
  * <li> JOB_NAME - The name of the job</li>
  * <li> USER_NAME - The system property "user.name" on the Node that the Launcher
  * is being executed on (slave or master)</li>
- * <li> NODE_NAME - The name of the node that the Launcher is being executed on</li> 
+ * <li> NODE_NAME - The name of the node that the Launcher is being executed on</li>
+ * <li> Any environment variable that is set on the Node that the Launcher is
+ * being executed on (slave or master)</li> 
  * </ul> 
  * 
  * @author Erik Ramfelt
