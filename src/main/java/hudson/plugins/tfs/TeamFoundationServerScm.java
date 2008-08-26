@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -45,6 +46,8 @@ import hudson.util.Scrambler;
  */
 public class TeamFoundationServerScm extends SCM {
 
+    public static final String WORKSPACE_ENV_STR = "TFS_WORKSPACE";
+    
     private final String serverUrl;
     private final String projectPath;
     private final String localPath;
@@ -96,7 +99,7 @@ public class TeamFoundationServerScm extends SCM {
         return userName;
     }
 
-    public String getNormalizedWorkspaceName(AbstractProject<?,?> project, Launcher launcher) {
+    String getNormalizedWorkspaceName(AbstractProject<?,?> project, Launcher launcher) {
         if (normalizedWorkspaceName == null) {
             normalizedWorkspaceName = Util.replaceMacro(workspaceName, new BuildVariableResolver(project, launcher));
         }
@@ -166,6 +169,14 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public TeamFoundationServerRepositoryBrowser getBrowser() {
         return repositoryBrowser;
+    }
+
+    @Override
+    public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
+        super.buildEnvVars(build, env);
+        if (normalizedWorkspaceName != null) {
+            env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
+        }
     }
 
     @Override

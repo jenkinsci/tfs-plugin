@@ -3,15 +3,18 @@ package hudson.plugins.tfs;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Computer;
 
 import org.junit.After;
 import org.junit.Test;
 
-
+@SuppressWarnings("unchecked")
 public class TeamFoundationServerScmTest {
 
     private FilePath workspace;
@@ -78,5 +81,15 @@ public class TeamFoundationServerScmTest {
         assertTrue("The module root was reported as not existing even if its virtually the same as workspace",
                 moduleRoot.exists());
         assertEquals("The module root was not the same as workspace", moduleRoot.lastModified(), workspace.lastModified());
+    }
+    
+    @Test
+    public void assertWorkspaceNameIsAddedToEnvVars() throws Exception {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", ".", false, "WORKSPACE_SAMPLE", "user", "password");
+        scm.getNormalizedWorkspaceName(mock(AbstractProject.class), mock(Launcher.class));
+        
+        Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        assertEquals("The workspace name was incorrect", "WORKSPACE_SAMPLE", env.get(TeamFoundationServerScm.WORKSPACE_ENV_STR));
     }
 }
