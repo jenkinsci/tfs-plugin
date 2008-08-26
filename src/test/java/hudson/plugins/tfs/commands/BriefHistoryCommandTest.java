@@ -65,6 +65,19 @@ public class BriefHistoryCommandTest extends SwedishLocaleTestCase {
     }    
     
     @Test
+    public void assertChangesWithNoComment() throws Exception {
+        StringReader reader = new StringReader(
+                "Changeset User           Date                 Comment\n" +
+                "--------- -------------- -------------------- ----------------------------------------------------------------------------\n" +
+                "\n" +
+                "12495     SND\\redsolo_cp 2008-jun-27 13:21:25\n");
+        
+        BriefHistoryCommand command = new BriefHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 06, 01), null);
+        List<ChangeSet> list = command.parse(reader);
+        assertEquals("Number of change sets was incorrect", 1, list.size());
+    }    
+    
+    @Test
     public void assertChangesWithOldChangeset() throws Exception {
         StringReader reader = new StringReader(
                 "Changeset User           Date                 Comment\n" +

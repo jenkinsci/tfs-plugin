@@ -6,7 +6,6 @@ import static org.mockito.Mockito.stub;
 
 import java.io.StringReader;
 import java.util.List;
-import java.util.regex.Matcher;
 
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
 import hudson.plugins.tfs.commands.ListWorkspacesCommand.WorkspaceFactory;
@@ -75,7 +74,7 @@ public class ListWorkspacesCommandTest {
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
                 "asterix2  SND\\redsolo_cp ASTERIX\n" +
-                "astreix   SND\\redsolo_cp ASTERIX This is a comment\n");
+                "astreix   SND\\redsolo_cp ASTERIX  This is a comment\n");
         
         ListWorkspacesCommand command = new ListWorkspacesCommand(
                 new Workspaces(Mockito.mock(Server.class)), 
@@ -110,18 +109,5 @@ public class ListWorkspacesCommandTest {
         assertEquals("Number of workspaces was incorrect", 1, list.size());
         Workspace workspace = list.get(0);
         assertEquals("The workspace name is incorrect", "Hudson-node lookup", workspace.getName());
-    }
-    @Test 
-    public void assertRegexWorks2() {
-        Matcher matcher = ListWorkspacesCommand.BRIEF_WORKSPACE_LIST_PATTERN.matcher("astreix   SND\\redsolo_cp ASTERIX  This is a comment");
-        assertTrue(matcher.matches());
-        assertEquals(4, matcher.groupCount());
-    }
-    
-    @Test 
-    public void assertRegexWorks() {
-        Matcher matcher = ListWorkspacesCommand.BRIEF_WORKSPACE_LIST_PATTERN.matcher("astreix   SND\\redsolo_cp ASTERIX");
-        assertTrue(matcher.matches());
-        assertEquals(4, matcher.groupCount());
     }
 }

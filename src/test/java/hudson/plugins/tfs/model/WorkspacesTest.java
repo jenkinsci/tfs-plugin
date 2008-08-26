@@ -30,7 +30,7 @@ public class WorkspacesTest {
         stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
-                "name1  SND\\redsolo_cp COMPUTER\n"));
+                "name1     SND\\redsolo_cp COMPUTER\n"));
         
         Workspaces workspaces = new Workspaces(server);
         Workspace workspace = workspaces.getWorkspace("name1");
@@ -42,7 +42,7 @@ public class WorkspacesTest {
         stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
-                "name1  SND\\redsolo_cp COMPUTER\n"));
+                "name1     SND\\redsolo_cp COMPUTER\n"));
         
         Workspaces workspaces = new Workspaces(server);
         Workspace workspace = workspaces.getWorkspace("name1");
@@ -58,7 +58,7 @@ public class WorkspacesTest {
         stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
-                "name1  SND\\redsolo_cp COMPUTER\n"));
+                "name1     SND\\redsolo_cp COMPUTER\n"));
         
         Workspaces workspaces = new Workspaces(server);
         assertTrue("The workspace was reported as non existant", workspaces.exists(new Workspace(server, "name1")));
@@ -69,7 +69,7 @@ public class WorkspacesTest {
         stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
-                "name1  SND\\redsolo_cp COMPUTER\n"));
+                "name1     SND\\redsolo_cp COMPUTER\n"));
         
         Workspaces workspaces = new Workspaces(server);
         assertTrue("The workspace was reported as non existant", workspaces.exists("name1"));

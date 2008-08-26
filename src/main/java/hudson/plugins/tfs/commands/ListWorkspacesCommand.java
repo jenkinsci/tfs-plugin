@@ -2,19 +2,15 @@ package hudson.plugins.tfs.commands;
 
 import hudson.Util;
 import hudson.plugins.tfs.model.Workspace;
+import hudson.plugins.tfs.util.TextTableParser;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ListWorkspacesCommand extends AbstractCommand implements ParseableCommand<List<Workspace>> {
-    static final Pattern BRIEF_WORKSPACE_LIST_PATTERN = 
-        Pattern.compile("(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*(.*)");
     private final WorkspaceFactory factory;
     private final String computer;
 
@@ -47,25 +43,14 @@ public class ListWorkspacesCommand extends AbstractCommand implements ParseableC
     public List<Workspace> parse(Reader consoleReader) throws IOException {
         List<Workspace> list = new ArrayList<Workspace>();
         
-        BufferedReader reader = new BufferedReader(consoleReader);
-        
-        String line = reader.readLine();        
-        while ((line != null) && (!line.startsWith("---------"))) {
-            line = reader.readLine();
-        }
-        
-        line = reader.readLine();
-        while (line != null) {
-            Matcher matcher = BRIEF_WORKSPACE_LIST_PATTERN.matcher(line);
-            if (matcher.find()) {
-                Workspace workspace = factory.createWorkspace(
-                        matcher.group(1), 
-                        matcher.group(3),
-                        matcher.group(2),
-                        matcher.group(4));
-                list.add(workspace);
-            }
-            line = reader.readLine();
+        TextTableParser parser = new TextTableParser(consoleReader, 1);
+        while (parser.nextRow()) {
+            Workspace workspace = factory.createWorkspace(
+                parser.getColumn(0), 
+                parser.getColumn(2),
+                parser.getColumn(1),
+                Util.fixNull(parser.getColumn(3)));
+            list.add(workspace);            
         }
         return list;
     }
