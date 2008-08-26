@@ -33,6 +33,6 @@ public class MapWorkfolderCommandTest {
         
         MaskedArgumentListBuilder arguments = new MapWorkfolderCommand(config, "$/serverPath", "localFolder", "workspaceName").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("workfold -map $/serverPath localFolder -workspace:workspaceName;snd\\user_cp -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("workfold -map $/serverPath localFolder -workspace:workspaceName -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 }

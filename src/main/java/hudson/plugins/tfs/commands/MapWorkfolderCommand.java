@@ -28,7 +28,7 @@ public class MapWorkfolderCommand extends AbstractCommand {
         arguments.add(projectPath);
         arguments.add(workFolder);
         if (workspaceName != null) {
-            arguments.add(String.format("-workspace:%s;%s", workspaceName, getConfig().getUserName()));
+            arguments.add(String.format("-workspace:%s", workspaceName));
         }        
         addServerArgument(arguments);
         addLoginArgument(arguments);
