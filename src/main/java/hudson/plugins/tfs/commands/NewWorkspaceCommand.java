@@ -15,7 +15,7 @@ public class NewWorkspaceCommand extends AbstractCommand {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("workspace");
         arguments.add("-new");
-        arguments.add(workspaceName);
+        arguments.add(String.format("%s;%s", workspaceName, getConfig().getUserName()));
         arguments.add("-noprompt");
         addServerArgument(arguments);
         addLoginArgument(arguments);

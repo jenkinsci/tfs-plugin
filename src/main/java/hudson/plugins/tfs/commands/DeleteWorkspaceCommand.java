@@ -15,7 +15,7 @@ public class DeleteWorkspaceCommand extends AbstractCommand {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("workspace");
         arguments.add("-delete");
-        arguments.add(workspaceName);
+        arguments.add(String.format("%s;%s", workspaceName, getConfig().getUserName()));
         addServerArgument(arguments);
         addLoginArgument(arguments);
         return arguments;

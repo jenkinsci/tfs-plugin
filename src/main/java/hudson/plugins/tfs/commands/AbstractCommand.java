@@ -23,4 +23,8 @@ public abstract class AbstractCommand implements Command {
                     config.getUserPassword()));
         }
     }
+
+    public ServerConfigurationProvider getConfig() {
+        return config;
+    }
 }
