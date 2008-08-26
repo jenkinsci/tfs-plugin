@@ -29,18 +29,20 @@ public class CheckoutAction {
 
     public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp) throws IOException, InterruptedException, ParseException {
         
-        Workspace workspace = new Workspace(server, workspaceName);
+        Workspace workspace = null;
         Workspaces workspaces = server.getWorkspaces();
         Project project = server.getProject(projectPath);
 
         try {
-            if (! workspaces.exists(workspace)) {
+            if (! workspaces.exists(workspaceName)) {
                 FilePath localFolderPath = workspacePath.child(localFolder);
                 if (!useUpdate && localFolderPath.exists()) {
                     localFolderPath.deleteContents();
                 }
                 workspace = workspaces.newWorkspace(workspaceName);
                 workspace.mapWorkfolder(project, localFolder);
+            } else {
+                workspace = workspaces.getWorkspace(workspaceName);
             }
             
             project.getFiles(localFolder);
@@ -49,7 +51,7 @@ public class CheckoutAction {
                 return project.getDetailedHistory(lastBuildTimestamp, Calendar.getInstance());
             }
         } finally {        
-            if (!useUpdate) {
+            if ((!useUpdate) && (workspace != null)) {
                 workspaces.deleteWorkspace(workspace);
             }
         }
