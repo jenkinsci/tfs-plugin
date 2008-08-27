@@ -16,14 +16,14 @@ import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 
 public class CheckoutActionTest {
 
     private FilePath hudsonWs;
 
-    @Before public void teardown() throws Exception {
+    @After public void teardown() throws Exception {
         if (hudsonWs != null) {
             hudsonWs.deleteRecursive();
         }
