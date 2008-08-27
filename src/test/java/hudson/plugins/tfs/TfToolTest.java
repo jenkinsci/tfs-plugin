@@ -42,7 +42,23 @@ public class TfToolTest {
 
     @Test(expected=AbortException.class)
     public void assertUnexpectReturnCodeThrowsAbortException() throws Exception {
-        stub(proc.join()).toReturn(1);
+        stub(proc.join()).toReturn(100);
+        stub(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).toReturn(proc);
+
+        tool.execute(new String[]{"history"});
+    }
+
+    @Test
+    public void assertSuccessReturnCodeDoesNotThrowAbortException() throws Exception {
+        stub(proc.join()).toReturn(TfTool.SUCCESS_EXIT_CODE);
+        stub(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).toReturn(proc);
+
+        tool.execute(new String[]{"history"});
+    }
+
+    @Test
+    public void assertPartialSuccessReturnCodeDoesNotThrowAbortException() throws Exception {
+        stub(proc.join()).toReturn(TfTool.PARTIAL_SUCCESS_EXIT_CODE);
         stub(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).toReturn(proc);
 
         tool.execute(new String[]{"history"});

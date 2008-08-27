@@ -24,6 +24,9 @@ import hudson.util.ForkOutputStream;
  */
 public class TfTool {
 
+    static final int SUCCESS_EXIT_CODE = 0;
+    static final int PARTIAL_SUCCESS_EXIT_CODE = 1;
+    
     private Launcher launcher;
     private TaskListener listener;
     private FilePath workspace;
@@ -100,7 +103,7 @@ public class TfTool {
         
         int result = proc.join();
         LOGGER.fine(String.format("The TFS command '%s' returned with an error code of %d", toolArguments[1], result));
-        if (result == 0) {
+        if ((result == SUCCESS_EXIT_CODE) || (result == PARTIAL_SUCCESS_EXIT_CODE)) {
             return new InputStreamReader(new ByteArrayInputStream(consoleStream.toByteArray()));
         } else {
             listener.fatalError(String.format("Executable returned an unexpected result code [%d]", result));
