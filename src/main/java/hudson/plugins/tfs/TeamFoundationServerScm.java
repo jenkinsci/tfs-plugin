@@ -104,6 +104,8 @@ public class TeamFoundationServerScm extends SCM {
     String getNormalizedWorkspaceName(AbstractProject<?,?> project, Launcher launcher) {
         if (normalizedWorkspaceName == null) {
             normalizedWorkspaceName = Util.replaceMacro(workspaceName, new BuildVariableResolver(project, launcher));
+            normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
+            normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\\.\\s]+$", "_");
         }
         return normalizedWorkspaceName;
     }
@@ -191,6 +193,7 @@ public class TeamFoundationServerScm extends SCM {
 
     public static class DescriptorImpl extends SCMDescriptor<TeamFoundationServerScm> {
         
+        public static final String WORKSPACE_NAME_REGEX = "[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$";
         public static final String USER_AT_DOMAIN_REGEX = "\\w+@\\w+";
         public static final String DOMAIN_SLASH_USER_REGEX = "\\w+\\\\\\w+";
         public static final String PROJECT_PATH_REGEX = "^\\$\\/.*";
@@ -254,6 +257,12 @@ public class TeamFoundationServerScm extends SCM {
             doRegexCheck(new String[]{PROJECT_PATH_REGEX}, 
                     "Project path must begin with '$/'.", 
                     "Project path is mandatory.", req, rsp );
+        }
+        
+        public void doWorkspaceNameCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+            doRegexCheck(new String[]{WORKSPACE_NAME_REGEX}, 
+                    "Workspace name cannot end with a space or period, and cannot contain any of the following characters: \"/:<>|*?", 
+                    "Workspace name is mandatory", req, rsp);
         }
         
         public void doFieldCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {

@@ -53,6 +53,20 @@ public class TeamFoundationServerScmTest {
         assertTrue("Project path regex did not match a valid project path", "$/tfsandbox/path with space/subpath".matches(TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX));
     }
     
+    @Test 
+    public void assertDoWorkspaceNameCheckRegexWorks() {
+        assertFalse("Workspace name regex matched an invalid workspace name", "work space ".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertFalse("Workspace name regex matched an invalid workspace name", "work.space.".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertFalse("Workspace name regex matched an invalid workspace name", "work*space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertFalse("Workspace name regex matched an invalid workspace name", "work/space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertFalse("Workspace name regex matched an invalid workspace name", "work\"space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertFalse("Workspace name regex matched an invalid workspace name", "workspace*".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertFalse("Workspace name regex matched an invalid workspace name", "workspace/".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertFalse("Workspace name regex matched an invalid workspace name", "workspace\"".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertTrue("Workspace name regex dit not match an invalid workspace name", "work.space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertTrue("Workspace name regex dit not match an invalid workspace name", "work space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+    }
+    
     @Test
     public void assertDefaultValueIsUsedForEmptyLocalPath() {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "", false, "workspace", "user", "password");
@@ -103,4 +117,31 @@ public class TeamFoundationServerScmTest {
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
         assertEquals("The workfolder path was incorrect", "/this/is/a" + File.separator + "PATH", env.get(TeamFoundationServerScm.WORKFOLDER_ENV_STR));
     }
+    
+    /**
+     * Workspace name must be less than 64 characters, cannot end with a space or period, and cannot contain any of the following characters: "/:<>|*?
+     */
+    @Test
+    public void assertWorkspaceNameReplacesInvalidChars() {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "A\"B/C:D<E>F|G*H?I", "user", "password");
+        assertEquals("Workspace name contained invalid chars", "A_B_C_D_E_F_G_H_I", scm.getNormalizedWorkspaceName(null, null));
+    }
+    
+    /**
+     * Workspace name must be less than 64 characters, cannot end with a space or period, and cannot contain any of the following characters: "/:<>|*?
+     */
+    @Test
+    public void assertWorkspaceNameReplacesEndingPeriod() {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "Workspace.Name.", "user", "password");
+        assertEquals("Workspace name ends with period", "Workspace.Name_", scm.getNormalizedWorkspaceName(null, null));
+    }
+    
+    /**
+     * Workspace name must be less than 64 characters, cannot end with a space or period, and cannot contain any of the following characters: "/:<>|*?
+     */
+    @Test
+    public void assertWorkspaceNameReplacesEndingSpace() {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "Workspace Name ", "user", "password");
+        assertEquals("Workspace name ends with space", "Workspace Name_", scm.getNormalizedWorkspaceName(null, null));
+    }    
 }
