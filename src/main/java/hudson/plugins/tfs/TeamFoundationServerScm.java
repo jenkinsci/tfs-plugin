@@ -107,7 +107,8 @@ public class TeamFoundationServerScm extends SCM {
     String getWorkspaceName(AbstractBuild<?,?> build, Launcher launcher) {
         normalizedWorkspaceName = workspaceName;
         if (build != null) {
-            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build, launcher));
+            normalizedWorkspaceName = substituteBuildParameter(build, normalizedWorkspaceName);
+            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build.getProject(), launcher));
         }
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\\.\\s]+$", "_");
@@ -115,11 +116,21 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     public String getServerUrl(Run<?,?> run) {
-        return Util.replaceMacro(serverUrl, run.getEnvVars());
+        return substituteBuildParameter(run, serverUrl);
     }
 
     String getProjectPath(Run<?,?> run) {
-        return Util.replaceMacro(projectPath, run.getEnvVars());
+        return substituteBuildParameter(run, projectPath);
+    }
+
+    private String substituteBuildParameter(Run<?,?> run, String text) {
+        if (run instanceof AbstractBuild<?, ?>){
+            AbstractBuild<?,?> build = (AbstractBuild<?, ?>) run;
+            if (build.getAction(ParametersAction.class) != null) {
+                return build.getAction(ParametersAction.class).substitute(build, text);
+            }
+        }
+        return text;
     }
     
     @Override

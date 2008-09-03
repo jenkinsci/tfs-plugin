@@ -11,6 +11,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.ParametersAction;
 
 import org.junit.After;
 import org.junit.Test;
@@ -150,32 +151,32 @@ public class TeamFoundationServerScmTest {
     }    
     
     @Test public void assertServerUrlResolvesBuildVariables() {
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("PARAM", "RESOLVED");
+        ParametersAction action = mock(ParametersAction.class);
+        stub(action.substitute(isA(AbstractBuild.class), isA(String.class))).toReturn("https://RESOLVED.com");
         AbstractBuild build = mock(AbstractBuild.class);
-        stub(build.getEnvVars()).toReturn(map);
+        stub(build.getAction(ParametersAction.class)).toReturn(action);
 
         TeamFoundationServerScm scm = new TeamFoundationServerScm("https://${PARAM}.com", null, ".", false, "", "user", "password");
         assertEquals("The server url wasnt resolved", "https://RESOLVED.com", scm.getServerUrl(build));
     }    
     
     @Test public void assertProjectPathResolvesBuildVariables() {
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("PARAM", "RESOLVED");
+        ParametersAction action = mock(ParametersAction.class);
+        stub(action.substitute(isA(AbstractBuild.class), isA(String.class))).toReturn("$/RESOLVED/path");
         AbstractBuild build = mock(AbstractBuild.class);
-        stub(build.getEnvVars()).toReturn(map);
+        stub(build.getAction(ParametersAction.class)).toReturn(action);
 
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, "$/$PARAM/path", ".", false, "", "user", "password");
         assertEquals("The project path wasnt resolved", "$/RESOLVED/path", scm.getProjectPath(build));
     }    
     
     @Test public void assertWorkspaceNameResolvesBuildVariables() {
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("PARAM", "RESOLVED");
+        ParametersAction action = mock(ParametersAction.class);
+        stub(action.substitute(isA(AbstractBuild.class), isA(String.class))).toReturn("WS-RESOLVED");
         AbstractBuild build = mock(AbstractBuild.class);
-        stub(build.getEnvVars()).toReturn(map);
+        stub(build.getAction(ParametersAction.class)).toReturn(action);
 
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "WS-${PARAM}", "user", "password");
-        assertEquals("The project path wasnt resolved", "WS-RESOLVED", scm.getWorkspaceName(build, mock(Launcher.class)));
+        assertEquals("The workspace name wasnt resolved", "WS-RESOLVED", scm.getWorkspaceName(build, mock(Launcher.class)));
     }
 }
