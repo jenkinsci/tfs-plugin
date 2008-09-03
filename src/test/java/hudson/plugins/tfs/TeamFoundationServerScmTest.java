@@ -29,11 +29,13 @@ public class TeamFoundationServerScmTest {
     
     @Test
     public void assertWorkspaceNameReplacesJobName() {
-        AbstractProject<?, ?> project = mock(AbstractProject.class);
+        AbstractBuild build = mock(AbstractBuild.class);
+        AbstractProject project = mock(AbstractProject.class);
+        stub(build.getProject()).toReturn(project);
         stub(project.getName()).toReturn("ThisIsAJob");
         
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}", "user", "password");
-        assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getNormalizedWorkspaceName(project, mock(Launcher.class)));
+        assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getWorkspaceName(build, mock(Launcher.class)));
     }
     
     @Test 
@@ -101,10 +103,12 @@ public class TeamFoundationServerScmTest {
     @Test
     public void assertWorkspaceNameIsAddedToEnvVars() throws Exception {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", ".", false, "WORKSPACE_SAMPLE", "user", "password");
-        scm.getNormalizedWorkspaceName(mock(AbstractProject.class), mock(Launcher.class));
+        AbstractBuild build = mock(AbstractBuild.class);
+        stub(build.getProject()).toReturn(mock(AbstractProject.class));
+        scm.getWorkspaceName(build, mock(Launcher.class));
         
         Map<String, String> env = new HashMap<String, String>();
-        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        scm.buildEnvVars(build, env );        
         assertEquals("The workspace name was incorrect", "WORKSPACE_SAMPLE", env.get(TeamFoundationServerScm.WORKSPACE_ENV_STR));
     }
     
@@ -124,7 +128,7 @@ public class TeamFoundationServerScmTest {
     @Test
     public void assertWorkspaceNameReplacesInvalidChars() {
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "A\"B/C:D<E>F|G*H?I", "user", "password");
-        assertEquals("Workspace name contained invalid chars", "A_B_C_D_E_F_G_H_I", scm.getNormalizedWorkspaceName(null, null));
+        assertEquals("Workspace name contained invalid chars", "A_B_C_D_E_F_G_H_I", scm.getWorkspaceName(null, null));
     }
     
     /**
@@ -133,7 +137,7 @@ public class TeamFoundationServerScmTest {
     @Test
     public void assertWorkspaceNameReplacesEndingPeriod() {
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "Workspace.Name.", "user", "password");
-        assertEquals("Workspace name ends with period", "Workspace.Name_", scm.getNormalizedWorkspaceName(null, null));
+        assertEquals("Workspace name ends with period", "Workspace.Name_", scm.getWorkspaceName(null, null));
     }
     
     /**
@@ -142,6 +146,36 @@ public class TeamFoundationServerScmTest {
     @Test
     public void assertWorkspaceNameReplacesEndingSpace() {
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "Workspace Name ", "user", "password");
-        assertEquals("Workspace name ends with space", "Workspace Name_", scm.getNormalizedWorkspaceName(null, null));
+        assertEquals("Workspace name ends with space", "Workspace Name_", scm.getWorkspaceName(null, null));
     }    
+    
+    @Test public void assertServerUrlResolvesBuildVariables() {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("PARAM", "RESOLVED");
+        AbstractBuild build = mock(AbstractBuild.class);
+        stub(build.getEnvVars()).toReturn(map);
+
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("https://${PARAM}.com", null, ".", false, "", "user", "password");
+        assertEquals("The server url wasnt resolved", "https://RESOLVED.com", scm.getServerUrl(build));
+    }    
+    
+    @Test public void assertProjectPathResolvesBuildVariables() {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("PARAM", "RESOLVED");
+        AbstractBuild build = mock(AbstractBuild.class);
+        stub(build.getEnvVars()).toReturn(map);
+
+        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, "$/$PARAM/path", ".", false, "", "user", "password");
+        assertEquals("The project path wasnt resolved", "$/RESOLVED/path", scm.getProjectPath(build));
+    }    
+    
+    @Test public void assertWorkspaceNameResolvesBuildVariables() {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("PARAM", "RESOLVED");
+        AbstractBuild build = mock(AbstractBuild.class);
+        stub(build.getEnvVars()).toReturn(map);
+
+        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "WS-${PARAM}", "user", "password");
+        assertEquals("The project path wasnt resolved", "WS-RESOLVED", scm.getWorkspaceName(build, mock(Launcher.class)));
+    }
 }

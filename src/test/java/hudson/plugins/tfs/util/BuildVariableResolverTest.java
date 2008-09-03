@@ -110,7 +110,6 @@ public class BuildVariableResolverTest {
         BuildVariableResolver resolver = new BuildVariableResolver(build, launcher);
         assertEquals("Variable resolution was incorrect", "121212", resolver.resolve("BUILD_ID"));
         verify(build).getEnvVars();
-        verifyZeroInteractions(launcher);
         verifyZeroInteractions(project);
     }
 }

@@ -1,7 +1,9 @@
 package hudson.plugins.tfs.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -29,6 +31,8 @@ import hudson.util.VariableResolver;
 public class BuildVariableResolver implements VariableResolver<String> {
     
     private Map<String,LazyResolver> lazyResolvers = new HashMap<String, LazyResolver>();
+    
+    private List<VariableResolver<String>> otherResolvers = new ArrayList<VariableResolver<String>>();
     
     private final Launcher launcher;
 
@@ -64,16 +68,11 @@ public class BuildVariableResolver implements VariableResolver<String> {
      */
     public BuildVariableResolver(final AbstractBuild<?, ?> build, final Launcher launcher) {
         this(build.getProject(), launcher);
+    
         
         final Map<String, String> envVars = build.getEnvVars();
         if (envVars != null) {
-            for (final String buildEnvVar : envVars.keySet()) {
-                lazyResolvers.put(buildEnvVar, new LazyResolver() {
-                    public String getValue() {
-                        return envVars.get(buildEnvVar);
-                    }
-                });
-            }
+            otherResolvers.add(new VariableResolver.ByMap<String>(envVars));
         }
     }
     
@@ -83,8 +82,9 @@ public class BuildVariableResolver implements VariableResolver<String> {
                 return lazyResolvers.get(variable).getValue();
             } else {
                 if (launcher.getComputer() != null) {
-                    return launcher.getComputer().getEnvVars().get(variable);
+                    otherResolvers.add(new VariableResolver.ByMap<String>(launcher.getComputer().getEnvVars()));
                 }
+                return new VariableResolver.Union<String>(otherResolvers).resolve(variable);
             }
         } catch (Exception e) {
             LOGGER.warning("Variable name '" + variable + "' look up failed because of " + e);

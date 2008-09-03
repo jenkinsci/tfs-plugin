@@ -25,6 +25,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
+import hudson.model.ParametersAction;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
@@ -73,6 +74,7 @@ public class TeamFoundationServerScm extends SCM {
         this.userPassword = Scrambler.scramble(userPassword);
     }
 
+    // Bean properties need for job configuration
     public String getServerUrl() {
         return serverUrl;
     }
@@ -99,23 +101,33 @@ public class TeamFoundationServerScm extends SCM {
 
     public String getUserName() {
         return userName;
-    }
+    }    
+    // Bean properties END
 
-    String getNormalizedWorkspaceName(AbstractProject<?,?> project, Launcher launcher) {
-        if (normalizedWorkspaceName == null) {
-            normalizedWorkspaceName = Util.replaceMacro(workspaceName, new BuildVariableResolver(project, launcher));
-            normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
-            normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\\.\\s]+$", "_");
+    String getWorkspaceName(AbstractBuild<?,?> build, Launcher launcher) {
+        normalizedWorkspaceName = workspaceName;
+        if (build != null) {
+            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build, launcher));
         }
+        normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
+        normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\\.\\s]+$", "_");
         return normalizedWorkspaceName;
     }
 
+    public String getServerUrl(Run<?,?> run) {
+        return Util.replaceMacro(serverUrl, run.getEnvVars());
+    }
+
+    String getProjectPath(Run<?,?> run) {
+        return Util.replaceMacro(projectPath, run.getEnvVars());
+    }
+    
     @Override
     public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
-        Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath));
+        Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
         
-        CheckoutAction action = new CheckoutAction(getNormalizedWorkspaceName(build.getProject(), launcher), 
-                projectPath, localPath, useUpdate);
+        CheckoutAction action = new CheckoutAction(getWorkspaceName(build, launcher), 
+                getProjectPath(build), getLocalPath(), isUseUpdate());
         try {
             List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null));
             ChangeSetWriter writer = new ChangeSetWriter();
@@ -129,14 +141,14 @@ public class TeamFoundationServerScm extends SCM {
 
     @Override
     public boolean pollChanges(AbstractProject hudsonProject, Launcher launcher, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
-        Run<?,?> lastBuild = hudsonProject.getLastBuild();
-        if (lastBuild == null) {
+        Run<?,?> lastRun = hudsonProject.getLastBuild();
+        if (lastRun == null) {
             return true;
         } else {
-            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace));
+            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
             try {
-                return (server.getProject(this.projectPath).getDetailedHistory(
-                            lastBuild.getTimestamp(), 
+                return (server.getProject(getProjectPath(lastRun)).getDetailedHistory(
+                            lastRun.getTimestamp(), 
                             Calendar.getInstance()
                         ).size() > 0);
             } catch (ParseException pe) {
@@ -146,8 +158,8 @@ public class TeamFoundationServerScm extends SCM {
         }
     }
     
-    protected Server createServer(TfTool tool) {
-        return new Server(tool, getServerUrl(), getUserName(), getUserPassword());
+    protected Server createServer(TfTool tool, Run<?,?> run) {
+        return new Server(tool, getServerUrl(run), getUserName(), getUserPassword());
     }
 
     @Override
@@ -167,7 +179,7 @@ public class TeamFoundationServerScm extends SCM {
 
     @Override
     public FilePath getModuleRoot(FilePath workspace) {
-        return workspace.child(localPath);
+        return workspace.child(getLocalPath());
     }
 
     @Override
@@ -182,7 +194,7 @@ public class TeamFoundationServerScm extends SCM {
             env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
         }
         if (env.containsKey("WORKSPACE")) {
-            env.put(WORKFOLDER_ENV_STR, env.get("WORKSPACE") + File.separator + localPath);
+            env.put(WORKFOLDER_ENV_STR, env.get("WORKSPACE") + File.separator + getLocalPath());
         }
     }
 

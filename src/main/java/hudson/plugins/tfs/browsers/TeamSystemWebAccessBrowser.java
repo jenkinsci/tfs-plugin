@@ -34,7 +34,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         AbstractProject<?, ?> project = changeset.getParent().build.getProject();
         SCM scm = project.getScm();
         if (scm instanceof TeamFoundationServerScm) {
-            return ((TeamFoundationServerScm) scm).getServerUrl();
+            return ((TeamFoundationServerScm) scm).getServerUrl(changeset.getParent().build);
         } else {
             throw new IllegalStateException("TFS repository browser used on a non TFS SCM");
         }
