@@ -31,7 +31,7 @@
 	    </f:entry>
 
         <f:entry title="Workspace name" help="/plugin/tfs/workspacename.html">
-            <f:textbox name="tfs.workspaceName" value="${h.defaulted(scm.workspaceName, 'Hudson-${JOB_NAME}')}"
+            <f:textbox name="tfs.workspaceName" value="${h.defaulted(scm.workspaceName, 'Hudson-${JOB_NAME}-${NODE_NAME}')}"
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/workspaceNameCheck?value='+escape(this.value)"/>
         </f:entry>
     </f:advanced>

@@ -69,7 +69,7 @@ public class TeamFoundationServerScm extends SCM {
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
         this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
-        this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}" : workspaceName);
+        this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.userPassword = Scrambler.scramble(userPassword);
     }

@@ -79,7 +79,7 @@ public class TeamFoundationServerScmTest {
     @Test
     public void assertDefaultValueIsUsedForEmptyWorkspaceName() {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", ".", false, "", "user", "password");
-        assertEquals("Default value for workspace was incorrect", "Hudson-${JOB_NAME}", scm.getWorkspaceName());
+        assertEquals("Default value for workspace was incorrect", "Hudson-${JOB_NAME}-${NODE_NAME}", scm.getWorkspaceName());
     }
     
     @Test
