@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Computer;
@@ -48,7 +49,7 @@ public class BuildVariableResolver implements VariableResolver<String> {
         });
         lazyResolvers.put("NODE_NAME", new LazyComputerResolver() {
             public String getValue(Computer computer) {
-                return (computer.getName() == null ? "MASTER" : computer.getName());
+                return (Util.fixEmpty(computer.getName()) == null ? "MASTER" : computer.getName());
             }            
         });
         lazyResolvers.put("USER_NAME", new LazyComputerResolver() {

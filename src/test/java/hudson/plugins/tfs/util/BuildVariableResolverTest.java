@@ -85,7 +85,7 @@ public class BuildVariableResolverTest {
     @Test public void assertMasterNodeNameIsResolved() {
         Computer computer = mock(Computer.class);
         stub(launcher.getComputer()).toReturn(computer);
-        stub(computer.getName()).toReturn(null);
+        stub(computer.getName()).toReturn("");
         
         BuildVariableResolver resolver = new BuildVariableResolver(project , launcher);
         assertEquals("Variable resolution was incorrect", "MASTER", resolver.resolve("NODE_NAME"));
