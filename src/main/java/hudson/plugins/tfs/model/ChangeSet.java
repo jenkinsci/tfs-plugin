@@ -14,7 +14,7 @@ import hudson.plugins.tfs.util.DateUtil;
 import hudson.scm.EditType;
 
 @ExportedBean(defaultVisibility=999)
-public class ChangeSet extends ChangeLogSet.Entry {
+public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     private String version;
     private String user;
