@@ -1,0 +1,974 @@
+-------------------------------------------------------------------------------
+Changeset: 19518
+User: im21
+Date: 13 May 2009 22:38:55
+
+Comment:
+  Uncommenting lines in IOC.cs
+
+Items:
+  edit $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework/IoC/IoC.cs
+
+Check-in Notes:
+  Code Reviewer:
+  Performance Reviewer:
+  Security Reviewer:
+
+-------------------------------------------------------------------------------
+Changeset: 19517
+User: im21
+Date: 13 May 2009 22:05:30
+
+Comment:
+  Merging Framework Project file into r2 from MAIN
+
+Items:
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework/app.config;X4019
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework/Framework.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework/Framework.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework/WCF
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework/WCF/WCFProxyBase.cs
+
+Check-in Notes:
+  Code Reviewer:
+  Performance Reviewer:
+  Security Reviewer:
+
+-------------------------------------------------------------------------------
+Changeset: 19516
+User: im21
+Date: 13 May 2009 21:59:12
+
+Comment:
+  Checking in framework changes
+
+Items:
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.CrossTalk
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.CrossTalk/Framework.CrossTalk.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.CrossTalk/Framework.CrossTalk.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.CrossTalk/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.CrossTalk/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.Security
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.Security/Framework.Security.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.Security/Framework.Security.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.Security/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Framework.Security/Properties/AssemblyInfo.cs;X4007
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/Properties/AssemblyInfo.cs;X3992
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SMO.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SQL.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SQL.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/Error.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/ErrorType.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/IPackageDetails.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/PackageDetails.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/PackageDetailsDTS.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/PackageDetailsFILE.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/PackageDetailsProvider.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/PackageDetailsProviderResult.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/PackageDetailsSQL.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/PackageHelper.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Helpers/SQL/SSIS/PackageHelperResult.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/AccessControllerTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/AccessControlPolicyCacheTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/ApplicationsNavigatorTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/ContextDataExample.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/GroceryWeb.tesco.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/GroceryWeb.tesco
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/GuidBasedObjectIdentifierTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/Helpers/TestHelper.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/LoginContextHandlerTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/OperationsTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/PersistedIdentityHandlerTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/PolicyNavigatorTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/ReferenceMonitor.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/ReferenceMonitor.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/RefMonHttpModuleTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/Resources
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/Resources/TestData.Designer.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/Resources/TestData.resx
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/TokenHandlerTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/TypeBasedObjectIdentifierTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor.UnitTests/VSCodeGenAccessors.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/AccessController.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Entities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Entities/AccessControlDecisionEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/HttpContextKeys.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/IAccessController.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/AccessControlPolicyCache.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/ApplicationsNavigator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/AuthoriseEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/DataRepository.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/IAccessControlPolicyCache.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/ILoginContextHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/ITokenHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/LoggerEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/LoginContextHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/Operations.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/OperatorEnumerations.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/PolicyNavigator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/TokenHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Internal/Variable.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/IPersistedIdentityHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ITescoSecureHttpHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ObjectIdentifiers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ObjectIdentifiers/AbstractObjectIdentifier.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ObjectIdentifiers/GuidBasedObjectIdentifier.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ObjectIdentifiers/TypeBasedObjectIdentifier.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ObjectIdentifiers/WebButtonObjectIdentifier.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ObjectIdentifiers/WebUrlObjectIdentifier.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/PersistedIdentityHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Properties/AssemblyInfo.cs;X3999
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/Properties/AssemblyInfo.Internals..cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ReferenceMonitor.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/ReferenceMonitor.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/ReferenceMonitor/RefMonHttpModule.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/Configuration.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/Configuration.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/ConfigurationServiceReadTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/GroceryWebConfigTest.tesco.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/GroceryWebConfigTest.tesco
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/MockObjects.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/ConfigurationService.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/app.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/ClassDiagram1.cd
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/ILocatorService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/AddressEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/AddressesEntity.cs
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/AddressExceptionEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/AreaDetailsEntity.cs
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/Exception.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/Locator.Entities.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/Locator.Entities.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/PafAddressEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Locator.Entities/Properties/AssemblyInfo.cs;X4012
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorServiceFactory.cs
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorServiceOperations.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorTests/Locator.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorTests/Locator.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorTests/LocatorTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite/Locator.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite/LocatorWcfWebsite.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite/LocatorWcfWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite/Properties/AssemblyInfo.cs;X3988
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/LocatorWcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess/IOperations.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess/mssccprj.scc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess/Operations.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess/Properties/AssemblyInfo.cs;X3986
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess/ResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess/SensitiveDatabaseAccess.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/SensitiveDatabaseAccess/SensitiveDatabaseAccess.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/configuration.svcinfo
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/configuration91.svcinfo
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/Locator.disco;X4009
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/Locator.xsd;X4011
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/Locator1.disco
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/Locator1.xsd;X4010
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/Locator2.xsd
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/Locator21.xsd
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/LocatorSvcSDAOperations.wsdl;X4014
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/LocatorSvcSDAOperations1.wsdl
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/Reference.cs
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Locator/Service References/LocatorSvcSDA/Reference.svcmap
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/app.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests/EMailNotificationServiceProviderTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests/EmailProvider.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests/EmailProvider.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/EmailProviderTests/VSCodeGenAccessors.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/INotificationService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/Notification.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/Notification.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/EmailEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/NotificationEntities.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/NotificationEntities.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/NotificationEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/NotificationMethodEnum.cs
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/NotificationTypeEnum.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationEntities/Properties/AssemblyInfo.cs;X3989
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/INotificationServiceProvider.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/NotificationProviderFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/NotificationProviders
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/NotificationProviders/EMailNotificationServiceProvider.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/NotificationService.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/NotificationService.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/NotificationServiceProvider.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationService/Properties/AssemblyInfo.cs;X3990
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationTests/Notification.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationTests/Notification.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationTests/NotificationServiceTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationWCFWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationWCFWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationWCFWebsite/Notification.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationWCFWebsite/NotificationWCFWebsite.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationWCFWebsite/NotificationWCFWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationWCFWebsite/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationWCFWebsite/Properties/AssemblyInfo.cs;X3993
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/NotificationWCFWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/Properties/AssemblyInfo.cs;X3997
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/Service References
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/Service References/NotificationWCFService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Notification/Service References/NotificationWCFService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/Auditing.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/Auditing.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/AuditingServiceTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/AuthenticationEventRequestTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/AuthorisationEventRequestTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/CryptographyEventRequestTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/Helpers/ObjectBuilderHelper.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/IdentificationEventRequestTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/SecurityEventRequestTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing.UnitTests/SecurityFailureEventRequestTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Auditing.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Auditing.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/AuditingService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/AuditingServiceFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/IAuditingService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Internal
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Internal/EventTypeInstruction.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Internal/EventTypeInstructions.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Internal/EventTypeInstructionsCache.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Internal/ResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Properties/AssemblyInfo.cs;X4015
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/AbstractEvent.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/AbstractSecurityEvent.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/AuthenticationEventRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/AuthorisationEventRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/AuthorisationManagementEventRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/CryptographyEventRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/IdentificationEventRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/SecurityEventRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/SecurityEventEntities/SecurityFailureEventRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Service References/AuditingSdaService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/Auditing/Service References/AuditingSdaService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/AuditingSensitiveDatabaseAccess.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/AuditingSensitiveDatabaseAccess.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/AuditingSensitiveDatabaseAccessTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/Helpers/TestHelper.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess/AuditingSensitiveDatabaseAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess/AuditingSensitiveDatabaseAccess.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess/AuditingSensitiveDatabaseAccess.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess/IAuditingSensitiveDatabaseAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess/Properties/AssemblyInfo.cs;X4016
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingSensitiveDatabaseAccess/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingService.IntegrationTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingService.IntegrationTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingService.IntegrationTests/AuditingService.IntegrationTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingService.IntegrationTests/AuditingService.IntegrationTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingService.IntegrationTests/IntegrationTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingService.IntegrationTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingService.IntegrationTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/AuditingService.IntegrationTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/SensitiveDataAccessWcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/SensitiveDataAccessWcfWebsite/AuditingSensitiveDataAccess.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/SensitiveDataAccessWcfWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/SensitiveDataAccessWcfWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/SensitiveDataAccessWcfWebsite/SensitiveDataAccessWcfWebsite.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/SensitiveDataAccessWcfWebsite/SensitiveDataAccessWcfWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Auditing/SensitiveDataAccessWcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/app.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/Authentication.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/Authentication.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/AuthenticationMechanismFactoryMockTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/AuthenticationMechanismFactoryTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/AuthenticationServiceMockTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/AuthenticationServiceTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Authentication.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Authentication.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/AuthenticationChallenge.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/AuthenticationChallengeResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/AuthenticationChallengeResult.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/AuthenticationMechanismCache.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/AuthenticationResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/AuthenticationService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Entities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Entities/MechanismDetails.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Entities/PasswordAuthenticationData.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/AbstractAuthenticationChallengeBuilder.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/AbstractAuthenticationChallengeResponseHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/AbstractAuthenticationManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/AbstractAuthenticationMechanismFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/AbstractAuthenticationResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/CaseInsensitivePasswordAuthenticationChallengeBuilder.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/CaseInsensitivePasswordAuthenticationChallengeResponseHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/CaseInsensitivePasswordAuthenticationManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/CaseInsensitivePasswordAuthenticationMechanismFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/PasswordAuthenticationChallengeBuilder.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/PasswordAuthenticationChallengeResponseHandler.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/PasswordAuthenticationManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/PasswordAuthenticationMechanismFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Factory/PasswordAuthenticationResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/IAuthenticationService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/MechanismType.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Properties/AssemblyInfo.cs;X3995
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Service References/AuthenticationSdaService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Service References/AuthenticationSdaService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Service References/PasswordSdaService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/Authentication/Service References/PasswordSdaService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDataAccessWcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDataAccessWcfWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDataAccessWcfWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDataAccessWcfWebsite/PasswordSensitiveDataAccess.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDataAccessWcfWebsite/PasswordSensitiveDataAccessWcfWebsite.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDataAccessWcfWebsite/PasswordSensitiveDataAccessWcfWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDataAccessWcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess.UnitTests/PasswordSensitiveDatabaseAccess.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess.UnitTests/PasswordSensitiveDatabaseAccess.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess.UnitTests/PasswordSensitiveDatabaseAccessTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess/DatabaseAccessService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess/IDatabaseAccessService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess/PasswordSensitiveDatabaseAccess.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess/PasswordSensitiveDatabaseAccess.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess/Properties/AssemblyInfo.cs;X3991
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/PasswordSensitiveDatabaseAccess/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDataAccessWcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDataAccessWcfWebsite/AuthenticationSensitiveDataAccess.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDataAccessWcfWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDataAccessWcfWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDataAccessWcfWebsite/SensitiveDataAccessWcfWebsite.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDataAccessWcfWebsite/SensitiveDataAccessWcfWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDataAccessWcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess.UnitTests/PasswordSensitiveDatabaseAccessTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess.UnitTests/SensitiveDatabaseAccess.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess.UnitTests/SensitiveDatabaseAccess.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess/DatabaseAccessService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess/IDatabaseAccessService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess/Properties/AssemblyInfo.cs;X3994
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess/SensitiveDatabaseAccess.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authentication/SensitiveDatabaseAccess/SensitiveDatabaseAccess.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AccessControlPolicyService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AccessControlPolicyServiceFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/AccessControlPolicyDataRequestTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/AccessControlPolicyManagementTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/AccessControlPolicyServiceFactoryTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/Authorisation.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/Authorisation.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/AuthorisationAuditingTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/AuthorisationServiceFactoryTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/AuthorisationTokenBuilderTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/Helpers/TestingHelpers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/ResourceAccessTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/TestData.Designer.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/TestData.resx
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/UserAuthorisationTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Authorisation.UnitTests/UserPermissionBuilderTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/app.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/AccessControlPolicyManagementTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/ApplicationManagmentTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/AuthorisationManagement.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/AuthorisationManagement.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/AuthorisationManagementAuditingTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/AuthorisationManagementServiceTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/Helpers/TestingHelpers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/PermissionManagementTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/ResourceAccessTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/UserGroupManagementTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/UserManagementTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagement.UnitTests/UserRoleManagementTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/AuthorisationManagementService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/ApplicationEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/ApplicationGroupEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/AuthorisationManagementRequestEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/IAuditableRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/PermissionContextEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/PermissionEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/UserEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/UserGroupEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Entities/UserRoleEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Helpers/ConversionHelpers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/IAuthorisationManagementService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/AccessControlPolicyManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/AccessControlPolicyGroupAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/AccessControlPolicyRoleAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/ApplicationEntityAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/ApplicationGroupEntityAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/BaseAccessControlPolicyUserAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/BaseUserEntityAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/PermissionEntityAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/UserGroupEntityAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Adapters/UserRoleEntityAdapter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/ApplicationManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/AuthorisationManagementAuditing.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/IAccessControlPolicyManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/IApplicationManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/IAuthorisationManagementAuditing.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/IPermissionManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/IResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/IUserGroupManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/IUserManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/IUserRoleManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/PermissionManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/ResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/UserGroupManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/UserManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/UserRoleManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Validators
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Validators/BaseUserValidator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Validators/UserGroupValidator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Internal/Validators/UserRoleValidator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Properties/AssemblyInfo.cs;X3987
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Service References/AuthorisationManagementSdaService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagement/Service References/AuthorisationManagementSdaService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/AuthorisationManagementSensitiveDatabaseAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/AuthorisationManagementSensitiveDatabaseAccessServiceFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/AuthorisationManagementSensitiveDBAccess.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/AuthorisationManagementSensitiveDBAccess.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/IAuthorisationManagementSensitiveDatabaseAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/Properties/AssemblyInfo.cs;X4000
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationManagementSensitiveDBAccess/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationMgtSensitiveDBAccess.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationMgtSensitiveDBAccess.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationMgtSensitiveDBAccess.UnitTests/AuthorisationManagementSensitiveDatabaseAccessTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationMgtSensitiveDBAccess.UnitTests/AuthorisationMgtSensitiveDBAccess.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationMgtSensitiveDBAccess.UnitTests/AuthorisationMgtSensitiveDBAccess.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationMgtSensitiveDBAccess.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationMgtSensitiveDBAccess.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationMgtSensitiveDBAccess.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDataAccessWcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDataAccessWcfWebsite/AuthorisationSensitiveDataAccess.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDataAccessWcfWebsite/AuthorisationSensitiveDataAccessWcfWebsite.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDataAccessWcfWebsite/AuthorisationSensitiveDataAccessWcfWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDataAccessWcfWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDataAccessWcfWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDataAccessWcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess/AuthorisationSensitiveDatabaseAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess/AuthorisationSensitiveDatabaseAccess.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess/AuthorisationSensitiveDatabaseAccess.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess/IAuthorisationSensitiveDatabaseAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess/Properties/AssemblyInfo.cs;X3996
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDatabaseAccess/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/AuthorisationSensitiveDatabaseAccessTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/AuthorisationSensitiveDBAccess.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/AuthorisationSensitiveDBAccess.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/AuthorisationSerializers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/Helpers/TestingHelpers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/TestData.Designer.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationSensitiveDBAccess.UnitTests/TestData.resx
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationServicePublic.cd
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationWcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationWcfWebsite/Authorisation.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationWcfWebsite/AuthorisationWcfWebsite.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationWcfWebsite/AuthorisationWcfWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationWcfWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationWcfWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/AuthorisationWcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/AccessControlPolicy Source
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/AccessControlPolicy Source/AccessControlPolicy.xml
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/AccessControlPolicy Source/AccessControlPolicy.xsd
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/AccessControlPolicy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/AccessControlPolicyCommonEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/AccessControlPolicyRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/IAuditableRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/PermissionContextDataEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/UserAuthorisationRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/UserPermissionEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/UserPermissionEntityComparer.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Entitities/UserPermissionsEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Helpers/AccessControlPolicyReader.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Helpers/StringHelpers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/IAccessControlPolicyService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/IAuthorisationService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/AccessControlPolicyDataRequest.cs
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/AccessControlPolicyManagement.cs
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/AuthorisationAuditing.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/Builders
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/Builders/AuthorisationTokenBuilder.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/Builders/UserPermissionBuilder.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/IAccessControlPolicyManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/IAuthorisationAuditing.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/IAuthorisationDataRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/IResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/IUserAuthorisation.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/ObjectIdComparer.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/ResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Internal/UserAuthorisation.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/MgmtSensitiveDataAccessWcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/MgmtSensitiveDataAccessWcfWebsite/AuthMgmtSensitiveDataAccess.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/MgmtSensitiveDataAccessWcfWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/MgmtSensitiveDataAccessWcfWebsite/MgmtSensitiveDataAccessWcfWebsite.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/MgmtSensitiveDataAccessWcfWebsite/MgmtSensitiveDataAccessWcfWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/MgmtSensitiveDataAccessWcfWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/MgmtSensitiveDataAccessWcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Properties/AssemblyInfo.cs;X3998
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Service References/AuthorisationSdaService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Authorisation/Service References/AuthorisationSdaService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/Helpers/TestingHelpers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/Identification.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/Identification.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/IdentificationAuditingTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/IdentificationServiceFactoryTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/IdentificationServiceTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Entities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Entitities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Entitities/GetIdentityResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Entitities/GetUserLoginInfoResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Entitities/IAuditableRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Entitities/IdentityRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Entitities/LogInState.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Entitities/UserIdentityRelationEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Identification.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Identification.csproj
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/IdentificationService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/IdentificationServiceFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/IIdentificationService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Internal
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Internal/IdentificationAuditing.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Internal/IIdentificationAuditing.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Internal/IResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Internal/ResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Properties/AssemblyInfo.cs;X4005
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Service References/IdentificationSdaService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/Identification/Service References/IdentificationSdaService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/IdentificationSensitiveDatabaseAccess.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/IdentificationSensitiveDatabaseAccess.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/IdentificationSensitiveDatabaseAccesss.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/IdentificationSensitiveDatabaseAccessServiceFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/IIdentificationSensitiveDatabaseAccesss.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/Properties/AssemblyInfo.cs;X4006
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDatabaseAccess/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/Helpers
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/Helpers/TestingHelpers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/IdentificationSensitiveDBAccess.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/IdentificationSensitiveDBAccess.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/IdentificationsSensitiveDBAccessTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/IdentificationSensitiveDBAccess.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/SensitiveDataAccessWcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/SensitiveDataAccessWcfWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/SensitiveDataAccessWcfWebsite/IdentificationSensitiveDataAccess.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/SensitiveDataAccessWcfWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/SensitiveDataAccessWcfWebsite/SensitiveDataAccessWcfWebsite.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/SensitiveDataAccessWcfWebsite/SensitiveDataAccessWcfWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/AccessControl/Identification/SensitiveDataAccessWcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/ImportLegacyMaterial.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/ImportLegacyMaterial.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/LegacyDataAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/Program.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/Properties/AssemblyInfo.cs;X4001
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/Service References/MaterialStoreService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/Service References/MaterialStoreService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/Service References/MaterialStoreServiceDataContractCtors.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/ImportLegacyMaterial/SetupLegacyKeys.cmd
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/MaterialStore.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/MaterialStore.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/MaterialStoreTest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/ResourceAccessFactoryMockTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/Service References/SensitiveDatabaseAccessService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.UnitTests/Service References/SensitiveDatabaseAccessService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore.xml
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Cipher.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/CipherSettings.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/CryptographyType.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Entities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Entities/HashMaterialEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Entities/HashMaterialSetEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Entities/KeyMaterialEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Entities/KeyMaterialSetEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Entities/MaterialEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Entities/MaterialSetEntity.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/AbstractMaterialGenerator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/AbstractMaterialStoreFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/AbstractMessageEntityGenerator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/AbstractResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/BaseMaterialGenerator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/CryptographicParameter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/HashMaterialGenerator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/HashMaterialStoreFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/HashMessageEntityGenerator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/HashParameter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/HashResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/LegacyMaterialGenerator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/SymmetricMaterialGenerator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/SymmetricMaterialStoreFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/SymmetricMessageEntityGenerator.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/SymmetricParameter.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Factory/SymmetricResourceAccess.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/HashAlgorithmType.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/IMaterialStore.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Internal
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Internal/Auditing
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Internal/Auditing/AuditMessage.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Internal/Auditing/MaterialStoreAuditor.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Internal/Auditing/MaterialStoreEventArgs.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Internal/Auditing/MaterialStoreEventHandlers.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Internal/MaterialStoreSettings.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MaterialStore.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MaterialStore.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MaterialStore.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MaterialStore.reg
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MaterialStoreSettings.tesco.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MaterialStoreSettings.tesco
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetHashMaterialRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetHashMaterialResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetHashMaterialSetRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetHashMaterialSetResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetKeyMaterialRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetKeyMaterialResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetKeyMaterialSetRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetKeyMaterialSetResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetMaterialRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetMaterialResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetMaterialSetRequest.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/MessageEntities/GetMaterialSetResponse.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Properties/AssemblyInfo.cs;X4017
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Properties/AssemblyInfo.Internals.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Service References/SensitiveDatabaseAccessService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/Service References/SensitiveDatabaseAccessService.map
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStore/SymmetricAlgorithmType.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreAppPool.xml
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreSensitiveDatabaseAccess.xml
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreSensitiveDatabaseAccessAppPool.xml
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreWCFWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreWCFWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreWCFWebsite/MaterialStore.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreWCFWebsite/MaterialStoreWCFWebsite.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreWCFWebsite/MaterialStoreWCFWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreWCFWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/MaterialStoreWCFWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess.UnitTests/SensitiveDatabaseAccess.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess.UnitTests/SensitiveDatabaseAccess.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess.UnitTests/SensitiveDatabaseAccessTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess/DatabaseAccessService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess/IDatabaseAccessService.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess/Properties/AssemblyInfo.cs;X4004
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess/SensitiveDatabaseAccess.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccess/SensitiveDatabaseAccess.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite/dummy.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite/Properties/AssemblyInfo.cs;X4003
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite/SensitiveDatabaseAccess.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite/SensitiveDatabaseAccessWCFWebsite.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite/SensitiveDatabaseAccessWCFWebsite.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/Security/KeyManagement/MaterialStore/SensitiveDatabaseAccessWCFWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc.Host.IIS
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc.Host.IIS/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc.Host.IIS/Properties/AssemblyInfo.cs;X4008
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc.Host.IIS/StateRegister.svc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc.Host.IIS/StateRegisterSvc.Host.IIS.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc.Host.IIS/StateRegisterSvc.Host.IIS.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc.Host.IIS/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc/app.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc/IStateRegisterSvc.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc/Properties/AssemblyInfo.cs;X4018
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc/StateRegisterSvc.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc/StateRegisterSvc.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Services/StateServices/StateRegisterSvc/StateRegisterSvc.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/app.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/IStateRegister.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Properties/AssemblyInfo.cs;X4013
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/RegisterItem.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/SecuredRegisterItem.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/SecureStateRegister.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/configuration.svcinfo
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/configuration91.svcinfo
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/Reference.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/Reference.svcmap
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/StateRegister.disco
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/StateRegister.xsd
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/StateRegister1.disco
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/StateRegister1.xsd
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/StateRegister2.xsd
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/StateRegister21.xsd
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/StateRegisterSvc.wsdl
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/Service References/StateRegisterSvc/StateRegisterSvc1.wsdl
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/State.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/State.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/StateRegister.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/State/StateRegistryFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/AutoIncrementingCredential.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Credential.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/CredentialCollection.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/CredentialName.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Internal
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Internal/IdentificationTokenBuilderFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Internal/ITokenBuilder.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Internal/TokenBuilder.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Internal/TokenValidationResult.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/ITokenFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/ITokenManagementProvider.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Properties
+  merge, delete $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Properties/AssemblyInfo.cs;X4002
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/SiteTokenManagement.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/TimerCredential.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/TokenFactory.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/TokenGroupValidationResult.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.csproj.vspscc
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/AuthorisationTokenTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/AutoIncrementingCredentialTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/CredentialCollectionTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/CredentialTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/ForgotMyPasswordTokenTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/IdentificationTokenTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/SecurityTokenTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/Tokens.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/Tokens.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/TokenTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens.UnitTests/TracerTokenTests.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/AuthorisationToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/BTCToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/ForgotMyPasswordToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/IAuthorisationToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/IBTCToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/IdentificationToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/IForgotMyPasswordToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/IIdentificationToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/ISecurityToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/IToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/ITracerToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/LegacyIdentificationToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/SecurityToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/Token.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/Tokens/TracerToken.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Tokens/wcfclientendpoints.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfClients
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfClients/readme.txt
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfClients/wcfclientendpoints.config
+  merge, branch $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfClients/wcfclientendpoints2.config
+  merge, edit   $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfClients/wcfstandardbinding.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite/AppPool.xml
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite/ImportWcfWebsite.bat
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite/keepalive.htm
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite/readme.txt
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite/RemoveWcfWebsite.bat
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite/WcfWebsite.xml
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite/WcfWebsite_pre-refactor.xml
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/WcfWebsite/Web.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/App.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/AuthoringTests.txt
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/GroceryWeb.tesco.config
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/GroceryWeb.tesco
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/mssccprj.scc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/Properties
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/Properties/AssemblyInfo.cs
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/Workflow.UnitTests.csproj.vspscc
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/Workflow.UnitTests.csproj
+  merge         $/Tesco_Dotcom/Dev/r2/Tesco/Com/Framework/Workflow.UnitTests/WorkflowTest.cs
+
+Check-in Notes:
+  Code Reviewer:
+  Performance Reviewer:
+  Security Reviewer:

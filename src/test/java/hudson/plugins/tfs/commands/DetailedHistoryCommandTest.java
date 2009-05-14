@@ -149,4 +149,12 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         command.parse(reader);
     }
+    
+    @Test
+    public void assertNoCrashForIssue3683() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-3683.txt"));
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        List<ChangeSet> list = command.parse(reader);
+        assertEquals("Number of change sets was incorrect", 3, list.size());
+    }
 }
