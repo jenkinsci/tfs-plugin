@@ -5,10 +5,12 @@ import hudson.plugins.tfs.model.ChangeLogSet;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.ChangeSet.Item;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 public class ChangeSetReaderTest {
 
@@ -67,5 +69,25 @@ public class ChangeSetReaderTest {
         Item item = changeset.getItems().get(0);
         assertNotNull("The item's parent change set cant be null", item.getParent());
         assertSame("The item's parent is not the same as the change set it belongs to", changeset, item.getParent());
+    }
+
+    public void assertXmlWithEscapedCharsIsReadCorrectly() throws Exception {
+        Reader reader = new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?><changelog>" +
+                "<changeset version=\"1122\">" +
+                    "<date>2009-01-12T00:00:00Z</date>" +
+                    "<user>snd\\user</user>" +
+                    "<comment>Just &lt;testing&gt; &quot;what&quot; happens when I use the &amp; character...Hudson does not seem to like it!</comment>" +
+                    "<items>" +
+                        "<item action=\"add\">path</item>" +
+                        "<item action=\"delete\">path2</item>" +
+                    "</items>" +
+                "</changeset>" +
+            "</changelog>");
+
+        ChangeSetReader changesetReader = new ChangeSetReader();
+        ChangeLogSet logset = changesetReader.parse(null, reader);
+        
+        ChangeSet changeset = logset.iterator().next();
+        assertEquals("The chage set's comment is incorrect", "Just <testing> \"what\" happens when I use the & character...Hudson does not seem to like it!", changeset.getComment());
     }
 }

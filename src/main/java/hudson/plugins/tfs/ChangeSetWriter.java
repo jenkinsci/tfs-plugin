@@ -58,17 +58,55 @@ public class ChangeSetWriter {
     private void write(ChangeSet changeSet, PrintWriter writer) {
         writer.println(String.format("\t\t<date>%s</date>", DateUtil.TFS_DATETIME_FORMATTER.get().format(changeSet.getDate())));
         if (Util.fixEmpty(changeSet.getDomain()) == null) {
-            writer.println(String.format("\t\t<user>%s</user>", changeSet.getUser()));
+            writer.println(String.format("\t\t<user>%s</user>", escapeForXml(changeSet.getUser())));
         } else {
-            writer.println(String.format("\t\t<user>%s\\%s</user>", changeSet.getDomain(), changeSet.getUser()));
+            writer.println(String.format("\t\t<user>%s\\%s</user>", escapeForXml(changeSet.getDomain()), escapeForXml(changeSet.getUser())));
         }
-        writer.println(String.format("\t\t<comment>%s</comment>", changeSet.getComment()));
+        writer.println(String.format("\t\t<comment>%s</comment>", escapeForXml(changeSet.getComment())));
         if (changeSet.getItems().size() > 0) {
             writer.println("\t\t<items>");
             for (ChangeSet.Item item : changeSet.getItems()) {
-                writer.println(String.format("\t\t\t<item action=\"%s\">%s</item>", item.getAction(), item.getPath()));
+                writer.println(String.format("\t\t\t<item action=\"%s\">%s</item>", escapeForXml(item.getAction()), escapeForXml(item.getPath())));
             }
             writer.println("\t\t</items>");
         }
+    }
+
+    /**
+     * 
+     * Converts the input in the way that it can be written to the XML.
+     * Special characters are converted to XML understandable way.
+     * 
+     * @param object The object to be escaped.
+     * @return Escaped string that can be written to XML.
+     */
+    private String escapeForXml(Object object)
+    {
+        if(object == null)
+        {
+            return null;
+        }
+
+        //Loop through and replace the special chars.
+        String string = object.toString();
+        int size = string.length();
+        char ch;
+        StringBuilder escapedString = new StringBuilder(size);
+        for(int index = 0;index < size;index ++)
+        {
+            //Convert special chars.
+            ch = string.charAt(index);
+            switch(ch)
+            {
+                case '&'  : escapedString.append("&amp;");  break;
+                case '<'  : escapedString.append("&lt;");   break;
+                case '>'  : escapedString.append("&gt;");   break;
+                case '\'' : escapedString.append("&apos;"); break;
+                case '\"' : escapedString.append("&quot;");break;
+                default:    escapedString.append(ch);
+            }
+        }
+
+        return escapedString.toString();
     }
 }
