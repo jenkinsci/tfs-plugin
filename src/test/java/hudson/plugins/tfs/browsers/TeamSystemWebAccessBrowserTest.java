@@ -60,7 +60,7 @@ public class TeamSystemWebAccessBrowserTest {
         ChangeSet.Item item = new ChangeSet.Item("$/Project/Folder/file.cs", "edit");
         changeSet.add(item);
         URL actual = browser.getDiffLink(item);
-        assertEquals("The change set link was incorrect", "http://tswaserver:8090/diff.aspx?opath=$/Project/Folder/file.cs&ocs=99&mpath=$/Project/Folder/file.cs&mcs=98", actual.toString());
+        assertEquals("The change set link was incorrect", "http://tswaserver:8090/diff.aspx?opath=$/Project/Folder/file.cs&ocs=98&mpath=$/Project/Folder/file.cs&mcs=99", actual.toString());
     }
 
     @Test public void assertNullDiffLinkForAddedFile() throws Exception {

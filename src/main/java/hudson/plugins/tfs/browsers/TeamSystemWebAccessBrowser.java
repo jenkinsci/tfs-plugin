@@ -82,9 +82,9 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
             return new URL(String.format("%sdiff.aspx?opath=%s&ocs=%s&mpath=%s&mcs=%s", 
                     getBaseUrlString(parent), 
                     item.getPath(),
-                    parent.getVersion(), 
+                    getPreviousChangeSetVersion(parent), 
                     item.getPath(),
-                    getPreviousChangeSetVersion(parent)));
+                    parent.getVersion()));
         } catch (NumberFormatException nfe) {
             return null;
         }
