@@ -150,7 +150,6 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         command.parse(reader);
     }
     
-    @Test
     public void assertNoCrashForIssue3683() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-3683.txt"));
         DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
