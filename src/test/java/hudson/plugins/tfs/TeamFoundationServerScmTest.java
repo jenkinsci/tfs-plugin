@@ -123,6 +123,30 @@ public class TeamFoundationServerScmTest {
         assertEquals("The workfolder path was incorrect", "/this/is/a" + File.separator + "PATH", env.get(TeamFoundationServerScm.WORKFOLDER_ENV_STR));
     }
     
+    @Test
+    public void assertProjectPathIsAddedToEnvVars() throws Exception {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
+        Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        assertEquals("The project path was incorrect", "projectpath", env.get(TeamFoundationServerScm.PROJECTPATH_ENV_STR));
+    }
+    
+    @Test
+    public void assertServerUrlIsAddedToEnvVars() throws Exception {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
+        Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        assertEquals("The server URL was incorrect", "serverurl", env.get(TeamFoundationServerScm.SERVERURL_ENV_STR));
+    }
+    
+    @Test
+    public void assertTfsUserNameIsAddedToEnvVars() throws Exception {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
+        Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        assertEquals("The TFS user name was incorrect", "user", env.get(TeamFoundationServerScm.USERNAME_ENV_STR));
+    }
+    
     /**
      * Workspace name must be less than 64 characters, cannot end with a space or period, and cannot contain any of the following characters: "/:<>|*?
      */

@@ -48,8 +48,10 @@ import hudson.util.Scrambler;
 public class TeamFoundationServerScm extends SCM {
 
     public static final String WORKSPACE_ENV_STR = "TFS_WORKSPACE";
-
     public static final String WORKFOLDER_ENV_STR = "TFS_WORKFOLDER";
+    public static final String PROJECTPATH_ENV_STR = "TFS_PROJECTPATH";
+    public static final String SERVERURL_ENV_STR = "TFS_SERVERURL";
+    public static final String USERNAME_ENV_STR = "TFS_USERNAME";
     
     private final String serverUrl;
     private final String projectPath;
@@ -206,6 +208,15 @@ public class TeamFoundationServerScm extends SCM {
         }
         if (env.containsKey("WORKSPACE")) {
             env.put(WORKFOLDER_ENV_STR, env.get("WORKSPACE") + File.separator + getLocalPath());
+        }
+        if (projectPath != null) {
+            env.put(PROJECTPATH_ENV_STR, projectPath);
+        }
+        if (serverUrl != null) {
+            env.put(SERVERURL_ENV_STR, serverUrl);
+        }
+        if (userName != null) {
+            env.put(USERNAME_ENV_STR, userName);
         }
     }
 
