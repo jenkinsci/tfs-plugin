@@ -10,7 +10,7 @@
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
   <name>Hudson Team Foundation Server Plug-in</name>
-  <version>1.5</version>
+  <version>1.6-SNAPSHOT</version>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Team+Foundation+Server+Plugin</url>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
@@ -30,10 +30,4 @@
         <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <scm>
-    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/tfs-1.5</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/tfs-1.5</developerConnection>
-    <url>https://hudson.dev.java.net/source/browse/hudson/hudson/plugins/tfs/tags/tfs-1.5</url>
-  </scm>
 </project>
