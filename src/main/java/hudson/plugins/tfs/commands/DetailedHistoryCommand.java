@@ -26,7 +26,7 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
      */
     private static final Pattern PATTERN_CHANGESET = Pattern.compile("^[^:]*:[ \t]([0-9]*)\n"
             + "[^:]*:[ \t](.*)\n[^:]*:[ \t](.*)\n"
-            + "[^:]*:((?:\n.*)*)\n\n[^\n :]*:(?=\n  )((?:\n[ \t]+.*)*)");
+            + "[^:]*:(?s)(.*)\n\n[^\n :]*:(?=\n  )(.*)\n\n");
 
     /**
      * An additional regex to split the items into their parts (change type
@@ -94,7 +94,7 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
         }
         
         if (foundAtLeastOneChangeSet) {
-            ChangeSet changeSet = parseChangeSetOutput(builder.toString().trim(), lastBuildDate);
+            ChangeSet changeSet = parseChangeSetOutput(builder.toString(), lastBuildDate);
             if (changeSet != null) {
                 list.add(changeSet);
             }

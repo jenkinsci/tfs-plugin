@@ -29,7 +29,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
                 "Created team project folder $/tfsandbox via the Team Project Creation Wizard\n" +
                 "\n" +
                 "Items:\n" +
-                "  add $/tfsandbox\n"));
+                "  add $/tfsandbox\n\n"));
         Project project = new Project(server, "$/serverpath");
         List<ChangeSet> list = project.getDetailedHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
         assertNotNull("The returned list was null", list);

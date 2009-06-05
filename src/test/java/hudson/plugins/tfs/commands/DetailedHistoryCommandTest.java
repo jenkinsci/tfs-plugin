@@ -150,10 +150,36 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         command.parse(reader);
     }
     
+    @Test
     public void assertNoCrashForIssue3683() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-3683.txt"));
         DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         List<ChangeSet> list = command.parse(reader);
         assertEquals("Number of change sets was incorrect", 3, list.size());
+    }
+
+    @Test
+    public void assertLongChangesetsCanBeParsed() throws Exception {
+        StringBuilder builder = new StringBuilder("-----------------------------------\n" +
+                "Changeset: 12472\n" +
+                "User:      RNO\\_MCLWEB\n" +
+                "Date:      2008-jun-27 11:16:06\n" +
+                "\n" +
+                "Comment:\n" +
+                "Created team project folder $/tfsandbox via the Team Project Creation Wizard\n" +
+                "\n" +
+                "Items:\n"
+        );
+
+        for (int i = 0; i < 40000; i++) {
+            builder.append("  add $/tfsandbox/file" + i);
+        }
+
+        builder.append("\n\n");
+
+        StringReader stringReader = new StringReader(builder.toString());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        List<ChangeSet> list = command.parse(stringReader);
+        assertEquals("Number of change sets was incorrect", 1, list.size());
     }
 }
