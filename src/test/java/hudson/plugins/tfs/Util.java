@@ -12,10 +12,18 @@ public class Util {
     }
 
     public static Calendar getCalendar(int year, int month, int day) {
-        return getCalendar(year, month, day, 0, 0, 0);
+        return getCalendar(year, month, day, 0, 0, 0, "GMT");
     }
     
     public static Calendar getCalendar(int year, int month, int day, int hour, int min, int sec) {
+        return getCalendar(year, month, day, hour, min, sec, "GMT");
+    }
+
+    public static Calendar getCalendar(int year, int month, int day, int hour, int min, int sec, String timezone) {
+        return getCalendar(year, month, day, hour, min, sec, TimeZone.getTimeZone(timezone));
+    }
+
+    public static Calendar getCalendar(int year, int month, int day, int hour, int min, int sec, TimeZone timezone) {
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
         calendar.set(Calendar.YEAR, year);
@@ -24,7 +32,7 @@ public class Util {
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, min);
         calendar.set(Calendar.SECOND, sec);
-        calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+        calendar.setTimeZone(timezone);
         return calendar;
     }
     

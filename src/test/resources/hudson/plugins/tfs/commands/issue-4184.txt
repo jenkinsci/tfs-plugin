@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Changeset: 5516
+User: Lo
+Date: Monday, 10 August 2009 5:17:36 p.m.
+
+Comment:
+
+Items:
+  edit $/LD.Tracker/Common/LD.Tracker.Core/Entities/TrackerType.cs
+
+Check-in Notes:
+  Code Reviewer:
+  Performance Reviewer:
+  Security Reviewer:

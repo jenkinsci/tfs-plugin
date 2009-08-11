@@ -7,6 +7,7 @@ import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.ChangeSet.Item;
+import hudson.plugins.tfs.util.DateParser;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import hudson.plugins.tfs.SwedishLocaleTestCase;
 
@@ -15,8 +16,11 @@ import java.io.StringReader;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.Test;
+import org.jvnet.hudson.test.Bug;
 
 public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
 
@@ -153,7 +157,11 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
     @Test
     public void assertNoCrashForIssue3683() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-3683.txt"));
-        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", 
+                Util.getCalendar(2009, 05, 13, 21, 55, 33, TimeZone.getDefault()), 
+                Util.getCalendar(2009, 05, 13, 22, 43, 05, TimeZone.getDefault()), 
+                new DateParser(new Locale("en", "ml"), TimeZone.getDefault()));
+        // Need to use the current locale as the Date.parse() will parse the date
         List<ChangeSet> list = command.parse(reader);
         assertEquals("Number of change sets was incorrect", 3, list.size());
     }
@@ -180,6 +188,25 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         StringReader stringReader = new StringReader(builder.toString());
         DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         List<ChangeSet> list = command.parse(stringReader);
+        assertEquals("Number of change sets was incorrect", 1, list.size());
+    }
+    
+    /**
+     * Asserts that the TF date output can be parsed correctly.
+     * It seems that the "p.m." could not be parsed properly, and would yield incorrect values. 
+     * The default date formats can only handle PM or AM (no dots).
+     * @throws Exception thrown if test error
+     */
+    @Bug(4184)
+    @Test
+    public void assertParsingOfDatesReportedInIssue4184Works() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-4184.txt"));
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), 
+                "$/tfsandbox", 
+                Util.getCalendar(2009, 8, 10, 5, 11, 2, "GMT"), 
+                Util.getCalendar(2009, 8, 10, 5, 19, 0, "GMT"),
+                new DateParser(new Locale("en", "nz"), TimeZone.getTimeZone("Pacific/Auckland")));
+        List<ChangeSet> list = command.parse(reader);
         assertEquals("Number of change sets was incorrect", 1, list.size());
     }
 }

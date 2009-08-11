@@ -24,9 +24,14 @@ public class DateUtil {
         }
     };
     
-    @SuppressWarnings("deprecation")
     public static Date parseDate(String dateString) throws ParseException {
+        return parseDate(dateString, Locale.getDefault(), TimeZone.getDefault());
+    }
+    
+    @SuppressWarnings("deprecation")
+    public static Date parseDate(String dateString, Locale locale, TimeZone timezone) throws ParseException {
         Date date = null;
+        dateString = dateString.replaceAll("(p|P)\\.(m|M)\\.", "PM").replaceAll("(a|A)\\.(m|M)\\.", "AM");
         try {
             // Use the deprecated Date.parse method as this is very good at detecting
             // dates commonly output by the US and UK standard locales of dotnet that
@@ -38,7 +43,7 @@ public class DateUtil {
         if (date == null) {
             // The old fashioned way did not work. Let's try it using a more
             // complex alternative.
-            DateFormat[] formats = createDateFormatsForLocaleAndTimeZone(null, null);
+            DateFormat[] formats = createDateFormatsForLocaleAndTimeZone(locale, timezone);
             return parseWithFormats(dateString, formats);
         }
         return date;
@@ -53,7 +58,9 @@ public class DateUtil {
                 parseException = ex;
             }
         }
-
+        if (parseException == null) {
+            throw new IllegalStateException("No dateformats found that can be used for parsing '" + input + "'");
+        }
         throw parseException;
     }
 
@@ -62,16 +69,23 @@ public class DateUtil {
      * and timezone.
      */
     static DateFormat[] createDateFormatsForLocaleAndTimeZone(Locale locale, TimeZone timeZone) {
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
-
-        if (timeZone == null) {
-            timeZone = TimeZone.getDefault();
-        }
-
         List<DateFormat> formats = new ArrayList<DateFormat>();
 
+        addDateTimeFormatsToList(locale, timeZone, formats);
+        addDateFormatsToList(locale, timeZone, formats);
+
+        return formats.toArray(new DateFormat[formats.size()]);
+    }
+
+    static void addDateFormatsToList(Locale locale, TimeZone timeZone, List<DateFormat> formats) {
+        for (int dateStyle = DateFormat.FULL; dateStyle <= DateFormat.SHORT; dateStyle++) {
+            DateFormat df = DateFormat.getDateInstance(dateStyle, locale);
+            df.setTimeZone(timeZone);
+            formats.add(df);
+        }
+    }
+
+    static void addDateTimeFormatsToList(Locale locale, TimeZone timeZone, List<DateFormat> formats) {
         for (int dateStyle = DateFormat.FULL; dateStyle <= DateFormat.SHORT; dateStyle++) {
             for (int timeStyle = DateFormat.FULL; timeStyle <= DateFormat.SHORT; timeStyle++) {
                 DateFormat df = DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
@@ -81,13 +95,5 @@ public class DateUtil {
                 formats.add(df);
             }
         }
-
-        for (int dateStyle = DateFormat.FULL; dateStyle <= DateFormat.SHORT; dateStyle++) {
-            DateFormat df = DateFormat.getDateInstance(dateStyle, locale);
-            df.setTimeZone(timeZone);
-            formats.add(df);
-        }
-
-        return formats.toArray(new DateFormat[formats.size()]);
     }
 }

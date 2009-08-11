@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.util.DateParser;
 import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
@@ -40,13 +41,20 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
 
     private final Calendar toTimestamp;
 
+    private final DateParser dateParser;
     
-    public DetailedHistoryCommand(ServerConfigurationProvider provider,  
-            String projectPath, Calendar fromTimestamp, Calendar toTimestamp) {
-        super(provider);
+    public DetailedHistoryCommand(ServerConfigurationProvider configurationProvider, String projectPath, Calendar fromTimestamp, Calendar toTimestamp,
+            DateParser dateParser) {
+        super(configurationProvider);
         this.projectPath = projectPath;
         this.fromTimestamp = fromTimestamp;
         this.toTimestamp = toTimestamp;
+        this.dateParser = dateParser;
+    }
+
+    public DetailedHistoryCommand(ServerConfigurationProvider provider,  
+            String projectPath, Calendar fromTimestamp, Calendar toTimestamp) {
+        this(provider, projectPath, fromTimestamp, toTimestamp, new DateParser());
     }
 
     public MaskedArgumentListBuilder getArguments() {
@@ -116,7 +124,7 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
             String revision = m.group(1);
             String userName = m.group(2).trim();
 
-            Date modifiedTime = DateUtil.parseDate(m.group(3));
+            Date modifiedTime = dateParser.parseDate(m.group(3));
             
             // CC-735.  Ignore changesets that occured before the specified lastBuild.
             if (modifiedTime.compareTo(lastBuildDate) < 0) {
