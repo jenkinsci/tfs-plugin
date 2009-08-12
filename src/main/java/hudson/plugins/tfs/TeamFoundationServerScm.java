@@ -25,10 +25,12 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
+import hudson.model.Node;
 import hudson.model.ParametersAction;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
+import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
 import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
@@ -39,6 +41,7 @@ import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.FormFieldValidator;
 import hudson.util.Scrambler;
+import hudson.util.StreamTaskListener;
 
 /**
  * SCM for Microsoft Team Foundation Server.
@@ -169,6 +172,21 @@ public class TeamFoundationServerScm extends SCM {
                 throw new AbortException();
             }
         }
+    }
+    
+    @Override
+    public boolean processWorkspaceBeforeDeletion(AbstractProject<?, ?> project, FilePath workspace, Node node) throws IOException, InterruptedException {
+        System.out.println("PROCESSS");
+        Run<?,?> lastRun = project.getLastBuild();
+        if (lastRun == null) {
+            return true;
+        }
+        StreamTaskListener listener = new StreamTaskListener(System.out);
+        Launcher launcher = Hudson.getInstance().createLauncher(listener);        
+        Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
+        RemoveWorkspaceAction action = new RemoveWorkspaceAction(getWorkspaceName(project.getLastBuild(), launcher));
+        action.remove(server);
+        return true;
     }
     
     protected Server createServer(TfTool tool, Run<?,?> run) {
