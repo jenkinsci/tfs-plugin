@@ -29,32 +29,30 @@ public class CheckoutAction {
 
     public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp) throws IOException, InterruptedException, ParseException {
         
-        Workspace workspace = null;
         Workspaces workspaces = server.getWorkspaces();
         Project project = server.getProject(projectPath);
-
-        try {
-            if (! workspaces.exists(workspaceName)) {
-                FilePath localFolderPath = workspacePath.child(localFolder);
-                if (!useUpdate && localFolderPath.exists()) {
-                    localFolderPath.deleteContents();
-                }
-                workspace = workspaces.newWorkspace(workspaceName);
-                workspace.mapWorkfolder(project, localFolder);
-            } else {
-                workspace = workspaces.getWorkspace(workspaceName);
+        
+        if (workspaces.exists(workspaceName) && !useUpdate) {
+            Workspace workspace = workspaces.getWorkspace(workspaceName);
+            workspaces.deleteWorkspace(workspace);
+        }
+        
+        Workspace workspace;
+        if (! workspaces.exists(workspaceName)) {
+            FilePath localFolderPath = workspacePath.child(localFolder);
+            if (!useUpdate && localFolderPath.exists()) {
+                localFolderPath.deleteContents();
             }
-            
-            project.getFiles(localFolder);
-            
-            if (lastBuildTimestamp != null) {
-                return project.getDetailedHistory(lastBuildTimestamp, Calendar.getInstance());
-            }
-        } finally {        
-            if ((!useUpdate) && (workspace != null)) {
-                workspace.unmapWorkfolder(localFolder);
-                workspaces.deleteWorkspace(workspace);
-            }
+            workspace = workspaces.newWorkspace(workspaceName);
+            workspace.mapWorkfolder(project, localFolder);
+        } else {
+            workspace = workspaces.getWorkspace(workspaceName);
+        }
+        
+        project.getFiles(localFolder);
+        
+        if (lastBuildTimestamp != null) {
+            return project.getDetailedHistory(lastBuildTimestamp, Calendar.getInstance());
         }
         
         return new ArrayList<ChangeSet>();
