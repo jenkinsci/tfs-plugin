@@ -19,7 +19,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     @Test
     public void assertGetDetailedHistory() throws Exception {
         Server server = mock(Server.class);
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
                 "-----------------------------------\n" +
                 "Changeset: 12472\n" +
                 "User:      RNO\\_MCLWEB\n" +
@@ -41,7 +41,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     public void assertGetDetailedHistoryClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
         Server server = mock(Server.class);
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
         new Project(server, "$/serverpath").getDetailedHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
 
         verify(spy).close();
@@ -50,7 +50,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     @Test
     public void assertGetBriefHistory() throws Exception {
         Server server = mock(Server.class);
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
                 "Changeset User           Date                 Comment\n" +
                 "--------- -------------- -------------------- ----------------------------------------------------------------------------\n" +
                 "\n" +
@@ -66,7 +66,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     public void assertGetBriefHistoryClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
         Server server = mock(Server.class);
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
         new Project(server, "$/serverpath").getBriefHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
 
         verify(spy).close();
@@ -75,7 +75,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     @Test
     public void assertGetFiles() throws Exception {
         Server server = mock(Server.class);
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
         Project project = new Project(server, "$/serverpath");
         project.getFiles(".");
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
@@ -85,7 +85,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     public void assertGetFilesClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
         Server server = mock(Server.class);
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
         new Project(server, "$/serverpath").getFiles("localpath");
 
         verify(spy).close();

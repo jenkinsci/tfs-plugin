@@ -12,9 +12,8 @@ import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoAnnotations.Mock;
-
 
 public class WorkspacesTest {
 
@@ -27,7 +26,7 @@ public class WorkspacesTest {
     
     @Test
     public void assertListFromServerIsParsedProperly() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
                 "name1     SND\\redsolo_cp COMPUTER\n"));
@@ -39,7 +38,7 @@ public class WorkspacesTest {
     
     @Test
     public void assertListFromServerIsRetrievedOnce() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
                 "name1     SND\\redsolo_cp COMPUTER\n"));
@@ -55,7 +54,7 @@ public class WorkspacesTest {
 
     @Test
     public void assertExistsWorkspace() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
                 "name1     SND\\redsolo_cp COMPUTER\n"));
@@ -66,7 +65,7 @@ public class WorkspacesTest {
 
     @Test
     public void assertWorkspaceExistsWithOnlyName() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
                 "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
                 "\n" +
                 "name1     SND\\redsolo_cp COMPUTER\n"));
@@ -77,7 +76,7 @@ public class WorkspacesTest {
 
     @Test
     public void assertNewWorkspaceIsAddedToMap() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
         
         Workspaces workspaces = new Workspaces(server);
         Workspace workspace = workspaces.newWorkspace("name1");
@@ -87,7 +86,7 @@ public class WorkspacesTest {
 
     @Test
     public void assertGettingNewWorkspaceIsNotRetrievingServerList() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
         
         Workspaces workspaces = new Workspaces(server);
         workspaces.newWorkspace("name1");
@@ -97,7 +96,7 @@ public class WorkspacesTest {
 
     @Test
     public void assertNewWorkspaceExistsIsNotRetrievingServerList() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
         
         Workspaces workspaces = new Workspaces(server);
         Workspace workspace = workspaces.newWorkspace("name1");
@@ -107,7 +106,7 @@ public class WorkspacesTest {
 
     @Test
     public void assertWorkspaceIsDeletedFromMap() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
         Workspaces workspaces = new Workspaces(server);
         // Populate the map in test object
         assertFalse("The workspace was reported as existant", workspaces.exists(new Workspace(server, "name")));
@@ -119,14 +118,14 @@ public class WorkspacesTest {
     
     @Test
     public void assertGetUnknownWorkspaceReturnsNull() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
         Workspaces workspaces = new Workspaces(server);
         assertNull("The unknown workspace was not null", workspaces.getWorkspace("name1"));
     }
     
     @Test
     public void assertUnknownWorkspaceDoesNotExists() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
         Workspaces workspaces = new Workspaces(server);
         assertFalse("The unknown workspace was reported as existing", workspaces.exists(new Workspace(server, "name1")));
     }
@@ -142,7 +141,7 @@ public class WorkspacesTest {
     @Test
     public void assertListWorkspacesClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
         new Workspaces(server).exists(new Workspace(server, "name1"));        
         verify(spy).close();
     }
@@ -150,7 +149,7 @@ public class WorkspacesTest {
     @Test
     public void assertNewWorkspaceClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
         new Workspaces(server).newWorkspace("name1");        
         verify(spy).close();
     }
@@ -158,7 +157,7 @@ public class WorkspacesTest {
     @Test
     public void assertGetWorkspacesClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
         new Workspaces(server).getWorkspace("name1");        
         verify(spy).close();
     }
@@ -166,7 +165,7 @@ public class WorkspacesTest {
     @Test
     public void assertDeleteWorkspaceClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
         new Workspaces(server).deleteWorkspace(new Workspace(server, "name"));        
         verify(spy).close();
     }

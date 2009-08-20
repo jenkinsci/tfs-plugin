@@ -17,8 +17,8 @@ import java.io.Reader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoAnnotations.Mock;
 
 public class TfToolTest {
     private FilePath workspace;
@@ -42,31 +42,31 @@ public class TfToolTest {
 
     @Test(expected=AbortException.class)
     public void assertUnexpectReturnCodeThrowsAbortException() throws Exception {
-        stub(proc.join()).toReturn(100);
-        stub(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).toReturn(proc);
+        when(proc.join()).thenReturn(100);
+        when(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).thenReturn(proc);
 
         tool.execute(new String[]{"history"});
     }
 
     @Test
     public void assertSuccessReturnCodeDoesNotThrowAbortException() throws Exception {
-        stub(proc.join()).toReturn(TfTool.SUCCESS_EXIT_CODE);
-        stub(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).toReturn(proc);
+        when(proc.join()).thenReturn(TfTool.SUCCESS_EXIT_CODE);
+        when(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).thenReturn(proc);
 
         tool.execute(new String[]{"history"});
     }
 
     @Test
     public void assertPartialSuccessReturnCodeDoesNotThrowAbortException() throws Exception {
-        stub(proc.join()).toReturn(TfTool.PARTIAL_SUCCESS_EXIT_CODE);
-        stub(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).toReturn(proc);
+        when(proc.join()).thenReturn(TfTool.PARTIAL_SUCCESS_EXIT_CODE);
+        when(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).thenReturn(proc);
 
         tool.execute(new String[]{"history"});
     }
 
     @Test
     public void assertExecutableReturnsWithReader() throws Exception {
-        stub(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).toReturn(proc);
+        when(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).thenReturn(proc);
 
         Reader reader = tool.execute(new String[]{"history"});
         assertNotNull("Reader should not be null", reader);
@@ -76,7 +76,7 @@ public class TfToolTest {
 
     @Test
     public void assertMaskedCommands() throws Exception {
-        stub(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).toReturn(proc);
+        when(launcher.launch(isA(String[].class), isA(boolean[].class), isA(String[].class), (InputStream) isNull(), isA(OutputStream.class), isA(FilePath.class))).thenReturn(proc);
 
         tool.execute(new String[]{"history"}, new boolean[]{true});
         

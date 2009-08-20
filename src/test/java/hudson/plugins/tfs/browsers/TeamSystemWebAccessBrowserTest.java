@@ -29,8 +29,8 @@ public class TeamSystemWebAccessBrowserTest {
     @Test public void assertChangeSetLinkUsesScmConfiguration() throws Exception {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject<?,?> project = mock(AbstractProject.class);
-        stub(build.getProject()).toReturn(project);
-        stub(project.getScm()).toReturn(new TeamFoundationServerScm("http://server:80", null, null, false, null, null, null));
+        when(build.getProject()).thenReturn(project);
+        when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80", null, null, false, null, null, null));
         
         ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
         new ChangeLogSet(build, new ChangeSet[]{ changeset});        

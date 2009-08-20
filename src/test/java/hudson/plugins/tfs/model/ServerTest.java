@@ -7,9 +7,8 @@ import hudson.plugins.tfs.TfTool;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoAnnotations.Mock;
-
 
 public class ServerTest {
 
@@ -44,7 +43,7 @@ public class ServerTest {
     
     @Test
     public void assertLocalHostnameIsRetrievedFromTfTool() throws Exception {
-        stub(tool.getHostname()).toReturn("thehostname");
+        when(tool.getHostname()).thenReturn("thehostname");
         Server server = new Server(tool, "url", null, null);
         assertEquals("Hostname was incorrect", "thehostname", server.getLocalHostname());
         verify(tool).getHostname();

@@ -10,8 +10,8 @@ import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
 
 import org.junit.*;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoAnnotations.Mock;
 
 public class RemoveWorkspaceActionTest {
     @Mock private Server server;        
@@ -24,8 +24,8 @@ public class RemoveWorkspaceActionTest {
 
     @Test
     public void assertNoSuchWorkspaceNameDoesNothing() throws Exception {
-        stub(server.getWorkspaces()).toReturn(workspaces);
-        stub(workspaces.exists(anyString())).toReturn(false);
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(workspaces.exists(anyString())).thenReturn(false);
         
         RemoveWorkspaceAction action = new RemoveWorkspaceAction("workspace");
         assertThat(action.remove(server), is(false));
@@ -39,9 +39,9 @@ public class RemoveWorkspaceActionTest {
 
     @Test
     public void assertWorkspaceIsDeleted() throws Exception  {
-        stub(server.getWorkspaces()).toReturn(workspaces);
-        stub(workspaces.exists(anyString())).toReturn(true);
-        stub(workspaces.getWorkspace(anyString())).toReturn(workspace);
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(workspaces.exists(anyString())).thenReturn(true);
+        when(workspaces.getWorkspace(anyString())).thenReturn(workspace);
         
         RemoveWorkspaceAction action = new RemoveWorkspaceAction("workspace");
         assertThat(action.remove(server), is(true));

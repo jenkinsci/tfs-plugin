@@ -13,8 +13,8 @@ import hudson.model.Computer;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoAnnotations.Mock;
 
 @SuppressWarnings("unchecked")
 public class BuildVariableResolverTest {
@@ -28,7 +28,7 @@ public class BuildVariableResolverTest {
     }
         
     @Test public void assertConstructorBuildUsesProject() {
-        stub(build.getProject()).toReturn(project);
+        when(build.getProject()).thenReturn(project);
         new BuildVariableResolver(build, launcher);
         verify(build).getProject();
         verifyZeroInteractions(project);
@@ -36,7 +36,7 @@ public class BuildVariableResolverTest {
     }
     
     @Test public void assertJobNameIsResolved() {
-        stub(project.getName()).toReturn("ThisIsAJob");
+        when(project.getName()).thenReturn("ThisIsAJob");
 
         BuildVariableResolver resolver = new BuildVariableResolver(project, launcher);
         assertEquals("Variable resolution was incorrect", "ThisIsAJob", resolver.resolve("JOB_NAME"));
@@ -48,8 +48,8 @@ public class BuildVariableResolverTest {
         map.put("ENV_VAR", "This is an env var");
         
         Computer computer = mock(Computer.class);
-        stub(launcher.getComputer()).toReturn(computer);
-        stub(computer.getEnvVars()).toReturn(map);
+        when(launcher.getComputer()).thenReturn(computer);
+        when(computer.getEnvVars()).thenReturn(map);
 
         BuildVariableResolver resolver = new BuildVariableResolver(project, launcher);
         assertEquals("Variable resolution was incorrect", "This is an env var", resolver.resolve("ENV_VAR"));
@@ -61,8 +61,8 @@ public class BuildVariableResolverTest {
         map.put("user.name", "Other_user");
         
         Computer computer = mock(Computer.class);
-        stub(launcher.getComputer()).toReturn(computer);
-        stub(computer.getSystemProperties()).toReturn(map);
+        when(launcher.getComputer()).thenReturn(computer);
+        when(computer.getSystemProperties()).thenReturn(map);
 
         BuildVariableResolver resolver = new BuildVariableResolver(project, launcher);
         assertEquals("Variable resolution was incorrect", "Other_user", resolver.resolve("USER_NAME"));
@@ -71,8 +71,8 @@ public class BuildVariableResolverTest {
     
     @Test public void assertNodeNameIsResolved() {
         Computer computer = mock(Computer.class);
-        stub(launcher.getComputer()).toReturn(computer);
-        stub(computer.getName()).toReturn("AKIRA");
+        when(launcher.getComputer()).thenReturn(computer);
+        when(computer.getName()).thenReturn("AKIRA");
         
         BuildVariableResolver resolver = new BuildVariableResolver(project , launcher);
         assertEquals("Variable resolution was incorrect", "AKIRA", resolver.resolve("NODE_NAME"));
@@ -84,8 +84,8 @@ public class BuildVariableResolverTest {
      */
     @Test public void assertMasterNodeNameIsResolved() {
         Computer computer = mock(Computer.class);
-        stub(launcher.getComputer()).toReturn(computer);
-        stub(computer.getName()).toReturn("");
+        when(launcher.getComputer()).thenReturn(computer);
+        when(computer.getName()).thenReturn("");
         
         BuildVariableResolver resolver = new BuildVariableResolver(project , launcher);
         assertEquals("Variable resolution was incorrect", "MASTER", resolver.resolve("NODE_NAME"));
@@ -93,7 +93,7 @@ public class BuildVariableResolverTest {
     }
     
     @Test public void assertNoComputeraDoesNotThrowNPEWhenResolvingNodeName() {
-        stub(launcher.getComputer()).toReturn(null);
+        when(launcher.getComputer()).thenReturn(null);
         
         BuildVariableResolver resolver = new BuildVariableResolver(project , launcher);
         assertNull("Variable resolution was incorrect", resolver.resolve("NODE_NAME"));
@@ -104,8 +104,8 @@ public class BuildVariableResolverTest {
         HashMap<String,String> map = new HashMap<String, String>();
         map.put("BUILD_ID", "121212");
 
-        stub(build.getProject()).toReturn(project);
-        stub(build.getEnvVars()).toReturn(map);
+        when(build.getProject()).thenReturn(project);
+        when(build.getEnvVars()).thenReturn(map);
 
         BuildVariableResolver resolver = new BuildVariableResolver(build, launcher);
         assertEquals("Variable resolution was incorrect", "121212", resolver.resolve("BUILD_ID"));

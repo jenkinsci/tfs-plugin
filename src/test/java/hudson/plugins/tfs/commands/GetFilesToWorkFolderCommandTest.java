@@ -1,9 +1,7 @@
 package hudson.plugins.tfs.commands;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.stub;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.StringReader;
 import java.util.List;
@@ -19,8 +17,8 @@ public class GetFilesToWorkFolderCommandTest {
     @Test
     public void assertArguments() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        stub(config.getUserName()).toReturn("snd\\user_cp");
-        stub(config.getUserPassword()).toReturn("password");
+        when(config.getUserName()).thenReturn("snd\\user_cp");
+        when(config.getUserPassword()).thenReturn("password");
         
         MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath").getArguments();
         assertNotNull("Arguments were null", arguments);
@@ -30,8 +28,8 @@ public class GetFilesToWorkFolderCommandTest {
     @Test
     public void assertPreviewArgument() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        stub(config.getUserName()).toReturn("snd\\user_cp");
-        stub(config.getUserPassword()).toReturn("password");
+        when(config.getUserName()).thenReturn("snd\\user_cp");
+        when(config.getUserPassword()).thenReturn("password");
         
         MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", true).getArguments();
         assertNotNull("Arguments were null", arguments);

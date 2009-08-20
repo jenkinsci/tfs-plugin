@@ -13,7 +13,7 @@ public class AbstractCommandTest {
     @Test
     public void assertAddingServerArguments() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        stub(config.getUrl()).toReturn("https://tfs02.codeplex.com");
+        when(config.getUrl()).thenReturn("https://tfs02.codeplex.com");
         
         AbstractCommand command = new AbstractCommandImpl(config);
         ArgumentListBuilder builder = new ArgumentListBuilder();
@@ -24,8 +24,8 @@ public class AbstractCommandTest {
     @Test
     public void assertAddingUserCredentials() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        stub(config.getUserName()).toReturn("user");
-        stub(config.getUserPassword()).toReturn("password");
+        when(config.getUserName()).thenReturn("user");
+        when(config.getUserPassword()).thenReturn("password");
         
         AbstractCommand command = new AbstractCommandImpl(config);
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
@@ -37,8 +37,8 @@ public class AbstractCommandTest {
     @Test
     public void assertNotAddingInvalidUserCredentials() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        stub(config.getUserName()).toReturn("user");
-        stub(config.getUserPassword()).toReturn(null);
+        when(config.getUserName()).thenReturn("user");
+        when(config.getUserPassword()).thenReturn(null);
         
         AbstractCommand command = new AbstractCommandImpl(config);
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
@@ -50,8 +50,8 @@ public class AbstractCommandTest {
     @Test
     public void assertNotAddingUserCredentialsForEmptyName() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        stub(config.getUserName()).toReturn("");
-        stub(config.getUserPassword()).toReturn("");
+        when(config.getUserName()).thenReturn("");
+        when(config.getUserPassword()).thenReturn("");
         
         AbstractCommand command = new AbstractCommandImpl(config);
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();
@@ -63,8 +63,8 @@ public class AbstractCommandTest {
     @Test
     public void assertAddingUserCredentialsForEmptyPassword() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        stub(config.getUserName()).toReturn("aname");
-        stub(config.getUserPassword()).toReturn("");
+        when(config.getUserName()).thenReturn("aname");
+        when(config.getUserPassword()).thenReturn("");
         
         AbstractCommand command = new AbstractCommandImpl(config);
         MaskedArgumentListBuilder builder = new MaskedArgumentListBuilder();

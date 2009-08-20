@@ -21,9 +21,9 @@ public class BriefHistoryCommandTest extends SwedishLocaleTestCase {
     @Test
     public void assertBriefHistoryArguments() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        stub(config.getUrl()).toReturn("https//tfs02.codeplex.com");
-        stub(config.getUserName()).toReturn("snd\\user_cp");
-        stub(config.getUserPassword()).toReturn("password");
+        when(config.getUrl()).thenReturn("https//tfs02.codeplex.com");
+        when(config.getUserName()).thenReturn("snd\\user_cp");
+        when(config.getUserPassword()).thenReturn("password");
         
         Calendar fromTimestamp = Util.getCalendar(2006, 12, 01, 01, 01, 01);
         Calendar toTimestamp = Util.getCalendar(2008, 06, 27, 20, 00, 0);
