@@ -105,7 +105,8 @@ public class TeamFoundationServerScmTest {
     public void assertWorkspaceNameIsAddedToEnvVars() throws Exception {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", ".", false, "WORKSPACE_SAMPLE", "user", "password");
         AbstractBuild build = mock(AbstractBuild.class);
-        stub(build.getProject()).toReturn(mock(AbstractProject.class));
+        AbstractProject project = mock(AbstractProject.class);
+        stub(build.getProject()).toReturn(project);
         scm.getWorkspaceName(build, mock(Launcher.class));
         
         Map<String, String> env = new HashMap<String, String>();
