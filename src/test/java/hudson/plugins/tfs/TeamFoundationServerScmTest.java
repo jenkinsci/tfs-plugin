@@ -1,5 +1,6 @@
 package hudson.plugins.tfs;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -11,6 +12,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Node;
 import hudson.model.ParametersAction;
 
 import org.junit.After;
@@ -32,8 +34,8 @@ public class TeamFoundationServerScmTest {
     public void assertWorkspaceNameReplacesJobName() {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(AbstractProject.class);
-        stub(build.getProject()).toReturn(project);
-        stub(project.getName()).toReturn("ThisIsAJob");
+        when(build.getProject()).thenReturn(project);
+        when(project.getName()).thenReturn("ThisIsAJob");
         
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}", "user", "password");
         assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getWorkspaceName(build, mock(Launcher.class)));
@@ -106,7 +108,7 @@ public class TeamFoundationServerScmTest {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", ".", false, "WORKSPACE_SAMPLE", "user", "password");
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(AbstractProject.class);
-        stub(build.getProject()).toReturn(project);
+        when(build.getProject()).thenReturn(project);
         scm.getWorkspaceName(build, mock(Launcher.class));
         
         Map<String, String> env = new HashMap<String, String>();
@@ -177,9 +179,9 @@ public class TeamFoundationServerScmTest {
     
     @Test public void assertServerUrlResolvesBuildVariables() {
         ParametersAction action = mock(ParametersAction.class);
-        stub(action.substitute(isA(AbstractBuild.class), isA(String.class))).toReturn("https://RESOLVED.com");
+        when(action.substitute(isA(AbstractBuild.class), isA(String.class))).thenReturn("https://RESOLVED.com");
         AbstractBuild build = mock(AbstractBuild.class);
-        stub(build.getAction(ParametersAction.class)).toReturn(action);
+        when(build.getAction(ParametersAction.class)).thenReturn(action);
 
         TeamFoundationServerScm scm = new TeamFoundationServerScm("https://${PARAM}.com", null, ".", false, "", "user", "password");
         assertEquals("The server url wasnt resolved", "https://RESOLVED.com", scm.getServerUrl(build));
@@ -187,9 +189,9 @@ public class TeamFoundationServerScmTest {
     
     @Test public void assertProjectPathResolvesBuildVariables() {
         ParametersAction action = mock(ParametersAction.class);
-        stub(action.substitute(isA(AbstractBuild.class), isA(String.class))).toReturn("$/RESOLVED/path");
+        when(action.substitute(isA(AbstractBuild.class), isA(String.class))).thenReturn("$/RESOLVED/path");
         AbstractBuild build = mock(AbstractBuild.class);
-        stub(build.getAction(ParametersAction.class)).toReturn(action);
+        when(build.getAction(ParametersAction.class)).thenReturn(action);
 
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, "$/$PARAM/path", ".", false, "", "user", "password");
         assertEquals("The project path wasnt resolved", "$/RESOLVED/path", scm.getProjectPath(build));
@@ -197,11 +199,42 @@ public class TeamFoundationServerScmTest {
     
     @Test public void assertWorkspaceNameResolvesBuildVariables() {
         ParametersAction action = mock(ParametersAction.class);
-        stub(action.substitute(isA(AbstractBuild.class), isA(String.class))).toReturn("WS-RESOLVED");
+        when(action.substitute(isA(AbstractBuild.class), isA(String.class))).thenReturn("WS-RESOLVED");
         AbstractBuild build = mock(AbstractBuild.class);
-        stub(build.getAction(ParametersAction.class)).toReturn(action);
+        when(build.getAction(ParametersAction.class)).thenReturn(action);
 
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "WS-${PARAM}", "user", "password");
         assertEquals("The workspace name wasnt resolved", "WS-RESOLVED", scm.getWorkspaceName(build, mock(Launcher.class)));
+    }
+    
+    @Test public void assertTfsWorkspaceIsntRemovedIfThereIsNoBuildWhenProcessWorkspaceBeforeDeletion() throws Exception {
+        AbstractProject project = mock(AbstractProject.class);
+        Node node = mock(Node.class);
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("server", "projectpath", ".", false, "workspace", "user", "password");
+        assertThat(scm.processWorkspaceBeforeDeletion(project, workspace, node), is(true));
+        verify(project).getLastBuild();
+        verifyNoMoreInteractions(project);
+    }
+
+    @Test public void assertWorkspaceIsntRemoveIfThereIsNoBuildOnSpecifiedNodeAndHudsonWantsToRemoveWorkspaceOnNode() throws Exception {
+        AbstractProject project = mock(AbstractProject.class);
+        AbstractBuild build = mock(AbstractBuild.class);
+        Node node = mock(Node.class);
+        Node inNode = mock(Node.class);
+        when(project.getLastBuild()).thenReturn(build);
+        when(build.getPreviousBuild()).thenReturn(build).thenReturn(null);
+        when(build.getBuiltOn()).thenReturn(node).thenReturn(node);
+        when(node.getNodeName()).thenReturn("node1").thenReturn("node2");
+        when(inNode.getNodeName()).thenReturn("needleNode").thenReturn("needleNode");
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("server", "projectpath", ".", false, "workspace", "user", "password");
+        assertThat( scm.processWorkspaceBeforeDeletion(project, workspace, inNode), is(true));
+        verify(project).getLastBuild();
+        verify(node, times(2)).getNodeName();
+        verify(build, times(2)).getBuiltOn();
+        verify(build, times(2)).getPreviousBuild();
+
+        verifyNoMoreInteractions(project);
+        verifyNoMoreInteractions(node);
+        verifyNoMoreInteractions(build);        
     }
 }

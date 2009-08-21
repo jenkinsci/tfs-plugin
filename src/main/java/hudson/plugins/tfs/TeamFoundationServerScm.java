@@ -8,6 +8,8 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
@@ -32,16 +34,19 @@ import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
 import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
+import hudson.plugins.tfs.model.WorkspaceConfiguration;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.util.BuildVariableResolver;
+import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
+import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
 import hudson.scm.ChangeLogParser;
 import hudson.scm.RepositoryBrowsers;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.FormFieldValidator;
+import hudson.util.LogTaskListener;
 import hudson.util.Scrambler;
-import hudson.util.StreamTaskListener;
 
 /**
  * SCM for Microsoft Team Foundation Server.
@@ -67,6 +72,8 @@ public class TeamFoundationServerScm extends SCM {
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
+    
+    private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
     @DataBoundConstructor
     public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword) {
@@ -141,9 +148,9 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
-        
-        CheckoutAction action = new CheckoutAction(getWorkspaceName(build, launcher), 
-                getProjectPath(build), getLocalPath(), isUseUpdate());
+        WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, launcher), getProjectPath(build), getLocalPath());
+        build.addAction(workspaceConfiguration);
+        CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
         try {
             List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null));
             ChangeSetWriter writer = new ChangeSetWriter();
@@ -176,16 +183,43 @@ public class TeamFoundationServerScm extends SCM {
     
     @Override
     public boolean processWorkspaceBeforeDeletion(AbstractProject<?, ?> project, FilePath workspace, Node node) throws IOException, InterruptedException {
-        System.out.println("PROCESSS");
         Run<?,?> lastRun = project.getLastBuild();
-        if (lastRun == null) {
+        if ((lastRun == null) || !(lastRun instanceof AbstractBuild<?, ?>)) {
             return true;
         }
-        StreamTaskListener listener = new StreamTaskListener(System.out);
-        Launcher launcher = Hudson.getInstance().createLauncher(listener);        
-        Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
-        RemoveWorkspaceAction action = new RemoveWorkspaceAction(getWorkspaceName(project.getLastBuild(), launcher));
-        action.remove(server);
+        
+        // Due to an error in Hudson core (pre 1.321), null was sent in for all invocations of this method
+        // Therefore we try to work around the problem, and see if its only built on one node or not. 
+        if (node == null) { 
+            while (lastRun != null) {
+                AbstractBuild<?,?> build = (AbstractBuild<?, ?>) lastRun;
+                Node buildNode = build.getBuiltOn();
+                if (node == null) {
+                    node = buildNode;
+                } else {
+                    if (!buildNode.getNodeName().equals(node.getNodeName())) {
+                        logger.warning("Could not wipe out workspace as there is no way of telling what Node the request is for. Please upgrade Hudson to a newer version.");
+                        return false;
+                    }
+                }                
+                lastRun = lastRun.getPreviousBuild();
+            }
+            if (node == null) {
+                return true;
+            }
+            lastRun = project.getLastBuild();
+        }
+        
+        BuildWorkspaceConfiguration configuration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(node, lastRun);
+        if ((configuration != null) && configuration.workspaceExists()) {
+            LogTaskListener listener = new LogTaskListener(logger, Level.INFO);
+            Launcher launcher = node.createLauncher(listener);        
+            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
+            if (new RemoveWorkspaceAction(configuration.getWorkspaceName()).remove(server)) {
+                configuration.setWorkspaceWasRemoved();
+                configuration.save();
+            }
+        }
         return true;
     }
     
