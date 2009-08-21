@@ -10,8 +10,8 @@ import java.io.StringReader;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoAnnotations.Mock;
 
 
 public class WorkspaceTest {
@@ -25,7 +25,7 @@ public class WorkspaceTest {
     
     @Test
     public void assertMapWorkfolderIsExecuted() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
         Workspace workspace = new Workspace(server, "name");
         workspace.mapWorkfolder(new Project(server, "$/serverpath"), ".");        
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
@@ -34,14 +34,14 @@ public class WorkspaceTest {
     @Test
     public void assertMapWorkfolderClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
         new Workspace(server, "name").mapWorkfolder(new Project(server, "$/serverpath"), ".");        
         verify(spy).close();
     }
     
     @Test
     public void assertUnmapWorkfolderIsExecuted() throws Exception {
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(new StringReader(""));        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
         Workspace workspace = new Workspace(server, "name");
         workspace.unmapWorkfolder(".");        
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
@@ -50,7 +50,7 @@ public class WorkspaceTest {
     @Test
     public void assertUnmapWorkfolderClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
-        stub(server.execute(isA(MaskedArgumentListBuilder.class))).toReturn(spy);        
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
         new Workspace(server, "name").unmapWorkfolder("$/serverpath");        
         verify(spy).close();
     }
@@ -58,12 +58,28 @@ public class WorkspaceTest {
     @Test
     public void assertExistsUsesWorkspacesClass() throws Exception {
         Workspaces workspaces = mock(Workspaces.class);
-        stub(server.getWorkspaces()).toReturn(workspaces);
-        stub(workspaces.exists(isA(Workspace.class))).toReturn(Boolean.TRUE);
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(workspaces.exists(isA(Workspace.class))).thenReturn(Boolean.TRUE);
         
         Workspace workspace = new Workspace(server, "name");
         assertTrue("The workspace is not reported as existing", workspace.exists());
         
         verify(workspaces).exists(new Workspace(server, "name"));
+    }
+    
+    @Test
+    public void assertGetMappingsIsExecuted() throws Exception {
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
+        Workspace workspace = new Workspace(server, "name");
+        workspace.getMappings();
+        verify(server).execute(isA(MaskedArgumentListBuilder.class));
+    }
+    
+    @Test
+    public void assertGetMappingsClosesReader() throws Exception {
+        Reader spy = spy(new StringReader(""));
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
+        new Workspace(server, "name").getMappings();        
+        verify(spy).close();
     }
 }
