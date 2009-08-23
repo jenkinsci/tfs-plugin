@@ -149,6 +149,19 @@ public class TeamFoundationServerScm extends SCM {
     public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
         WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, launcher), getProjectPath(build), getLocalPath());
+        
+        // Check if the configuration has changed
+        if (build.getPreviousBuild() != null) {
+            BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), build.getPreviousBuild());
+            if ((nodeConfiguration != null) &&
+                    nodeConfiguration.workspaceExists() 
+                    && (! workspaceConfiguration.equals(nodeConfiguration))) {
+                new RemoveWorkspaceAction(workspaceConfiguration.getWorkspaceName()).remove(server);
+                nodeConfiguration.setWorkspaceWasRemoved();
+                nodeConfiguration.save();
+            }
+        }
+        
         build.addAction(workspaceConfiguration);
         CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
         try {
