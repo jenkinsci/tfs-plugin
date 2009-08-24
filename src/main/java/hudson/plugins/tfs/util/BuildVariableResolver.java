@@ -12,6 +12,7 @@ import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Computer;
+import hudson.model.Job;
 import hudson.util.VariableResolver;
 
 /**
@@ -39,9 +40,17 @@ public class BuildVariableResolver implements VariableResolver<String> {
 
     private static final Logger LOGGER = Logger.getLogger(BuildVariableResolver.class.getName());
     
+    public BuildVariableResolver(final Job<?, ?> job) {
+        launcher = null;
+        lazyResolvers.put("JOB_NAME", new LazyResolver() {
+            public String getValue() {
+                return job.getName();
+            }            
+        });
+    }
+    
     public BuildVariableResolver(final AbstractProject<?, ?> project, final Launcher launcher) {
         this.launcher = launcher;
-        
         lazyResolvers.put("JOB_NAME", new LazyResolver() {
             public String getValue() {
                 return project.getName();
@@ -82,7 +91,7 @@ public class BuildVariableResolver implements VariableResolver<String> {
             if (lazyResolvers.containsKey(variable)) {
                 return lazyResolvers.get(variable).getValue();
             } else {
-                if (launcher.getComputer() != null) {
+                if ((launcher != null) && (launcher.getComputer() != null)) {
                     otherResolvers.add(new VariableResolver.ByMap<String>(launcher.getComputer().getEnvVars()));
                 }
                 return new VariableResolver.Union<String>(otherResolvers).resolve(variable);
@@ -107,7 +116,7 @@ public class BuildVariableResolver implements VariableResolver<String> {
     private abstract class LazyComputerResolver implements LazyResolver {
         protected abstract String getValue(Computer computer) throws IOException, InterruptedException;
         public String getValue() throws IOException, InterruptedException {
-            if (launcher.getComputer() == null) {
+            if ((launcher == null) || (launcher.getComputer() == null)) {
                 return null;
             } else {
                 return getValue(launcher.getComputer());

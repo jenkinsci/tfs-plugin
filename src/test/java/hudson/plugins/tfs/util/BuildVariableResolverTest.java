@@ -43,6 +43,14 @@ public class BuildVariableResolverTest {
         verifyZeroInteractions(launcher);
     }
     
+    @Test public void assertJobNameWithoutLauncherIsResolved() {
+        when(project.getName()).thenReturn("ThisIsAJob");
+
+        BuildVariableResolver resolver = new BuildVariableResolver(project);
+        assertEquals("Variable resolution was incorrect", "ThisIsAJob", resolver.resolve("JOB_NAME"));
+        assertNull("Variable resolution was performed", resolver.resolve("NONE_EXISTING_KEY"));
+    }
+    
     @Test public void assertComputerEnvVarIsResolved() throws Exception {
         Map<String, String> map = new HashMap<String, String>();
         map.put("ENV_VAR", "This is an env var");

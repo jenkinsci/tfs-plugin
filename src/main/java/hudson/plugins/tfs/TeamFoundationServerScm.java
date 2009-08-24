@@ -132,7 +132,7 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     String getProjectPath(Run<?,?> run) {
-        return substituteBuildParameter(run, projectPath);
+        return Util.replaceMacro(substituteBuildParameter(run, projectPath), new BuildVariableResolver(run.getParent()));
     }
 
     private String substituteBuildParameter(Run<?,?> run, String text) {
