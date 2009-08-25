@@ -19,6 +19,10 @@ import java.util.regex.Pattern;
 
 public class DetailedHistoryCommand extends AbstractCommand implements ParseableCommand<List<ChangeSet>> {
 
+    // Setting this system property will skip the date chek in parsing that makes
+    // sure that a change set is within the date range. See CC-735 reference.
+    public static final String IGNORE_DATE_CHECK_ON_CHANGE_SET = "tfs.history.skipdatecheck";
+    
     private static final String CHANGESET_SEPERATOR = "------------";
     
     /**
@@ -43,6 +47,8 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
 
     private final DateParser dateParser;
     
+    private final boolean skipDateCheckInParsing;
+    
     public DetailedHistoryCommand(ServerConfigurationProvider configurationProvider, String projectPath, Calendar fromTimestamp, Calendar toTimestamp,
             DateParser dateParser) {
         super(configurationProvider);
@@ -50,6 +56,7 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
         this.fromTimestamp = fromTimestamp;
         this.toTimestamp = toTimestamp;
         this.dateParser = dateParser;
+        this.skipDateCheckInParsing = Boolean.valueOf(System.getProperty(IGNORE_DATE_CHECK_ON_CHANGE_SET));
     }
 
     public DetailedHistoryCommand(ServerConfigurationProvider provider,  
@@ -127,7 +134,7 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
             Date modifiedTime = dateParser.parseDate(m.group(3));
             
             // CC-735.  Ignore changesets that occured before the specified lastBuild.
-            if (modifiedTime.compareTo(lastBuildDate) < 0) {
+            if (!skipDateCheckInParsing && modifiedTime.compareTo(lastBuildDate) < 0) {
                 return null;
             }
 

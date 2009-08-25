@@ -19,11 +19,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.junit.After;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
 
 public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
 
+    @After public void tearDown() {
+        System.getProperties().remove(DetailedHistoryCommand.IGNORE_DATE_CHECK_ON_CHANGE_SET);        
+    }
+    
     @Test
     public void assertBriefHistoryArguments() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
@@ -135,6 +140,16 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         List<ChangeSet> list = command.parse(reader);
         assertNotNull("The list of change sets was null", list);
         assertEquals("The number of change sets in the list was incorrect", 1, list.size());
+    }
+
+    @Test
+    public void assertOldChangeSetAreNotIgnoredIfSystemPropertyIsSet() throws Exception {
+        System.setProperty(DetailedHistoryCommand.IGNORE_DATE_CHECK_ON_CHANGE_SET,"true");
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-2.txt"));
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2009, 06, 15), Util.getCalendar(2009, 06, 16));
+        List<ChangeSet> list = command.parse(reader);
+        assertNotNull("The list of change sets was null", list);
+        assertEquals("The number of change sets in the list was incorrect", 2, list.size());
     }
     
     @Test(expected=ParseException.class)
