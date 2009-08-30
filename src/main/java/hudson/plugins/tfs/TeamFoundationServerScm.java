@@ -243,7 +243,7 @@ public class TeamFoundationServerScm extends SCM {
 
     @Override
     public boolean requiresWorkspaceForPolling() {
-        return false;
+        return true;
     }
 
     @Override
