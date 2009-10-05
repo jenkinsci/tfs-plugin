@@ -43,33 +43,40 @@ public class TeamFoundationServerScmTest {
     
     @Test 
     public void assertDoUsernameCheckRegexWorks() {
-        assertFalse("redsolo".matches(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX));
-        assertTrue("snd\\redsolo".matches(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX));
-        assertFalse("redsolo".matches(TeamFoundationServerScm.DescriptorImpl.USER_AT_DOMAIN_REGEX));
-        assertTrue("redsolo@snd".matches(TeamFoundationServerScm.DescriptorImpl.USER_AT_DOMAIN_REGEX));
+        assertFalse(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX.matcher("redsolo").matches());
+        assertTrue(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX.matcher("snd\\redsolo").matches());
+        assertTrue(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX.matcher("domain-name.se\\my name").matches());
+        assertTrue(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX.matcher("domain-NAME.se\\NAME").matches());
+        assertFalse(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX.matcher("dumb$name\\0349").matches());
+
+        assertFalse(TeamFoundationServerScm.DescriptorImpl.USER_AT_DOMAIN_REGEX.matcher("redsolo").matches());
+        assertTrue(TeamFoundationServerScm.DescriptorImpl.USER_AT_DOMAIN_REGEX.matcher("redsolo@snd").matches());
+        assertTrue(TeamFoundationServerScm.DescriptorImpl.USER_AT_DOMAIN_REGEX.matcher("my name-andsuch@domain-name.se").matches());
+        assertTrue(TeamFoundationServerScm.DescriptorImpl.USER_AT_DOMAIN_REGEX.matcher("DomainNAME@NAME.se").matches());
+        assertFalse(TeamFoundationServerScm.DescriptorImpl.USER_AT_DOMAIN_REGEX.matcher("0349@dumb$name").matches());
     }
     
     @Test 
     public void assertDoProjectPathCheckRegexWorks() {
-        assertFalse("Project path regex matched an invalid project path", "tfsandbox".matches(TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX));
-        assertFalse("Project path regex matched an invalid project path", "tfsandbox/with/sub/pathes".matches(TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX));
-        assertFalse("Project path regex matched an invalid project path", "tfsandbox$/with/sub/pathes".matches(TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX));
-        assertTrue("Project path regex did not match a valid project path", "$/tfsandbox".matches(TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX));
-        assertTrue("Project path regex did not match a valid project path", "$/tfsandbox/path with space/subpath".matches(TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX));
+        assertFalse("Project path regex matched an invalid project path", TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX.matcher("tfsandbox").matches());
+        assertFalse("Project path regex matched an invalid project path", TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX.matcher("tfsandbox/with/sub/pathes").matches());
+        assertFalse("Project path regex matched an invalid project path", TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX.matcher("tfsandbox$/with/sub/pathes").matches());
+        assertTrue("Project path regex did not match a valid project path", TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX.matcher("$/tfsandbox").matches());
+        assertTrue("Project path regex did not match a valid project path", TeamFoundationServerScm.DescriptorImpl.PROJECT_PATH_REGEX.matcher("$/tfsandbox/path with space/subpath").matches());
     }
     
     @Test 
     public void assertDoWorkspaceNameCheckRegexWorks() {
-        assertFalse("Workspace name regex matched an invalid workspace name", "work space ".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertFalse("Workspace name regex matched an invalid workspace name", "work.space.".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertFalse("Workspace name regex matched an invalid workspace name", "work*space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertFalse("Workspace name regex matched an invalid workspace name", "work/space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertFalse("Workspace name regex matched an invalid workspace name", "work\"space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertFalse("Workspace name regex matched an invalid workspace name", "workspace*".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertFalse("Workspace name regex matched an invalid workspace name", "workspace/".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertFalse("Workspace name regex matched an invalid workspace name", "workspace\"".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertTrue("Workspace name regex dit not match an invalid workspace name", "work.space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
-        assertTrue("Workspace name regex dit not match an invalid workspace name", "work space".matches(TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX));
+        assertFalse("Workspace name regex matched an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("work space ").matches());
+        assertFalse("Workspace name regex matched an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("work.space.").matches());
+        assertFalse("Workspace name regex matched an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("work*space").matches());
+        assertFalse("Workspace name regex matched an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("work/space").matches());
+        assertFalse("Workspace name regex matched an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("work\"space").matches());
+        assertFalse("Workspace name regex matched an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("workspace*").matches());
+        assertFalse("Workspace name regex matched an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("workspace/").matches());
+        assertFalse("Workspace name regex matched an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("workspace\"").matches());
+        assertTrue("Workspace name regex dit not match an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("work.space").matches());
+        assertTrue("Workspace name regex dit not match an invalid workspace name", TeamFoundationServerScm.DescriptorImpl.WORKSPACE_NAME_REGEX.matcher("work space").matches());
     }
     
     @Test

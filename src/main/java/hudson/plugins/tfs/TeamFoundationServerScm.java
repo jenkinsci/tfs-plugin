@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 
@@ -293,10 +294,10 @@ public class TeamFoundationServerScm extends SCM {
 
     public static class DescriptorImpl extends SCMDescriptor<TeamFoundationServerScm> {
         
-        public static final String WORKSPACE_NAME_REGEX = "[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$";
-        public static final String USER_AT_DOMAIN_REGEX = "\\w+@\\w+";
-        public static final String DOMAIN_SLASH_USER_REGEX = "\\w+\\\\\\w+";
-        public static final String PROJECT_PATH_REGEX = "^\\$\\/.*";
+        public static final Pattern WORKSPACE_NAME_REGEX = Pattern.compile("[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern USER_AT_DOMAIN_REGEX = Pattern.compile("^([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)@([a-z][a-z0-9.-]+)$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern DOMAIN_SLASH_USER_REGEX = Pattern.compile("^([a-z][a-z0-9.-]+)\\\\([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         private String tfExecutable;
         
         protected DescriptorImpl() {
@@ -323,7 +324,7 @@ public class TeamFoundationServerScm extends SCM {
             new FormFieldValidator.Executable(req, rsp).process();
         }
 
-        private void doRegexCheck(final String[] regexArray, final String noMatchText, final String nullText,  
+        private void doRegexCheck(final Pattern[] regexArray, final String noMatchText, final String nullText,  
                 StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
             new FormFieldValidator(req, rsp, false) {
                 @Override
@@ -337,8 +338,8 @@ public class TeamFoundationServerScm extends SCM {
                         }
                         return;
                     }
-                    for (String regex : regexArray) {
-                        if (value.matches(regex)) {
+                    for (Pattern regex : regexArray) {
+                        if (regex.matcher(value).matches()) {
                             ok();
                             return;
                         }
@@ -349,18 +350,18 @@ public class TeamFoundationServerScm extends SCM {
         }
         
         public void doUsernameCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            doRegexCheck(new String[]{DOMAIN_SLASH_USER_REGEX, USER_AT_DOMAIN_REGEX}, 
+            doRegexCheck(new Pattern[]{DOMAIN_SLASH_USER_REGEX, USER_AT_DOMAIN_REGEX}, 
                     "Login name must contain the name of the domain and user", null, req, rsp );
         }
         
         public void doProjectPathCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            doRegexCheck(new String[]{PROJECT_PATH_REGEX}, 
+            doRegexCheck(new Pattern[]{PROJECT_PATH_REGEX}, 
                     "Project path must begin with '$/'.", 
                     "Project path is mandatory.", req, rsp );
         }
         
         public void doWorkspaceNameCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            doRegexCheck(new String[]{WORKSPACE_NAME_REGEX}, 
+            doRegexCheck(new Pattern[]{WORKSPACE_NAME_REGEX}, 
                     "Workspace name cannot end with a space or period, and cannot contain any of the following characters: \"/:<>|*?", 
                     "Workspace name is mandatory", req, rsp);
         }
