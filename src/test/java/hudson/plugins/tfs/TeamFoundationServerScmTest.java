@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import hudson.FilePath;
-import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Computer;
 import hudson.model.Node;
 import hudson.model.ParametersAction;
 
@@ -38,7 +38,7 @@ public class TeamFoundationServerScmTest {
         when(project.getName()).thenReturn("ThisIsAJob");
         
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}", "user", "password");
-        assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getWorkspaceName(build, mock(Launcher.class)));
+        assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getWorkspaceName(build, mock(Computer.class)));
     }
     
     @Test 
@@ -116,7 +116,7 @@ public class TeamFoundationServerScmTest {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(AbstractProject.class);
         when(build.getProject()).thenReturn(project);
-        scm.getWorkspaceName(build, mock(Launcher.class));
+        scm.getWorkspaceName(build, mock(Computer.class));
         
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(build, env );        
@@ -211,7 +211,7 @@ public class TeamFoundationServerScmTest {
         when(build.getAction(ParametersAction.class)).thenReturn(action);
 
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "WS-${PARAM}", "user", "password");
-        assertEquals("The workspace name wasnt resolved", "WS-RESOLVED", scm.getWorkspaceName(build, mock(Launcher.class)));
+        assertEquals("The workspace name wasnt resolved", "WS-RESOLVED", scm.getWorkspaceName(build, mock(Computer.class)));
     }
     
     @Test public void assertTfsWorkspaceIsntRemovedIfThereIsNoBuildWhenProcessWorkspaceBeforeDeletion() throws Exception {

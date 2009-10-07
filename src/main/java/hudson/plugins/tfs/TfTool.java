@@ -96,9 +96,9 @@ public class TfTool {
         }
         
         ByteArrayOutputStream consoleStream = new ByteArrayOutputStream();
-        Proc proc = launcher.launch(toolArguments, toolMasks, new String[]{}, 
-                null, new ForkOutputStream(consoleStream, listener.getLogger()), 
-                workspace);
+        Proc proc = launcher.launch().cmds(toolArguments).masks(toolMasks)
+                .stdout(new ForkOutputStream(consoleStream, listener.getLogger()))
+                .pwd(workspace).start();
         consoleStream.close();
         
         int result = proc.join();

@@ -12,22 +12,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletException;
-
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
 import hudson.AbortException;
+import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Hudson;
+import hudson.model.Computer;
 import hudson.model.Node;
 import hudson.model.ParametersAction;
 import hudson.model.Run;
@@ -45,9 +43,10 @@ import hudson.scm.ChangeLogParser;
 import hudson.scm.RepositoryBrowsers;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
-import hudson.util.FormFieldValidator;
+import hudson.util.FormValidation;
 import hudson.util.LogTaskListener;
 import hudson.util.Scrambler;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * SCM for Microsoft Team Foundation Server.
@@ -117,11 +116,11 @@ public class TeamFoundationServerScm extends SCM {
     }    
     // Bean properties END
 
-    String getWorkspaceName(AbstractBuild<?,?> build, Launcher launcher) {
+    String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
         normalizedWorkspaceName = workspaceName;
         if (build != null) {
             normalizedWorkspaceName = substituteBuildParameter(build, normalizedWorkspaceName);
-            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build.getProject(), launcher));
+            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build.getProject(), computer));
         }
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\\.\\s]+$", "_");
@@ -149,7 +148,7 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
-        WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, launcher), getProjectPath(build), getLocalPath());
+        WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
         
         // Check if the configuration has changed
         if (build.getPreviousBuild() != null) {
@@ -289,9 +288,10 @@ public class TeamFoundationServerScm extends SCM {
 
     @Override
     public DescriptorImpl getDescriptor() {
-        return PluginImpl.TFS_DESCRIPTOR;
+        return (DescriptorImpl)super.getDescriptor();
     }
 
+    @Extension
     public static class DescriptorImpl extends SCMDescriptor<TeamFoundationServerScm> {
         
         public static final Pattern WORKSPACE_NAME_REGEX = Pattern.compile("[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$", Pattern.CASE_INSENSITIVE);
@@ -300,7 +300,7 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         private String tfExecutable;
         
-        protected DescriptorImpl() {
+        public DescriptorImpl() {
             super(TeamFoundationServerScm.class, TeamFoundationServerRepositoryBrowser.class);
             load();
         }
@@ -320,64 +320,47 @@ public class TeamFoundationServerScm extends SCM {
             return scm;
         }
         
-        public void doExecutableCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            new FormFieldValidator.Executable(req, rsp).process();
+        public FormValidation doExecutableCheck(@QueryParameter final String value) {
+            return FormValidation.validateExecutable(value);
         }
 
-        private void doRegexCheck(final Pattern[] regexArray, final String noMatchText, final String nullText,  
-                StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            new FormFieldValidator(req, rsp, false) {
-                @Override
-                protected void check() throws IOException, ServletException {
-                    String value = fixEmpty(request.getParameter("value"));
-                    if (value == null) {
-                        if (nullText == null) {
-                            ok();
-                        } else {
-                            error(nullText);
-                        }
-                        return;
-                    }
-                    for (Pattern regex : regexArray) {
-                        if (regex.matcher(value).matches()) {
-                            ok();
-                            return;
-                        }
-                    }
-                    error(noMatchText);
+        private FormValidation doRegexCheck(final Pattern[] regexArray,
+                final String noMatchText, final String nullText, String value) {
+            value = fixEmpty(value);
+            if (value == null) {
+                if (nullText == null) {
+                    return FormValidation.ok();
+                } else {
+                    return FormValidation.error(nullText);
                 }
-            }.process();
-        }
-        
-        public void doUsernameCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            doRegexCheck(new Pattern[]{DOMAIN_SLASH_USER_REGEX, USER_AT_DOMAIN_REGEX}, 
-                    "Login name must contain the name of the domain and user", null, req, rsp );
-        }
-        
-        public void doProjectPathCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            doRegexCheck(new Pattern[]{PROJECT_PATH_REGEX}, 
-                    "Project path must begin with '$/'.", 
-                    "Project path is mandatory.", req, rsp );
-        }
-        
-        public void doWorkspaceNameCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            doRegexCheck(new Pattern[]{WORKSPACE_NAME_REGEX}, 
-                    "Workspace name cannot end with a space or period, and cannot contain any of the following characters: \"/:<>|*?", 
-                    "Workspace name is mandatory", req, rsp);
-        }
-        
-        public void doFieldCheck(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            try {
-                int hudsonMinorVersion = Integer.parseInt(Hudson.VERSION.substring(Hudson.VERSION.indexOf('.') + 1));
-                if (hudsonMinorVersion >= 216) {
-                    Hudson.getInstance().doFieldCheck(req, rsp);
-                }
-            } catch (NumberFormatException nfe) {
             }
+            for (Pattern regex : regexArray) {
+                if (regex.matcher(value).matches()) {
+                    return FormValidation.ok();
+                }
+            }
+            return FormValidation.error(noMatchText);
+        }
+        
+        public FormValidation doUsernameCheck(@QueryParameter final String value) {
+            return doRegexCheck(new Pattern[]{DOMAIN_SLASH_USER_REGEX, USER_AT_DOMAIN_REGEX},
+                    "Login name must contain the name of the domain and user", null, value );
+        }
+        
+        public FormValidation doProjectPathCheck(@QueryParameter final String value) {
+            return doRegexCheck(new Pattern[]{PROJECT_PATH_REGEX},
+                    "Project path must begin with '$/'.", 
+                    "Project path is mandatory.", value );
+        }
+        
+        public FormValidation doWorkspaceNameCheck(@QueryParameter final String value) {
+            return doRegexCheck(new Pattern[]{WORKSPACE_NAME_REGEX},
+                    "Workspace name cannot end with a space or period, and cannot contain any of the following characters: \"/:<>|*?", 
+                    "Workspace name is mandatory", value);
         }
         
         @Override
-        public boolean configure(StaplerRequest req) throws FormException {
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             tfExecutable = Util.fixEmpty(req.getParameter("tfs.tfExecutable").trim());
             save();
             return true;

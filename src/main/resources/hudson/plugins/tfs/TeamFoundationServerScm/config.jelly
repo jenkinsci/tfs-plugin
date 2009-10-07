@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:entry title="Server URL" help="/plugin/tfs/server.html">
         <f:textbox name="tfs.serverUrl" value="${scm.serverUrl}"
-             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/fieldCheck?errorText='+escape('${%Server URL is mandatory.}')+'&amp;value='+escape(this.value)"/>
+             clazz="required" checkMessage="${%Server URL is mandatory.}"/>
     </f:entry>
     
     <f:entry title="Project path" help="/plugin/tfs/project.html">
@@ -27,7 +27,7 @@
     
 	    <f:entry title="Local workfolder" help="/plugin/tfs/workfolder.html">
 	        <f:textbox name="tfs.localPath" value="${h.defaulted(scm.localPath, '.')}"
-	             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/fieldCheck?warningText='+escape('${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}')+'&amp;value='+escape(this.value)"/>
+	             clazz="required" checkMessage="${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}"/>
 	    </f:entry>
 
         <f:entry title="Workspace name" help="/plugin/tfs/workspacename.html">

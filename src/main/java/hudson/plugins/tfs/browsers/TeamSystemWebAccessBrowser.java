@@ -1,9 +1,9 @@
 package hudson.plugins.tfs.browsers;
 
+import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
-import hudson.plugins.tfs.PluginImpl;
 import hudson.plugins.tfs.TeamFoundationServerScm;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.scm.EditType;
@@ -94,10 +94,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         return Integer.toString(Integer.parseInt(changeset.getVersion()) - 1);
     }
 
-    public DescriptorImpl getDescriptor() {
-        return PluginImpl.TSWA_DESCRIPTOR;
-    }
-
+    @Extension
     public static final class DescriptorImpl extends Descriptor<RepositoryBrowser<?>> {
 
         public DescriptorImpl() {

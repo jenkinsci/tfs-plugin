@@ -13,6 +13,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Computer;
 import hudson.model.Job;
+import hudson.model.TaskListener;
 import hudson.util.VariableResolver;
 
 /**
@@ -36,12 +37,12 @@ public class BuildVariableResolver implements VariableResolver<String> {
     
     private List<VariableResolver<String>> otherResolvers = new ArrayList<VariableResolver<String>>();
     
-    private final Launcher launcher;
+    private final Computer computer;
 
     private static final Logger LOGGER = Logger.getLogger(BuildVariableResolver.class.getName());
     
     public BuildVariableResolver(final Job<?, ?> job) {
-        launcher = null;
+        computer = null;
         lazyResolvers.put("JOB_NAME", new LazyResolver() {
             public String getValue() {
                 return job.getName();
@@ -49,8 +50,8 @@ public class BuildVariableResolver implements VariableResolver<String> {
         });
     }
     
-    public BuildVariableResolver(final AbstractProject<?, ?> project, final Launcher launcher) {
-        this.launcher = launcher;
+    public BuildVariableResolver(final AbstractProject<?, ?> project, final Computer computer) {
+        this.computer = computer;
         lazyResolvers.put("JOB_NAME", new LazyResolver() {
             public String getValue() {
                 return project.getName();
@@ -74,13 +75,12 @@ public class BuildVariableResolver implements VariableResolver<String> {
      * This constructor should not be called in a method that may be called by
      * {@link AbstractBuild#getEnvVars()}.  
      * @param build used to get the project and the build env vars
-     * @param launcher launcher used to get the computer
      */
-    public BuildVariableResolver(final AbstractBuild<?, ?> build, final Launcher launcher) {
-        this(build.getProject(), launcher);
-    
+    public BuildVariableResolver(final AbstractBuild<?, ?> build, final Computer computer)
+            throws IOException, InterruptedException {
+        this(build.getProject(), computer);
         
-        final Map<String, String> envVars = build.getEnvVars();
+        final Map<String, String> envVars = build.getEnvironment(TaskListener.NULL);
         if (envVars != null) {
             otherResolvers.add(new VariableResolver.ByMap<String>(envVars));
         }
@@ -91,8 +91,8 @@ public class BuildVariableResolver implements VariableResolver<String> {
             if (lazyResolvers.containsKey(variable)) {
                 return lazyResolvers.get(variable).getValue();
             } else {
-                if ((launcher != null) && (launcher.getComputer() != null)) {
-                    otherResolvers.add(new VariableResolver.ByMap<String>(launcher.getComputer().getEnvVars()));
+                if (computer != null) {
+                    otherResolvers.add(new VariableResolver.ByMap<String>(computer.getEnvironment()));
                 }
                 return new VariableResolver.Union<String>(otherResolvers).resolve(variable);
             }
@@ -116,11 +116,7 @@ public class BuildVariableResolver implements VariableResolver<String> {
     private abstract class LazyComputerResolver implements LazyResolver {
         protected abstract String getValue(Computer computer) throws IOException, InterruptedException;
         public String getValue() throws IOException, InterruptedException {
-            if ((launcher == null) || (launcher.getComputer() == null)) {
-                return null;
-            } else {
-                return getValue(launcher.getComputer());
-            }
+            return getValue(computer);
         }
     }
 }
