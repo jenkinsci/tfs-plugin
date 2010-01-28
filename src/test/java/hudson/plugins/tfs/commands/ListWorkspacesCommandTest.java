@@ -127,4 +127,19 @@ public class ListWorkspacesCommandTest {
         Mockito.verify(factory).createWorkspace("W7-DENNIS-1", "W7-DENNIS-1", "dennis", "");
     }
 
+    @Bug(4726)
+    @Test
+    public void assertNoIndexOutOfBoundsIsThrownSecondEdition() throws Exception {
+        WorkspaceFactory factory = Mockito.mock(ListWorkspacesCommand.WorkspaceFactory.class);
+        
+        StringReader reader = new StringReader(
+                "Server: xxxx-xxxx-010\n" +
+                "Workspace                Owner        Computer      Comment\n" +
+                "------------------------ ------------ ------------- ---------------------------\n" +
+                "Hudson.JOBXXXXXXXXXXXXXX First.LastXX XXXX-XXXX-007\n");
+
+        new ListWorkspacesCommand(factory, mock(ServerConfigurationProvider.class)).parse(reader);
+        Mockito.verify(factory).createWorkspace("Hudson.JOBXXXXXXXXXXXXXX", "XXXX-XXXX-007", "First.LastXX", "");
+    }
+
 }
