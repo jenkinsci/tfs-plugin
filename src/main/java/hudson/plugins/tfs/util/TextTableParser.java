@@ -64,13 +64,15 @@ public class TextTableParser {
         String line = reader.readLine();
         columns = new ArrayList<ColumnRange>();
         while (line != null) {
-            Matcher matcher = SEPARATOR_PATTERN.matcher(line);
-            if (matcher.find()) {
-                do  {
-                    columns.add(new ColumnRange(matcher.start(), matcher.end()));
-                } while (matcher.find());
-                break;
-            }
+        	if (line.startsWith("-")) {
+	            Matcher matcher = SEPARATOR_PATTERN.matcher(line);
+	            if (matcher.find()) {
+	                do  {
+	                    columns.add(new ColumnRange(matcher.start(), matcher.end()));
+	                } while (matcher.find());
+	                break;
+	            }
+        	}
             line = reader.readLine();
         }
         if (columns.size() > 0){

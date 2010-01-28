@@ -14,6 +14,7 @@ import hudson.plugins.tfs.model.Workspaces;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import org.junit.Test;
+import org.jvnet.hudson.test.Bug;
 import org.mockito.Mockito;
 
 public class ListWorkspacesCommandTest {
@@ -109,4 +110,21 @@ public class ListWorkspacesCommandTest {
         Workspace workspace = list.get(0);
         assertEquals("The workspace name is incorrect", "Hudson-node lookup", workspace.getName());
     }
+
+    @Bug(4666)
+    @Test
+    public void assertNoIndexOutOfBoundsIsThrown() throws Exception {
+        WorkspaceFactory factory = Mockito.mock(ListWorkspacesCommand.WorkspaceFactory.class);
+        
+        StringReader reader = new StringReader(
+                "Server: teamserver-01\n" +
+                "Workspace         Owner  Computer    Comment\n" +
+                "----------------- ------ ----------- ------------------------------------------\n" +
+                "Hudson-Scrumboard dennis W7-DENNIS-1\n" + 
+                "W7-DENNIS-1       dennis W7-DENNIS-1\n");
+
+        new ListWorkspacesCommand(factory, mock(ServerConfigurationProvider.class)).parse(reader);
+        Mockito.verify(factory).createWorkspace("W7-DENNIS-1", "W7-DENNIS-1", "dennis", "");
+    }
+
 }
