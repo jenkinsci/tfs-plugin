@@ -43,6 +43,7 @@ public class ChangeSetReader extends ChangeLogParser {
         digester.addSetProperties("*/changeset");
         digester.addBeanPropertySetter("*/changeset/date", "dateStr");
         digester.addBeanPropertySetter("*/changeset/user");
+        digester.addBeanPropertySetter("*/changeset/checked_in_by_user", "checkedInByUser");
         digester.addBeanPropertySetter("*/changeset/comment");
         digester.addSetNext("*/changeset", "add");
 

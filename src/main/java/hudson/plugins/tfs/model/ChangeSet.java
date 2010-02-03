@@ -22,6 +22,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     private Date date;
     private String comment;
     private List<Item> items;
+	private String checkedInByUser;
     
     public ChangeSet() {
         this("", null, "", "");
@@ -106,6 +107,14 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+	public void setCheckedInByUser(String user) {
+		checkedInByUser = user;
+	}
+
+	public String getCheckedInByUser() {
+		return checkedInByUser;
+	}
 
     @Exported
     public List<Item> getItems() {

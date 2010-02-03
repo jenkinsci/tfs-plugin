@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.mockito.Mockito.*;
 
 import hudson.plugins.tfs.Util;
@@ -224,4 +225,18 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         List<ChangeSet> list = command.parse(reader);
         assertEquals("Number of change sets was incorrect", 1, list.size());
     }
+
+    @Bug(4943)
+    @Test
+    public void assertCheckinOnBehalfOfOtherUserWorks() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-4943.txt"));
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", 
+                Util.getCalendar(2009, 01, 01, 21, 55, 33, TimeZone.getDefault()), 
+                Util.getCalendar(2010, 01, 01, 22, 43, 05, TimeZone.getDefault()));
+        // Need to use the current locale as the Date.parse() will parse the date
+        List<ChangeSet> list = command.parse(reader);
+        assertEquals("Number of change sets was incorrect", 2, list.size());
+        assertThat(list.get(1).getCheckedInByUser(), is("USERB"));
+    }
+
 }
