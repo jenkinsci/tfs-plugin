@@ -108,13 +108,17 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         this.comment = comment;
     }
 
-	public void setCheckedInByUser(String user) {
+	public void setCheckedInBy(String user) {
 		checkedInByUser = user;
 	}
 
-	public String getCheckedInByUser() {
+	public String getCheckedInBy() {
 		return checkedInByUser;
 	}
+
+    public User getCheckedInByUser() {
+        return User.get(checkedInByUser);
+    }
 
     @Exported
     public List<Item> getItems() {

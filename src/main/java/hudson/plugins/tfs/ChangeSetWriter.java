@@ -62,8 +62,8 @@ public class ChangeSetWriter {
         } else {
             writer.println(String.format("\t\t<user>%s\\%s</user>", escapeForXml(changeSet.getDomain()), escapeForXml(changeSet.getUser())));
         }
-        if (Util.fixEmpty(changeSet.getCheckedInByUser()) != null) {
-            writer.println(String.format("\t\t<checked_in_by_user>%s</checked_in_by_user>", escapeForXml(changeSet.getCheckedInByUser())));
+        if (Util.fixEmpty(changeSet.getCheckedInBy()) != null) {
+            writer.println(String.format("\t\t<checked_in_by_user>%s</checked_in_by_user>", escapeForXml(changeSet.getCheckedInBy())));
         }
         writer.println(String.format("\t\t<comment>%s</comment>", escapeForXml(changeSet.getComment())));
         if (changeSet.getItems().size() > 0) {

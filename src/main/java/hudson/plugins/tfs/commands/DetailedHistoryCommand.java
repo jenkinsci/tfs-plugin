@@ -130,7 +130,7 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
     	if (map.containsKey("User") && map.containsKey("Changeset") && map.containsKey("Date") && map.containsKey("Items")) {
     		ChangeSet changeSet = createChangeSet(map.get("Items"), map.get("Changeset"), map.get("User"), map.get("Date"), map.get("Comment"));
     		if (changeSet != null) {
-    			changeSet.setCheckedInByUser(map.get("Checked in by"));
+    			changeSet.setCheckedInBy(map.get("Checked in by"));
     		}
 			return changeSet;
     	}

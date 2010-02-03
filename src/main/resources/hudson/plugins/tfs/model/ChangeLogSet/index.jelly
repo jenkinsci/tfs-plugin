@@ -17,6 +17,9 @@
               ${%Version} 
               <a href="${browser.getChangeSetLink(cs)}">${cs.version}</a> 
               by <a href="${rootURL}/${cs.author.url}/">${cs.user}</a>
+              <j:if test="${cs.checkedInBy!=null}">
+              	<i>Checked in by <a href="${rootURL}/${cs.checkedInByUser.url}/">${cs.checkedInBy}</a></i>
+              </j:if>
               <j:if test="${cs.domain!=null}">
               	@${cs.domain}
               </j:if>:

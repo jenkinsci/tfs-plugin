@@ -109,7 +109,7 @@ public class ChangeSetReaderTest {
         ChangeLogSet logset = changesetReader.parse(null, reader);
         
         ChangeSet changeset = logset.iterator().next();
-        assertEquals("Checked in by user is incorrect", "snd\\other_user", changeset.getCheckedInByUser());
+        assertEquals("Checked in by user is incorrect", "snd\\other_user", changeset.getCheckedInBy());
     }
 
 }

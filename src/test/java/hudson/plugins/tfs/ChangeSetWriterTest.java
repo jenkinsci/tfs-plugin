@@ -82,7 +82,7 @@ public class ChangeSetWriterTest {
     @Test
     public void assertCheckedInByUserIsWritten() throws Exception {
         ChangeSet changeset = new ChangeSet("1122", Util.getCalendar(2008, 12, 12).getTime(), "user", "Just <testing> \"what\" happens when I use the & character...Hudson does not seem to like it!");
-        changeset.setCheckedInByUser("another_user");
+        changeset.setCheckedInBy("another_user");
         ArrayList<ChangeSet> sets = new ArrayList<ChangeSet>();
         sets.add(changeset);
 

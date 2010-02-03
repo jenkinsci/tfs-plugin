@@ -236,7 +236,7 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         // Need to use the current locale as the Date.parse() will parse the date
         List<ChangeSet> list = command.parse(reader);
         assertEquals("Number of change sets was incorrect", 2, list.size());
-        assertThat(list.get(1).getCheckedInByUser(), is("USERB"));
+        assertThat(list.get(1).getCheckedInBy(), is("USERB"));
     }
 
 }
