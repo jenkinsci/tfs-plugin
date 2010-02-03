@@ -1,0 +1,39 @@
+-------------------------------------------------------------------------------
+Changeset: 45212
+User: USERA
+Checked in by: USERB
+Date: Tuesday, November 24, 2009 10:59:13 AM
+
+Comment:
+  Sample checkin with /author
+
+Items:
+  edit $/PROJECT/PATH/TO/FILE.txt
+
+Policy Warnings:
+  Override Reason:
+    XXXX XXXXXXX XX XXXXX
+  Messages:
+    XXXXXXXX XXXXX XX XXXXXXXX XXXXXXX XXXX.
+    XXXXXXXX XXXXX XX XXXXXXXX XX XXXXXXX.
+
+-------------------------------------------------------------------------------
+Changeset: 15005
+User: USERC
+Date: Monday, April 06, 2009 8:29:28 AM
+
+Comment:
+  Sample normal checkin (without /author)
+
+Items:
+  edit $/PROJECT/PATH/TO/FILE.txt
+
+Check-in Notes:
+  XXXXXXX XXXX:
+    XXXXXXX XXXXXX
+  XXXX XXXXXXXXXXX:
+    XXXXXX, XXXX;
+  XXXXXXX XXXXX XXX:
+    X
+  XXXXXXXX XXXXXXXXX:
+  XX XXXXXXXXX:
