@@ -37,6 +37,17 @@ public class GetFilesToWorkFolderCommandTest {
     }
 
     @Test
+    public void assertVersionSpecArgument() {
+        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
+        when(config.getUserName()).thenReturn("snd\\user_cp");
+        when(config.getUserPassword()).thenReturn("password");
+        
+        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", false, "C100").getArguments();
+        assertNotNull("Arguments were null", arguments);
+        assertEquals("get localPath -recursive -version:C100 -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
+    }
+
+    @Test
     public void assertEmptyListWithEmptyOutput() throws Exception {
         GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".");
         List<String> list = command.parse(new StringReader(""));

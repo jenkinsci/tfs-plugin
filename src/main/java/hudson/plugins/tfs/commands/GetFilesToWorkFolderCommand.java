@@ -17,15 +17,25 @@ public class GetFilesToWorkFolderCommand extends AbstractCommand implements Pars
     
     private final String workFolder;
     private final boolean preview;
+    private final String versionSpec;
 
-    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder, boolean preview) {
-        super(provider);
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider configurationProvider, String workFolder, boolean preview, String versionSpec) {
+        super(configurationProvider);
         this.workFolder = workFolder;
         this.preview = preview;
+        this.versionSpec = versionSpec;
+    }
+
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider configurationProvider, String workFolder, String versionSpec) {
+        this(configurationProvider, workFolder, false, versionSpec);
+    }
+
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder, boolean preview) {
+        this(provider, workFolder, preview, null);
     }
 
     public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder) {
-        this(provider, workFolder, false);
+        this(provider, workFolder, false, null);
     }
 
     public MaskedArgumentListBuilder getArguments() {
@@ -35,6 +45,9 @@ public class GetFilesToWorkFolderCommand extends AbstractCommand implements Pars
         arguments.add("-recursive");
         if (preview) {
             arguments.add("-preview");
+        }
+        if (versionSpec != null) {
+            arguments.add("-version:" + versionSpec);
         }
         arguments.add("-noprompt");
         addLoginArgument(arguments);

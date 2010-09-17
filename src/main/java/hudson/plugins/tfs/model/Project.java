@@ -71,6 +71,16 @@ public class Project {
         server.execute(command.getArguments()).close();
     }
 
+    /**
+     * Gets all files from server.
+     * @param localPath the local path to get all files into
+     * @param versionSpec the version spec to use when getting the files
+     */
+    public void getFiles(String localPath, String versionSpec) throws IOException, InterruptedException {
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec);
+        server.execute(command.getArguments()).close();
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder(13, 27).append(projectPath).toHashCode();

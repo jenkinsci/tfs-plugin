@@ -80,6 +80,15 @@ public class ProjectTest extends SwedishLocaleTestCase {
         project.getFiles(".");
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
     }
+    
+    @Test
+    public void assertGetFilesUsesVersion() throws Exception {
+        Server server = mock(Server.class);
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
+        Project project = new Project(server, "$/serverpath");
+        project.getFiles(".", "C5");
+        verify(server).execute(isA(MaskedArgumentListBuilder.class));
+    }
 
     @Test
     public void assertGetFilesClosesReader() throws Exception {
