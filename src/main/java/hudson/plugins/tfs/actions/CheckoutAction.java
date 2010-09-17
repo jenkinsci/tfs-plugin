@@ -12,6 +12,7 @@ import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
+import hudson.plugins.tfs.util.DateUtil;
 
 public class CheckoutAction {
 
@@ -27,7 +28,7 @@ public class CheckoutAction {
         this.useUpdate = useUpdate;
     }
 
-    public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp) throws IOException, InterruptedException, ParseException {
+    public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp, Calendar currentBuildTimestamp) throws IOException, InterruptedException, ParseException {
         
         Workspaces workspaces = server.getWorkspaces();
         Project project = server.getProject(projectPath);
@@ -49,10 +50,10 @@ public class CheckoutAction {
             workspace = workspaces.getWorkspace(workspaceName);
         }
         
-        project.getFiles(localFolder);
+        project.getFiles(localFolder, "D" + DateUtil.TFS_DATETIME_FORMATTER.get().format(currentBuildTimestamp.getTime()));
         
         if (lastBuildTimestamp != null) {
-            return project.getDetailedHistory(lastBuildTimestamp, Calendar.getInstance());
+            return project.getDetailedHistory(lastBuildTimestamp, currentBuildTimestamp);
         }
         
         return new ArrayList<ChangeSet>();
