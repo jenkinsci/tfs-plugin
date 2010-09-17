@@ -1,0 +1,38 @@
+Changeset: 24
+User: GRP\ObendorfH
+Date: 06.05.2010 13:29:24
+
+Comment:
+  Initialer Check-In
+
+Items:
+  add $/TFSJavaBuild/Sources/Maven/DEV/com.haufelexware.project.base
+  add $/TFSJavaBuild/Sources/Maven/DEV/com.haufelexware.project.base/.project
+  add $/TFSJavaBuild/Sources/Maven/DEV/com.haufelexware.project.base/.settings
+  add $/TFSJavaBuild/Sources/Maven/DEV/com.haufelexware.project.base/.tpignore
+  add $/TFSJavaBuild/Sources/Maven/DEV/com.haufelexware.project.base/pom.xml
+  add $/TFSJavaBuild/Sources/Maven/DEV/com.haufelexware.project.base/src
+  add $/TFSJavaBuild/Sources/Maven/DEV/com.haufelexware.project.base/.settings/org.maven.ide.eclipse.prefs
+  add $/TFSJavaBuild/Sources/Maven/DEV/com.haufelexware.project.base/src/site
+
+Check-in Notes:
+  Code Reviewer:
+  Performance Reviewer:
+  Security Reviewer:
+
+-----------------------------------------------------------------------------------------------------------------------
+Changeset: 23
+User: GRP\ObendorfH
+Date: 06.05.2010 13:28:21
+
+Comment:
+
+
+Items:
+  branch $/TFSJavaBuild/Sources/Maven/Current
+
+Check-in Notes:
+  Code Reviewer:
+  Performance Reviewer:
+  Security Reviewer:
+ 

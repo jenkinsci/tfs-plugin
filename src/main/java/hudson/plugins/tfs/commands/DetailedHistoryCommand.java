@@ -200,35 +200,37 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
 	 */
 	private static class ChangeSetStringReader {
 		
-		private final BufferedReader reader;
+		private static final Pattern PATTERN_KEYWORD = Pattern.compile("\\w+:");
+        private final BufferedReader reader;
 		private boolean foundAtLeastOneChangeSet;
 
 		public ChangeSetStringReader(BufferedReader reader) {
 			super();
 			this.reader = reader;
 		}
+		
+        public String readChangeSet() throws IOException {
+            StringBuilder builder = new StringBuilder();
+            String line;
+            int linecount = 0;
 
-		public String readChangeSet() throws IOException {
-	    	StringBuilder builder = new StringBuilder();
-	        String line;
-	        int linecount = 0;
-	        
-	        while ((line = reader.readLine()) != null) {
-	            if (line.startsWith(CHANGESET_SEPERATOR)) {
-	                foundAtLeastOneChangeSet = true;
-	                if (linecount > 1) {
-	                    // We are starting a new changeset.
-	                    return builder.toString();
-	                }
-	            } else {
+            while ((line = reader.readLine()) != null) {
+                if (line.length() > 0) {
+                    if ((!foundAtLeastOneChangeSet) && PATTERN_KEYWORD.matcher(line).matches()) {
+                        foundAtLeastOneChangeSet = true;
+                    }
+                    if (line.startsWith(CHANGESET_SEPERATOR) && (linecount > 0)) {
+                        // We are starting a new changeset.
+                        return builder.toString();
+                    }
                     linecount++;
-            		builder.append(line).append('\n');
-	            }
-	        }	        
-	        if (foundAtLeastOneChangeSet &&  linecount > 0) {
-	            return builder.toString();
-	        }
-	        return null;
-	    }
+                    builder.append(line).append('\n');
+                }
+            }
+            if (foundAtLeastOneChangeSet && linecount > 0) {
+                return builder.toString();
+            }
+            return null;
+        }
 	}
 }

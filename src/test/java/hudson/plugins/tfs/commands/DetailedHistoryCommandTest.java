@@ -239,4 +239,32 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         assertThat(list.get(1).getCheckedInBy(), is("USERB"));
     }
 
+    /**
+     * The MS TEE tfs command line tool does not output the line separator in the begining anymore.
+     * @throws Exception thrown if test error
+     */
+    @Bug(6870)
+    @Test
+    public void assertThatSingleChangesetWithoutSeparatorIsParsedProperly() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-6870.txt"));
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), 
+                "$/tfsandbox", 
+                Util.getCalendar(2009, 8, 10, 5, 11, 2, "GMT"), 
+                Util.getCalendar(2010, 9, 10, 5, 19, 0, "GMT"), 
+                new DateParser(new Locale("de", "DE"), TimeZone.getTimeZone("Germany")));
+        List<ChangeSet> list = command.parse(reader);
+        assertEquals("Number of change sets was incorrect", 1, list.size());
+    }
+    @Bug(6870)
+    @Test
+    public void assertThatMultiChangesetWithoutSeparatorIsParsedProperly() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-6870-2.txt"));
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), 
+                "$/tfsandbox", 
+                Util.getCalendar(2009, 8, 10, 5, 11, 2, "GMT"), 
+                Util.getCalendar(2010, 9, 10, 5, 19, 0, "GMT"), 
+                new DateParser(new Locale("de", "DE"), TimeZone.getTimeZone("Germany")));
+        List<ChangeSet> list = command.parse(reader);
+        assertEquals("Number of change sets was incorrect", 2, list.size());
+    }
 }

@@ -1,0 +1,15 @@
+Changeset: 364235
+User: GRP\ObendorfH
+Date: 28.06.2010 17:25:40
+
+Comment:
+  Versionierung für EJB EAR
+
+Items:
+  edit $/Services/Server/DEV/SP/MavenDefs/pom.xml
+
+Check-in Notes:
+  Code Reviewer: 
+
+  Performance Reviewer: 
+  Security Reviewer: 
