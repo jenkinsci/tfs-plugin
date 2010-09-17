@@ -267,4 +267,17 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         List<ChangeSet> list = command.parse(reader);
         assertEquals("Number of change sets was incorrect", 2, list.size());
     }
+
+    /** HUDSON-6454 was actually caused by HUDSON-6870. */
+    @Bug(6454)
+    @Test
+    public void assertThatMovedKeywordsAreProperlyRead() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-6454.txt"));
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), 
+                "$/tfsandbox", 
+                Util.getCalendar(2009, 8, 10, 5, 11, 2, "GMT"), 
+                Util.getCalendar(2010, 9, 10, 5, 19, 0, "GMT"));
+        List<ChangeSet> list = command.parse(reader);
+        assertEquals("Number of change sets was incorrect", 1, list.size());
+    }
 }

@@ -1,0 +1,13 @@
+Changeset: 146266
+User: hschneider
+Checked in by: vsts-demon
+Date: Saturday, May 01, 2010 12:17:34 AM
+
+Comment:
+  4/22/2010 3:56:15 PM: Recycling mode disabled; Test changed
+   (Updated by TFS to TFS Connector, server: 192.168.1.208:1666, id 521906. )
+
+Items:
+  edit $/source/Dev/playback/pb_playback/Olymp/LowLevelTests/FileScannerTest.cs
+  edit $/source/Dev/playback/pb_playback/Olymp/MainApplication/Panels/VirtualizingGroupingItemsPanel.cs
+
