@@ -36,7 +36,11 @@ public class BriefHistoryCommand extends AbstractCommand implements ParseableCom
         super(provider);
         this.projectPath = projectPath;
         this.fromTimestamp = fromTimestamp;
-        this.toTimestamp = toTimestamp;
+
+        // The to timestamp is exclusive, ie it will only show history before the to timestamp.
+        // This command should be inclusive.
+        this.toTimestamp = (Calendar) toTimestamp.clone();
+        this.toTimestamp.add(Calendar.SECOND, 1);
     }
 
     /**

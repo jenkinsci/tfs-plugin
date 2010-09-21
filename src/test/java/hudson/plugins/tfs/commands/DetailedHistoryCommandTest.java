@@ -29,7 +29,8 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
     @After public void tearDown() {
         System.getProperties().remove(DetailedHistoryCommand.IGNORE_DATE_CHECK_ON_CHANGE_SET);        
     }
-    
+
+    @Bug(6596)
     @Test
     public void assertBriefHistoryArguments() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
@@ -42,7 +43,8 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         
         MaskedArgumentListBuilder arguments = new DetailedHistoryCommand(config, "$/tfsandbox", fromTimestamp, toTimestamp).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("history $/tfsandbox -noprompt -version:D2006-12-01T01:01:01Z~D2008-06-27T20:00:00Z -recursive -format:detailed -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("history $/tfsandbox -noprompt -version:D2006-12-01T01:01:01Z~D2008-06-27T20:00:01Z -recursive -format:detailed -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals(toTimestamp, Util.getCalendar(2008, 06, 27, 20, 00, 0));
     }
     
     @Test

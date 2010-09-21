@@ -56,9 +56,13 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
         super(configurationProvider);
         this.projectPath = projectPath;
         this.fromTimestamp = fromTimestamp;
-        this.toTimestamp = toTimestamp;
         this.dateParser = dateParser;
         this.skipDateCheckInParsing = Boolean.valueOf(System.getProperty(IGNORE_DATE_CHECK_ON_CHANGE_SET));
+
+        // The to timestamp is exclusive, ie it will only show history before the to timestamp.
+        // This command should be inclusive.
+        this.toTimestamp = (Calendar) toTimestamp.clone();
+        this.toTimestamp.add(Calendar.SECOND, 1);
     }
 
     public DetailedHistoryCommand(ServerConfigurationProvider provider,  
