@@ -55,7 +55,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
      */
     @Override
     public URL getChangeSetLink(ChangeSet changeSet) throws IOException {
-        return new URL(String.format("%scs.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
+        return new URL(String.format("%sViewChangeset.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
     }
 
     /**
@@ -64,7 +64,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
      * @return
      */
     public URL getFileLink(ChangeSet.Item item) throws IOException {
-        return new URL(String.format("%sview.aspx?path=%s&cs=%s", getBaseUrlString(item.getParent()), item.getPath(), item.getParent().getVersion()));
+        return new URL(String.format("%sViewSource.aspx?path=%s&cs=%s", getBaseUrlString(item.getParent()), item.getPath(), item.getParent().getVersion()));
     }
 
     /**
@@ -79,7 +79,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
             return null;
         }
         try {
-            return new URL(String.format("%sdiff.aspx?opath=%s&ocs=%s&mpath=%s&mcs=%s", 
+            return new URL(String.format("%sDifference.aspx?opath=%s&ocs=%s&mpath=%s&mcs=%s", 
                     getBaseUrlString(parent), 
                     item.getPath(),
                     getPreviousChangeSetVersion(parent), 
