@@ -22,7 +22,14 @@ public class BuildWorkspaceConfigurationRetriever {
         }
         
         AbstractBuild<?, ?> build = (AbstractBuild<?, ?>) latestRun;
-        while ((build != null) && !build.getBuiltOn().getNodeName().equals(needleNode.getNodeName())) {
+        while (build != null) {
+        	Node node = build.getBuiltOn();
+        	if (node != null) {
+                if (node.getNodeName().equals(needleNode.getNodeName()))
+                {
+                   break;
+                }
+        	}
             build = build.getPreviousBuild();
         }
         

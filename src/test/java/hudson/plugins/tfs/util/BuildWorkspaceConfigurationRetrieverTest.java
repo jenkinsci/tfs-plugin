@@ -13,6 +13,7 @@ import hudson.plugins.tfs.model.WorkspaceConfiguration;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
 
 import org.junit.Test;
+import org.jvnet.hudson.test.Bug;
 
 @SuppressWarnings("unchecked")
 public class BuildWorkspaceConfigurationRetrieverTest {
@@ -100,4 +101,18 @@ public class BuildWorkspaceConfigurationRetrieverTest {
         
         verify(build).save();  
     }
-}
+    
+    @Bug(8322)
+    @Test
+    public void assertGetLatestConfgiurationOnPreviousDeletedNode() {
+        AbstractBuild build = mock(AbstractBuild.class);
+        Node node = mock(Node.class);
+        Node needleNode = mock(Node.class);
+        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", "projectPath", "workfolder");
+        when(build.getPreviousBuild()).thenReturn(build).thenReturn(null);
+        when(build.getBuiltOn()).thenReturn(null);
+
+
+        assertThat( new BuildWorkspaceConfigurationRetriever().getLatestForNode(needleNode, build), nullValue());  
+    }
+ }
