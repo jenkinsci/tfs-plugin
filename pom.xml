@@ -24,10 +24,9 @@
       <timezone>+1</timezone>
     </developer>
   </developers>
-
   <scm>
-    <connection>scm:git:git://github.com/hudson/tfs-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:hudson/tfs-plugin.git</developerConnection>
+    <connection>scm:git:ssh://github.com/jenkinsci/tfs-plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/tfs-plugin.git</developerConnection>
   </scm>
 
   <distributionManagement>
