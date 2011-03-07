@@ -10,7 +10,7 @@
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
   <name>Hudson Team Foundation Server Plug-in</name>
-  <version>1.14</version>
+  <version>1.15-SNAPSHOT</version>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Team+Foundation+Server+Plugin</url>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
