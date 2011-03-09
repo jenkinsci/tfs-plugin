@@ -12,8 +12,9 @@ import hudson.plugins.tfs.model.ChangeSet;
 import java.net.URL;
 
 import org.junit.Test;
+import org.jvnet.hudson.test.Bug;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public class TeamSystemWebAccessBrowserTest {
 
     /**
@@ -25,6 +26,24 @@ public class TeamSystemWebAccessBrowserTest {
         URL actual = browser.getChangeSetLink(changeSet);
         assertEquals("The change set link was incorrect", "http://tswaserver:8090/cs.aspx?cs=99", actual.toString());
     }
+
+	@Bug(7394)
+	@Test
+	public void assertChangeSetLinkWithOnlyServerUrl() throws Exception {
+		TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser("http://tswaserver");
+		ChangeSet changeSet = new ChangeSet("99", null, "user", "comment");
+		URL actual = browser.getChangeSetLink(changeSet);
+		assertEquals("The change set link was incorrect", "http://tswaserver/cs.aspx?cs=99", actual.toString());
+	}
+
+	@Bug(7394)
+	@Test
+	public void assertChangeSetLinkWithOnlyServerUrlWithTrailingSlash() throws Exception {
+		TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser("http://tswaserver/");
+		ChangeSet changeSet = new ChangeSet("99", null, "user", "comment");
+		URL actual = browser.getChangeSetLink(changeSet);
+		assertEquals("The change set link was incorrect","http://tswaserver/cs.aspx?cs=99", actual.toString());
+	}
     
     @Test public void assertChangeSetLinkUsesScmConfiguration() throws Exception {
         AbstractBuild build = mock(AbstractBuild.class);
@@ -79,12 +98,12 @@ public class TeamSystemWebAccessBrowserTest {
         assertNull("The diff link should be null for invalid change set version", browser.getDiffLink(item));
     }
     
-    @Test public void assertDescriptorBaseUrlRemovesName() {
+    @Test public void assertDescriptorBaseUrlRemovesName() throws Exception {
         String expected = TeamSystemWebAccessBrowser.DescriptorImpl.getBaseUrl("http://server:80/UI/Pages/Scc/ViewChangeset.aspx?changeset=62643");
         assertEquals("The base url was incorrect", "http://server:80/UI/Pages/Scc/", expected);
     }
     
-    @Test public void assertDescriptorBaseUrlDoesNotRemoveLastPath() {
+    @Test public void assertDescriptorBaseUrlDoesNotRemoveLastPath() throws Exception {
         String expected = TeamSystemWebAccessBrowser.DescriptorImpl.getBaseUrl("http://server:80/UI/Pages/Scc/");
         assertEquals("The base url was incorrect", "http://server:80/UI/Pages/Scc/", expected);
     }

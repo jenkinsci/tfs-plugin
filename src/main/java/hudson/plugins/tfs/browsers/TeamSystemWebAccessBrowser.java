@@ -11,8 +11,10 @@ import hudson.scm.RepositoryBrowser;
 import hudson.scm.SCM;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBrowser {
@@ -40,7 +42,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         }
     }
 
-    private String getBaseUrlString(ChangeSet changeSet) {
+    private String getBaseUrlString(ChangeSet changeSet) throws MalformedURLException {
         String baseUrl;
         if (url != null) {
             baseUrl = DescriptorImpl.getBaseUrl(url);
@@ -106,13 +108,9 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
             return "Team System Web Access";
         }
         
-        public static String getBaseUrl(String urlExample) {
-            int pos = urlExample.lastIndexOf('/');
-            if (pos != -1) {
-                return urlExample.substring(0, pos + 1);
-            } else {
-                return urlExample;
-            }
+        public static String getBaseUrl(String urlExample) throws MalformedURLException {
+        	URL url = new URL(urlExample);
+        	return new URL(url.getProtocol(), url.getHost(), url.getPort(), String.format("/%s", FilenameUtils.getPath(url.getPath()))).toString();
         }
     }
 }

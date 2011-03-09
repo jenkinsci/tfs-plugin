@@ -1,14 +1,12 @@
 <div>
   <p>
-	Enter the full URL to a page that displays a change set on the Team System Web Access.
-	The plugin will use the example URL as the base for building up the links to the Team
-	System Web Access server. The plugin will strip the last path name so the URL can be used
-	to build URL for change sets and other pages.
+	Enter the URL to the TSWA server. Examples:<tt>http://tswasrv</tt> or <tt>http://TFSMachine:8080/</tt>.
+	The plugin will strip the last path (if any) of the URL when building URLs for change set pages and other pages. 
   </p>	 
   <p>
     If the field is empty then the plugin will try to build up a valid URL using the server URL.
     For instance if the server URL is <tt>https://server:8090</tt> then the plugin will
-    creates links such as 
-    <tt>https://server:8090/cs.aspx?cs=99</tt>.  
+    creates links such as <tt>https://server:8090/cs.aspx?cs=99</tt>, which is identical if the user entered 
+    <tt>https://server:8090</tt> into this field.  
   </p>
 </div>
