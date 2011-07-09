@@ -73,7 +73,7 @@ public class TeamFoundationServerScm extends SCM {
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
-	private transient String workspaceChangesetVersion;
+    private transient String workspaceChangesetVersion;
     
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
@@ -177,18 +177,18 @@ public class TeamFoundationServerScm extends SCM {
         }
 
         try {
-        	setWorkspaceChangesetVersion(null);
-        	setWorkspaceChangesetVersion(server.getProject(workspaceConfiguration.getProjectPath()).getWorkspaceChangesetVersion(workspaceConfiguration.getWorkfolder()));
-		} catch (ParseException pe) {
+            setWorkspaceChangesetVersion(null);
+            setWorkspaceChangesetVersion(server.getProject(workspaceConfiguration.getProjectPath()).getWorkspaceChangesetVersion(workspaceConfiguration.getWorkfolder()));
+        } catch (ParseException pe) {
             listener.error(pe.getMessage());
-		}
-        
+        }
+
         return true;
     }
 
     void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
-    	this.workspaceChangesetVersion = workspaceChangesetVersion;
-	}
+        this.workspaceChangesetVersion = workspaceChangesetVersion;
+    }
 
     @Override
     public boolean pollChanges(AbstractProject hudsonProject, Launcher launcher, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
@@ -299,7 +299,7 @@ public class TeamFoundationServerScm extends SCM {
             env.put(USERNAME_ENV_STR, userName);
         }
         if (workspaceChangesetVersion != null && ! workspaceChangesetVersion.isEmpty()) {
-        	env.put(WORKSPACE_CHANGESET_ENV_STR, workspaceChangesetVersion);
+            env.put(WORKSPACE_CHANGESET_ENV_STR, workspaceChangesetVersion);
         }
     }
 

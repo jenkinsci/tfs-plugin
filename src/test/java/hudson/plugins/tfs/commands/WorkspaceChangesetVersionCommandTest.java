@@ -26,14 +26,14 @@ public class WorkspaceChangesetVersionCommandTest {
 
     @Test
     public void assertNoChangesWithEmptyOutput() throws Exception {
-    	WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
         String changesetNumber = command.parse(new StringReader(""));
         assertEquals("Change set number was incorrect", "", changesetNumber);
     }
     
     @Test
     public void assertChangesWithEmptyToolOutput() throws Exception {
-    	WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
         StringReader reader = new StringReader("No history entries were found for the item and version combination specified.\n\n");
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "", changesetNumber);

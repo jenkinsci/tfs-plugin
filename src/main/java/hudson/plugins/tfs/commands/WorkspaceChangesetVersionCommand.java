@@ -35,27 +35,26 @@ public class WorkspaceChangesetVersionCommand extends AbstractCommand implements
      *    <i>tf history localPath -recursive -noprompt -stopafter:1 -version:T -format:brief</i></p>
      * 
      */
-	public MaskedArgumentListBuilder getArguments() {		
-		MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
-		arguments.add("history");
-		arguments.add(localPath);
-		arguments.add("-recursive");
-		arguments.add("-stopafter:1");
-		arguments.add("-noprompt");
-		arguments.add("-version:T");
-		arguments.add("-format:brief");
-		return arguments;
-		
-	}
+    public MaskedArgumentListBuilder getArguments() {
+        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();
+        arguments.add("history");
+        arguments.add(localPath);
+        arguments.add("-recursive");
+        arguments.add("-stopafter:1");
+        arguments.add("-noprompt");
+        arguments.add("-version:T");
+        arguments.add("-format:brief");
+        return arguments;
+    }
 
-	public String parse(Reader consoleReader) throws ParseException, IOException {
-		TextTableParser parser = new TextTableParser(new BufferedReader(consoleReader), 1);
+    public String parse(Reader consoleReader) throws ParseException, IOException {
+        TextTableParser parser = new TextTableParser(new BufferedReader(consoleReader), 1);
 
-		while (parser.nextRow()) {
-			return parser.getColumn(0);
-		}
-		
-		return StringUtils.EMPTY;
-	}
+        while (parser.nextRow()) {
+            return parser.getColumn(0);
+        }
+
+        return StringUtils.EMPTY;
+    }
 
 }
