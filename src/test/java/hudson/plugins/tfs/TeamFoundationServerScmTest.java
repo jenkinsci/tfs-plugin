@@ -157,6 +157,33 @@ public class TeamFoundationServerScmTest {
         assertEquals("The TFS user name was incorrect", "user", env.get(TeamFoundationServerScm.USERNAME_ENV_STR));
     }
     
+    @Test
+    public void assertTfsWorkspaceChangesetIsAddedToEnvVars() throws Exception {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
+        scm.setWorkspaceChangesetVersion("12345");
+        Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        assertEquals("Workspace changeset version was incorrect", "12345", env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
+    }
+  
+    @Test
+    public void assertTfsWorkspaceChangesetIsNotAddedToEnvVarsIfEmpty() throws Exception {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
+        scm.setWorkspaceChangesetVersion("");
+        Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        assertEquals("Workspace changeset version was not null", null, env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
+    }
+
+    @Test
+    public void assertTfsWorkspaceChangesetIsNotAddedToEnvVarsIfNull() throws Exception {
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
+        scm.setWorkspaceChangesetVersion(null);
+        Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(mock(AbstractBuild.class), env );        
+        assertEquals("Workspace changeset version was not null", null, env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
+    }
+
     /**
      * Workspace name must be less than 64 characters, cannot end with a space or period, and cannot contain any of the following characters: "/:<>|*?
      */

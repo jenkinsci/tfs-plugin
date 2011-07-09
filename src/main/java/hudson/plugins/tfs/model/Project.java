@@ -3,6 +3,7 @@ package hudson.plugins.tfs.model;
 import hudson.plugins.tfs.commands.BriefHistoryCommand;
 import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
+import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -81,6 +82,17 @@ public class Project {
         server.execute(command.getArguments()).close();
     }
 
+	public String getWorkspaceChangesetVersion(String localPath) throws IOException, InterruptedException, ParseException {
+		WorkspaceChangesetVersionCommand workspaceChangesetCommand = new WorkspaceChangesetVersionCommand(server, localPath);
+		Reader reader = null;		
+		try {
+			reader = server.execute(workspaceChangesetCommand.getArguments());
+			return workspaceChangesetCommand.parse(reader);
+		} finally {
+            IOUtils.closeQuietly(reader);
+		}
+	}
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder(13, 27).append(projectPath).toHashCode();

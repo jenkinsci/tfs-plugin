@@ -60,6 +60,7 @@ public class TeamFoundationServerScm extends SCM {
     public static final String PROJECTPATH_ENV_STR = "TFS_PROJECTPATH";
     public static final String SERVERURL_ENV_STR = "TFS_SERVERURL";
     public static final String USERNAME_ENV_STR = "TFS_USERNAME";
+    public static final String WORKSPACE_CHANGESET_ENV_STR = "TFS_CHANGESET";
     
     private final String serverUrl;
     private final String projectPath;
@@ -72,6 +73,7 @@ public class TeamFoundationServerScm extends SCM {
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
+	private transient String workspaceChangesetVersion;
     
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
@@ -173,8 +175,20 @@ public class TeamFoundationServerScm extends SCM {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
         }
+
+        try {
+        	setWorkspaceChangesetVersion(null);
+        	setWorkspaceChangesetVersion(server.getProject(workspaceConfiguration.getProjectPath()).getWorkspaceChangesetVersion(workspaceConfiguration.getWorkfolder()));
+		} catch (ParseException pe) {
+            listener.error(pe.getMessage());
+		}
+        
         return true;
     }
+
+    void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
+    	this.workspaceChangesetVersion = workspaceChangesetVersion;
+	}
 
     @Override
     public boolean pollChanges(AbstractProject hudsonProject, Launcher launcher, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
@@ -283,6 +297,9 @@ public class TeamFoundationServerScm extends SCM {
         }
         if (userName != null) {
             env.put(USERNAME_ENV_STR, userName);
+        }
+        if (workspaceChangesetVersion != null && ! workspaceChangesetVersion.isEmpty()) {
+        	env.put(WORKSPACE_CHANGESET_ENV_STR, workspaceChangesetVersion);
         }
     }
 
