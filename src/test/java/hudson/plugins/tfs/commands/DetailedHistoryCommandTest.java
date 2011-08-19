@@ -21,7 +21,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
 
@@ -172,14 +171,15 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
         command.parse(reader);
     }
-    
+
+    @Bug(10784)
     @Test
-    @Ignore("Fix the regular expression")
     public void assertCanParseGermanChangesetWithCheckinNotes() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-german-1.txt"));
-        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2011, 07, 10), Calendar.getInstance());
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", 
+                Util.getCalendar(2011, 07, 10), Calendar.getInstance(), 
+                new DateParser(new Locale("de", "DE"), TimeZone.getTimeZone("Germany")));
         List<ChangeSet> list = command.parse(reader);
-
         assertNotNull("The list of change sets was null", list);
         assertEquals("The number of change sets in the list was incorrect", 1, list.size());
     }
