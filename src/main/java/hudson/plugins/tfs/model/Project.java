@@ -82,12 +82,21 @@ public class Project {
         server.execute(command.getArguments()).close();
     }
 
-    public String getWorkspaceChangesetVersion(String localPath) throws IOException, InterruptedException, ParseException {
-        WorkspaceChangesetVersionCommand workspaceChangesetCommand = new WorkspaceChangesetVersionCommand(server,localPath);
+    /**
+     * Gets workspace changeset version for specified local path.
+     * 
+     * @param localPath for which to get latest workspace changeset version
+     * @param workspaceName name of workspace for which to get latest changeset version
+     * @return workspace changeset version for specified local path
+     */
+    public String getWorkspaceChangesetVersion(String localPath, String workspaceName) throws IOException, 
+                                                                                              InterruptedException, 
+                                                                                              ParseException {
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(server,localPath,workspaceName);
         Reader reader = null;
         try {
-            reader = server.execute(workspaceChangesetCommand.getArguments());
-            return workspaceChangesetCommand.parse(reader);
+            reader = server.execute(command.getArguments());
+            return command.parse(reader);
         } finally {
             IOUtils.closeQuietly(reader);
         }

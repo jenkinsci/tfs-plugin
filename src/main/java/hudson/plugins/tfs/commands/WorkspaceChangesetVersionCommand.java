@@ -18,22 +18,25 @@ import org.apache.commons.lang.StringUtils;
 public class WorkspaceChangesetVersionCommand extends AbstractCommand implements ParseableCommand<String> {
    
     private final String localPath;
+    private final String workspaceName;
     
     /**
      * 
      * @param localPath the local path to get the workspace changeset version for
+     * @param workspaceName name of workspace for which to get changeset version
      */
-    public WorkspaceChangesetVersionCommand(ServerConfigurationProvider provider, String localPath) {
+    public WorkspaceChangesetVersionCommand(ServerConfigurationProvider provider, String localPath, String workspaceName) {
         super(provider);
 
         this.localPath = localPath;
+        this.workspaceName = workspaceName;
     }
 
     /**
      * Returns arguments for TFS history command:
      * 
-     *    <i>tf history localPath -recursive -noprompt -stopafter:1 -version:T -format:brief</i></p>
-     * 
+     *    <i>tf history localPath -recursive -noprompt -stopafter:1 -version:WworkspaceName -format:brief</i></p>
+     *    
      */
     public MaskedArgumentListBuilder getArguments() {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();
@@ -42,7 +45,7 @@ public class WorkspaceChangesetVersionCommand extends AbstractCommand implements
         arguments.add("-recursive");
         arguments.add("-stopafter:1");
         arguments.add("-noprompt");
-        arguments.add("-version:T");
+        arguments.add("-version:W" + workspaceName);
         arguments.add("-format:brief");
         return arguments;
     }

@@ -109,7 +109,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
                 "\n" +
                 "12495     SND\\redsolo_cp 2008-jun-27 13:21:25 changed and created one\n"));
         Project project = new Project(server, "$/serverpath");
-        String workspaceChangesetVersion = project.getWorkspaceChangesetVersion("localpath");
+        String workspaceChangesetVersion = project.getWorkspaceChangesetVersion("localpath", "workspace_name");
         assertNotNull("The returned workspace changeset versions is null", workspaceChangesetVersion);
         assertEquals("Workspace changeset number was incorrect", "12495", workspaceChangesetVersion);
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
@@ -120,7 +120,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Reader spy = spy(new StringReader(""));
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getWorkspaceChangesetVersion("localpath");
+        new Project(server, "$/serverpath").getWorkspaceChangesetVersion("localpath", "workspace_name");
 
         verify(spy).close();
     }    

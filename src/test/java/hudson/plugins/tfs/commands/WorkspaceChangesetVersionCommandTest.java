@@ -19,21 +19,21 @@ public class WorkspaceChangesetVersionCommandTest {
         when(config.getUserName()).thenReturn("snd\\user_cp");
         when(config.getUserPassword()).thenReturn("password");
         
-        MaskedArgumentListBuilder arguments = new WorkspaceChangesetVersionCommand(config, "$/tfsandbox").getArguments();
+        MaskedArgumentListBuilder arguments = new WorkspaceChangesetVersionCommand(config, "$/tfsandbox", "workspace_name").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:T -format:brief", arguments.toStringWithQuote());
+        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:Wworkspace_name -format:brief", arguments.toStringWithQuote());
     }
 
     @Test
     public void assertNoChangesWithEmptyOutput() throws Exception {
-        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", "workspace_name");
         String changesetNumber = command.parse(new StringReader(""));
         assertEquals("Change set number was incorrect", "", changesetNumber);
     }
     
     @Test
     public void assertChangesWithEmptyToolOutput() throws Exception {
-        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", "workspace_name");
         StringReader reader = new StringReader("No history entries were found for the item and version combination specified.\n\n");
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "", changesetNumber);
@@ -50,7 +50,7 @@ public class WorkspaceChangesetVersionCommandTest {
                 "12492     SND\\redsolo_cp 2008-jun-27 13:11:15 first file\n" +
                 "12472     RNO\\_MCLWEB    2008-jun-27 11:16:06 Created team project folder $/tfsandbox via the Team Project Creation Wizard\n");
         
-        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", "workspace_name");
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "12495", changesetNumber);
     }    
@@ -63,7 +63,7 @@ public class WorkspaceChangesetVersionCommandTest {
                 "\n" +
                 "12495     SND\\redsolo_cp 2008-jun-27 13:21:25\n");
         
-        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", "workspace_name");
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "12495", changesetNumber);
     }    
@@ -75,7 +75,7 @@ public class WorkspaceChangesetVersionCommandTest {
                 "--------- -------------- -------------------- ----------------------------------------------------------------------------\n" +
                 "12497     SND\\redsolo_cp 2008-jun-27 13:21:25\n");
         
-        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox");
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", "workspace_name");
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "12497", changesetNumber);
     }    

@@ -33,6 +33,7 @@ import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
 import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
+import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.WorkspaceConfiguration;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
@@ -178,9 +179,14 @@ public class TeamFoundationServerScm extends SCM {
 
         try {
             setWorkspaceChangesetVersion(null);
-            setWorkspaceChangesetVersion(server.getProject(workspaceConfiguration.getProjectPath()).getWorkspaceChangesetVersion(workspaceConfiguration.getWorkfolder()));
+            String projectPath = workspaceConfiguration.getProjectPath();
+            String workFolder = workspaceConfiguration.getWorkfolder();
+            String workspaceName = workspaceConfiguration.getWorkspaceName();
+            Project project = server.getProject(projectPath);
+            setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName));
         } catch (ParseException pe) {
-            listener.error(pe.getMessage());
+            listener.fatalError(pe.getMessage());
+            throw new AbortException();
         }
 
         return true;
