@@ -1,0 +1,13 @@
+-------------------------------------------------------------------------------
+Changeset: 302
+Benutzer: georg
+Datum: Freitag, 15. Juli 2011 16:24:59
+Kommentar:
+Elemente:
+  bearbeiten $/InvestInform/commons/Utils14/src/main/java/de/safir/api/types/ApiSafirBool.java
+Eincheckhinweise:
+  Codebearbeiter:
+  Leistungsbearbeiter:
+  Sicherheitsbearbeiter:
+
+

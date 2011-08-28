@@ -40,6 +40,22 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
      * and filename)
      */
     private static final Pattern PATTERN_ITEM = Pattern.compile("\\s*([^$]+) (\\$/.*)");
+    
+
+    /** Names of field in the output from the TFS tool. This was added because the tool 
+     * will return locale dependent field names.
+     */
+    private static final int FIELD_USER = 0;
+    private static final int FIELD_CHANGESET = 1;
+    private static final int FIELD_DATE = 2;
+    private static final int FIELD_ITEMS = 3;
+    private static final int FIELD_COMMENT = 4;
+    private static final int FIELD_CHECKED_IN_BY = 5;
+    //private static final int FIELD_CHECKEIN_NOTES = 6;
+    private static final String[][] LANG_FIELD_NAMES = {
+                {"User", "Changeset", "Date", "Items", "Comment", "Checked in by", "Check-in Notes"}, // EN
+                {"Benutzer", "Changeset", "Datum", "Elemente", "Kommentar", "Checked in by", "Eincheckhinweise"} // DE
+            };
 
     private final String projectPath;
 
@@ -129,16 +145,21 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
      * @return a change set if it could read the different key/value pairs; null otherwise
      */
     private ChangeSet parseChangeSetString(String changeSetString) throws ParseException, IOException {
-    	KeyValueTextReader reader = new KeyValueTextReader();
-    	Map<String, String> map = reader.parse(changeSetString);
-    	if (map.containsKey("User") && map.containsKey("Changeset") && map.containsKey("Date") && map.containsKey("Items")) {
-    		ChangeSet changeSet = createChangeSet(map.get("Items"), map.get("Changeset"), map.get("User"), map.get("Date"), map.get("Comment"));
-    		if (changeSet != null) {
-    			changeSet.setCheckedInBy(map.get("Checked in by"));
-    		}
-			return changeSet;
-    	}
-    	return null;
+        KeyValueTextReader reader = new KeyValueTextReader();
+        Map<String, String> map = reader.parse(changeSetString);
+        for (String[] fieldNames : LANG_FIELD_NAMES) {
+            if (map.containsKey(fieldNames[FIELD_USER]) 
+                    && map.containsKey(fieldNames[FIELD_CHANGESET]) 
+                    && map.containsKey(fieldNames[FIELD_DATE])
+                    && map.containsKey(fieldNames[FIELD_ITEMS])) {
+                ChangeSet changeSet = createChangeSet(map.get(fieldNames[FIELD_ITEMS]), map.get(fieldNames[FIELD_CHANGESET]), map.get(fieldNames[FIELD_USER]), map.get(fieldNames[FIELD_DATE]), map.get(fieldNames[FIELD_COMMENT]));
+                if (changeSet != null) {
+                    changeSet.setCheckedInBy(map.get(fieldNames[FIELD_CHECKED_IN_BY]));
+                }
+                return changeSet;
+            }
+        }
+        return null;
     }
 
     /**
@@ -236,5 +257,5 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
             }
             return null;
         }
-	}
+    }
 }
