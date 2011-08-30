@@ -33,6 +33,7 @@ import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
 import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
+import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.WorkspaceConfiguration;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
@@ -60,6 +61,7 @@ public class TeamFoundationServerScm extends SCM {
     public static final String PROJECTPATH_ENV_STR = "TFS_PROJECTPATH";
     public static final String SERVERURL_ENV_STR = "TFS_SERVERURL";
     public static final String USERNAME_ENV_STR = "TFS_USERNAME";
+    public static final String WORKSPACE_CHANGESET_ENV_STR = "TFS_CHANGESET";
     
     private final String serverUrl;
     private final String projectPath;
@@ -72,6 +74,7 @@ public class TeamFoundationServerScm extends SCM {
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
+    private transient String workspaceChangesetVersion;
     
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
@@ -173,7 +176,24 @@ public class TeamFoundationServerScm extends SCM {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
         }
+
+        try {
+            setWorkspaceChangesetVersion(null);
+            String projectPath = workspaceConfiguration.getProjectPath();
+            String workFolder = workspaceConfiguration.getWorkfolder();
+            String workspaceName = workspaceConfiguration.getWorkspaceName();
+            Project project = server.getProject(projectPath);
+            setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName));
+        } catch (ParseException pe) {
+            listener.fatalError(pe.getMessage());
+            throw new AbortException();
+        }
+
         return true;
+    }
+
+    void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
+        this.workspaceChangesetVersion = workspaceChangesetVersion;
     }
 
     @Override
@@ -283,6 +303,9 @@ public class TeamFoundationServerScm extends SCM {
         }
         if (userName != null) {
             env.put(USERNAME_ENV_STR, userName);
+        }
+        if (workspaceChangesetVersion != null && ! workspaceChangesetVersion.isEmpty()) {
+            env.put(WORKSPACE_CHANGESET_ENV_STR, workspaceChangesetVersion);
         }
     }
 
