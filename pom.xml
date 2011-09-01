@@ -9,9 +9,9 @@
 
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
-  <name>Hudson Team Foundation Server Plug-in</name>
+  <name>Team Foundation Server Plug-in</name>
   <version>1.18-SNAPSHOT</version>
-  <url>http://wiki.hudson-ci.org/display/HUDSON/Team+Foundation+Server+Plugin</url>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
   </licenses>
