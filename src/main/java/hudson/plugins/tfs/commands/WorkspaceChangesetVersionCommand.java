@@ -19,23 +19,26 @@ public class WorkspaceChangesetVersionCommand extends AbstractCommand implements
    
     private final String localPath;
     private final String workspaceName;
+    private String workspaceOwner;
     
     /**
      * 
      * @param localPath the local path to get the workspace changeset version for
      * @param workspaceName name of workspace for which to get changeset version
+     * @param workspaceOwner owner of TFS workspace
      */
-    public WorkspaceChangesetVersionCommand(ServerConfigurationProvider provider, String localPath, String workspaceName) {
+    public WorkspaceChangesetVersionCommand(ServerConfigurationProvider provider, String localPath, String workspaceName, String workspaceOwner) {
         super(provider);
 
         this.localPath = localPath;
         this.workspaceName = workspaceName;
+        this.workspaceOwner = workspaceOwner;
     }
 
     /**
      * Returns arguments for TFS history command:
      * 
-     *    <i>tf history localPath -recursive -noprompt -stopafter:1 -version:WworkspaceName -format:brief</i></p>
+     *    <i>tf history localPath -recursive -noprompt -stopafter:1 -version:WworkspaceName;workspaceOwner -format:brief</i></p>
      *    
      */
     public MaskedArgumentListBuilder getArguments() {
@@ -45,7 +48,7 @@ public class WorkspaceChangesetVersionCommand extends AbstractCommand implements
         arguments.add("-recursive");
         arguments.add("-stopafter:1");
         arguments.add("-noprompt");
-        arguments.add("-version:W" + workspaceName);
+        arguments.add("-version:W" + workspaceName + ";" + workspaceOwner);
         arguments.add("-format:brief");
         return arguments;
     }
