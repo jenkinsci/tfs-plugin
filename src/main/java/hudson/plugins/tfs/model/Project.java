@@ -89,10 +89,11 @@ public class Project {
      * @param workspaceName name of workspace for which to get latest changeset version
      * @return workspace changeset version for specified local path
      */
-    public String getWorkspaceChangesetVersion(String localPath, String workspaceName) throws IOException, 
+    public String getWorkspaceChangesetVersion(String localPath, String workspaceName, String workspaceOwner) 
+                                                                                       throws IOException, 
                                                                                               InterruptedException, 
                                                                                               ParseException {
-        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(server,localPath,workspaceName);
+        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(server,localPath,workspaceName, workspaceOwner);
         Reader reader = null;
         try {
             reader = server.execute(command.getArguments());

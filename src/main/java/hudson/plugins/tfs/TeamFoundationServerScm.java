@@ -183,7 +183,7 @@ public class TeamFoundationServerScm extends SCM {
             String workFolder = workspaceConfiguration.getWorkfolder();
             String workspaceName = workspaceConfiguration.getWorkspaceName();
             Project project = server.getProject(projectPath);
-            setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName));
+            setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName, getUserName()));
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
