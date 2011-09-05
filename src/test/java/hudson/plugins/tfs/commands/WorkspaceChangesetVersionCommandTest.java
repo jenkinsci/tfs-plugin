@@ -21,7 +21,7 @@ public class WorkspaceChangesetVersionCommandTest {
         
         MaskedArgumentListBuilder arguments = new WorkspaceChangesetVersionCommand(config, "$/tfsandbox", "workspace_name", "owner").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:Wworkspace_name;owner -format:brief", arguments.toStringWithQuote());
+        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:Wworkspace_name;owner -format:brief -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test

@@ -50,6 +50,7 @@ public class WorkspaceChangesetVersionCommand extends AbstractCommand implements
         arguments.add("-noprompt");
         arguments.add("-version:W" + workspaceName + ";" + workspaceOwner);
         arguments.add("-format:brief");
+        addLoginArgument(arguments);
         return arguments;
     }
 
