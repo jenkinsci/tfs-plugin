@@ -304,7 +304,7 @@ public class TeamFoundationServerScm extends SCM {
         if (userName != null) {
             env.put(USERNAME_ENV_STR, userName);
         }
-        if (workspaceChangesetVersion != null && ! workspaceChangesetVersion.isEmpty()) {
+        if (workspaceChangesetVersion != null && workspaceChangesetVersion.length() > 0) {
             env.put(WORKSPACE_CHANGESET_ENV_STR, workspaceChangesetVersion);
         }
     }
