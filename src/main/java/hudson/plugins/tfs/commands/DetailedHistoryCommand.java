@@ -54,7 +54,8 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
     //private static final int FIELD_CHECKEIN_NOTES = 6;
     private static final String[][] LANG_FIELD_NAMES = {
                 {"User", "Changeset", "Date", "Items", "Comment", "Checked in by", "Check-in Notes"}, // EN
-                {"Benutzer", "Changeset", "Datum", "Elemente", "Kommentar", "Checked in by", "Eincheckhinweise"} // DE
+                {"Benutzer", "Changeset", "Datum", "Elemente", "Kommentar", "Checked in by", "Eincheckhinweise"}, // DE
+				{"Utilisateur", "Ensemble de modifications", "Date", "Éléments", "Commentaire", "Checked in by", "Notes d'archivage"} //FR
             };
 
     private final String projectPath;
@@ -104,11 +105,10 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
     public List<ChangeSet> parse(Reader reader) throws IOException, ParseException {
         Date lastBuildDate = fromTimestamp.getTime();
         ArrayList<ChangeSet> list = new ArrayList<ChangeSet>();
-        
+		
         ChangeSetStringReader iterator = new ChangeSetStringReader(new BufferedReader(reader));
         String changeSetString = iterator.readChangeSet(); 
         while (changeSetString != null) {
-        	
         	ChangeSet changeSet = parseChangeSetString(changeSetString);
         	// If some tf tool outputs the key words in non english we will use the old fashion way
         	// using the complicated regex
@@ -153,7 +153,7 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
                     && map.containsKey(fieldNames[FIELD_DATE])
                     && map.containsKey(fieldNames[FIELD_ITEMS])) {
                 ChangeSet changeSet = createChangeSet(map.get(fieldNames[FIELD_ITEMS]), map.get(fieldNames[FIELD_CHANGESET]), map.get(fieldNames[FIELD_USER]), map.get(fieldNames[FIELD_DATE]), map.get(fieldNames[FIELD_COMMENT]));
-                if (changeSet != null) {
+				if (changeSet != null) {
                     changeSet.setCheckedInBy(map.get(fieldNames[FIELD_CHECKED_IN_BY]));
                 }
                 return changeSet;
@@ -238,10 +238,10 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
             StringBuilder builder = new StringBuilder();
             String line;
             int linecount = 0;
-
+			
             while ((line = reader.readLine()) != null) {
                 if (line.length() > 0) {
-                    if ((!foundAtLeastOneChangeSet) && PATTERN_KEYWORD.matcher(line).matches()) {
+                    if ((!foundAtLeastOneChangeSet) && PATTERN_KEYWORD.matcher(line.replace("\u00A0", "")).matches()) {
                         foundAtLeastOneChangeSet = true;
                     }
                     if (line.startsWith(CHANGESET_SEPERATOR) && (linecount > 0)) {
