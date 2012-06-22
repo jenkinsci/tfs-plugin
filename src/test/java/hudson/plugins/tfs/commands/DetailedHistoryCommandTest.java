@@ -187,7 +187,7 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
 	/* Related to bug 10784*/
 	@Test
     public void assertCanParseFrenchChangesetWithCheckinNotes() throws Exception {
-        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-french-1.txt"));
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-french-1.txt"), "Windows-1252");
         DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", 
                 Util.getCalendar(2011, 07, 10), Calendar.getInstance(), 
                 new DateParser(new Locale("fr", "FR"), TimeZone.getTimeZone("France")));
@@ -198,7 +198,7 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
 	
 	@Test
     public void assertCanParseFrenchChangesetWithNBSP() throws Exception {
-        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-french-2.txt"));
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-french-2.txt"), "Windows-1252");
         DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", 
                 Util.getCalendar(2011, 07, 10), Calendar.getInstance(), 
                 new DateParser(new Locale("fr", "FR"), TimeZone.getTimeZone("France")));
