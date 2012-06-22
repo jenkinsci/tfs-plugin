@@ -55,7 +55,7 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
     private static final String[][] LANG_FIELD_NAMES = {
                 {"User", "Changeset", "Date", "Items", "Comment", "Checked in by", "Check-in Notes"}, // EN
                 {"Benutzer", "Changeset", "Datum", "Elemente", "Kommentar", "Checked in by", "Eincheckhinweise"}, // DE
-				{"Utilisateur", "Ensemble de modifications", "Date", "Éléments", "Commentaire", "Checked in by", "Notes d'archivage"} //FR
+				{"Utilisateur", "Ensemble de modifications", "Date", "\u00C9l\u00E9ments", "Commentaire", "Checked in by", "Notes d'archivage"} //FR
             };
 
     private final String projectPath;
