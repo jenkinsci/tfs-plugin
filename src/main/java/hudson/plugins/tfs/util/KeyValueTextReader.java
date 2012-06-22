@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 /**
  * Class that parsers key/values from a reader.
  * This is used when reading text files that contains keys and value pairs where the
@@ -18,20 +19,20 @@ import java.util.regex.Pattern;
  */
 public class KeyValueTextReader {
 
-	private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("([\\w\\s]*):(.*)");
+	private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("([\\w\\s\\p{L}\\']*):(.*)");
 	private static final String CONTINUED_VALUE_STRING = " ";
 
 	public Map<String, String> parse(String string) throws IOException {
 		return parse(new BufferedReader(new StringReader(string)));
 	}
-
+	
 	public Map<String, String> parse(BufferedReader reader) throws IOException {
 		HashMap<String,String> map = null;
 		String line = reader.readLine();
 		String value = null;
 		String key = null;
-		
 		while (line != null) {
+			line = line.replace("\u00A0","");
 			if (line.startsWith(CONTINUED_VALUE_STRING)) {
 				value = value + "\n" + line.trim();
 			} else {

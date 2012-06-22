@@ -184,6 +184,29 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         assertEquals("The number of change sets in the list was incorrect", 1, list.size());
     }
     
+	/* Related to bug 10784*/
+	@Test
+    public void assertCanParseFrenchChangesetWithCheckinNotes() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-french-1.txt"), "Windows-1252");
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", 
+                Util.getCalendar(2011, 07, 10), Calendar.getInstance(), 
+                new DateParser(new Locale("fr", "FR"), TimeZone.getTimeZone("France")));
+        List<ChangeSet> list = command.parse(reader);
+        assertNotNull("The list of change sets was null", list);
+        assertEquals("The number of change sets in the list was incorrect", 1, list.size());
+    }
+	
+	@Test
+    public void assertCanParseFrenchChangesetWithNBSP() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-french-2.txt"), "Windows-1252");
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", 
+                Util.getCalendar(2011, 07, 10), Calendar.getInstance(), 
+                new DateParser(new Locale("fr", "FR"), TimeZone.getTimeZone("France")));
+        List<ChangeSet> list = command.parse(reader);
+        assertNotNull("The list of change sets was null", list);
+        assertEquals("The number of change sets in the list was incorrect", 1, list.size());
+    }
+	
     @Test
     public void assertNoCrashForIssue3683() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("issue-3683.txt"));
