@@ -8,14 +8,14 @@ import org.junit.Test;
 public class WorkspaceConfigurationTest {
 
     @Test public void assertConfigurationsEquals() {
-        WorkspaceConfiguration one = new WorkspaceConfiguration("server", "workspace", "project", "workfolder");
-        WorkspaceConfiguration two = new WorkspaceConfiguration("server", "workspace", "project", "workfolder");
+        WorkspaceConfiguration one = new WorkspaceConfiguration("server", "workspace", ProjectData.getProjects("project", "workfolder", null));
+        WorkspaceConfiguration two = new WorkspaceConfiguration("server", "workspace", ProjectData.getProjects("project", "workfolder", null));
         assertThat(one, is(two));
         assertThat(two, is(one));
         assertThat(one, is(one));
-        assertThat(one, not(new WorkspaceConfiguration("aserver", "workspace", "project", "workfolder")));
-        assertThat(one, not(new WorkspaceConfiguration("server", "aworkspace", "project", "workfolder")));
-        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "aproject", "workfolder")));
-        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", "aworkfolder")));
+        assertThat(one, not(new WorkspaceConfiguration("aserver", "workspace", ProjectData.getProjects("project", "workfolder", null))));
+        assertThat(one, not(new WorkspaceConfiguration("server", "aworkspace", ProjectData.getProjects("project", "workfolder", null))));
+        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", ProjectData.getProjects("aproject", "workfolder", null))));
+        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", ProjectData.getProjects("project", "aworkfolder", null))));
     }
 }

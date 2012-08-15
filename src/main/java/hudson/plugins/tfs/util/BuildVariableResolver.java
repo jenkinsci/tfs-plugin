@@ -54,7 +54,17 @@ public class BuildVariableResolver implements VariableResolver<String> {
         this.computer = computer;
         lazyResolvers.put("JOB_NAME", new LazyResolver() {
             public String getValue() {
-                return project.getName();
+            	if ((null != project.getParent()) && (project.getParent() instanceof hudson.matrix.MatrixProject))
+            	{
+            		hudson.matrix.MatrixProject matrixProject = (hudson.matrix.MatrixProject)project.getParent();
+            		
+            		String projectName;
+            		projectName = matrixProject.getName();
+            		projectName += "-" + project.getName();
+            		return projectName;
+            	}
+            	else
+            		return project.getName();
             }            
         });
         lazyResolvers.put("NODE_NAME", new LazyComputerResolver() {
