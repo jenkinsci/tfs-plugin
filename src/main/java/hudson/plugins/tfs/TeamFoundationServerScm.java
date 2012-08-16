@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -27,7 +28,6 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Node;
-import hudson.model.ParametersAction;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
@@ -37,6 +37,7 @@ import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.WorkspaceConfiguration;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.model.ProjectData;
 import hudson.plugins.tfs.util.BuildVariableResolver;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
@@ -71,6 +72,8 @@ public class TeamFoundationServerScm extends SCM {
     private final String userName;
     private final boolean useUpdate;
     
+    private ProjectData[] projects = new ProjectData[0];
+    
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
@@ -79,7 +82,15 @@ public class TeamFoundationServerScm extends SCM {
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword, List<ProjectData> projects) {
+    	if ((projects != null)&& (projects.size() > 0)) {
+            for (Iterator<ProjectData> itr = projects.iterator(); itr.hasNext();) {
+                ProjectData ml = itr.next();
+                String path = Util.fixEmptyAndTrim(ml.projectPath);
+                if(path==null) itr.remove();
+            }
+            this.projects = projects.toArray(new ProjectData[projects.size()]);
+    	}
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
@@ -117,12 +128,19 @@ public class TeamFoundationServerScm extends SCM {
     public String getUserName() {
         return userName;
     }    
+
+    public ProjectData[] getProjects() {
+    	if (projects == null)
+    		projects = new ProjectData[0];
+    	return projects;
+    }
+	
     // Bean properties END
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
         normalizedWorkspaceName = workspaceName;
         if (build != null) {
-            normalizedWorkspaceName = substituteBuildParameter(build, normalizedWorkspaceName);
+            normalizedWorkspaceName = ProjectData.substituteBuildParameter(build, normalizedWorkspaceName);
             normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build.getProject(), computer));
         }
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
@@ -131,27 +149,17 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     public String getServerUrl(Run<?,?> run) {
-        return substituteBuildParameter(run, serverUrl);
+        return ProjectData.substituteBuildParameter(run, serverUrl);
     }
 
     String getProjectPath(Run<?,?> run) {
-        return Util.replaceMacro(substituteBuildParameter(run, projectPath), new BuildVariableResolver(run.getParent()));
-    }
-
-    private String substituteBuildParameter(Run<?,?> run, String text) {
-        if (run instanceof AbstractBuild<?, ?>){
-            AbstractBuild<?,?> build = (AbstractBuild<?, ?>) run;
-            if (build.getAction(ParametersAction.class) != null) {
-                return build.getAction(ParametersAction.class).substitute(build, text);
-            }
-        }
-        return text;
+        return Util.replaceMacro(ProjectData.substituteBuildParameter(run, projectPath), new BuildVariableResolver(run.getParent()));
     }
     
     @Override
     public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
-        WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
+        WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), ProjectData.getProjects(build, getProjectPath(), getLocalPath(), getProjects()));
         
         // Check if the configuration has changed
         if (build.getPreviousBuild() != null) {
@@ -167,7 +175,7 @@ public class TeamFoundationServerScm extends SCM {
         }
         
         build.addAction(workspaceConfiguration);
-        CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
+        CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjects(), isUseUpdate());
         try {
             List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
             ChangeSetWriter writer = new ChangeSetWriter();
@@ -179,11 +187,11 @@ public class TeamFoundationServerScm extends SCM {
 
         try {
             setWorkspaceChangesetVersion(null);
-            String projectPath = workspaceConfiguration.getProjectPath();
-            String workFolder = workspaceConfiguration.getWorkfolder();
+            String projectPath = workspaceConfiguration.getProjects()[0].getProjectPath();
+            String workFolder = getLocalPath();
             String workspaceName = workspaceConfiguration.getWorkspaceName();
             Project project = server.getProject(projectPath);
-            setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName, getUserName()));
+            setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion("$/", workspaceName, getUserName()));
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
@@ -204,10 +212,17 @@ public class TeamFoundationServerScm extends SCM {
         } else {
             Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
             try {
-                return (server.getProject(getProjectPath(lastRun)).getDetailedHistory(
+            	ProjectData[] projs = ProjectData.getProjects(lastRun, getProjectPath(), getLocalPath(), getProjects());
+            	for (int ndx = 0; ndx < projs.length; ++ndx) {
+                    if (server.getProject(projs[ndx].getProjectPath()).getDetailedHistory(
                             lastRun.getTimestamp(), 
                             Calendar.getInstance()
-                        ).size() > 0);
+                        ).size() > 0) {
+                    	return true;
+                    }
+            	}
+            	return false;
+                
             } catch (ParseException pe) {
                 listener.fatalError(pe.getMessage());
                 throw new AbortException();

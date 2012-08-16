@@ -30,6 +30,26 @@
 	             clazz="required" checkMessage="${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}"/>
 	    </f:entry>
 
+    <f:entry title="${%Additional Projects}">
+      <f:repeatable var="proj" name="tfs.projects" items="${scm.projects}">
+        <table width="100%">
+          <f:entry title="Project path" field="projectPath" help="/plugin/tfs/project.html">
+            <f:textbox value="${proj.projectPath}" id="scm.projectPath.loc" />
+          </f:entry>
+
+          <f:entry title="Local workfolder" field="localPath" help="/plugin/tfs/workfolder.html">
+            <f:textbox value="${h.defaulted(proj.localPath, '.')}" />
+          </f:entry>
+
+          <f:entry>
+            <div align="right">
+              <input type="button" value="${%Delete}" class="repeatable-delete" style="margin-left: 1em;" />
+            </div>
+          </f:entry>
+        </table>
+      </f:repeatable>
+    </f:entry>
+
         <f:entry title="Workspace name" help="/plugin/tfs/workspacename.html">
             <f:textbox name="tfs.workspaceName" value="${h.defaulted(scm.workspaceName, 'Hudson-${JOB_NAME}-${NODE_NAME}')}"
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/workspaceNameCheck?value='+escape(this.value)"/>
