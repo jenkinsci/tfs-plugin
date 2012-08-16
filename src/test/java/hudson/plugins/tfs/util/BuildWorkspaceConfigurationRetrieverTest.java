@@ -23,7 +23,9 @@ public class BuildWorkspaceConfigurationRetrieverTest {
         AbstractBuild build = mock(AbstractBuild.class);
         Node node = mock(Node.class);
         Node needleNode = mock(Node.class);
-        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", ProjectData.getProjects("projectPath", "workfolder", null));
+    	ProjectData[] projects = new ProjectData[0];
+
+        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", ProjectData.getProjects("projectPath", "workfolder", projects));
         when(build.getPreviousBuild()).thenReturn(build).thenReturn(null);
         when(build.getBuiltOn()).thenReturn(node, node, null);
         when(node.getNodeName()).thenReturn("node1", "needleNode");
@@ -90,11 +92,13 @@ public class BuildWorkspaceConfigurationRetrieverTest {
     @Test
     public void assertSaveWorkspaceConfigurationUsesSaveOnBuild() throws IOException {
         AbstractBuild build = mock(AbstractBuild.class);
+    	ProjectData[] projects = new ProjectData[0];
+
         Node node = mock(Node.class);
         when(build.getPreviousBuild()).thenReturn(build);
         when(build.getBuiltOn()).thenReturn(node);
         when(node.getNodeName()).thenReturn("needleNode");
-        when(build.getAction(WorkspaceConfiguration.class)).thenReturn(new WorkspaceConfiguration("serverUrl", "workspaceName", ProjectData.getProjects("projectPath", "workfolder", null)));
+        when(build.getAction(WorkspaceConfiguration.class)).thenReturn(new WorkspaceConfiguration("serverUrl", "workspaceName", ProjectData.getProjects("projectPath", "workfolder", projects)));
         
         BuildWorkspaceConfiguration configuration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(node, build);
         assertThat( configuration.getWorkspaceName(), is("workspaceName"));
@@ -107,9 +111,11 @@ public class BuildWorkspaceConfigurationRetrieverTest {
     @Test
     public void assertGetLatestConfgiurationOnPreviousDeletedNode() {
         AbstractBuild build = mock(AbstractBuild.class);
+    	ProjectData[] projects = new ProjectData[0];
+
         Node node = mock(Node.class);
         Node needleNode = mock(Node.class);
-        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", ProjectData.getProjects("projectPath", "workfolder", null));
+        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", ProjectData.getProjects("projectPath", "workfolder", projects));
         when(build.getPreviousBuild()).thenReturn(build).thenReturn(null);
         when(build.getBuiltOn()).thenReturn(null);
 

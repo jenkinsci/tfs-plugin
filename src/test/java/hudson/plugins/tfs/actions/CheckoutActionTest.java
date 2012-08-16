@@ -141,8 +141,8 @@ public class CheckoutActionTest {
 		ProjectData[] projects = new ProjectData[0];
         CheckoutAction action = new CheckoutAction("workspace", ProjectData.getProjects("project", ".", projects), true);
         List<ChangeSet> actualList = action.checkout(server, hudsonWs, Util.getCalendar(2008, 9, 24), Util.getCalendar(2008, 10, 24));
-        assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
+        assertEquals("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         verify(project).getDetailedHistory(eq(Util.getCalendar(2008, 9, 24)), isA(Calendar.class));
     }
     
@@ -159,7 +159,7 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         
 		ProjectData[] projects = new ProjectData[0];
-        new CheckoutAction("workspace", ProjectData.getProjects("project", ".", projects), false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", ProjectData.getProjects("project", "tfs-ws", projects), false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The local TFS folder was not cleaned", 0, tfsWs.list((FileFilter)null).size());
@@ -255,7 +255,7 @@ public class CheckoutActionTest {
 		ProjectData[] projects = new ProjectData[0];
         CheckoutAction action = new CheckoutAction("workspace", ProjectData.getProjects("project", ".", projects), true);
         List<ChangeSet> actualList = action.checkout(server, hudsonWs, Util.getCalendar(2008, 9, 24), Util.getCalendar(2009, 9, 24));
-        assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
+        assertEquals("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
         verify(project).getDetailedHistory(eq(Util.getCalendar(2008, 9, 24)), eq(Util.getCalendar(2009, 9, 24)));
         verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
