@@ -1,16 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.jvnet.hudson.plugins</groupId>
+    <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.324</version>
-    <relativePath>../pom.xml</relativePath>
+    <version>1.465</version><!-- which version of Jenkins is this plugin built against? -->
   </parent>
 
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
   <name>Team Foundation Server Plug-in</name>
-  <version>1.21-SNAPSHOT</version>
+  <version>1.25-SNAPSHOT</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
@@ -23,6 +22,22 @@
       <email>eramfelt@gmail.com</email>
       <timezone>+1</timezone>
     </developer>
+    
+     <developer>
+      <name>Pablo Maceiras</name>
+      <email>pmaceiras@servicerepairsolutions.com</email> 
+    </developer>
+    
+    <developer>
+      <name>Daniel Gamallo</name>
+      <email>dgamallo@servicerepairsolutions.com</email> 
+    </developer>
+    
+    <developer>
+      <name>Diego Bascans</name>
+      <email>dbascans@servicerepairsolutions.com</email> 
+    </developer>
+    
   </developers>
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/tfs-plugin.git</connection>
@@ -46,27 +61,7 @@
         </configuration>
       </plugin>
 
-      <plugin>
-	<groupId>org.codehaus.mojo</groupId>
-	<artifactId>animal-sniffer-maven-plugin</artifactId>
-	<version>1.7</version>
-	<configuration>
-	  <signature>
-	    <groupId>org.codehaus.mojo.signature</groupId>
-	    <artifactId>java15</artifactId>
-	    <version>1.0</version>
-	  </signature>
-	</configuration>
-	<executions>
-	  <execution>
-	    <id>java.1.5.check</id>
-	    <phase>verify</phase>
-	    <goals>
-	      <goal>check</goal>
-	    </goals>
-	  </execution>
-	</executions>
-      </plugin>
+     
 
     </plugins>
   </build>
