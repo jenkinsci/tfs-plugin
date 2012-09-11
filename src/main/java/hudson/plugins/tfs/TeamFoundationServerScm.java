@@ -41,7 +41,9 @@ import hudson.plugins.tfs.util.BuildVariableResolver;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
 import hudson.scm.ChangeLogParser;
+import hudson.scm.PollingResult;
 import hudson.scm.RepositoryBrowsers;
+import hudson.scm.SCMRevisionState;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.FormValidation;
@@ -197,23 +199,33 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public boolean pollChanges(AbstractProject hudsonProject, Launcher launcher, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
-        Run<?,?> lastRun = hudsonProject.getLastBuild();
-        if (lastRun == null) {
-            return true;
-        } else {
-            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
-            try {
-                return (server.getProject(getProjectPath(lastRun)).getDetailedHistory(
-                            lastRun.getTimestamp(), 
-                            Calendar.getInstance()
-                        ).size() > 0);
-            } catch (ParseException pe) {
-                listener.fatalError(pe.getMessage());
-                throw new AbortException();
-            }
-        }
-    }
+	public boolean pollChanges(AbstractProject hudsonProject,
+			Launcher launcher, FilePath workspace, TaskListener listener)
+			throws IOException, InterruptedException {
+		Run<?, ?> lastRun = hudsonProject.getLastBuild();
+		if (lastRun == null) {
+			return true;
+		} else {
+			Server server = createServer(new TfTool(getDescriptor()
+					.getTfExecutable(), launcher, listener, workspace), lastRun);
+			try {
+				List<ChangeSet> changesHistorySinceLastBuild = server
+						.getProject(getProjectPath(lastRun))
+						.getDetailedHistory(lastRun.getTimestamp(),
+								Calendar.getInstance());
+				for (ChangeSet newChangeinSC : changesHistorySinceLastBuild) {
+					if (!newChangeinSC.getComment().toUpperCase()
+							.contains("NO_CI")) {
+						return true;
+					}
+				}
+				return false;
+			} catch (ParseException pe) {
+				listener.fatalError(pe.getMessage());
+				throw new AbortException();
+			}
+		}
+	}
     
     @Override
     public boolean processWorkspaceBeforeDeletion(AbstractProject<?, ?> project, FilePath workspace, Node node) throws IOException, InterruptedException {
@@ -287,7 +299,7 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
+    public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
         super.buildEnvVars(build, env);
         if (normalizedWorkspaceName != null) {
             env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
@@ -394,4 +406,46 @@ public class TeamFoundationServerScm extends SCM {
             return "Team Foundation Server";
         }
     }
+
+	@Override
+	public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build,
+			Launcher launcher, TaskListener listener) throws IOException,
+			InterruptedException {
+		
+		return null;
+	}
+	
+
+	@Override
+	protected PollingResult compareRemoteRevisionWith(
+			AbstractProject<?, ?> project, Launcher launcher,
+			FilePath workspace, TaskListener listener, SCMRevisionState baseline)
+			throws IOException, InterruptedException {
+		
+		Run<?, ?> lastRun = project.getLastBuild();
+		if (lastRun == null) {
+			return PollingResult.BUILD_NOW;
+		} else {
+			Server server = createServer(new TfTool(getDescriptor()
+					.getTfExecutable(), launcher, listener, workspace), lastRun);
+			try {
+				List<ChangeSet> changesHistorySinceLastBuild = server
+						.getProject(getProjectPath(lastRun))
+						.getDetailedHistory(lastRun.getTimestamp(),
+								Calendar.getInstance());
+				for (ChangeSet newChangeinSC : changesHistorySinceLastBuild) {
+					if (!newChangeinSC.getComment().toUpperCase()
+							.contains("NO_CI")) {
+						return PollingResult.BUILD_NOW;
+					}
+				}
+				return PollingResult.NO_CHANGES;
+			} catch (ParseException pe) {
+				listener.fatalError(pe.getMessage());
+				throw new AbortException();
+			}
+		}
+	}
+
+
 }
