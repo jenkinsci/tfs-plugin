@@ -1,0 +1,11 @@
+-------------------------------------------------------------------------------
+Ensemble de modifications: 302
+Utilisateur: georg
+Date: mercredi 13 juin 2012 16:24:59
+Commentaire:
+Éléments:
+  modifier $/InvestInform/commons/Utils14/src/main/java/de/safir/api/types/ApiSafirBool.java
+Notes d'archivage:
+  Vérificateur de code:
+  Vérificateur de la sécurité:
+  Vérificateur des performances:
