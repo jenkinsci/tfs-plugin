@@ -3,6 +3,7 @@ package hudson.plugins.tfs.model;
 import hudson.plugins.tfs.commands.BriefHistoryCommand;
 import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
+import hudson.plugins.tfs.commands.LabelBasedHistoryCommand;
 import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
 
 import java.io.IOException;
@@ -45,6 +46,25 @@ public class Project {
             IOUtils.closeQuietly(reader);
         }
     }
+
+    /**
+     * a list of change sets based on a label
+     * 
+     * @param label to get history from
+     * @throws InterruptedException 
+     * @throws IOException 
+     * @throws ParseException 
+     */
+	public List<ChangeSet> getDetailedHistory(String label) throws IOException, InterruptedException, ParseException {
+		LabelBasedHistoryCommand command = new LabelBasedHistoryCommand(server, projectPath, label);
+		Reader reader = null;
+		try {
+			reader = server.execute(command.getArguments());
+			return command.parse(reader);
+		} finally {
+			IOUtils.closeQuietly(reader);
+		}
+	}
 
     /**
      * Returns a list of change sets not containing the modified items.
