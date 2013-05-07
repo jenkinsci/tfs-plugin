@@ -1,6 +1,39 @@
 package hudson.plugins.tfs;
 
 import static hudson.Util.fixEmpty;
+import hudson.AbortException;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.Util;
+import hudson.model.BuildListener;
+import hudson.model.TaskListener;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Computer;
+import hudson.model.Node;
+import hudson.model.ParametersAction;
+import hudson.model.Run;
+import hudson.plugins.tfs.actions.CheckoutAction;
+import hudson.plugins.tfs.actions.CheckoutActionFactory;
+import hudson.plugins.tfs.actions.CheckoutInfo;
+import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
+import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
+import hudson.plugins.tfs.commands.EnvironmentStrings;
+import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.model.Project;
+import hudson.plugins.tfs.model.Server;
+import hudson.plugins.tfs.model.WorkspaceConfiguration;
+import hudson.plugins.tfs.util.BuildVariableResolver;
+import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
+import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
+import hudson.scm.ChangeLogParser;
+import hudson.scm.RepositoryBrowsers;
+import hudson.scm.SCMDescriptor;
+import hudson.scm.SCM;
+import hudson.util.FormValidation;
+import hudson.util.LogTaskListener;
+import hudson.util.Scrambler;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,39 +48,8 @@ import java.util.regex.Pattern;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-
-import hudson.AbortException;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Computer;
-import hudson.model.Node;
-import hudson.model.ParametersAction;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.tfs.actions.CheckoutAction;
-import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
-import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
-import hudson.plugins.tfs.model.Project;
-import hudson.plugins.tfs.model.WorkspaceConfiguration;
-import hudson.plugins.tfs.model.Server;
-import hudson.plugins.tfs.model.ChangeSet;
-import hudson.plugins.tfs.util.BuildVariableResolver;
-import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
-import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
-import hudson.scm.ChangeLogParser;
-import hudson.scm.RepositoryBrowsers;
-import hudson.scm.SCM;
-import hudson.scm.SCMDescriptor;
-import hudson.util.FormValidation;
-import hudson.util.LogTaskListener;
-import hudson.util.Scrambler;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * SCM for Microsoft Team Foundation Server.
@@ -56,12 +58,6 @@ import org.kohsuke.stapler.QueryParameter;
  */
 public class TeamFoundationServerScm extends SCM {
 
-    public static final String WORKSPACE_ENV_STR = "TFS_WORKSPACE";
-    public static final String WORKFOLDER_ENV_STR = "TFS_WORKFOLDER";
-    public static final String PROJECTPATH_ENV_STR = "TFS_PROJECTPATH";
-    public static final String SERVERURL_ENV_STR = "TFS_SERVERURL";
-    public static final String USERNAME_ENV_STR = "TFS_USERNAME";
-    public static final String WORKSPACE_CHANGESET_ENV_STR = "TFS_CHANGESET";
     
     private final String serverUrl;
     private final String projectPath;
@@ -75,6 +71,8 @@ public class TeamFoundationServerScm extends SCM {
 
     private transient String normalizedWorkspaceName;
     private transient String workspaceChangesetVersion;
+	private Server server;
+	private WorkspaceConfiguration workspaceConfiguration;
     
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
@@ -150,8 +148,8 @@ public class TeamFoundationServerScm extends SCM {
     
     @Override
     public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
-        Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
-        WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
+		this.server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
+        this.workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
         
         // Check if the configuration has changed
         if (build.getPreviousBuild() != null) {
@@ -167,9 +165,13 @@ public class TeamFoundationServerScm extends SCM {
         }
         
         build.addAction(workspaceConfiguration);
-        CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
         try {
-            List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
+			CheckoutInfo checkoutInfo = new CheckoutInfo(workspaceName, projectPath, 
+					workspaceConfiguration.getWorkfolder(), useUpdate, server, workspaceFilePath, build);
+			
+        	CheckoutAction checkout = CheckoutActionFactory.getInstance(build, checkoutInfo);
+        	List<ChangeSet> list = checkout.checkout();
+        	
             ChangeSetWriter writer = new ChangeSetWriter();
             writer.write(list, changelogFile);
         } catch (ParseException pe) {
@@ -201,17 +203,17 @@ public class TeamFoundationServerScm extends SCM {
         Run<?,?> lastRun = hudsonProject.getLastBuild();
         if (lastRun == null) {
             return true;
-        } else {
-            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
-            try {
-                return (server.getProject(getProjectPath(lastRun)).getDetailedHistory(
-                            lastRun.getTimestamp(), 
-                            Calendar.getInstance()
-                        ).size() > 0);
-            } catch (ParseException pe) {
-                listener.fatalError(pe.getMessage());
-                throw new AbortException();
-            }
+        } 
+
+        Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
+        try {
+            return (server.getProject(getProjectPath(lastRun)).getDetailedHistory(
+                        lastRun.getTimestamp(), 
+                        Calendar.getInstance()
+                    ).size() > 0);
+        } catch (ParseException pe) {
+            listener.fatalError(pe.getMessage());
+            throw new AbortException();
         }
     }
     
@@ -290,22 +292,22 @@ public class TeamFoundationServerScm extends SCM {
     public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
         super.buildEnvVars(build, env);
         if (normalizedWorkspaceName != null) {
-            env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
+            env.put(EnvironmentStrings.WORKSPACE.getValue(), normalizedWorkspaceName);
         }
         if (env.containsKey("WORKSPACE")) {
-            env.put(WORKFOLDER_ENV_STR, env.get("WORKSPACE") + File.separator + getLocalPath());
+            env.put(EnvironmentStrings.WORKFOLDER.getValue(), env.get("WORKSPACE") + File.separator + getLocalPath());
         }
         if (projectPath != null) {
-            env.put(PROJECTPATH_ENV_STR, projectPath);
+            env.put(EnvironmentStrings.PROJECTPATH.getValue(), projectPath);
         }
         if (serverUrl != null) {
-            env.put(SERVERURL_ENV_STR, serverUrl);
+            env.put(EnvironmentStrings.SERVERURL.getValue(), serverUrl);
         }
         if (userName != null) {
-            env.put(USERNAME_ENV_STR, userName);
+            env.put(EnvironmentStrings.USERNAME.getValue(), userName);
         }
         if (workspaceChangesetVersion != null && workspaceChangesetVersion.length() > 0) {
-            env.put(WORKSPACE_CHANGESET_ENV_STR, workspaceChangesetVersion);
+            env.put(EnvironmentStrings.CHANGESET.getValue() , workspaceChangesetVersion);
         }
     }
 

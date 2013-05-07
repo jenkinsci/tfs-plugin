@@ -1,5 +1,7 @@
 package hudson.plugins.tfs.util;
 
+import hudson.util.ArgumentListBuilder;
+
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -32,7 +34,8 @@ public class MaskedArgumentListBuilder extends ArgumentListBuilder{
      * Returns true if there are any masked arguments.
      * @return true if there are any masked arguments; false otherwise
      */
-    public boolean hasMaskedArguments() {
+    @Override
+	public boolean hasMaskedArguments() {
         return (maskedArgumentIndex != null);
     }
 
@@ -40,7 +43,8 @@ public class MaskedArgumentListBuilder extends ArgumentListBuilder{
      * Returns an array of booleans where the masked arguments are marked as true
      * @return an array of booleans.
      */
-    public boolean[] toMaskArray() {
+    @Override
+	public boolean[] toMaskArray() {
         String[] commands = toCommandArray();
         boolean[] mask = new boolean[commands.length];
         if (maskedArgumentIndex != null) { 
@@ -55,7 +59,8 @@ public class MaskedArgumentListBuilder extends ArgumentListBuilder{
      * Add a masked argument
      * @param string the argument
      */
-    public void addMasked(String string) {
+    @Override
+	public void addMasked(String string) {
         if (maskedArgumentIndex == null) {
             maskedArgumentIndex = new HashSet<Integer>();
         }

@@ -1,19 +1,27 @@
 package hudson.plugins.tfs;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Computer;
 import hudson.model.Node;
 import hudson.model.ParametersAction;
+import hudson.plugins.tfs.commands.EnvironmentStrings;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Test;
@@ -120,7 +128,7 @@ public class TeamFoundationServerScmTest {
         
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(build, env );        
-        assertEquals("The workspace name was incorrect", "WORKSPACE_SAMPLE", env.get(TeamFoundationServerScm.WORKSPACE_ENV_STR));
+        assertEquals("The workspace name was incorrect", "WORKSPACE_SAMPLE", env.get(EnvironmentStrings.WORKSPACE.getValue()));
     }
     
     @Test
@@ -130,7 +138,7 @@ public class TeamFoundationServerScmTest {
         Map<String, String> env = new HashMap<String, String>();
         env.put("WORKSPACE", "/this/is/a");
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
-        assertEquals("The workfolder path was incorrect", "/this/is/a" + File.separator + "PATH", env.get(TeamFoundationServerScm.WORKFOLDER_ENV_STR));
+        assertEquals("The workfolder path was incorrect", "/this/is/a" + File.separator + "PATH", env.get(EnvironmentStrings.WORKFOLDER.getValue()));
     }
     
     @Test
@@ -138,7 +146,7 @@ public class TeamFoundationServerScmTest {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
-        assertEquals("The project path was incorrect", "projectpath", env.get(TeamFoundationServerScm.PROJECTPATH_ENV_STR));
+        assertEquals("The project path was incorrect", "projectpath", env.get(EnvironmentStrings.PROJECTPATH.getValue()));
     }
     
     @Test
@@ -146,7 +154,7 @@ public class TeamFoundationServerScmTest {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
-        assertEquals("The server URL was incorrect", "serverurl", env.get(TeamFoundationServerScm.SERVERURL_ENV_STR));
+        assertEquals("The server URL was incorrect", "serverurl", env.get(EnvironmentStrings.SERVERURL.getValue()));
     }
     
     @Test
@@ -154,7 +162,7 @@ public class TeamFoundationServerScmTest {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "PATH", false, "WORKSPACE_SAMPLE", "user", "password");
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
-        assertEquals("The TFS user name was incorrect", "user", env.get(TeamFoundationServerScm.USERNAME_ENV_STR));
+        assertEquals("The TFS user name was incorrect", "user", env.get(EnvironmentStrings.USERNAME.getValue()));
     }
     
     @Test
@@ -163,7 +171,7 @@ public class TeamFoundationServerScmTest {
         scm.setWorkspaceChangesetVersion("12345");
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
-        assertEquals("Workspace changeset version was incorrect", "12345", env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
+        assertEquals("Workspace changeset version was incorrect", "12345", env.get(EnvironmentStrings.CHANGESET.getValue()));
     }
   
     @Test
@@ -172,7 +180,7 @@ public class TeamFoundationServerScmTest {
         scm.setWorkspaceChangesetVersion("");
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
-        assertEquals("Workspace changeset version was not null", null, env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
+        assertEquals("Workspace changeset version was not null", null, env.get(EnvironmentStrings.WORKSPACE.getValue()));
     }
 
     @Test
@@ -181,7 +189,7 @@ public class TeamFoundationServerScmTest {
         scm.setWorkspaceChangesetVersion(null);
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
-        assertEquals("Workspace changeset version was not null", null, env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
+        assertEquals("Workspace changeset version was not null", null, env.get(EnvironmentStrings.WORKSPACE.getValue()));
     }
 
     /**
