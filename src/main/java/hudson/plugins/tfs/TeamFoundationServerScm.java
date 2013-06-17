@@ -41,7 +41,9 @@ import hudson.plugins.tfs.util.BuildVariableResolver;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
 import hudson.scm.ChangeLogParser;
+import hudson.scm.PollingResult;
 import hudson.scm.RepositoryBrowsers;
+import hudson.scm.SCMRevisionState;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.FormValidation;
@@ -149,7 +151,7 @@ public class TeamFoundationServerScm extends SCM {
     }
     
     @Override
-    public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
+    public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
         WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
         
@@ -287,7 +289,7 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
+    public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
         super.buildEnvVars(build, env);
         if (normalizedWorkspaceName != null) {
             env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
@@ -393,5 +395,22 @@ public class TeamFoundationServerScm extends SCM {
         public String getDisplayName() {
             return "Team Foundation Server";
         }
+    }
+
+    @Override
+    public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build,
+            Launcher launcher, TaskListener listener) throws IOException,
+            InterruptedException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected PollingResult compareRemoteRevisionWith(
+            AbstractProject<?, ?> project, Launcher launcher,
+            FilePath workspace, TaskListener listener, SCMRevisionState baseline)
+            throws IOException, InterruptedException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
