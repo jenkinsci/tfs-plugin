@@ -186,6 +186,9 @@ public class TeamFoundationServerScm extends SCM {
             String workspaceName = workspaceConfiguration.getWorkspaceName();
             Project project = server.getProject(projectPath);
             setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName, getUserName()));
+            
+            // by adding this action, we prevent calcRevisionsFromBuild() from being called
+            build.addAction(new TFSRevisionState(this.workspaceChangesetVersion));
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
@@ -401,7 +404,14 @@ public class TeamFoundationServerScm extends SCM {
     public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build,
             Launcher launcher, TaskListener listener) throws IOException,
             InterruptedException {
-        // TODO Auto-generated method stub
+        /*
+         * This method does nothing, since the work has already been done in
+         * the checkout() method, as per the documentation:
+         * """
+         * As an optimization, SCM implementation can choose to compute SCMRevisionState
+         * and add it as an action during check out, in which case this method will not called.
+         * """
+         */
         return null;
     }
 
