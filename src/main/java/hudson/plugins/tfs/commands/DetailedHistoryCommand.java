@@ -2,9 +2,7 @@ package hudson.plugins.tfs.commands;
 
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.util.DateParser;
-import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.KeyValueTextReader;
-import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +17,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DetailedHistoryCommand extends AbstractCommand implements ParseableCommand<List<ChangeSet>> {
+public class DetailedHistoryCommand extends AbstractHistoryCommand {
 
     // Setting this system property will skip the date chek in parsing that makes
     // sure that a change set is within the date range. See CC-735 reference.
@@ -57,28 +55,15 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
                 {"Benutzer", "Changeset", "Datum", "Elemente", "Kommentar", "Checked in by", "Eincheckhinweise"} // DE
             };
 
-    private final String projectPath;
-
-    private final Calendar fromTimestamp;
-
-    private final Calendar toTimestamp;
-
     private final DateParser dateParser;
     
     private final boolean skipDateCheckInParsing;
     
     public DetailedHistoryCommand(ServerConfigurationProvider configurationProvider, String projectPath, Calendar fromTimestamp, Calendar toTimestamp,
             DateParser dateParser) {
-        super(configurationProvider);
-        this.projectPath = projectPath;
-        this.fromTimestamp = fromTimestamp;
+        super(configurationProvider, projectPath, fromTimestamp, toTimestamp);
         this.dateParser = dateParser;
         this.skipDateCheckInParsing = Boolean.valueOf(System.getProperty(IGNORE_DATE_CHECK_ON_CHANGE_SET));
-
-        // The to timestamp is exclusive, ie it will only show history before the to timestamp.
-        // This command should be inclusive.
-        this.toTimestamp = (Calendar) toTimestamp.clone();
-        this.toTimestamp.add(Calendar.SECOND, 1);
     }
 
     public DetailedHistoryCommand(ServerConfigurationProvider provider,  
@@ -86,19 +71,10 @@ public class DetailedHistoryCommand extends AbstractCommand implements Parseable
         this(provider, projectPath, fromTimestamp, toTimestamp, new DateParser());
     }
 
-    public MaskedArgumentListBuilder getArguments() {
-        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
-        arguments.add("history");
-        arguments.add(projectPath);
-        arguments.add("-noprompt");
-        arguments.add(String.format("-version:D%s~D%s", 
-                DateUtil.TFS_DATETIME_FORMATTER.get().format(fromTimestamp.getTime()), 
-                DateUtil.TFS_DATETIME_FORMATTER.get().format(toTimestamp.getTime())));
-        arguments.add("-recursive");
-        arguments.add("-format:detailed");        
-        addServerArgument(arguments);
-        addLoginArgument(arguments);
-        return arguments;
+    @Override
+    protected String getFormat()
+    {
+        return "detailed";
     }
     
     public List<ChangeSet> parse(Reader reader) throws IOException, ParseException {
