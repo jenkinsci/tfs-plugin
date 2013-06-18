@@ -189,7 +189,7 @@ public class TeamFoundationServerScm extends SCM {
             setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName, getUserName()));
             
             // by adding this action, we prevent calcRevisionsFromBuild() from being called
-            build.addAction(new TFSRevisionState(this.workspaceChangesetVersion));
+            build.addAction(new TFSRevisionState(this.workspaceChangesetVersion, projectPath));
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
@@ -437,7 +437,7 @@ public class TeamFoundationServerScm extends SCM {
             // briefHistory will probably always contain at least one entry 
             final TFSRevisionState tfsRemote = 
                     (briefHistory.size() > 0) 
-                    ? new TFSRevisionState(briefHistory.get(0).getVersion()) 
+                    ? new TFSRevisionState(briefHistory.get(0).getVersion(), projectPath)
                     : tfsBaseline;
 
             // TODO: we could return INSIGNIFICANT if all the changesets
