@@ -427,10 +427,9 @@ public class TeamFoundationServerScm extends SCM {
         final Server server = createServer(tool, build);
         final Project tfsProject = server.getProject(projectPath);
         final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
-        final int changeset = Integer.parseInt(tfsBaseline.changesetVersion, 10);
         try {
             final List<ChangeSet> briefHistory = tfsProject.getBriefHistory(
-                        changeset,
+                        tfsBaseline.changesetVersion,
                         Calendar.getInstance()
                     );
 
@@ -447,7 +446,7 @@ public class TeamFoundationServerScm extends SCM {
             // we would be in a better position to detect if this workspace
             // points to a different remote path and thus return INCOMPARABLE
             final Change change = 
-                    tfsBaseline.changesetVersion.equals(tfsRemote.changesetVersion)
+                    tfsBaseline.changesetVersion == tfsRemote.changesetVersion
                     ? Change.NONE
                     : Change.SIGNIFICANT;
             return new PollingResult(tfsBaseline, tfsRemote, change);
