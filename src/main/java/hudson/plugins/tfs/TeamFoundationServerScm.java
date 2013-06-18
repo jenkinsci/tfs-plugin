@@ -42,6 +42,7 @@ import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
 import hudson.scm.ChangeLogParser;
 import hudson.scm.PollingResult;
+import hudson.scm.PollingResult.Change;
 import hudson.scm.RepositoryBrowsers;
 import hudson.scm.SCMRevisionState;
 import hudson.scm.SCM;
@@ -420,7 +421,39 @@ public class TeamFoundationServerScm extends SCM {
             AbstractProject<?, ?> project, Launcher launcher,
             FilePath workspace, TaskListener listener, SCMRevisionState baseline)
             throws IOException, InterruptedException {
-        // TODO Auto-generated method stub
-        return null;
+
+        Run<?, ?> build = project.getLastBuild();
+        final TfTool tool = new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace);
+        final Server server = createServer(tool, build);
+        final Project tfsProject = server.getProject(projectPath);
+        final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
+        final int changeset = Integer.parseInt(tfsBaseline.changesetVersion, 10);
+        try {
+            final List<ChangeSet> briefHistory = tfsProject.getBriefHistory(
+                        changeset,
+                        Calendar.getInstance()
+                    );
+
+            // TODO: Given we have a tfsBaseline with a changeset, 
+            // briefHistory will probably always contain at least one entry 
+            final TFSRevisionState tfsRemote = 
+                    (briefHistory.size() > 0) 
+                    ? new TFSRevisionState(briefHistory.get(0).getVersion()) 
+                    : tfsBaseline;
+
+            // TODO: we could return INSIGNIFICANT if all the changesets
+            // contain the string "***NO_CI***" at the end of their comment
+            // TODO: if we augment TFSRevisionState to include the remote path,
+            // we would be in a better position to detect if this workspace
+            // points to a different remote path and thus return INCOMPARABLE
+            final Change change = 
+                    tfsBaseline.changesetVersion.equals(tfsRemote.changesetVersion)
+                    ? Change.NONE
+                    : Change.SIGNIFICANT;
+            return new PollingResult(tfsBaseline, tfsRemote, change);
+        } catch (ParseException pe) {
+            listener.fatalError(pe.getMessage());
+            throw new AbortException();
+        }
     }
 }
