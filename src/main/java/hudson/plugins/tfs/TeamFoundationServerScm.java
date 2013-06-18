@@ -422,11 +422,16 @@ public class TeamFoundationServerScm extends SCM {
             FilePath workspace, TaskListener listener, SCMRevisionState baseline)
             throws IOException, InterruptedException {
 
+        final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
+        if (!projectPath.equalsIgnoreCase(tfsBaseline.projectPath))
+        {
+            // There's no PollingResult.INCOMPARABLE, so we use the next closest thing
+            return PollingResult.BUILD_NOW;
+        }
         Run<?, ?> build = project.getLastBuild();
         final TfTool tool = new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace);
         final Server server = createServer(tool, build);
         final Project tfsProject = server.getProject(projectPath);
-        final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
         try {
             final List<ChangeSet> briefHistory = tfsProject.getBriefHistory(
                         tfsBaseline.changesetVersion,
@@ -434,7 +439,7 @@ public class TeamFoundationServerScm extends SCM {
                     );
 
             // TODO: Given we have a tfsBaseline with a changeset, 
-            // briefHistory will probably always contain at least one entry 
+            // briefHistory will probably always contain at least one entry
             final TFSRevisionState tfsRemote = 
                     (briefHistory.size() > 0) 
                     ? new TFSRevisionState(briefHistory.get(0).getVersion(), projectPath)
@@ -442,9 +447,6 @@ public class TeamFoundationServerScm extends SCM {
 
             // TODO: we could return INSIGNIFICANT if all the changesets
             // contain the string "***NO_CI***" at the end of their comment
-            // TODO: if we augment TFSRevisionState to include the remote path,
-            // we would be in a better position to detect if this workspace
-            // points to a different remote path and thus return INCOMPARABLE
             final Change change = 
                     tfsBaseline.changesetVersion == tfsRemote.changesetVersion
                     ? Change.NONE
