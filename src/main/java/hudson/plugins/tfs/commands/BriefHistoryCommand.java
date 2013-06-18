@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +32,11 @@ public class BriefHistoryCommand extends AbstractHistoryCommand {
         super(provider, projectPath, fromTimestamp, toTimestamp);
     }
 
+    public BriefHistoryCommand(ServerConfigurationProvider provider,
+            String projectPath, int fromChangeset, Calendar toTimestamp) {
+        super(provider, projectPath, fromChangeset, toTimestamp);
+    }
+
     @Override
     protected String getFormat()
     {
@@ -43,6 +49,7 @@ public class BriefHistoryCommand extends AbstractHistoryCommand {
      * @return a list of change sets from the console output; empty if none could be found.
      */
     public List<ChangeSet> parse(Reader consoleReader) throws ParseException, IOException {
+        Date lastBuildDate = fromTimestamp == null ? null : fromTimestamp.getTime();
         List<ChangeSet> list = new ArrayList<ChangeSet>();
 
         TextTableParser parser = new TextTableParser(new BufferedReader(consoleReader), 1);
@@ -51,7 +58,7 @@ public class BriefHistoryCommand extends AbstractHistoryCommand {
                 DateUtil.parseDate(parser.getColumn(2)),
                 parser.getColumn(1),
                 Util.fixNull(parser.getColumn(3)));
-            if (changeset.getDate().after(fromTimestamp.getTime())) { 
+            if (lastBuildDate == null || changeset.getDate().after(lastBuildDate)) { 
                 list.add(changeset);
             }
         }

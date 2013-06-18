@@ -70,6 +70,18 @@ public class DetailedHistoryCommand extends AbstractHistoryCommand {
             String projectPath, Calendar fromTimestamp, Calendar toTimestamp) {
         this(provider, projectPath, fromTimestamp, toTimestamp, new DateParser());
     }
+    
+    public DetailedHistoryCommand(ServerConfigurationProvider configurationProvider, String projectPath, int fromChangeset, Calendar toTimestamp,
+            DateParser dateParser) {
+        super(configurationProvider, projectPath, fromChangeset, toTimestamp);
+        this.dateParser = dateParser;
+        this.skipDateCheckInParsing = Boolean.valueOf(System.getProperty(IGNORE_DATE_CHECK_ON_CHANGE_SET));
+    }
+
+    public DetailedHistoryCommand(ServerConfigurationProvider provider,  
+            String projectPath, int fromChangeset, Calendar toTimestamp) {
+        this(provider, projectPath, fromChangeset, toTimestamp, new DateParser());
+    }
 
     @Override
     protected String getFormat()
@@ -78,7 +90,7 @@ public class DetailedHistoryCommand extends AbstractHistoryCommand {
     }
     
     public List<ChangeSet> parse(Reader reader) throws IOException, ParseException {
-        Date lastBuildDate = fromTimestamp.getTime();
+        Date lastBuildDate = fromTimestamp == null ? null : fromTimestamp.getTime();
         ArrayList<ChangeSet> list = new ArrayList<ChangeSet>();
         
         ChangeSetStringReader iterator = new ChangeSetStringReader(new BufferedReader(reader));
@@ -102,7 +114,7 @@ public class DetailedHistoryCommand extends AbstractHistoryCommand {
             }
 
             // CC-735.  Ignore changesets that occured before the specified lastBuild.
-            if (skipDateCheckInParsing || changeSet.getDate().compareTo(lastBuildDate) > 0) {
+            if (skipDateCheckInParsing || lastBuildDate == null || changeSet.getDate().after(lastBuildDate)) {
                 list.add(changeSet);
             }
             changeSetString = iterator.readChangeSet();
