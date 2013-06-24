@@ -45,7 +45,7 @@ public class CheckoutAction {
                 localFolderPath.deleteContents();
             }
             workspace = workspaces.newWorkspace(workspaceName);
-            workspace.mapWorkfolder(project, localFolder);
+            workspace.mapWorkfolder(project, localFolderPath.getRemote());
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }
