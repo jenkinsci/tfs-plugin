@@ -422,6 +422,13 @@ public class TeamFoundationServerScm extends SCM {
             FilePath workspace, TaskListener listener, SCMRevisionState baseline)
             throws IOException, InterruptedException {
 
+        if (!(baseline instanceof TFSRevisionState))
+        {
+            // This plugin was just upgraded, we don't yet have a new-style baseline,
+            // so we perform an old-school poll
+            boolean shouldBuild = pollChanges(project, launcher, workspace, listener);
+            return shouldBuild ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
+        }
         final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
         if (!projectPath.equalsIgnoreCase(tfsBaseline.projectPath))
         {
