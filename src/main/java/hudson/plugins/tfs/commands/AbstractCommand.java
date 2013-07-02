@@ -22,6 +22,14 @@ public abstract class AbstractCommand implements Command {
         return result;
     }
 
+    protected static Calendar getExclusiveToTimestamp(Calendar toTimestamp) {
+        // The to timestamp is exclusive, ie it will only show history before the to timestamp.
+        // This command should be inclusive.
+        Calendar result = (Calendar) toTimestamp.clone();
+        result.add(Calendar.SECOND, 1);
+        return result;
+    }
+
     private final ServerConfigurationProvider config;
     
     public AbstractCommand(ServerConfigurationProvider configurationProvider) {

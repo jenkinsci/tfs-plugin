@@ -32,15 +32,6 @@ public abstract class AbstractHistoryCommand extends AbstractCommand implements
         this.toTimestamp = getExclusiveToTimestamp(toTimestamp);
     }
     
-    static Calendar getExclusiveToTimestamp(Calendar toTimestamp)
-    {
-        // The to timestamp is exclusive, ie it will only show history before the to timestamp.
-        // This command should be inclusive.
-        Calendar result = (Calendar) toTimestamp.clone();
-        result.add(Calendar.SECOND, 1);
-        return result;
-    }
-
     public MaskedArgumentListBuilder getArguments() {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("history");
