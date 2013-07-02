@@ -1,10 +1,26 @@
 package hudson.plugins.tfs.commands;
 
+import java.util.Calendar;
+
 import hudson.Util;
+import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import hudson.util.ArgumentListBuilder;
 
 public abstract class AbstractCommand implements Command {
+
+    protected static String getRangeSpecification(Calendar timestamp, int changeset) {
+        String result;
+        if(timestamp != null)
+        {
+            result = String.format("D%s", DateUtil.TFS_DATETIME_FORMATTER.get().format(timestamp.getTime()));
+        }
+        else
+        {
+            result = String.format("C%d", changeset); 
+        }
+        return result;
+    }
 
     private final ServerConfigurationProvider config;
     
