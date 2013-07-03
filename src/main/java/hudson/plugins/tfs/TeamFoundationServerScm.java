@@ -269,7 +269,7 @@ public class TeamFoundationServerScm extends SCM {
 
     @Override
     public boolean requiresWorkspaceForPolling() {
-        return true;
+        return false;
     }
 
     @Override
@@ -422,11 +422,12 @@ public class TeamFoundationServerScm extends SCM {
             FilePath workspace, TaskListener listener, SCMRevisionState baseline)
             throws IOException, InterruptedException {
 
+        final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
         if (!(baseline instanceof TFSRevisionState))
         {
             // This plugin was just upgraded, we don't yet have a new-style baseline,
             // so we perform an old-school poll
-            boolean shouldBuild = pollChanges(project, launcher, workspace, listener);
+            boolean shouldBuild = pollChanges(project, localLauncher, workspace, listener);
             return shouldBuild ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
         }
         final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
@@ -436,7 +437,7 @@ public class TeamFoundationServerScm extends SCM {
             return PollingResult.BUILD_NOW;
         }
         Run<?, ?> build = project.getLastBuild();
-        final TfTool tool = new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace);
+        final TfTool tool = new TfTool(getDescriptor().getTfExecutable(), localLauncher, listener, workspace);
         final Server server = createServer(tool, build);
         final Project tfsProject = server.getProject(projectPath);
         try {
