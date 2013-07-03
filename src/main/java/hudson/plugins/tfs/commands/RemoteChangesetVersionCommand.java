@@ -30,6 +30,6 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
     
     @Override
     String getVersionSpecification() {
-        return String.format("~%s", AbstractCommand.getRangeSpecification(toTimestamp, 0));
+        return String.format("%s", AbstractCommand.getRangeSpecification(toTimestamp, 0));
     }
 }

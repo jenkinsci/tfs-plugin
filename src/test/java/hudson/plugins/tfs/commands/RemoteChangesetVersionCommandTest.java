@@ -25,7 +25,7 @@ public class RemoteChangesetVersionCommandTest {
         
         MaskedArgumentListBuilder arguments = new RemoteChangesetVersionCommand(config, "$/tfsandbox", fixedPointInTime).getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:~D2013-07-02T15:40:51Z -format:brief -login:snd\\user_cp,password -server:https://tfs02.codeplex.com", arguments.toStringWithQuote());
+        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:D2013-07-02T15:40:51Z -format:brief -login:snd\\user_cp,password -server:https://tfs02.codeplex.com", arguments.toStringWithQuote());
     }
 
     @Test
