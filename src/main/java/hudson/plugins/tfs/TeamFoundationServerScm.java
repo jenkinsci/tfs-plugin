@@ -183,13 +183,13 @@ public class TeamFoundationServerScm extends SCM {
         try {
             setWorkspaceChangesetVersion(null);
             String projectPath = workspaceConfiguration.getProjectPath();
-            String workFolder = workspaceConfiguration.getWorkfolder();
-            String workspaceName = workspaceConfiguration.getWorkspaceName();
             Project project = server.getProject(projectPath);
-            setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName, getUserName()));
+            // TODO: even better would be to call this first, then use the changeset when calling checkout
+            int buildChangeset = project.getRemoteChangesetVersion(build.getTimestamp());
+            setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
             
             // by adding this action, we prevent calcRevisionsFromBuild() from being called
-            build.addAction(new TFSRevisionState(this.workspaceChangesetVersion, projectPath));
+            build.addAction(new TFSRevisionState(buildChangeset, projectPath));
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
