@@ -41,7 +41,10 @@ import hudson.plugins.tfs.util.BuildVariableResolver;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
 import hudson.scm.ChangeLogParser;
+import hudson.scm.PollingResult;
+import hudson.scm.PollingResult.Change;
 import hudson.scm.RepositoryBrowsers;
+import hudson.scm.SCMRevisionState;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.FormValidation;
@@ -149,7 +152,7 @@ public class TeamFoundationServerScm extends SCM {
     }
     
     @Override
-    public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
+    public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
         WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
         
@@ -184,6 +187,9 @@ public class TeamFoundationServerScm extends SCM {
             String workspaceName = workspaceConfiguration.getWorkspaceName();
             Project project = server.getProject(projectPath);
             setWorkspaceChangesetVersion(project.getWorkspaceChangesetVersion(workFolder, workspaceName, getUserName()));
+            
+            // by adding this action, we prevent calcRevisionsFromBuild() from being called
+            build.addAction(new TFSRevisionState(this.workspaceChangesetVersion, projectPath));
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
@@ -287,7 +293,7 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
+    public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
         super.buildEnvVars(build, env);
         if (normalizedWorkspaceName != null) {
             env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
@@ -392,6 +398,70 @@ public class TeamFoundationServerScm extends SCM {
         @Override
         public String getDisplayName() {
             return "Team Foundation Server";
+        }
+    }
+
+    @Override
+    public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build,
+            Launcher launcher, TaskListener listener) throws IOException,
+            InterruptedException {
+        /*
+         * This method does nothing, since the work has already been done in
+         * the checkout() method, as per the documentation:
+         * """
+         * As an optimization, SCM implementation can choose to compute SCMRevisionState
+         * and add it as an action during check out, in which case this method will not called.
+         * """
+         */
+        return null;
+    }
+
+    @Override
+    protected PollingResult compareRemoteRevisionWith(
+            AbstractProject<?, ?> project, Launcher launcher,
+            FilePath workspace, TaskListener listener, SCMRevisionState baseline)
+            throws IOException, InterruptedException {
+
+        if (!(baseline instanceof TFSRevisionState))
+        {
+            // This plugin was just upgraded, we don't yet have a new-style baseline,
+            // so we perform an old-school poll
+            boolean shouldBuild = pollChanges(project, launcher, workspace, listener);
+            return shouldBuild ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
+        }
+        final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
+        if (!projectPath.equalsIgnoreCase(tfsBaseline.projectPath))
+        {
+            // There's no PollingResult.INCOMPARABLE, so we use the next closest thing
+            return PollingResult.BUILD_NOW;
+        }
+        Run<?, ?> build = project.getLastBuild();
+        final TfTool tool = new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace);
+        final Server server = createServer(tool, build);
+        final Project tfsProject = server.getProject(projectPath);
+        try {
+            final List<ChangeSet> briefHistory = tfsProject.getBriefHistory(
+                        tfsBaseline.changesetVersion,
+                        Calendar.getInstance()
+                    );
+
+            // TODO: Given we have a tfsBaseline with a changeset, 
+            // briefHistory will probably always contain at least one entry
+            final TFSRevisionState tfsRemote = 
+                    (briefHistory.size() > 0) 
+                    ? new TFSRevisionState(briefHistory.get(0).getVersion(), projectPath)
+                    : tfsBaseline;
+
+            // TODO: we could return INSIGNIFICANT if all the changesets
+            // contain the string "***NO_CI***" at the end of their comment
+            final Change change = 
+                    tfsBaseline.changesetVersion == tfsRemote.changesetVersion
+                    ? Change.NONE
+                    : Change.SIGNIFICANT;
+            return new PollingResult(tfsBaseline, tfsRemote, change);
+        } catch (ParseException pe) {
+            listener.fatalError(pe.getMessage());
+            throw new AbortException();
         }
     }
 }
