@@ -3,6 +3,7 @@ package hudson.plugins.tfs.model;
 import hudson.plugins.tfs.commands.BriefHistoryCommand;
 import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
+import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
 
 import java.io.IOException;
@@ -120,6 +121,37 @@ public class Project {
         }
     }
 
+    /**
+     * Gets remote changeset version for specified remote path, as of toTimestamp.
+     * 
+     * @param remotePath for which to get latest changeset version
+     * @param toTimestamp the date/time of the last build
+     * @return changeset version for specified remote path
+     */
+    public int getRemoteChangesetVersion(String remotePath, Calendar toTimestamp)
+            throws IOException, InterruptedException, ParseException {
+        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, remotePath, toTimestamp);
+        Reader reader = null;
+        try {
+            reader = server.execute(command.getArguments());
+            final String changesetString = command.parse(reader);
+            return Integer.parseInt(changesetString, 10);
+        } finally {
+            IOUtils.closeQuietly(reader);
+        }
+    }
+
+    /**
+     * Gets remote changeset version for the project's remote path, as of toTimestamp.
+     * 
+     * @param toTimestamp the date/time of the last build
+     * @return changeset version for the project's remote path
+     */
+    public int getRemoteChangesetVersion(Calendar toTimestamp)
+            throws IOException, InterruptedException, ParseException {
+        return getRemoteChangesetVersion(projectPath, toTimestamp);
+    }
+    
     @Override
     public int hashCode() {
         return new HashCodeBuilder(13, 27).append(projectPath).toHashCode();
