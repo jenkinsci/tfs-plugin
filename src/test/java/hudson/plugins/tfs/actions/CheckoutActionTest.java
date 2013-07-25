@@ -53,7 +53,7 @@ public class CheckoutActionTest {
         new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
         
         verify(workspaces).newWorkspace("workspace");
-        verify(workspace).mapWorkfolder(project, ".");
+        verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
         verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
         verify(workspaces).deleteWorkspace(workspace);
     }
@@ -68,7 +68,7 @@ public class CheckoutActionTest {
         new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
         
         verify(workspaces).newWorkspace("workspace");
-        verify(workspace).mapWorkfolder(project, ".");
+        verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
         verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
@@ -101,7 +101,7 @@ public class CheckoutActionTest {
         new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
 
         verify(workspaces).newWorkspace("workspace");
-        verify(workspace).mapWorkfolder(project, ".");
+        verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
         verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
         verify(workspaces).deleteWorkspace(workspace);
     }
