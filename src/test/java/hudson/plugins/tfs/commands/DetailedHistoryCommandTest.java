@@ -1,16 +1,18 @@
 package hudson.plugins.tfs.commands;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.mockito.Mockito.*;
-
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import hudson.plugins.tfs.SwedishLocaleTestCase;
 import hudson.plugins.tfs.Util;
-import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.ChangeSet.Item;
 import hudson.plugins.tfs.util.DateParser;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
-import hudson.plugins.tfs.SwedishLocaleTestCase;
 
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -30,6 +32,20 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
         System.getProperties().remove(DetailedHistoryCommand.IGNORE_DATE_CHECK_ON_CHANGE_SET);        
     }
 
+    @Test
+    public void assertGetRangeSpecificationWithDate()
+    {
+        String actual = AbstractHistoryCommand.getRangeSpecification(Util.getCalendar(2013, 06, 18, 9, 22, 42), 0);
+        assertEquals("D2013-06-18T09:22:42Z", actual);
+    }
+
+    @Test
+    public void assertGetRangeSpecificationWithChangeset()
+    {
+        String actual = AbstractHistoryCommand.getRangeSpecification(null, 12472);
+        assertEquals("C12472", actual);
+    }
+    
     @Bug(6596)
     @Test
     public void assertBriefHistoryArguments() {
@@ -89,6 +105,30 @@ public class DetailedHistoryCommandTest extends SwedishLocaleTestCase {
     public void assertTwoChangeSetFromFile() throws Exception {
         InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-2.txt"));
         DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", Util.getCalendar(2008, 01, 15), Calendar.getInstance());
+        List<ChangeSet> list = command.parse(reader);
+
+        assertNotNull("The list of change sets was null", list);
+        assertEquals("The number of change sets in the list was incorrect", 2, list.size());
+        
+        ChangeSet changeSet = list.get(0);
+        assertEquals("The version was incorrect", "12472", changeSet.getVersion());
+        assertEquals("The user was incorrect", "_MCLWEB", changeSet.getUser());
+        assertEquals("The user was incorrect", "RNO", changeSet.getDomain());
+        //assertEquals("The date was incorrect", TestUtil.getCalendar(2008, 06, 27, 11, 16, 06).getTime(), changeSet.getDate());
+        assertEquals("The comment was incorrect", "Created team project folder $/tfsandbox via the Team Project Creation Wizard", changeSet.getComment());
+
+        changeSet = list.get(1);
+        assertEquals("The version was incorrect", "12492", changeSet.getVersion());
+        assertEquals("The user was incorrect", "redsolo_cp", changeSet.getUser());
+        assertEquals("The user was incorrect", "SND", changeSet.getDomain());
+        //assertEquals("The date was incorrect", TestUtil.getCalendar(2008, 06, 27, 13, 19, 49).getTime(), changeSet.getDate());
+        assertEquals("The comment was incorrect", "first file", changeSet.getComment());
+    }
+    
+    @Test
+    public void assertTwoChangeSetFromFileFilteringByChangeset() throws Exception {
+        InputStreamReader reader = new InputStreamReader(DetailedHistoryCommandTest.class.getResourceAsStream("tf-changeset-2.txt"));
+        DetailedHistoryCommand command = new DetailedHistoryCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", 12472, Calendar.getInstance());
         List<ChangeSet> list = command.parse(reader);
 
         assertNotNull("The list of change sets was null", list);

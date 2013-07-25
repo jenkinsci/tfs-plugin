@@ -64,6 +64,23 @@ public class Project {
     }
 
     /**
+     * Returns a list of change sets not containing the modified items.
+     * @param fromChangeset the changeset number to get history from
+     * @param toTimestamp the timestamp to get history to
+     * @return a list of change sets
+     */
+    public List<ChangeSet> getBriefHistory(int fromChangeset, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
+        BriefHistoryCommand command = new BriefHistoryCommand(server, projectPath, fromChangeset, toTimestamp);
+        Reader reader = null;
+        try {
+            reader = server.execute(command.getArguments());
+            return command.parse(reader);
+        } finally {
+            IOUtils.closeQuietly(reader);
+        }
+    }
+
+    /**
      * Gets all files from server.
      * @param localPath the local path to get all files into
      */
