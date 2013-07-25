@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import hudson.plugins.tfs.model.ChangeSet;
-import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 public abstract class AbstractHistoryCommand extends AbstractCommand implements
@@ -31,29 +30,6 @@ public abstract class AbstractHistoryCommand extends AbstractCommand implements
         this.fromChangeset = fromChangeset;
 
         this.toTimestamp = getExclusiveToTimestamp(toTimestamp);
-    }
-    
-    static Calendar getExclusiveToTimestamp(Calendar toTimestamp)
-    {
-        // The to timestamp is exclusive, ie it will only show history before the to timestamp.
-        // This command should be inclusive.
-        Calendar result = (Calendar) toTimestamp.clone();
-        result.add(Calendar.SECOND, 1);
-        return result;
-    }
-
-    static String getRangeSpecification(Calendar timestamp, int changeset)
-    {
-        String result;
-        if(timestamp != null)
-        {
-            result = String.format("D%s", DateUtil.TFS_DATETIME_FORMATTER.get().format(timestamp.getTime()));
-        }
-        else
-        {
-            result = String.format("C%d", changeset); 
-        }
-        return result;
     }
     
     public MaskedArgumentListBuilder getArguments() {
