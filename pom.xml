@@ -77,6 +77,43 @@
   </build>
 
   <dependencies>
+    <!-- 
+      com.microsoft.tfs.sdk includes its dependencies inline, some of which conflict with those of jenkins-core.
+      We have to repeat dependencies here to make sure they are considered before those inside the TFS SDK.
+    -->
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>jenkins-war</artifactId>
+      <version>1.424</version>
+      <type>war</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>jenkins-core</artifactId>
+      <version>1.424</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>jenkins-test-harness</artifactId>
+      <version>1.424</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>ui-samples-plugin</artifactId>
+      <version>1.424</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.tfs.sdk</groupId>
+      <artifactId>com.microsoft.tfs.sdk</artifactId>
+      <version>11.0.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/com.microsoft.tfs.sdk-11.0.0.jar</systemPath>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
