@@ -22,7 +22,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     private Date date;
     private String comment;
     private List<Item> items;
-	private String checkedInByUser;
+    private String checkedInByUserString;
     
     public ChangeSet() {
         this("", null, "", "");
@@ -108,16 +108,23 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         this.comment = comment;
     }
 
-	public void setCheckedInBy(String user) {
-		checkedInByUser = user;
-	}
+    public void setCheckedInBy(String checkedInByUserString) {
+        if (checkedInByUserString != null) {
+            String[] split = checkedInByUserString.split("\\\\");
+            if (split.length == 2) {
+                this.checkedInByUserString = split[1];
+            } else {
+                this.checkedInByUserString = checkedInByUserString;
+            }
+        }
+    }
 
-	public String getCheckedInBy() {
-		return checkedInByUser;
-	}
+    public String getCheckedInBy() {
+        return checkedInByUserString;
+    }
 
     public User getCheckedInByUser() {
-        return User.get(checkedInByUser);
+        return User.get(checkedInByUserString);
     }
 
     @Exported
