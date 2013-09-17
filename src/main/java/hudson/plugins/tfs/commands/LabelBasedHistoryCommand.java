@@ -32,11 +32,16 @@ public class LabelBasedHistoryCommand extends AbstractHistoryCommand implements 
     }
     
     @Override
-    public String addVersionspecCommand() {
+    protected String addVersionspecCommand() {
     	return String.format(Versionspec.L.getCommand(),this.label);
     }
 
-	public List<ChangeSet> parse(Reader reader) throws ParseException,
+    @Override
+    protected String getFormat() {
+        return "detailed";
+    }
+
+    public List<ChangeSet> parse(Reader reader) throws ParseException,
 			IOException {
         ArrayList<ChangeSet> list = new ArrayList<ChangeSet>();
         
