@@ -17,6 +17,7 @@ import hudson.scm.EditType;
 public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     private User authorUser;
+    private User checkedInByUser;
     private String version;
     private String userString;
     private String domain;
@@ -135,7 +136,14 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     }
 
     public User getCheckedInByUser() {
-        return User.get(checkedInByUserString);
+        if (checkedInByUser == null) {
+           checkedInByUser = User.get(checkedInByUserString);  
+        }
+        return checkedInByUser;
+    }
+
+    public void setCheckedInByUser(User checkedInBy) {
+        this.checkedInByUser = checkedInBy;
     }
 
     @Exported
