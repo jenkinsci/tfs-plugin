@@ -16,6 +16,7 @@ import hudson.scm.EditType;
 @ExportedBean(defaultVisibility=999)
 public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
+    private User authorUser;
     private String version;
     private String userString;
     private String domain;
@@ -36,6 +37,13 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         setUser(userString);
     }
     
+    public ChangeSet(String version, Date date, User author, String comment) {
+        this.version = version;
+        this.date = date;
+        this.authorUser = author;
+        this.comment = comment;
+    }
+    
     @Override
     public Collection<String> getAffectedPaths() {
         Collection<String> paths = new ArrayList<String>(items.size());
@@ -52,7 +60,10 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     @Override
     public User getAuthor() {
-        return User.get(userString);
+        if(authorUser == null) {
+            authorUser = User.get(userString);
+        }
+        return authorUser;
     }
 
     @Override
