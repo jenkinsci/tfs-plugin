@@ -17,7 +17,7 @@ import hudson.scm.EditType;
 public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     private String version;
-    private String user;
+    private String userString;
     private String domain;
     private Date date;
     private String comment;
@@ -28,12 +28,12 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         this("", null, "", "");
     }
     
-    public ChangeSet(String version, Date date, String user, String comment) {
+    public ChangeSet(String version, Date date, String userString, String comment) {
         this.version = version;
         this.date = date;
         this.comment = comment;
         items = new ArrayList<Item>();
-        setUser(user);
+        setUser(userString);
     }
     
     @Override
@@ -52,7 +52,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     @Override
     public User getAuthor() {
-        return User.get(user);
+        return User.get(userString);
     }
 
     @Override
@@ -76,16 +76,16 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     @Exported
     public String getUser() {
-        return user;
+        return userString;
     }
     
     public void setUser(String user) {        
         String[] split = user.split("\\\\");
         if (split.length == 2) {
             this.domain = split[0];
-            this.user = split[1];
+            this.userString = split[1];
         } else {
-            this.user = user;
+            this.userString = user;
             this.domain = null;
         }
     }
