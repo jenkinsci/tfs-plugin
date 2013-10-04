@@ -6,8 +6,16 @@ import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.httpclient.Credentials;
+import com.microsoft.tfs.core.httpclient.DefaultNTCredentials;
+import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
+import com.microsoft.tfs.core.util.CredentialsUtils;
+import com.microsoft.tfs.core.util.URIUtils;
 
 public class Server implements ServerConfigurationProvider {
     
@@ -17,12 +25,33 @@ public class Server implements ServerConfigurationProvider {
     private Workspaces workspaces;
     private Map<String, Project> projects = new HashMap<String, Project>();
     private final TfTool tool;
+    private final TFSTeamProjectCollection tpc;
 
     public Server(TfTool tool, String url, String username, String password) {
         this.tool = tool;
         this.url = url;
         this.userName = username;
         this.userPassword = password;
+        final URI uri = URIUtils.newURI(url);
+
+        Credentials credentials = null;
+        // In case no user name is provided and the current platform supports
+        // default credentials, use default credentials
+        if ((username == null || username.length() == 0) && CredentialsUtils.supportsDefaultCredentials()) {
+            credentials = new DefaultNTCredentials();
+        }
+        else if (username != null && password != null) {
+            credentials = new UsernamePasswordCredentials(username, password);
+        }
+
+        if (credentials != null) {
+            // TODO: TFSTeamProjectCollection implements Closeable
+            // and should be disposed as soon as no longer needed.
+            this.tpc = new TFSTeamProjectCollection(uri, credentials);
+        }
+        else {
+            this.tpc = null;
+        }
     }
 
     Server(String url) {
@@ -34,6 +63,11 @@ public class Server implements ServerConfigurationProvider {
             projects.put(projectPath, new Project(this, projectPath));
         }
         return projects.get(projectPath);
+    }
+    
+    public TFSTeamProjectCollection getTeamProjectCollection()
+    {
+        return this.tpc;
     }
     
     public Workspaces getWorkspaces() {
