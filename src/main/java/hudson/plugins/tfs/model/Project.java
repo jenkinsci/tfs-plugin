@@ -10,6 +10,7 @@ import hudson.plugins.tfs.model.ChangeSet.Item;
 import java.io.IOException;
 import java.io.Reader;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +19,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 
 public class Project {
 
@@ -65,13 +71,36 @@ public class Project {
      * @return a list of change sets
      */
     public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
-        DetailedHistoryCommand command = new DetailedHistoryCommand(server, projectPath, fromTimestamp, toTimestamp);
-        Reader reader = null;
+        final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
+        final VersionControlClient vcc = tpc.getVersionControlClient();
         try {
-            reader = server.execute(command.getArguments());
-            return command.parse(reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
+            final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
+            final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
+            final Changeset[] serverChangesets = vcc.queryHistory(
+                    projectPath,
+                    fromVersion,
+                    0 /* deletionId */,
+                    RecursionType.FULL,
+                    null /* user */,
+                    fromVersion,
+                    toVersion,
+                    Integer.MAX_VALUE,
+                    true /* includeFileDetails */,
+                    true /* slotMode */,
+                    false /* includeDownloadInfo */,
+                    false /* sortAscending */
+                    );
+            final List<ChangeSet> result = new ArrayList<ChangeSet>();
+            if (serverChangesets != null) {
+                for (final Changeset serverChangeset : serverChangesets) {
+                    final ChangeSet changeSet = convertServerChangeset(serverChangeset);
+                    result.add(changeSet);
+                } 
+            }
+            return result;
+        }
+        finally {
+            vcc.close();
         }
     }
 
