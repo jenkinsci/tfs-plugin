@@ -5,16 +5,20 @@ import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
+import hudson.plugins.tfs.model.ChangeSet.Item;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
 
 public class Project {
 
@@ -30,6 +34,30 @@ public class Project {
         return projectPath;
     }
 
+    static hudson.plugins.tfs.model.ChangeSet.Item convertServerChange
+        (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange) {
+        final String path = serverChange.getItem().getServerItem();
+        final String action = serverChange.getChangeType().toUIString(true);
+        final Item result = new Item(path, action);
+        return result;
+    }
+
+    static hudson.plugins.tfs.model.ChangeSet convertServerChangeset
+        (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset) {
+        final String version = Integer.toString(serverChangeset.getChangesetID(), 10);
+        final Date date = serverChangeset.getDate().getTime();
+        final String author = serverChangeset.getCommitter();
+        final String comment = serverChangeset.getComment();
+
+        final ChangeSet result = new ChangeSet(version, date, author, comment);
+        final Change[] serverChanges = serverChangeset.getChanges();
+        for (final Change serverChange : serverChanges) {
+            final Item item = convertServerChange(serverChange);
+            result.add(item);
+        }
+        return result;
+    }
+    
     /**
      * Returns a list of change sets containing modified items.
      * @param fromTimestamp the timestamp to get history from

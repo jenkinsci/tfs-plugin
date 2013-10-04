@@ -6,16 +6,70 @@ import static org.mockito.Mockito.*;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Calendar;
 import java.util.List;
 
 import hudson.plugins.tfs.SwedishLocaleTestCase;
 import hudson.plugins.tfs.Util;
+import hudson.plugins.tfs.model.ChangeSet.Item;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import org.junit.Test;
 
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ChangeType;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ItemType;
+
 public class ProjectTest extends SwedishLocaleTestCase {
 
+    private com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change createServerChange() {
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Item serverItem
+            = new com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Item();
+        serverItem.setItemType(ItemType.FILE);
+        serverItem.setServerItem("$/tfsandbox");
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange
+            = new Change(serverItem, ChangeType.ADD, null);
+        return serverChange;
+    }
+
+    @Test
+    public void assertConvertServerChange() throws Exception {
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange = createServerChange();
+        
+        final Item actual = Project.convertServerChange(serverChange);
+        
+        assertEquals("$/tfsandbox", actual.getPath());
+        assertEquals("add", actual.getAction());
+    }
+    
+    @Test
+    public void assertConvertServerChangeset() throws Exception {
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange = createServerChange();
+        final String comment = "Created team project folder $/tfsandbox via the Team Project Creation Wizard";
+        final Calendar juneTwentySeventh = Util.getCalendar(2008, 06, 27, 11, 16, 06);
+        final String userString = "RNO\\_MCLWEB";
+        Changeset serverChangeset = new Changeset(userString, comment, null, null);
+        serverChangeset.setChangesetID(12472);
+        serverChangeset.setCommitter(userString);
+        serverChangeset.setDate(juneTwentySeventh);
+        final Change[] changes = new Change[] { serverChange };
+        serverChangeset.setChanges(changes);
+
+        hudson.plugins.tfs.model.ChangeSet actual = Project.convertServerChangeset(serverChangeset);
+
+        assertEquals("The version was incorrect", "12472", actual.getVersion());
+        assertEquals("The user was incorrect", "_MCLWEB", actual.getUser());
+        assertEquals("The user was incorrect", "RNO", actual.getDomain());
+        assertEquals("The date was incorrect", juneTwentySeventh.getTime(), actual.getDate());
+        assertEquals("The comment was incorrect", comment, actual.getComment());
+
+        Item item = actual.getItems().get(0);
+        assertEquals("The item path was incorrect", "$/tfsandbox", item.getPath());
+        assertEquals("The item action was incorrect", "add", item.getAction());
+
+    }
+    
     @Test
     public void assertGetDetailedHistory() throws Exception {
         Server server = mock(Server.class);
