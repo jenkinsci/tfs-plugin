@@ -71,37 +71,6 @@ public class ProjectTest extends SwedishLocaleTestCase {
     }
     
     @Test
-    public void assertGetDetailedHistory() throws Exception {
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
-                "-----------------------------------\n" +
-                "Changeset: 12472\n" +
-                "User:      RNO\\_MCLWEB\n" +
-                "Date:      2008-jun-27 11:16:06\n" +
-                "\n" +
-                "Comment:\n" +
-                "Created team project folder $/tfsandbox via the Team Project Creation Wizard\n" +
-                "\n" +
-                "Items:\n" +
-                "  add $/tfsandbox\n\n"));
-        Project project = new Project(server, "$/serverpath");
-        List<ChangeSet> list = project.getDetailedHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
-        assertNotNull("The returned list was null", list);
-        assertEquals("The number of change sets in list was incorrect", 1, list.size());
-        verify(server).execute(isA(MaskedArgumentListBuilder.class));
-    }
-
-    @Test
-    public void assertGetDetailedHistoryClosesReader() throws Exception {
-        Reader spy = spy(new StringReader(""));
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getDetailedHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
-
-        verify(spy).close();
-    }
-    
-    @Test
     public void assertGetBriefHistory() throws Exception {
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
