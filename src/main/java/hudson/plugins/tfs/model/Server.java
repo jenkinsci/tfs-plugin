@@ -4,9 +4,13 @@ import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +23,7 @@ import com.microsoft.tfs.core.util.URIUtils;
 
 public class Server implements ServerConfigurationProvider {
     
+    private static final String nativeFolderPropertyName = "com.microsoft.tfs.jni.native.base-directory";
     private final String url;
     private final String userName;
     private final String userPassword;
@@ -45,12 +50,29 @@ public class Server implements ServerConfigurationProvider {
         }
 
         if (credentials != null) {
+            ensureNativeLibrariesConfigured();
             // TODO: TFSTeamProjectCollection implements Closeable
             // and should be disposed as soon as no longer needed.
             this.tpc = new TFSTeamProjectCollection(uri, credentials);
         }
         else {
             this.tpc = null;
+        }
+    }
+
+    static synchronized void ensureNativeLibrariesConfigured() {
+        final String nativeFolder = System.getProperty(nativeFolderPropertyName);
+        if (nativeFolder == null) {
+            final Class<TFSTeamProjectCollection> metaclass = TFSTeamProjectCollection.class;
+            final ProtectionDomain protectionDomain = metaclass.getProtectionDomain();
+            final CodeSource codeSource = protectionDomain.getCodeSource();
+            // TODO: codeSource could be null; what should we do, then?
+            final URL location = codeSource.getLocation();
+            final String stringPathToJar = location.getFile();
+            final File pathToJar = new File(stringPathToJar);
+            final File pathToLibFolder = pathToJar.getParentFile();
+            final File pathToNativeFolder = new File(pathToLibFolder, "native");
+            System.setProperty(nativeFolderPropertyName, pathToNativeFolder.toString()); 
         }
     }
 
