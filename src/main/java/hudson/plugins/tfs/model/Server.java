@@ -20,8 +20,9 @@ import com.microsoft.tfs.core.httpclient.DefaultNTCredentials;
 import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
+import com.microsoft.tfs.util.Closable;
 
-public class Server implements ServerConfigurationProvider {
+public class Server implements ServerConfigurationProvider, Closable {
     
     private static final String nativeFolderPropertyName = "com.microsoft.tfs.jni.native.base-directory";
     private final String url;
@@ -51,8 +52,6 @@ public class Server implements ServerConfigurationProvider {
 
         if (credentials != null) {
             ensureNativeLibrariesConfigured();
-            // TODO: TFSTeamProjectCollection implements Closeable
-            // and should be disposed as soon as no longer needed.
             this.tpc = new TFSTeamProjectCollection(uri, credentials);
         }
         else {
@@ -117,5 +116,12 @@ public class Server implements ServerConfigurationProvider {
 
     public String getLocalHostname() throws IOException, InterruptedException {
         return tool.getHostname();
+    }
+
+    public synchronized void close() {
+        if (this.tpc != null) {
+           this.tpc.close();
+        }
+        
     }
 }

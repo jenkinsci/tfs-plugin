@@ -19,7 +19,11 @@ public class ServerIntegrationTest {
      */
     public void canFindTfsSdkNativeLibraries() {
         final Server server = new Server(null, "http://tfs.invalid:8080/tfs", "username", "password");
-        final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
-        tpc.getVersionControlClient();
+        try {
+            final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
+            tpc.getVersionControlClient();
+        } finally {
+            server.close();
+        }
     }
 }
