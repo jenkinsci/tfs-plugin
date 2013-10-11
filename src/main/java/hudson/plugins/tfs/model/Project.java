@@ -1,7 +1,7 @@
 package hudson.plugins.tfs.model;
 
+import hudson.model.User;
 import hudson.plugins.tfs.commands.BriefHistoryCommand;
-import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
@@ -25,6 +25,8 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
 
 public class Project {
 
@@ -49,13 +51,14 @@ public class Project {
     }
 
     static hudson.plugins.tfs.model.ChangeSet convertServerChangeset
-        (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset) {
+        (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset, UserLookup userLookup) {
         final String version = Integer.toString(serverChangeset.getChangesetID(), 10);
         final Date date = serverChangeset.getDate().getTime();
         final String author = serverChangeset.getCommitter();
+        final User authorUser = userLookup.find(author);
         final String comment = serverChangeset.getComment();
 
-        final ChangeSet result = new ChangeSet(version, date, author, comment);
+        final ChangeSet result = new ChangeSet(version, date, authorUser, comment);
         final Change[] serverChanges = serverChangeset.getChanges();
         for (final Change serverChange : serverChanges) {
             final Item item = convertServerChange(serverChange);
@@ -72,6 +75,8 @@ public class Project {
      */
     public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
         final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
+        final IIdentityManagementService ims = new IdentityManagementService(tpc);
+        final UserLookup userLookup = new TfsUserLookup(ims);
         final VersionControlClient vcc = tpc.getVersionControlClient();
         try {
             final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
@@ -93,7 +98,7 @@ public class Project {
             final List<ChangeSet> result = new ArrayList<ChangeSet>();
             if (serverChangesets != null) {
                 for (final Changeset serverChangeset : serverChangesets) {
-                    final ChangeSet changeSet = convertServerChangeset(serverChangeset);
+                    final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup);
                     result.add(changeSet);
                 } 
             }

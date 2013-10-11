@@ -9,10 +9,12 @@ import java.io.StringReader;
 import java.util.Calendar;
 import java.util.List;
 
+import hudson.model.User;
 import hudson.plugins.tfs.SwedishLocaleTestCase;
 import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.model.ChangeSet.Item;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
+import hudson.tasks.Mailer;
 
 import org.junit.Test;
 
@@ -43,24 +45,45 @@ public class ProjectTest extends SwedishLocaleTestCase {
         assertEquals("add", actual.getAction());
     }
     
+    private UserLookup createMockUserLookup(String accountName, String displayName, String emailAddress) {
+        UserLookup userLookup = mock(UserLookup.class);
+        User user = mock(User.class);
+        // this portion stolen from User.get()
+        final String id = accountName.replace('\\', '_').replace('/', '_').replace('<','_')
+                .replace('>','_');  // 4 replace() still faster than regex
+        // end stolen portion
+        when(user.getId()).thenReturn(id);
+        when(user.getDisplayName()).thenReturn(displayName);
+        when(user.getProperty(Mailer.UserProperty.class)).thenReturn(new Mailer.UserProperty(emailAddress));
+
+        when(userLookup.find(accountName)).thenReturn(user);
+        return userLookup;
+    }
+    
     @Test
     public void assertConvertServerChangeset() throws Exception {
         final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange = createServerChange();
         final String comment = "Created team project folder $/tfsandbox via the Team Project Creation Wizard";
         final Calendar juneTwentySeventh = Util.getCalendar(2008, 06, 27, 11, 16, 06);
-        final String userString = "RNO\\_MCLWEB";
+        final String userString = "EXAMPLE\\ljenkins";
         Changeset serverChangeset = new Changeset(userString, comment, null, null);
         serverChangeset.setChangesetID(12472);
         serverChangeset.setCommitter(userString);
         serverChangeset.setDate(juneTwentySeventh);
         final Change[] changes = new Change[] { serverChange };
         serverChangeset.setChanges(changes);
+        final String userDisplayName = "Leeroy Jenkins";
+        final String userEmailAddress = "leeroy.jenkins@example.com";
+        final UserLookup userLookup = createMockUserLookup(userString, userDisplayName, userEmailAddress);
 
-        hudson.plugins.tfs.model.ChangeSet actual = Project.convertServerChangeset(serverChangeset);
+        hudson.plugins.tfs.model.ChangeSet actual = Project.convertServerChangeset(serverChangeset, userLookup);
 
+        final User author = actual.getAuthor();
         assertEquals("The version was incorrect", "12472", actual.getVersion());
-        assertEquals("The user was incorrect", "_MCLWEB", actual.getUser());
-        assertEquals("The user was incorrect", "RNO", actual.getDomain());
+        assertEquals("The author's user ID was incorrect", "EXAMPLE_ljenkins", author.getId());
+        assertEquals("The author's display name was incorrect", userDisplayName, author.getDisplayName());
+        final String actualEmailAddress = author.getProperty(Mailer.UserProperty.class).getAddress();
+        assertEquals("The author's e-mail address was incorrect", userEmailAddress, actualEmailAddress);
         assertEquals("The date was incorrect", juneTwentySeventh.getTime(), actual.getDate());
         assertEquals("The comment was incorrect", comment, actual.getComment());
 

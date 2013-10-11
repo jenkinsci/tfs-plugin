@@ -42,7 +42,9 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         this.version = version;
         this.date = date;
         this.authorUser = author;
+        this.userString = author.getId();
         this.comment = comment;
+        items = new ArrayList<Item>();
     }
     
     @Override
