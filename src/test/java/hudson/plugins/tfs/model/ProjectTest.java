@@ -6,45 +6,91 @@ import static org.mockito.Mockito.*;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Calendar;
 import java.util.List;
 
+import hudson.model.User;
 import hudson.plugins.tfs.SwedishLocaleTestCase;
 import hudson.plugins.tfs.Util;
+import hudson.plugins.tfs.model.ChangeSet.Item;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
+import hudson.tasks.Mailer;
 
 import org.junit.Test;
 
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ChangeType;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ItemType;
+
 public class ProjectTest extends SwedishLocaleTestCase {
 
-    @Test
-    public void assertGetDetailedHistory() throws Exception {
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
-                "-----------------------------------\n" +
-                "Changeset: 12472\n" +
-                "User:      RNO\\_MCLWEB\n" +
-                "Date:      2008-jun-27 11:16:06\n" +
-                "\n" +
-                "Comment:\n" +
-                "Created team project folder $/tfsandbox via the Team Project Creation Wizard\n" +
-                "\n" +
-                "Items:\n" +
-                "  add $/tfsandbox\n\n"));
-        Project project = new Project(server, "$/serverpath");
-        List<ChangeSet> list = project.getDetailedHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
-        assertNotNull("The returned list was null", list);
-        assertEquals("The number of change sets in list was incorrect", 1, list.size());
-        verify(server).execute(isA(MaskedArgumentListBuilder.class));
+    private com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change createServerChange() {
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Item serverItem
+            = new com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Item();
+        serverItem.setItemType(ItemType.FILE);
+        serverItem.setServerItem("$/tfsandbox");
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange
+            = new Change(serverItem, ChangeType.ADD, null);
+        return serverChange;
     }
 
     @Test
-    public void assertGetDetailedHistoryClosesReader() throws Exception {
-        Reader spy = spy(new StringReader(""));
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getDetailedHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
+    public void assertConvertServerChange() throws Exception {
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange = createServerChange();
+        
+        final Item actual = Project.convertServerChange(serverChange);
+        
+        assertEquals("$/tfsandbox", actual.getPath());
+        assertEquals("add", actual.getAction());
+    }
+    
+    private UserLookup createMockUserLookup(String accountName, String displayName, String emailAddress) {
+        UserLookup userLookup = mock(UserLookup.class);
+        User user = mock(User.class);
+        // this portion stolen from User.get()
+        final String id = accountName.replace('\\', '_').replace('/', '_').replace('<','_')
+                .replace('>','_');  // 4 replace() still faster than regex
+        // end stolen portion
+        when(user.getId()).thenReturn(id);
+        when(user.getDisplayName()).thenReturn(displayName);
+        when(user.getProperty(Mailer.UserProperty.class)).thenReturn(new Mailer.UserProperty(emailAddress));
 
-        verify(spy).close();
+        when(userLookup.find(accountName)).thenReturn(user);
+        return userLookup;
+    }
+    
+    @Test
+    public void assertConvertServerChangeset() throws Exception {
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange = createServerChange();
+        final String comment = "Created team project folder $/tfsandbox via the Team Project Creation Wizard";
+        final Calendar juneTwentySeventh = Util.getCalendar(2008, 06, 27, 11, 16, 06);
+        final String userString = "EXAMPLE\\ljenkins";
+        Changeset serverChangeset = new Changeset(userString, comment, null, null);
+        serverChangeset.setChangesetID(12472);
+        serverChangeset.setCommitter(userString);
+        serverChangeset.setDate(juneTwentySeventh);
+        final Change[] changes = new Change[] { serverChange };
+        serverChangeset.setChanges(changes);
+        final String userDisplayName = "Leeroy Jenkins";
+        final String userEmailAddress = "leeroy.jenkins@example.com";
+        final UserLookup userLookup = createMockUserLookup(userString, userDisplayName, userEmailAddress);
+
+        hudson.plugins.tfs.model.ChangeSet actual = Project.convertServerChangeset(serverChangeset, userLookup);
+
+        final User author = actual.getAuthor();
+        assertEquals("The version was incorrect", "12472", actual.getVersion());
+        assertEquals("The author's user ID was incorrect", "EXAMPLE_ljenkins", author.getId());
+        assertEquals("The author's display name was incorrect", userDisplayName, author.getDisplayName());
+        final String actualEmailAddress = author.getProperty(Mailer.UserProperty.class).getAddress();
+        assertEquals("The author's e-mail address was incorrect", userEmailAddress, actualEmailAddress);
+        assertEquals("The date was incorrect", juneTwentySeventh.getTime(), actual.getDate());
+        assertEquals("The comment was incorrect", comment, actual.getComment());
+
+        Item item = actual.getItems().get(0);
+        assertEquals("The item path was incorrect", "$/tfsandbox", item.getPath());
+        assertEquals("The item action was incorrect", "add", item.getAction());
+
     }
     
     @Test

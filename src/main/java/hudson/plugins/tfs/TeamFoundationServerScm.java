@@ -154,47 +154,50 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
-        WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
-        
-        // Check if the configuration has changed
-        if (build.getPreviousBuild() != null) {
-            BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), build.getPreviousBuild());
-            if ((nodeConfiguration != null) &&
-                    nodeConfiguration.workspaceExists() 
-                    && (! workspaceConfiguration.equals(nodeConfiguration))) {
-                listener.getLogger().println("Deleting workspace as the configuration has changed since a build was performed on this computer.");
-                new RemoveWorkspaceAction(workspaceConfiguration.getWorkspaceName()).remove(server);
-                nodeConfiguration.setWorkspaceWasRemoved();
-                nodeConfiguration.save();
-            }
-        }
-        
-        build.addAction(workspaceConfiguration);
-        CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
         try {
-            List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
-            ChangeSetWriter writer = new ChangeSetWriter();
-            writer.write(list, changelogFile);
-        } catch (ParseException pe) {
-            listener.fatalError(pe.getMessage());
-            throw new AbortException();
-        }
-
-        try {
-            setWorkspaceChangesetVersion(null);
-            String projectPath = workspaceConfiguration.getProjectPath();
-            Project project = server.getProject(projectPath);
-            // TODO: even better would be to call this first, then use the changeset when calling checkout
-            int buildChangeset = project.getRemoteChangesetVersion(build.getTimestamp());
-            setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
+            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
             
-            // by adding this action, we prevent calcRevisionsFromBuild() from being called
-            build.addAction(new TFSRevisionState(buildChangeset, projectPath));
-        } catch (ParseException pe) {
-            listener.fatalError(pe.getMessage());
-            throw new AbortException();
+            // Check if the configuration has changed
+            if (build.getPreviousBuild() != null) {
+                BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), build.getPreviousBuild());
+                if ((nodeConfiguration != null) &&
+                        nodeConfiguration.workspaceExists() 
+                        && (! workspaceConfiguration.equals(nodeConfiguration))) {
+                    listener.getLogger().println("Deleting workspace as the configuration has changed since a build was performed on this computer.");
+                    new RemoveWorkspaceAction(workspaceConfiguration.getWorkspaceName()).remove(server);
+                    nodeConfiguration.setWorkspaceWasRemoved();
+                    nodeConfiguration.save();
+                }
+            }
+            
+            build.addAction(workspaceConfiguration);
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
+            try {
+                List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
+                ChangeSetWriter writer = new ChangeSetWriter();
+                writer.write(list, changelogFile);
+            } catch (ParseException pe) {
+                listener.fatalError(pe.getMessage());
+                throw new AbortException();
+            }
+    
+            try {
+                setWorkspaceChangesetVersion(null);
+                String projectPath = workspaceConfiguration.getProjectPath();
+                Project project = server.getProject(projectPath);
+                // TODO: even better would be to call this first, then use the changeset when calling checkout
+                int buildChangeset = project.getRemoteChangesetVersion(build.getTimestamp());
+                setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
+                
+                // by adding this action, we prevent calcRevisionsFromBuild() from being called
+                build.addAction(new TFSRevisionState(buildChangeset, projectPath));
+            } catch (ParseException pe) {
+                listener.fatalError(pe.getMessage());
+                throw new AbortException();
+            }
+        } finally {
+            server.close();
         }
-
         return true;
     }
 
@@ -217,6 +220,8 @@ public class TeamFoundationServerScm extends SCM {
             } catch (ParseException pe) {
                 listener.fatalError(pe.getMessage());
                 throw new AbortException();
+            } finally {
+                server.close();
             }
         }
     }
@@ -255,9 +260,13 @@ public class TeamFoundationServerScm extends SCM {
             LogTaskListener listener = new LogTaskListener(logger, Level.INFO);
             Launcher launcher = node.createLauncher(listener);        
             Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
-            if (new RemoveWorkspaceAction(configuration.getWorkspaceName()).remove(server)) {
-                configuration.setWorkspaceWasRemoved();
-                configuration.save();
+            try {
+                if (new RemoveWorkspaceAction(configuration.getWorkspaceName()).remove(server)) {
+                    configuration.setWorkspaceWasRemoved();
+                    configuration.save();
+                }
+            } finally {
+                server.close();
             }
         }
         return true;
@@ -463,6 +472,8 @@ public class TeamFoundationServerScm extends SCM {
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
+        } finally {
+            server.close();
         }
     }
 }

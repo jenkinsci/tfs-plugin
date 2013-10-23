@@ -16,24 +16,35 @@ import hudson.scm.EditType;
 @ExportedBean(defaultVisibility=999)
 public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
+    private User authorUser;
+    private User checkedInByUser;
     private String version;
-    private String user;
+    private String userString;
     private String domain;
     private Date date;
     private String comment;
     private List<Item> items;
-	private String checkedInByUser;
+    private String checkedInByUserString;
     
     public ChangeSet() {
         this("", null, "", "");
     }
     
-    public ChangeSet(String version, Date date, String user, String comment) {
+    public ChangeSet(String version, Date date, String userString, String comment) {
         this.version = version;
         this.date = date;
         this.comment = comment;
         items = new ArrayList<Item>();
-        setUser(user);
+        setUser(userString);
+    }
+    
+    public ChangeSet(String version, Date date, User author, String comment) {
+        this.version = version;
+        this.date = date;
+        this.authorUser = author;
+        this.userString = author.getId();
+        this.comment = comment;
+        items = new ArrayList<Item>();
     }
     
     @Override
@@ -52,7 +63,10 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     @Override
     public User getAuthor() {
-        return User.get(user);
+        if(authorUser == null) {
+            authorUser = User.get(userString);
+        }
+        return authorUser;
     }
 
     @Override
@@ -76,16 +90,16 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     @Exported
     public String getUser() {
-        return user;
+        return userString;
     }
     
     public void setUser(String user) {        
         String[] split = user.split("\\\\");
         if (split.length == 2) {
             this.domain = split[0];
-            this.user = split[1];
+            this.userString = split[1];
         } else {
-            this.user = user;
+            this.userString = user;
             this.domain = null;
         }
     }
@@ -108,16 +122,30 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         this.comment = comment;
     }
 
-	public void setCheckedInBy(String user) {
-		checkedInByUser = user;
-	}
+    public void setCheckedInBy(String checkedInByUserString) {
+        if (checkedInByUserString != null) {
+            String[] split = checkedInByUserString.split("\\\\");
+            if (split.length == 2) {
+                this.checkedInByUserString = split[1];
+            } else {
+                this.checkedInByUserString = checkedInByUserString;
+            }
+        }
+    }
 
-	public String getCheckedInBy() {
-		return checkedInByUser;
-	}
+    public String getCheckedInBy() {
+        return checkedInByUserString;
+    }
 
     public User getCheckedInByUser() {
-        return User.get(checkedInByUser);
+        if (checkedInByUser == null) {
+           checkedInByUser = User.get(checkedInByUserString);  
+        }
+        return checkedInByUser;
+    }
+
+    public void setCheckedInByUser(User checkedInBy) {
+        this.checkedInByUser = checkedInBy;
     }
 
     @Exported

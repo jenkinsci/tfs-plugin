@@ -45,7 +45,11 @@ public class ServerTest {
     public void assertLocalHostnameIsRetrievedFromTfTool() throws Exception {
         when(tool.getHostname()).thenReturn("thehostname");
         Server server = new Server(tool, "url", null, null);
-        assertEquals("Hostname was incorrect", "thehostname", server.getLocalHostname());
-        verify(tool).getHostname();
+        try {
+            assertEquals("Hostname was incorrect", "thehostname", server.getLocalHostname());
+            verify(tool).getHostname();
+        } finally {
+            server.close();
+        }
     }
 }

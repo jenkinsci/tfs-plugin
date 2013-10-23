@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.424</version>
+    <version>1.436</version>
   </parent>
 
   <artifactId>tfs</artifactId>
@@ -13,6 +13,37 @@
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
+    <license>
+      <name>Microsoft Visual Studio Team Foundation Server 2012 Software Development Kit for Java license terms</name>
+      <url>http://download.microsoft.com/download/5/9/9/5993F89B-AEF0-4381-9CEE-D3D7BA9EA33B/license.html</url>
+    </license>
+    <license>
+      <name>
+        Apache Commons Codec, Apache Commons Logging, Apache HttpClient, Apache Commons Lang, Apache log4j,
+        and Apache ServiceMix are licensed by the Apache Foundation under the Apache License, Version 2.0.
+      </name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+    <license>
+      <name>
+        The Apache Foundation's Xerces Java Parser project is licensed by the
+        Apache Foundation under the Apache License, Version 1.1.
+      </name>
+      <url>http://www.apache.org/licenses/LICENSE-1.1</url>
+    </license>
+    <license>
+      <name>
+        The Woodstox XML Processor and the StAX API are licensed by their authors under the Apache License, Version 2.0.
+      </name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url></license>
+    <license>
+      <name>This product includes software from the Hypersonic SQL DB http://hsqldb.org/.</name>
+      <url>http://www.hsqldb.org/web/hsqlLicense.html</url>
+    </license>
+    <license>
+      <name>This product includes software from the Cryptix project http://www.cryptix.org/.</name>
+      <url>http://cryptix.org/LICENSE.TXT</url>
+    </license>
   </licenses>
 
   <developers>
@@ -77,6 +108,43 @@
   </build>
 
   <dependencies>
+    <!-- 
+      com.microsoft.tfs.sdk includes its dependencies inline, some of which conflict with those of jenkins-core.
+      We have to repeat dependencies here to make sure they are considered before those inside the TFS SDK.
+    -->
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>jenkins-war</artifactId>
+      <version>1.436</version>
+      <type>war</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>jenkins-core</artifactId>
+      <version>1.436</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>jenkins-test-harness</artifactId>
+      <version>1.436</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>ui-samples-plugin</artifactId>
+      <version>1.436</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.tfs.sdk</groupId>
+      <artifactId>com.microsoft.tfs.sdk</artifactId>
+      <version>11.0.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/com.microsoft.tfs.sdk-11.0.0.jar</systemPath>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

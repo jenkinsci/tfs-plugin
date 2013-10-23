@@ -1,20 +1,32 @@
 package hudson.plugins.tfs.model;
 
+import hudson.model.User;
 import hudson.plugins.tfs.commands.BriefHistoryCommand;
-import hudson.plugins.tfs.commands.DetailedHistoryCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
+import hudson.plugins.tfs.model.ChangeSet.Item;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
 
 public class Project {
 
@@ -30,6 +42,31 @@ public class Project {
         return projectPath;
     }
 
+    static hudson.plugins.tfs.model.ChangeSet.Item convertServerChange
+        (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange) {
+        final String path = serverChange.getItem().getServerItem();
+        final String action = serverChange.getChangeType().toUIString(true);
+        final Item result = new Item(path, action);
+        return result;
+    }
+
+    static hudson.plugins.tfs.model.ChangeSet convertServerChangeset
+        (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset, UserLookup userLookup) {
+        final String version = Integer.toString(serverChangeset.getChangesetID(), 10);
+        final Date date = serverChangeset.getDate().getTime();
+        final String author = serverChangeset.getCommitter();
+        final User authorUser = userLookup.find(author);
+        final String comment = serverChangeset.getComment();
+
+        final ChangeSet result = new ChangeSet(version, date, authorUser, comment);
+        final Change[] serverChanges = serverChangeset.getChanges();
+        for (final Change serverChange : serverChanges) {
+            final Item item = convertServerChange(serverChange);
+            result.add(item);
+        }
+        return result;
+    }
+    
     /**
      * Returns a list of change sets containing modified items.
      * @param fromTimestamp the timestamp to get history from
@@ -37,13 +74,38 @@ public class Project {
      * @return a list of change sets
      */
     public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
-        DetailedHistoryCommand command = new DetailedHistoryCommand(server, projectPath, fromTimestamp, toTimestamp);
-        Reader reader = null;
+        final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
+        final IIdentityManagementService ims = new IdentityManagementService(tpc);
+        final UserLookup userLookup = new TfsUserLookup(ims);
+        final VersionControlClient vcc = tpc.getVersionControlClient();
         try {
-            reader = server.execute(command.getArguments());
-            return command.parse(reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
+            final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
+            final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
+            final Changeset[] serverChangesets = vcc.queryHistory(
+                    projectPath,
+                    fromVersion,
+                    0 /* deletionId */,
+                    RecursionType.FULL,
+                    null /* user */,
+                    fromVersion,
+                    toVersion,
+                    Integer.MAX_VALUE,
+                    true /* includeFileDetails */,
+                    true /* slotMode */,
+                    false /* includeDownloadInfo */,
+                    false /* sortAscending */
+                    );
+            final List<ChangeSet> result = new ArrayList<ChangeSet>();
+            if (serverChangesets != null) {
+                for (final Changeset serverChangeset : serverChangesets) {
+                    final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup);
+                    result.add(changeSet);
+                } 
+            }
+            return result;
+        }
+        finally {
+            vcc.close();
         }
     }
 
