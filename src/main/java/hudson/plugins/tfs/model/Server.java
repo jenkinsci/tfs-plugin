@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
@@ -67,7 +68,15 @@ public class Server implements ServerConfigurationProvider, Closable {
             final CodeSource codeSource = protectionDomain.getCodeSource();
             // TODO: codeSource could be null; what should we do, then?
             final URL location = codeSource.getLocation();
-            final String stringPathToJar = location.getFile();
+            URI locationUri = null;
+            try {
+                locationUri = location.toURI();
+            } catch (URISyntaxException e) {
+                // this shouldn't happen
+                // TODO: consider logging this situation if it ever happens
+                return;
+            }
+            final String stringPathToJar = locationUri.getPath();
             final File pathToJar = new File(stringPathToJar);
             final File pathToLibFolder = pathToJar.getParentFile();
             final File pathToNativeFolder = new File(pathToLibFolder, "native");
