@@ -9,7 +9,7 @@
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
   <name>Team Foundation Server Plug-in</name>
-  <version>3.0.1</version>
+  <version>3.0.2-SNAPSHOT</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
