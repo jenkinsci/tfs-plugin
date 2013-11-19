@@ -76,8 +76,7 @@ public class Server implements ServerConfigurationProvider, Closable {
                 // TODO: consider logging this situation if it ever happens
                 return;
             }
-            final String stringPathToJar = locationUri.getPath();
-            final File pathToJar = new File(stringPathToJar);
+            final File pathToJar = new File(locationUri);
             final File pathToLibFolder = pathToJar.getParentFile();
             final File pathToNativeFolder = new File(pathToLibFolder, "native");
             System.setProperty(nativeFolderPropertyName, pathToNativeFolder.toString()); 
