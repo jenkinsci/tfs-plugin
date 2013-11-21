@@ -66,18 +66,25 @@ public class Server implements ServerConfigurationProvider, Closable {
             final Class<TFSTeamProjectCollection> metaclass = TFSTeamProjectCollection.class;
             final ProtectionDomain protectionDomain = metaclass.getProtectionDomain();
             final CodeSource codeSource = protectionDomain.getCodeSource();
-            // TODO: codeSource could be null; what should we do, then?
-            final URL location = codeSource.getLocation();
-            URI locationUri = null;
-            try {
-                locationUri = location.toURI();
-            } catch (URISyntaxException e) {
-                // this shouldn't happen
-                // TODO: consider logging this situation if it ever happens
+            if (codeSource == null) {
+                // TODO: log that we were unable to determine the codeSource
                 return;
             }
-            final String stringPathToJar = locationUri.getPath();
-            final File pathToJar = new File(stringPathToJar);
+            final URL location = codeSource.getLocation();
+            // inspired by http://hg.netbeans.org/main/file/default/openide.filesystems/src/org/openide/filesystems/FileUtil.java#l1992
+            final String u = location.toString();
+            URI locationUri;
+            if (u.startsWith("jar:file:") && u.endsWith("!/")) {
+                locationUri = URI.create(u.substring(4, u.length() - 2));
+            }
+            else if (u.startsWith("file:")) {
+                locationUri = URI.create(u);
+            }
+            else {
+                // TODO: log that we were unable to determine location from codeSource
+                return;
+            }
+            final File pathToJar = new File(locationUri);
             final File pathToLibFolder = pathToJar.getParentFile();
             final File pathToNativeFolder = new File(pathToLibFolder, "native");
             System.setProperty(nativeFolderPropertyName, pathToNativeFolder.toString()); 
