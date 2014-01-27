@@ -1,5 +1,7 @@
 package hudson.plugins.tfs.model;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.model.User;
 import hudson.plugins.tfs.commands.BriefHistoryCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
@@ -66,21 +68,20 @@ public class Project {
         }
         return result;
     }
-    
+
     /**
-     * Returns a list of change sets containing modified items.
-     * @param fromTimestamp the timestamp to get history from
-     * @param toTimestamp the timestamp to get history to
+     * Returns a list of changes using TFS Java SDK
+     * @param fromVersion the version to get the history from
+     * @param toVersion the version to get the history to
+     * @param includeFileDetails whether or not to include details of modified items
      * @return a list of change sets
      */
-    public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
+    private List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails) {
         final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
         final IIdentityManagementService ims = new IdentityManagementService(tpc);
         final UserLookup userLookup = new TfsUserLookup(ims);
         final VersionControlClient vcc = tpc.getVersionControlClient();
         try {
-            final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
-            final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
             final Changeset[] serverChangesets = vcc.queryHistory(
                     projectPath,
                     fromVersion,
@@ -90,17 +91,17 @@ public class Project {
                     fromVersion,
                     toVersion,
                     Integer.MAX_VALUE,
-                    true /* includeFileDetails */,
+                    includeFileDetails /* includeFileDetails */,
                     true /* slotMode */,
                     false /* includeDownloadInfo */,
                     false /* sortAscending */
-                    );
+            );
             final List<ChangeSet> result = new ArrayList<ChangeSet>();
             if (serverChangesets != null) {
                 for (final Changeset serverChangeset : serverChangesets) {
                     final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup);
                     result.add(changeSet);
-                } 
+                }
             }
             return result;
         }
@@ -110,20 +111,27 @@ public class Project {
     }
 
     /**
+     * Returns a list of change sets containing modified items.
+     * @param fromTimestamp the timestamp to get history from
+     * @param toTimestamp the timestamp to get history to
+     * @return a list of change sets
+     */
+    public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
+        final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
+        final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
+        return getVCCHistory(fromVersion, toVersion, true);
+    }
+
+    /**
      * Returns a list of change sets not containing the modified items.
      * @param fromTimestamp the timestamp to get history from
      * @param toTimestamp the timestamp to get history to
      * @return a list of change sets
      */
     public List<ChangeSet> getBriefHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
-        BriefHistoryCommand command = new BriefHistoryCommand(server, projectPath, fromTimestamp, toTimestamp);
-        Reader reader = null;
-        try {
-            reader = server.execute(command.getArguments());
-            return command.parse(reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
-        }
+        final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
+        final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
+        return getVCCHistory(fromVersion, toVersion, false);
     }
 
     /**
@@ -133,14 +141,9 @@ public class Project {
      * @return a list of change sets
      */
     public List<ChangeSet> getBriefHistory(int fromChangeset, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
-        BriefHistoryCommand command = new BriefHistoryCommand(server, projectPath, fromChangeset, toTimestamp);
-        Reader reader = null;
-        try {
-            reader = server.execute(command.getArguments());
-            return command.parse(reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
-        }
+        final ChangesetVersionSpec fromVersion = new ChangesetVersionSpec(fromChangeset);
+        final VersionSpec toVersion = new DateVersionSpec(toTimestamp);
+        return getVCCHistory(fromVersion, toVersion, false);
     }
 
     /**
