@@ -21,12 +21,12 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
- * Used to create a label on TFS after a build is completed.
+ * Used to create a label in TFS after a build is completed.
  * @author Rodrigo Lopes (rodrigolopes)
  */
 public class TFSLabeler extends Notifier {
 
-    private String time;
+    private String whenToLabel;
     private String labelName;
 
     private static final Logger logger = Logger.getLogger(TFSLabeler.class.getName());
@@ -39,7 +39,7 @@ public class TFSLabeler extends Notifier {
 
         @Override
         public String getDisplayName() {
-            return "Create a label on TFS";
+            return "Create a label in TFS";
         }
 
         @Override
@@ -50,7 +50,7 @@ public class TFSLabeler extends Notifier {
         @Override
         public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new TFSLabeler(
-                    req.getParameter("tfsLabeler.time"),
+                    req.getParameter("tfsLabeler.whenToLabel"),
                     req.getParameter("tfsLabeler.labelName")
             );
         }
@@ -58,8 +58,8 @@ public class TFSLabeler extends Notifier {
     }
 
     @DataBoundConstructor
-    public TFSLabeler(String time, String labelName) {
-        this.time = time;
+    public TFSLabeler(String whenToLabel, String labelName) {
+        this.whenToLabel = whenToLabel;
         this.labelName = labelName;
     }
 
@@ -67,7 +67,7 @@ public class TFSLabeler extends Notifier {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         SCM scm = build.getProject().getScm();
         if (!(scm instanceof TeamFoundationServerScm)) {
-            listener.getLogger().println("No label for non TFS project");
+            listener.getLogger().println("Labels are only supported for projects using TFS SCM");
             return false;
         }
 
@@ -77,7 +77,7 @@ public class TFSLabeler extends Notifier {
 
         boolean buildSucess = Result.SUCCESS.equals(build.getResult());
 
-        String whenCreateLabel = getTime();
+        String whenCreateLabel = getWhenToLabel();
         if ("always".equals(whenCreateLabel) || ("success".equals(whenCreateLabel) && buildSucess)) {
 
             final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
@@ -104,15 +104,19 @@ public class TFSLabeler extends Notifier {
 
     /**
      * Replace an expression in the form ${name} in the given String
-     * by the value of the matching environment variable.<Br/>
-     * Util.replaceMacro(parameterizedValue, new BuildVariableResolver(build.getProject())) did not work.
+     * by the value of the matching environment variable or build parameter.<Br/>
      */
     private String computeDynamicValue(AbstractBuild build, String parameterizedValue)
             throws IllegalStateException, InterruptedException, IOException {
-        String value = parameterizedValue;
-        while (value != null && value.contains("${")) {
-            int start = value.indexOf("${", 0);
-            int end = value.indexOf("}", start);
+
+        // replace build parameters
+        String value = Util.replaceMacro(parameterizedValue, new BuildVariableResolver(build.getProject()));
+
+        // now replace environment variables
+        int start = value.indexOf("${");
+        int end = value.indexOf("}", start);
+
+        while (value != null && start > -1 && end > -1) {
             String parameter = value.substring(start + 2, end);
             String parameterValue = build.getEnvironment(TaskListener.NULL).get(parameter);
             if (parameterValue == null) {
@@ -120,6 +124,9 @@ public class TFSLabeler extends Notifier {
             }
             value = value.substring(0, start) + parameterValue +
                     (value.length() > end + 1 ? value.substring(end + 1) : "");
+
+            start = value.indexOf("${");
+            end = value.indexOf("}", start);
         }
         logger.fine("oldValue = " + parameterizedValue + "; newValue = " + value);
         return value;
@@ -129,8 +136,8 @@ public class TFSLabeler extends Notifier {
         return BuildStepMonitor.STEP;
     }
 
-    public String getTime() {
-        return time;
+    public String getWhenToLabel() {
+        return whenToLabel;
     }
 
     public String getLabelName() {

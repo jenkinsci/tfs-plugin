@@ -3,9 +3,9 @@
 		<f:textbox name="tfsLabeler.labelName" value="${instance.labelName}" />
 	</f:entry>
 	<f:entry title="Always">
-		<f:radio name="tfsLabeler.time" value="always" checked="${instance.time=='always'}"/>
+		<f:radio name="tfsLabeler.whenToLabel" value="always" checked="${instance.whenToLabel=='always'}"/>
 	</f:entry>
 	<f:entry title="If the build is successful">
-		<f:radio name="tfsLabeler.time" value="success" checked="${instance.time=='success'}"/>
+		<f:radio name="tfsLabeler.whenToLabel" value="success" checked="${instance.whenToLabel=='success'}"/>
 	</f:entry>
 </j:jelly>

@@ -13,12 +13,12 @@ public class LabelCommandTest {
     @Test
     public void assertArguments() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        when(config.getUrl()).thenReturn("https//tfs02.codeplex.com");
+        when(config.getUrl()).thenReturn("https://tfs02.codeplex.com");
         when(config.getUserName()).thenReturn("snd\\user_cp");
         when(config.getUserPassword()).thenReturn("password");
 
-        MaskedArgumentListBuilder arguments = new LabelCommand(config, "LABEL", "WORKSPACE", "PATH").getArguments();
+        MaskedArgumentListBuilder arguments = new LabelCommand(config, "int_build.10", "Jenkins-JOB-MASTER", ".").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("label LABEL PATH -version:WWORKSPACE -noprompt -recursive -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("label int_build.10 . -version:WJenkins-JOB-MASTER -noprompt -recursive -server:https://tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 }
