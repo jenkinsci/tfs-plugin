@@ -1,5 +1,6 @@
 package hudson.plugins.tfs;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -13,6 +14,8 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.util.VariableResolver;
+import hudson.util.VariableResolver.Union;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
@@ -109,25 +112,18 @@ public class TFSLabeler extends Notifier {
     private String computeDynamicValue(AbstractBuild build, String parameterizedValue)
             throws IllegalStateException, InterruptedException, IOException {
 
-        // replace build parameters
-        String value = Util.replaceMacro(parameterizedValue, new BuildVariableResolver(build.getProject()));
-
-        // now replace environment variables
-        int start = value.indexOf("${");
-        int end = value.indexOf("}", start);
-
-        while (value != null && start > -1 && end > -1) {
-            String parameter = value.substring(start + 2, end);
-            String parameterValue = build.getEnvironment(TaskListener.NULL).get(parameter);
-            if (parameterValue == null) {
-                throw new IllegalStateException(parameter);
+        final EnvVars envVars = build.getEnvironment(TaskListener.NULL);
+        final VariableResolver<String> environmentVariables = new VariableResolver<String>() {
+            public String resolve(String name) {
+                return envVars.get(name);
             }
-            value = value.substring(0, start) + parameterValue +
-                    (value.length() > end + 1 ? value.substring(end + 1) : "");
+            
+        };
+        final BuildVariableResolver buildVariables = new BuildVariableResolver(build.getProject());
+        @SuppressWarnings("unchecked")
+        final Union<String> bothVariables = new VariableResolver.Union<String>(buildVariables, environmentVariables);
+        String value = Util.replaceMacro(parameterizedValue, bothVariables);
 
-            start = value.indexOf("${");
-            end = value.indexOf("}", start);
-        }
         logger.fine("oldValue = " + parameterizedValue + "; newValue = " + value);
         return value;
     }
