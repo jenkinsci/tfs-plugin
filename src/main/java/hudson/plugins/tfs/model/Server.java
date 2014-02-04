@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.model;
 
-import com.microsoft.tfs.core.TFSConfigurationServer;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
@@ -8,7 +7,6 @@ import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -26,7 +24,7 @@ import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.util.Closable;
 
 public class Server implements ServerConfigurationProvider, Closable {
-
+    
     private static final String nativeFolderPropertyName = "com.microsoft.tfs.jni.native.base-directory";
     private final String url;
     private final String userName;
@@ -108,14 +106,14 @@ public class Server implements ServerConfigurationProvider, Closable {
     {
         return this.tpc;
     }
-
+    
     public Workspaces getWorkspaces() {
         if (workspaces == null) {
             workspaces = new Workspaces(this);
         }
         return workspaces;
     }
-
+    
     public Reader execute(MaskedArgumentListBuilder arguments) throws IOException, InterruptedException {
         return tool.execute(arguments.toCommandArray(), arguments.toMaskArray());
     }
@@ -138,23 +136,8 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public synchronized void close() {
         if (this.tpc != null) {
-            // Close the configuration server connection that should be closed by
-            // TFSTeamProjectCollection
-            // The field is private, so use reflection
-            // This should be removed when the TFS SDK is fixed
-            try {
-                Field f = TFSTeamProjectCollection.class.getDeclaredField("configurationServer");
-                f.setAccessible(true);
-                TFSConfigurationServer configurationServer = (TFSConfigurationServer) f.get(this.tpc);
-                if (configurationServer != null) {
-                    configurationServer.close();
-                }
-                f.setAccessible(false);
-            } catch (NoSuchFieldException ignore) {
-            } catch (IllegalAccessException ignore) {
-            }
-            this.tpc.close();
+           this.tpc.close();
         }
-
+        
     }
 }
