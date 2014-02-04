@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import com.microsoft.tfs.core.TFSConfigurationServer;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
@@ -7,6 +8,7 @@ import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -136,7 +138,23 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public synchronized void close() {
         if (this.tpc != null) {
-           this.tpc.close();
+            // Close the configuration server connection that should be closed by
+            // TFSTeamProjectCollection
+            // The field is private, so use reflection
+            // This should be removed when the TFS SDK is fixed
+            // Post in MSDN forum: social.msdn.microsoft.com/Forums/vstudio/en-US/79985ef1-b35d-4fc5-af0b-b95e28402b83
+            try {
+                Field f = TFSTeamProjectCollection.class.getDeclaredField("configurationServer");
+                f.setAccessible(true);
+                TFSConfigurationServer configurationServer = (TFSConfigurationServer) f.get(this.tpc);
+                if (configurationServer != null) {
+                    configurationServer.close();
+                }
+                f.setAccessible(false);
+            } catch (NoSuchFieldException ignore) {
+            } catch (IllegalAccessException ignore) {
+            }
+            this.tpc.close();
         }
         
     }

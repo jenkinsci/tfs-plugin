@@ -92,32 +92,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         assertEquals("The item action was incorrect", "add", item.getAction());
 
     }
-    
-    @Test
-    public void assertGetBriefHistory() throws Exception {
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(
-                "Changeset User           Date                 Comment\n" +
-                "--------- -------------- -------------------- ----------------------------------------------------------------------------\n" +
-                "\n" +
-                "12495     SND\\redsolo_cp 2008-jun-27 13:21:25 changed and created one\n"));
-        Project project = new Project(server, "$/serverpath");
-        List<ChangeSet> list = project.getBriefHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
-        assertNotNull("The returned list was null", list);
-        assertEquals("The number of change sets in list was incorrect", 1, list.size());
-        verify(server).execute(isA(MaskedArgumentListBuilder.class));
-    }
 
-    @Test
-    public void assertGetBriefHistoryClosesReader() throws Exception {
-        Reader spy = spy(new StringReader(""));
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getBriefHistory(Util.getCalendar(2008, 06, 01), Util.getCalendar(2008, 07, 01));
-
-        verify(spy).close();
-    }
-    
     @Test
     public void assertGetFiles() throws Exception {
         Server server = mock(Server.class);
