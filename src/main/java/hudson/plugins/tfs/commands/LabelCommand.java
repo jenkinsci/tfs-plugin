@@ -25,6 +25,8 @@ public class LabelCommand extends AbstractCommand {
         arguments.add(labelName);
         arguments.add(projectPath);
         arguments.add(String.format("-version:W%s", workspaceName));
+        arguments.add("-comment");
+        arguments.add("Automatically applied by Jenkins TFS plugin");
         arguments.add("-noprompt");
         arguments.add("-recursive");
         addServerArgument(arguments);
