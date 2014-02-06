@@ -117,7 +117,7 @@ public class TFSLabeler extends Notifier {
             public String resolve(String name) {
                 return envVars.get(name);
             }
-            
+
         };
         final BuildVariableResolver buildVariables = new BuildVariableResolver(build.getProject());
         @SuppressWarnings("unchecked")
