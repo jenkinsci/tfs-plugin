@@ -19,6 +19,6 @@ public class LabelCommandTest {
 
         MaskedArgumentListBuilder arguments = new LabelCommand(config, "int_build.10", "Jenkins-JOB-MASTER", ".").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("label int_build.10 . -version:WJenkins-JOB-MASTER -comment \"Automatically applied by Jenkins TFS plugin\" -noprompt -recursive -server:https://tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("label int_build.10 . -version:WJenkins-JOB-MASTER -comment:Automatically_applied_by_Jenkins_TFS_plugin -noprompt -recursive -server:https://tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 }

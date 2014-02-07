@@ -25,12 +25,17 @@ public class LabelCommand extends AbstractCommand {
         arguments.add(labelName);
         arguments.add(projectPath);
         arguments.add(String.format("-version:W%s", workspaceName));
-        arguments.add("-comment");
-        arguments.add("Automatically applied by Jenkins TFS plugin");
+        arguments.add(String.format("-comment:%s", getLabelComment()));
         arguments.add("-noprompt");
         arguments.add("-recursive");
         addServerArgument(arguments);
         addLoginArgument(arguments);
         return arguments;
+    }
+
+    private String getLabelComment() {
+        // TODO 1. Solve issue with quotes and spaces
+        // TODO 2. Include build information in the comment.
+        return "Automatically_applied_by_Jenkins_TFS_plugin";
     }
 }
