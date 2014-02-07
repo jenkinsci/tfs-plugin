@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<f:entry title="Label" help="/plugin/tfs/labelname.html">
+		<f:textbox name="tfsLabeler.labelName" value="${instance.labelName}" />
+	</f:entry>
+	<f:entry title="Always">
+		<f:radio name="tfsLabeler.whenToLabel" value="always" checked="${instance.whenToLabel=='always'}"/>
+	</f:entry>
+	<f:entry title="If the build is successful">
+		<f:radio name="tfsLabeler.whenToLabel" value="success" checked="${instance.whenToLabel=='success'}"/>
+	</f:entry>
+</j:jelly>
