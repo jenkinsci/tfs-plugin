@@ -11,7 +11,16 @@ import com.microsoft.tfs.core.clients.webservices.ReadIdentityOptions;
 import com.microsoft.tfs.core.clients.webservices.TeamFoundationIdentity;
 import com.microsoft.tfs.util.GUID;
 
-public class FakeIdentityManagementService implements IIdentityManagementService {
+/**
+ * An {@link IIdentityManagementService} implementation to provide similar
+ * functionality to that provided by TFS 2010 and up on TFS 2008.  
+ *
+ * Right now, the {@link TfsUserLookup} is the only consumer of
+ * {@link IIdentityManagementService} implementations, for the purpose of
+ * determining a TFS user's display name and e-mail address, given their
+ * account name.
+ */
+public class LegacyIdentityManagementService implements IIdentityManagementService {
 
     public TeamFoundationIdentity[] readIdentities(IdentityDescriptor[] paramArrayOfIdentityDescriptor,
             MembershipQuery paramMembershipQuery, ReadIdentityOptions paramReadIdentityOptions) {

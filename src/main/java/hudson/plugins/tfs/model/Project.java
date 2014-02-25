@@ -83,7 +83,7 @@ public class Project {
         try {
             ims = new IdentityManagementService(tpc);
         } catch (IdentityManagementException e) {
-            ims = new FakeIdentityManagementService();
+            ims = new LegacyIdentityManagementService();
         }
         final UserLookup userLookup = new TfsUserLookup(ims);
         final VersionControlClient vcc = tpc.getVersionControlClient();
