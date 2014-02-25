@@ -2,6 +2,7 @@ package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
+
 import hudson.model.User;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
@@ -27,6 +28,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
 
 public class Project {
@@ -77,7 +79,12 @@ public class Project {
      */
     private List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails) {
         final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
-        final IIdentityManagementService ims = new IdentityManagementService(tpc);
+        IIdentityManagementService ims;
+        try {
+            ims = new IdentityManagementService(tpc);
+        } catch (IdentityManagementException e) {
+            ims = new FakeIdentityManagementService();
+        }
         final UserLookup userLookup = new TfsUserLookup(ims);
         final VersionControlClient vcc = tpc.getVersionControlClient();
         try {
