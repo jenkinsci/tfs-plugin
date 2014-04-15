@@ -13,6 +13,7 @@ import hudson.scm.SCM;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import org.apache.commons.io.FilenameUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -57,7 +58,16 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
      */
     @Override
     public URL getChangeSetLink(ChangeSet changeSet) throws IOException {
-        return new URL(String.format("%scs.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
+       // AbstractProject<?, ?> project = changeSet.getParent().build.getProject();
+       // SCM scm = project.getScm();
+       // if (scm instanceof TeamFoundationServerScm) {
+          //  if(true)
+          //  {
+                return new URL(String.format("%s_versionControl/changeset/%s", getBaseUrlString(changeSet), changeSet.getVersion()));
+        //    }
+      //  }
+        
+      //  return new URL(String.format("%scs.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
     }
 
     /**
@@ -66,7 +76,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
      * @return
      */
     public URL getFileLink(ChangeSet.Item item) throws IOException {
-        return new URL(String.format("%sview.aspx?path=%s&cs=%s", getBaseUrlString(item.getParent()), item.getPath(), item.getParent().getVersion()));
+        return new URL(String.format("%s_versionControl/changeset/%s#path=%s&_a=contents", getBaseUrlString(item.getParent()),item.getParent().getVersion(), URLEncoder.encode(item.getPath(),"UTF-8")));
     }
 
     /**
@@ -81,12 +91,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
             return null;
         }
         try {
-            return new URL(String.format("%sdiff.aspx?opath=%s&ocs=%s&mpath=%s&mcs=%s", 
-                    getBaseUrlString(parent), 
-                    item.getPath(),
-                    getPreviousChangeSetVersion(parent), 
-                    item.getPath(),
-                    parent.getVersion()));
+            return new URL(String.format("%s_versionControl/changeset/%s#path=%s&_a=compare", getBaseUrlString(item.getParent()),item.getParent().getVersion(), URLEncoder.encode(item.getPath(),"UTF-8")));
         } catch (NumberFormatException nfe) {
             return null;
         }

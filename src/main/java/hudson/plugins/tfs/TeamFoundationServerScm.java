@@ -112,14 +112,14 @@ public class TeamFoundationServerScm extends SCM {
     public boolean isUseUpdate() {
         return useUpdate;
     }
-
+    
     public String getUserPassword() {
         return Scrambler.descramble(userPassword);
     }
 
     public String getUserName() {
         return userName;
-    }    
+    }  
     // Bean properties END
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
