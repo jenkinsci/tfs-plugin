@@ -73,6 +73,7 @@ public class TeamFoundationServerScm extends SCM {
     private final String userPassword;
     private final String userName;
     private final boolean useUpdate;
+    private final boolean useRestUrls;
     
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
@@ -82,7 +83,7 @@ public class TeamFoundationServerScm extends SCM {
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword, boolean useRestUrls) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
@@ -90,7 +91,9 @@ public class TeamFoundationServerScm extends SCM {
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.userPassword = Scrambler.scramble(userPassword);
+        this.useRestUrls = useRestUrls;
     }
+    
 
     // Bean properties need for job configuration
     public String getServerUrl() {
@@ -111,6 +114,10 @@ public class TeamFoundationServerScm extends SCM {
 
     public boolean isUseUpdate() {
         return useUpdate;
+    }
+    
+    public boolean isUseRestUrls(){
+        return useRestUrls;
     }
     
     public String getUserPassword() {

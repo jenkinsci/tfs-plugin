@@ -24,7 +24,10 @@
 		<f:entry title="Use update" description="If checked, Hudson will not delete the workspace at end of each build, making the build faster. But this causes the artifacts from the previous build to remain when a new build starts.">
 			<f:checkbox name="tfs.useUpdate" checked="${h.defaultToTrue(scm.useUpdate)}"/>
 		</f:entry>
-    
+                
+                <f:entry title="Use REST Style URLs" description="If checked, Hudson will use the REST style URLs compatable with TFS 2012+ web access. ">
+			<f:checkbox name="tfs.useRestUrls" checked="${h.defaultToTrue(scm.useRestUrls)}"/>
+		</f:entry>
 	    <f:entry title="Local workfolder" help="/plugin/tfs/workfolder.html">
 	        <f:textbox name="tfs.localPath" value="${h.defaulted(scm.localPath, '.')}"
 	             clazz="required" checkMessage="${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}"/>

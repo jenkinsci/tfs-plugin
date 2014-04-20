@@ -23,7 +23,8 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
     private static final long serialVersionUID = 1L;
 
     private final String url;
-
+    private Boolean useRestUrls = null;
+    
     @DataBoundConstructor
     public TeamSystemWebAccessBrowser(String urlExample) {
         this.url = Util.fixEmpty(urlExample);
@@ -53,21 +54,29 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         return baseUrl;
     }
 
+    private boolean isUseRestUrls(ChangeSet changeSet){
+        if(useRestUrls == null)
+        {
+            AbstractProject<?, ?> project = changeSet.getParent().build.getProject();
+            SCM scm = project.getScm();
+            if (scm instanceof TeamFoundationServerScm){
+                TeamFoundationServerScm tfsScm = (TeamFoundationServerScm)scm;
+                useRestUrls = tfsScm.isUseRestUrls();
+            }
+        }
+        return useRestUrls;
+    }
     /**
      * http://tswaserver:8090/cs.aspx?cs=99
      */
     @Override
     public URL getChangeSetLink(ChangeSet changeSet) throws IOException {
-       // AbstractProject<?, ?> project = changeSet.getParent().build.getProject();
-       // SCM scm = project.getScm();
-       // if (scm instanceof TeamFoundationServerScm) {
-          //  if(true)
-          //  {
-                return new URL(String.format("%s_versionControl/changeset/%s", getBaseUrlString(changeSet), changeSet.getVersion()));
-        //    }
-      //  }
-        
-      //  return new URL(String.format("%scs.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
+        if(isUseRestUrls(changeSet))
+        {
+            return new URL(String.format("%s_versionControl/changeset/%s", getBaseUrlString(changeSet), changeSet.getVersion()));
+        }else{
+            return new URL(String.format("%scs.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
+        }
     }
 
     /**
@@ -76,7 +85,12 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
      * @return
      */
     public URL getFileLink(ChangeSet.Item item) throws IOException {
-        return new URL(String.format("%s_versionControl/changeset/%s#path=%s&_a=contents", getBaseUrlString(item.getParent()),item.getParent().getVersion(), URLEncoder.encode(item.getPath(),"UTF-8")));
+        if(isUseRestUrls(item.getParent()))
+        {
+            return new URL(String.format("%s_versionControl/changeset/%s#path=%s&_a=contents", getBaseUrlString(item.getParent()),item.getParent().getVersion(), URLEncoder.encode(item.getPath(),"UTF-8")));
+        }else{
+            return new URL(String.format("%sview.aspx?path=%s&cs=%s", getBaseUrlString(item.getParent()), item.getPath(), item.getParent().getVersion()));
+        }
     }
 
     /**
@@ -91,7 +105,20 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
             return null;
         }
         try {
-            return new URL(String.format("%s_versionControl/changeset/%s#path=%s&_a=compare", getBaseUrlString(item.getParent()),item.getParent().getVersion(), URLEncoder.encode(item.getPath(),"UTF-8")));
+            if(isUseRestUrls(item.getParent()))
+            {
+                return new URL(String.format("%s_versionControl/changeset/%s#path=%s&_a=compare", 
+                    getBaseUrlString(item.getParent()),
+                    item.getParent().getVersion(), 
+                    URLEncoder.encode(item.getPath(),"UTF-8")));
+            }else{
+                return new URL(String.format("%sdiff.aspx?opath=%s&ocs=%s&mpath=%s&mcs=%s", 
+                    getBaseUrlString(parent), 
+                    item.getPath(),
+                    getPreviousChangeSetVersion(parent), 
+                    item.getPath(),
+                    parent.getVersion()));
+            }
         } catch (NumberFormatException nfe) {
             return null;
         }
