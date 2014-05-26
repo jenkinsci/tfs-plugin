@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -50,6 +51,8 @@ import hudson.scm.SCMDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.LogTaskListener;
 import hudson.util.Scrambler;
+import hudson.util.VariableResolver;
+
 import org.kohsuke.stapler.QueryParameter;
 
 /**
@@ -59,12 +62,14 @@ import org.kohsuke.stapler.QueryParameter;
  */
 public class TeamFoundationServerScm extends SCM {
 
-    public static final String WORKSPACE_ENV_STR = "TFS_WORKSPACE";
+	public static final String WORKSPACE_ENV_STR = "TFS_WORKSPACE";
     public static final String WORKFOLDER_ENV_STR = "TFS_WORKFOLDER";
     public static final String PROJECTPATH_ENV_STR = "TFS_PROJECTPATH";
     public static final String SERVERURL_ENV_STR = "TFS_SERVERURL";
     public static final String USERNAME_ENV_STR = "TFS_USERNAME";
     public static final String WORKSPACE_CHANGESET_ENV_STR = "TFS_CHANGESET";
+    
+    private static final String CHECKOUT_INFO = "CHECKOUT_INFO";
     
     private final String serverUrl;
     private final String projectPath;
@@ -173,7 +178,7 @@ public class TeamFoundationServerScm extends SCM {
             build.addAction(workspaceConfiguration);
             CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
             try {
-                List<ChangeSet> list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
+                List<ChangeSet> list = checkout(build, workspaceFilePath, server, action);
                 ChangeSetWriter writer = new ChangeSetWriter();
                 writer.write(list, changelogFile);
             } catch (ParseException pe) {
@@ -200,6 +205,22 @@ public class TeamFoundationServerScm extends SCM {
         }
         return true;
     }
+
+	private List<ChangeSet> checkout(AbstractBuild<?, ?> build,
+			FilePath workspaceFilePath, Server server, CheckoutAction action)
+			throws IOException, InterruptedException, ParseException {
+		
+		VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
+		String label = buildVariableResolver.resolve(CHECKOUT_INFO);
+		if (StringUtils.isNotEmpty(label)) {
+			if (label.startsWith("L")) {
+				return action.checkoutByLabel(server, workspaceFilePath, label);
+			}
+			//TODO to be implemented another checkout strategies...
+		}
+		
+		return action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
+	}
 
     void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
         this.workspaceChangesetVersion = workspaceChangesetVersion;

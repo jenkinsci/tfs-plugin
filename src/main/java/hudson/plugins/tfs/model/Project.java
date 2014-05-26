@@ -1,8 +1,5 @@
 package hudson.plugins.tfs.model;
 
-import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
-import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
-
 import hudson.model.User;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
@@ -26,7 +23,11 @@ import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LabelVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
@@ -127,6 +128,11 @@ public class Project {
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
         return getVCCHistory(fromVersion, toVersion, true);
     }
+    
+	public List<ChangeSet> getDetailedHistory(String label) {
+		LabelVersionSpec toVersion = new LabelVersionSpec(new LabelSpec(label, this.getProjectPath()));
+		return getVCCHistory(null, toVersion, true);
+	}
 
     /**
      * Returns a list of change sets not containing the modified items.

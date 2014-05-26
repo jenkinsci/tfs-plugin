@@ -30,7 +30,27 @@ public class CheckoutAction {
 
     public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp, Calendar currentBuildTimestamp) throws IOException, InterruptedException, ParseException {
         
-        Workspaces workspaces = server.getWorkspaces();
+        Project project = getProject(server, workspacePath);
+        
+        project.getFiles(localFolder, "D" + DateUtil.TFS_DATETIME_FORMATTER.get().format(currentBuildTimestamp.getTime()));
+        
+        if (lastBuildTimestamp != null) {
+            return project.getDetailedHistory(lastBuildTimestamp, currentBuildTimestamp);
+        }
+        
+        return new ArrayList<ChangeSet>();
+    }
+
+    public List<ChangeSet> checkoutByLabel(Server server, FilePath hudsonWs, String label) throws IOException, InterruptedException {
+    	Project project = getProject(server, hudsonWs);
+    	project.getFiles(localFolder, label);
+    	
+    	return project.getDetailedHistory(label);
+    }
+
+    private Project getProject(Server server, FilePath workspacePath)
+			throws IOException, InterruptedException {
+		Workspaces workspaces = server.getWorkspaces();
         Project project = server.getProject(projectPath);
         
         if (workspaces.exists(workspaceName) && !useUpdate) {
@@ -49,13 +69,7 @@ public class CheckoutAction {
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }
-        
-        project.getFiles(localFolder, "D" + DateUtil.TFS_DATETIME_FORMATTER.get().format(currentBuildTimestamp.getTime()));
-        
-        if (lastBuildTimestamp != null) {
-            return project.getDetailedHistory(lastBuildTimestamp, currentBuildTimestamp);
-        }
-        
-        return new ArrayList<ChangeSet>();
-    }
+		return project;
+	}
+
 }
