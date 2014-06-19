@@ -62,15 +62,15 @@ import org.kohsuke.stapler.QueryParameter;
  */
 public class TeamFoundationServerScm extends SCM {
 
-	public static final String WORKSPACE_ENV_STR = "TFS_WORKSPACE";
+    public static final String WORKSPACE_ENV_STR = "TFS_WORKSPACE";
     public static final String WORKFOLDER_ENV_STR = "TFS_WORKFOLDER";
     public static final String PROJECTPATH_ENV_STR = "TFS_PROJECTPATH";
     public static final String SERVERURL_ENV_STR = "TFS_SERVERURL";
     public static final String USERNAME_ENV_STR = "TFS_USERNAME";
     public static final String WORKSPACE_CHANGESET_ENV_STR = "TFS_CHANGESET";
     
-    private static final String CHECKOUT_INFO = "CHECKOUT_INFO";
-    
+    private static final String VERSION_SPEC = "VERSION_SPEC";
+
     private final String serverUrl;
     private final String projectPath;
     private final String localPath;
@@ -211,10 +211,11 @@ public class TeamFoundationServerScm extends SCM {
 			throws IOException, InterruptedException, ParseException {
 		
 		VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
-		String label = buildVariableResolver.resolve(CHECKOUT_INFO);
+		String label = buildVariableResolver.resolve(VERSION_SPEC);
 		if (StringUtils.isNotEmpty(label)) {
 			if (label.startsWith("L")) {
-				return action.checkoutByLabel(server, workspaceFilePath, label);
+		        String preffixRemoved = label.substring(1);
+				return action.checkoutByLabel(server, workspaceFilePath, preffixRemoved);
 			}
 			//TODO to be implemented another checkout strategies...
 		}

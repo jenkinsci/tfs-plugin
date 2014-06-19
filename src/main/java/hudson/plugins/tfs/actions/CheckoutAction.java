@@ -41,8 +41,8 @@ public class CheckoutAction {
         return new ArrayList<ChangeSet>();
     }
 
-    public List<ChangeSet> checkoutByLabel(Server server, FilePath hudsonWs, String label) throws IOException, InterruptedException {
-    	Project project = getProject(server, hudsonWs);
+    public List<ChangeSet> checkoutByLabel(Server server, FilePath workspacePath, String label) throws IOException, InterruptedException {
+    	Project project = getProject(server, workspacePath);
     	project.getFiles(localFolder, label);
     	
     	return project.getDetailedHistory(label);

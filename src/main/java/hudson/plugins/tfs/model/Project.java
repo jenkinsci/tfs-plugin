@@ -130,8 +130,7 @@ public class Project {
     }
     
 	public List<ChangeSet> getDetailedHistory(String label) {
-		String preffixRemoved = label.substring(1);
-		LabelVersionSpec fromVersion = new LabelVersionSpec(new LabelSpec(preffixRemoved, null));
+		LabelVersionSpec fromVersion = new LabelVersionSpec(new LabelSpec(label, null));
 		return getVCCHistory(fromVersion, null, true);
 	}
 
