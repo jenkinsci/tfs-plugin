@@ -25,7 +25,8 @@ import org.mockito.MockitoAnnotations;
 
 public class CheckoutActionTest {
 
-    private FilePath hudsonWs;
+    private static final String MY_LABEL = "MyLabel";
+	private FilePath hudsonWs;
     private @Mock Server server;
     private @Mock Workspaces workspaces;
     private @Mock Workspace workspace;
@@ -40,6 +41,22 @@ public class CheckoutActionTest {
         if (hudsonWs != null) {
             hudsonWs.deleteRecursive();
         }
+    }
+    
+    @Test
+    public void assertFirstCheckoutByLabelNotUsingUpdate() throws Exception {
+    	when(server.getWorkspaces()).thenReturn(workspaces);
+    	when(server.getProject("project")).thenReturn(project);
+    	when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
+    	when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+    	when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
+    	
+    	new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs,MY_LABEL);
+    	
+    	verify(workspaces).newWorkspace("workspace");
+    	verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
+    	verify(project).getFiles(".", MY_LABEL);
+    	verify(workspaces).deleteWorkspace(workspace);    	
     }
     
     @Test
@@ -59,20 +76,52 @@ public class CheckoutActionTest {
     }
 
     @Test
-    public void assertFirstCheckoutUsingUpdate() throws Exception {
+    public void assertFirstCheckoutByLabelUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
         
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+        verify(project).getFiles(".", MY_LABEL);
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
 
+    @Test
+    public void assertFirstCheckoutUsingUpdate() throws Exception {
+    	when(server.getWorkspaces()).thenReturn(workspaces);
+    	when(server.getProject("project")).thenReturn(project);
+    	when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+    	when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+    	
+    	new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
+    	
+    	verify(workspaces).newWorkspace("workspace");
+    	verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
+    	verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+    	verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
+    }
+    
+    @Test
+    public void assertSecondCheckoutByLabelUsingUpdate() throws Exception {
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(server.getProject("project")).thenReturn(project);
+        when(workspaces.exists("workspace")).thenReturn(true);
+        when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
+        when(server.getLocalHostname()).thenReturn("LocalComputer");
+        when(workspace.getComputer()).thenReturn("LocalComputer");
+        
+        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+
+        verify(project).getFiles(".", MY_LABEL);
+        verify(workspaces, never()).newWorkspace("workspace");
+        verify(workspace, never()).mapWorkfolder(project, ".");
+        verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
+    }
+    
     @Test
     public void assertSecondCheckoutUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
@@ -88,6 +137,22 @@ public class CheckoutActionTest {
         verify(workspaces, never()).newWorkspace("workspace");
         verify(workspace, never()).mapWorkfolder(project, ".");
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
+    }
+
+    @Test
+    public void assertSecondCheckoutByLabelNotUsingUpdate() throws Exception {
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(server.getProject("project")).thenReturn(project);
+        when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
+        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
+        
+        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+
+        verify(workspaces).newWorkspace("workspace");
+        verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
+        verify(project).getFiles(".", MY_LABEL);
+        verify(workspaces).deleteWorkspace(workspace);
     }
 
     @Test
@@ -107,6 +172,20 @@ public class CheckoutActionTest {
     }
    
     @Test
+    public void assertDetailedHistoryIsNotRetrievedInFirstBuildCheckingOutByLabel() throws Exception {
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(server.getProject("project")).thenReturn(project);
+        when(workspaces.exists("workspace")).thenReturn(true);
+        when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
+        when(server.getLocalHostname()).thenReturn("LocalComputer");
+        when(workspace.getComputer()).thenReturn("LocalComputer");
+        
+        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        
+        verify(project, never()).getDetailedHistory(isA(Calendar.class), isA(Calendar.class));
+    }
+   
+    @Test
     public void assertDetailedHistoryIsNotRetrievedInFirstBuild() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
@@ -118,6 +197,24 @@ public class CheckoutActionTest {
         new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(project, never()).getDetailedHistory(isA(Calendar.class), isA(Calendar.class));
+    }
+    
+    @Test
+    public void assertDetailedHistoryIsRetrievedInSecondBuildCheckingOutByLabel() throws Exception {
+        List<ChangeSet> list = new ArrayList<ChangeSet>();
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(server.getProject("project")).thenReturn(project);
+        when(workspaces.exists("workspace")).thenReturn(true);
+        when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
+        when(server.getLocalHostname()).thenReturn("LocalComputer");
+        when(workspace.getComputer()).thenReturn("LocalComputer");
+        when(project.getDetailedHistory(isA(String.class))).thenReturn(list);
+        
+        CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
+        List<ChangeSet> actualList = action.checkoutByLabel(server, hudsonWs, MY_LABEL);
+        assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
+        
+        verify(project).getDetailedHistory(isA(String.class));
     }
     
     @Test
@@ -156,6 +253,25 @@ public class CheckoutActionTest {
         assertEquals("The local TFS folder was not cleaned", 0, tfsWs.list((FileFilter)null).size());
         assertEquals("The Hudson workspace path was cleaned", 2, hudsonWs.list((FileFilter)null).size());
     }
+    
+    @Test
+    public void assertWorkFolderIsCleanedIfNotUsingUpdateCheckingOutByLabel() throws Exception {
+        hudsonWs.createTempFile("temp", "txt");
+        FilePath tfsWs = hudsonWs.child("tfs-ws");
+        tfsWs.mkdirs();
+        tfsWs.createTempFile("temp", "txt");
+        
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(server.getProject("project")).thenReturn(project);
+        when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        
+        new CheckoutAction("workspace", "project", "tfs-ws", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        
+        assertTrue("The local folder was removed", tfsWs.exists());
+        assertEquals("The local TFS folder was not cleaned", 0, tfsWs.list((FileFilter)null).size());
+        assertEquals("The Hudson workspace path was cleaned", 2, hudsonWs.list((FileFilter)null).size());
+    }
 
     @Test
     public void assertWorkspaceIsNotCleanedIfUsingUpdate() throws Exception {
@@ -174,6 +290,25 @@ public class CheckoutActionTest {
 
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The TFS workspace path was cleaned", 1, hudsonWs.list((FileFilter)null).size());
+    }
+    
+    @Bug(3882)
+    @Test
+    public void assertCheckoutByLabelDeletesWorkspaceAtStartIfNotUsingUpdate() throws Exception {
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
+        when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
+        when(server.getProject("project")).thenReturn(project);
+        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        
+        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        
+        verify(server).getWorkspaces();
+        verify(workspaces, times(2)).exists("workspace");
+        verify(workspaces).getWorkspace("workspace");
+        verify(workspaces).deleteWorkspace(workspace);
+        verify(workspaces).newWorkspace("workspace");
+        verifyNoMoreInteractions(workspaces);
     }
     
     @Bug(3882)
@@ -213,6 +348,22 @@ public class CheckoutActionTest {
     
     @Bug(3882)
     @Test
+    public void assertCheckoutByLabelDoesNotDeleteWorkspaceAtStartIfUsingUpdate() throws Exception {
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(workspaces.exists("workspace")).thenReturn(true).thenReturn(true);
+        when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
+        when(server.getProject("project")).thenReturn(project);
+        
+        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        
+        verify(server).getWorkspaces();
+        verify(workspaces, times(2)).exists("workspace");
+        verify(workspaces).getWorkspace("workspace");
+        verifyNoMoreInteractions(workspaces);
+    }
+    
+    @Bug(3882)
+    @Test
     public void assertCheckoutDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
@@ -220,6 +371,22 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         
         new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        
+        verify(server).getWorkspaces();
+        verify(workspaces, times(2)).exists("workspace");
+        verify(workspaces).newWorkspace("workspace");
+        verifyNoMoreInteractions(workspaces);
+    }
+    
+    @Bug(3882)
+    @Test
+    public void assertCheckoutByLabelDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
+        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(server.getProject("project")).thenReturn(project);
+        
+        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
