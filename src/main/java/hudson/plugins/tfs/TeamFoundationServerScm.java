@@ -77,6 +77,7 @@ public class TeamFoundationServerScm extends SCM {
     private final String workspaceName;
     private final String userPassword;
     private final String userName;
+    private final String excludedRegions;
     private final boolean useUpdate;
     
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
@@ -87,7 +88,7 @@ public class TeamFoundationServerScm extends SCM {
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword, String excludedRegions) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
@@ -95,6 +96,7 @@ public class TeamFoundationServerScm extends SCM {
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.userPassword = Scrambler.scramble(userPassword);
+	this.excludedRegions = excludedRegions;
     }
 
     // Bean properties need for job configuration
@@ -124,7 +126,36 @@ public class TeamFoundationServerScm extends SCM {
 
     public String getUserName() {
         return userName;
-    }    
+    }
+    
+    public String getExcludedRegions() {
+        return excludedRegions;  
+    }
+    
+    /*
+     * Borrowed from subversion-plugin
+     */
+    public String[] getExcludedRegionsNormalized() {
+        return (excludedRegions == null || excludedRegions.trim().equals(""))
+               ? null : excludedRegions.split("[\\r\\n]+");
+    }
+
+    private Pattern[] getExcludedRegionsPatterns() {
+        String[] excluded = getExcludedRegionsNormalized();
+        if (excluded != null) {
+            Pattern[] patterns = new Pattern[excluded.length];
+
+            int i = 0;
+            for (String excludedRegion : excluded) {
+                patterns[i++] = Pattern.compile(excludedRegion);
+            }
+
+            return patterns;
+        }
+
+        return new Pattern[0];
+    }
+    
     // Bean properties END
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
@@ -226,7 +257,7 @@ public class TeamFoundationServerScm extends SCM {
     void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
         this.workspaceChangesetVersion = workspaceChangesetVersion;
     }
-
+    
     @Override
     public boolean pollChanges(AbstractProject hudsonProject, Launcher launcher, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         Run<?,?> lastRun = hudsonProject.getLastBuild();
@@ -235,10 +266,30 @@ public class TeamFoundationServerScm extends SCM {
         } else {
             Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
             try {
-                return (server.getProject(getProjectPath(lastRun)).getDetailedHistory(
+		List<ChangeSet> changes = server.getProject(getProjectPath(lastRun)).getDetailedHistory(
                             lastRun.getTimestamp(), 
-                            Calendar.getInstance()
-                        ).size() > 0);
+                            Calendar.getInstance());
+	        Pattern[] patterns = getExcludedRegionsPatterns();
+
+		// No regions to calculate exclusions, go directly to how many changes there are
+		if (patterns.length == 0)
+			return changes.size() > 0;
+		
+		// Otherwise, iterate all changes and all paths looking for anything not matching the exclusion pattern
+		for (ChangeSet change: changes)
+			for (String path: change.getAffectedPaths()) {
+				boolean isExcluded = false;
+				for (Pattern pattern: patterns) {
+					if (pattern.matcher(path).matches()) {
+						isExcluded = true;
+						break;
+					}
+				}
+				if (!isExcluded)
+					return true;
+			}
+		return false;
+		
             } catch (ParseException pe) {
                 listener.fatalError(pe.getMessage());
                 throw new AbortException();
