@@ -16,7 +16,7 @@
     </f:entry>
     
     <f:entry title="User password">
-        <input type="password" class="setting-input" name="tfs.userPassword" value="${scm.userPassword}"/>
+        <input type="password" class="setting-input" name="tfs.password" value="${scm.password}"/>
     </f:entry>
 
     <f:advanced>

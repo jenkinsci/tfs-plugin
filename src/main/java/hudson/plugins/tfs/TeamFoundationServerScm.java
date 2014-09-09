@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import hudson.util.Secret;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
@@ -75,7 +76,8 @@ public class TeamFoundationServerScm extends SCM {
     private final String projectPath;
     private final String localPath;
     private final String workspaceName;
-    private final String userPassword;
+    private transient @Deprecated String userPassword;
+    private /* almost final */ Secret password;
     private final String userName;
     private final boolean useUpdate;
     
@@ -84,17 +86,29 @@ public class TeamFoundationServerScm extends SCM {
     private transient String normalizedWorkspaceName;
     private transient String workspaceChangesetVersion;
     
-    private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
+    private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
+
+    @Deprecated
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password) {
+        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
+    }
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
         this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
-        this.userPassword = Scrambler.scramble(userPassword);
+        this.password = password;
+    }
+
+    /* Migrate legacy data */
+    private Object readResolve() {
+        if (password == null && userPassword != null)
+            password = Secret.fromString(Scrambler.scramble(userPassword));
+        return this;
     }
 
     // Bean properties need for job configuration
@@ -119,7 +133,11 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     public String getUserPassword() {
-        return Scrambler.descramble(userPassword);
+        return Secret.toString(password);
+    }
+
+    public Secret getPassword() {
+        return password;
     }
 
     public String getUserName() {
