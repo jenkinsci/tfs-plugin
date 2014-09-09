@@ -1,40 +1,37 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:entry title="Server URL" help="/plugin/tfs/server.html">
-        <f:textbox name="tfs.serverUrl" value="${scm.serverUrl}"
-             clazz="required" checkMessage="${%Server URL is mandatory.}"/>
+    <f:entry field="serverUrl" title="Server URL">
+        <f:textbox clazz="required" checkMessage="${%Server URL is mandatory.}"/>
     </f:entry>
     
-    <f:entry title="Project path" help="/plugin/tfs/project.html">
-        <f:textbox name="tfs.projectPath" value="${scm.projectPath}"
-             checkUrl="'${rootURL}/scm/TeamFoundationServerScm/projectPathCheck?value='+escape(this.value)"/>
+    <f:entry field="projectPath" title="Project path">
+        <f:textbox checkUrl="'${rootURL}/scm/TeamFoundationServerScm/projectPathCheck?value='+escape(this.value)"/>
     </f:entry>
 
-    <f:entry title="Login name" help="/plugin/tfs/username.html">
-        <f:textbox name="tfs.userName" value="${scm.userName}"
-          checkUrl="'${rootURL}/scm/TeamFoundationServerScm/usernameCheck?value='+escape(this.value)"/>
+    <f:entry field="userName" title="Login name">
+        <f:textbox checkUrl="'${rootURL}/scm/TeamFoundationServerScm/usernameCheck?value='+escape(this.value)"/>
         <i>(including domain name)</i>
     </f:entry>
     
-    <f:entry title="User password">
-        <input type="password" class="setting-input" name="tfs.password" value="${scm.password}"/>
+    <f:entry field="password" title="User password">
+        <f:password />
     </f:entry>
 
     <f:advanced>
 
-		<f:entry title="Use update" description="If checked, Hudson will not delete the workspace at end of each build, making the build faster. But this causes the artifacts from the previous build to remain when a new build starts.">
-			<f:checkbox name="tfs.useUpdate" checked="${h.defaultToTrue(scm.useUpdate)}"/>
+		<f:entry field="useUpdate" title="Use update" description="If checked, Hudson will not delete the workspace at end of each build, making the build faster. But this causes the artifacts from the previous build to remain when a new build starts.">
+			<f:checkbox default="true"/>
 		</f:entry>
     
-	    <f:entry title="Local workfolder" help="/plugin/tfs/workfolder.html">
-	        <f:textbox name="tfs.localPath" value="${h.defaulted(scm.localPath, '.')}"
+	    <f:entry field="localPath" title="Local workfolder">
+	        <f:textbox default="."
 	             clazz="required" checkMessage="${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}"/>
 	    </f:entry>
 
-        <f:entry title="Workspace name" help="/plugin/tfs/workspacename.html">
-            <f:textbox name="tfs.workspaceName" value="${h.defaulted(scm.workspaceName, 'Hudson-${JOB_NAME}-${NODE_NAME}')}"
+        <f:entry field="workspaceName" title="Workspace name">
+            <f:textbox default="Hudson-$${JOB_NAME}-$${NODE_NAME}"
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/workspaceNameCheck?value='+escape(this.value)"/>
         </f:entry>
     </f:advanced>
     
-    <t:listScmBrowsers name="tfs.browser" />
+    <t:listScmBrowsers field="browser" />
 </j:jelly>
