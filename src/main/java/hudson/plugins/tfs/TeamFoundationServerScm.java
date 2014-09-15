@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import hudson.util.Secret;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
@@ -76,39 +75,28 @@ public class TeamFoundationServerScm extends SCM {
     private final String projectPath;
     private final String localPath;
     private final String workspaceName;
-    private transient @Deprecated String userPassword;
-    private /* almost final */ Secret password;
+    private final String userPassword;
     private final String userName;
     private final boolean useUpdate;
+	private final String exclusionId;
     
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
     private transient String workspaceChangesetVersion;
     
-    private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
-
-    @Deprecated
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password) {
-        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
-    }
+    private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword , String exclusionId) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
         this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
-        this.password = password;
-    }
-
-    /* Migrate legacy data */
-    private Object readResolve() {
-        if (password == null && userPassword != null)
-            password = Secret.fromString(Scrambler.scramble(userPassword));
-        return this;
+        this.userPassword = Scrambler.scramble(userPassword);
+		this.exclusionId = exclusionId;
     }
 
     // Bean properties need for job configuration
@@ -133,16 +121,16 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     public String getUserPassword() {
-        return Secret.toString(password);
-    }
-
-    public Secret getPassword() {
-        return password;
+        return Scrambler.descramble(userPassword);
     }
 
     public String getUserName() {
         return userName;
     }    
+
+	public String getExclusionId() {
+		return exclusionId;
+	}
     // Bean properties END
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
@@ -495,6 +483,44 @@ public class TeamFoundationServerScm extends SCM {
                         Calendar.getInstance()
                     );
 
+			boolean flag = false;
+			int matchCount = 0;
+			 Run<?,?> lastRun = project.getLastBuild();
+			if(lastRun != null)
+			{
+             final List<ChangeSet> changeSets = server.getProject(getProjectPath(lastRun)).getDetailedHistory(
+                            lastRun.getTimestamp(), 
+                            Calendar.getInstance());
+			int size = changeSets.size();
+			if(size > 0 )
+			{
+				if(!getExclusionId().equals("NA"))
+					{
+						for(ChangeSet changeSet : changeSets)
+						{
+							if(changeSet.getUser()!=null)
+							{
+								listener.getLogger().println("Checked in by user"+changeSet.getUser());
+								if(changeSet.getUser().equals(getExclusionId()))
+								{
+									listener.getLogger().println("User is in Exclusion List"+getExclusionId());									
+									matchCount++;							
+								} //end if exclusion
+							} // end if get user
+
+						} // end for changeset
+						if(matchCount >= size)
+						{
+							flag=true;
+							listener.getLogger().println("Suppressing SCM Trigger as it is done by excluded user");
+						}
+					} // end if exclusion 
+				} // end if size
+
+			} // end if lastRun
+
+			
+
             // TODO: Given we have a tfsBaseline with a changeset, 
             // briefHistory will probably always contain at least one entry
             final TFSRevisionState tfsRemote = 
@@ -508,6 +534,8 @@ public class TeamFoundationServerScm extends SCM {
                     tfsBaseline.changesetVersion == tfsRemote.changesetVersion
                     ? Change.NONE
                     : Change.SIGNIFICANT;
+			if(flag)
+			return new PollingResult(tfsBaseline,tfsRemote,Change.NONE);
             return new PollingResult(tfsBaseline, tfsRemote, change);
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());

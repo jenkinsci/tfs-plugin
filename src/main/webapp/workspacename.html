@@ -1,0 +1,20 @@
+<div>
+  <p>
+	The name of the Workspace under which the source should be retrieved. This workspace is 
+	created at the start of a download, and deleted at the end. You can normally 
+	omit the property unless you want to name a workspace to avoid conflicts 
+	on the server (i.e. when you have multiple projects on one server talking 
+	to a Team Foundation Server)
+  </p>
+  <p>
+    The default value is to create a workspace named <tt>Hudson-${JOB_NAME}</tt>. The TFS plugin
+    supports the following macros that are replaced in the workspace name:
+    <ul>
+	    <li><tt>${JOB_NAME}</tt> - The name of the job.</li>
+	    <li><tt>${USER_NAME}</tt> - The user name that the Hudson server or slave is running as.</li>
+	    <li><tt>${NODE_NAME}</tt> - The name of the node/slave that the plugin currently is executed on. 
+	    Note that this is not the hostname, this value is Hudson configured name of the slave/node.</li>
+	    <li><tt>${ENV}</tt> - The environment variable that is set on the master or slave.</li>
+    </ul>
+  </p>
+</div>

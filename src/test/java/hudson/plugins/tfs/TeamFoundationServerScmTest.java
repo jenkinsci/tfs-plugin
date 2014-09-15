@@ -1,13 +1,8 @@
 package hudson.plugins.tfs;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.util.HashMap;
@@ -21,16 +16,12 @@ import hudson.model.Node;
 import hudson.model.ParametersAction;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
 
 @SuppressWarnings("unchecked")
 public class TeamFoundationServerScmTest {
 
     private FilePath workspace;
-
-    @Rule public JenkinsRule j = new JenkinsRule();
 
     @After public void tearDown() throws Exception {
         if (workspace != null) {
@@ -45,7 +36,7 @@ public class TeamFoundationServerScmTest {
         AbstractProject project = mock(AbstractProject.class);
         when(build.getProject()).thenReturn(project);
         when(project.getName()).thenReturn("ThisIsAJob");
-
+        
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}", "user", "password");
         assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getWorkspaceName(build, mock(Computer.class)));
     }
