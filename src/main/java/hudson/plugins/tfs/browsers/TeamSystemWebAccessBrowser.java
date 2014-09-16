@@ -57,12 +57,16 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
     private boolean isUseRestUrls(ChangeSet changeSet){
         if(useRestUrls == null)
         {
-            AbstractProject<?, ?> project = changeSet.getParent().build.getProject();
-            SCM scm = project.getScm();
-            if (scm instanceof TeamFoundationServerScm){
-                TeamFoundationServerScm tfsScm = (TeamFoundationServerScm)scm;
-                useRestUrls = tfsScm.isUseRestUrls();
-            }
+            if(changeSet.getParent() == null){
+                useRestUrls = false;
+            }else{
+                AbstractProject<?, ?> project = changeSet.getParent().build.getProject();
+                SCM scm = project.getScm();
+                if (scm instanceof TeamFoundationServerScm){
+                    TeamFoundationServerScm tfsScm = (TeamFoundationServerScm)scm;
+                    useRestUrls = tfsScm.isUseRestUrls();
+                 }
+            }           
         }
         return useRestUrls;
     }
