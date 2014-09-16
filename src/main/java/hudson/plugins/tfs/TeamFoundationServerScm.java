@@ -90,8 +90,8 @@ public class TeamFoundationServerScm extends SCM {
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
 
     @Deprecated
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password) {
-        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password, boolean useRestUrls) {
+        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password), useRestUrls);
     }
 
     @DataBoundConstructor
