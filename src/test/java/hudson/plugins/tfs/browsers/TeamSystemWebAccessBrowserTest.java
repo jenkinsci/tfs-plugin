@@ -147,7 +147,7 @@ public class TeamSystemWebAccessBrowserTest {
         ChangeSet changeSet = new ChangeSet("aaaa", null, "user", "comment");
         ChangeSet.Item item = new ChangeSet.Item("$/Project/Folder/file.cs", "edit");
         changeSet.add(item);
-        //assertNull("The diff link should be null for invalid change set version", browser.getDiffLink(item));
+        assertNull("The diff link should be null for invalid change set version", browser.getDiffLink(item));
     }
     
     @Test public void assertDescriptorBaseUrlRemovesName() throws Exception {
