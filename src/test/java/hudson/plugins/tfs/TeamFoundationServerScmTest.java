@@ -1,27 +1,29 @@
 package hudson.plugins.tfs;
 
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Computer;
-import hudson.model.Node;
-import hudson.model.ParametersAction;
-import hudson.util.Secret;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
-import org.junit.After;
 import static org.junit.Assert.*;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Computer;
+import hudson.model.Node;
+import hudson.model.ParametersAction;
+
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
 @SuppressWarnings("unchecked")
 public class TeamFoundationServerScmTest {
@@ -43,9 +45,7 @@ public class TeamFoundationServerScmTest {
         AbstractProject project = mock(AbstractProject.class);
         when(build.getProject()).thenReturn(project);
         when(project.getName()).thenReturn("ThisIsAJob");
-        Secret password = null;
-        password.fromString("password");
-        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}", "user", password, false);
+        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}", "user", "password", false);
         assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getWorkspaceName(build, mock(Computer.class)));
     }
     
