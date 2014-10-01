@@ -7,12 +7,14 @@ import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 
 public class WorkspaceTest {
 
@@ -27,7 +29,7 @@ public class WorkspaceTest {
     public void assertMapWorkfolderIsExecuted() throws Exception {
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
         Workspace workspace = new Workspace(server, "name");
-        workspace.mapWorkfolder(new Project(server, "$/serverpath"), ".");        
+        workspace.mapWorkfolder(new Project(server, "$/serverpath", new ArrayList<String>()), ".");        
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
     }
     
@@ -35,8 +37,34 @@ public class WorkspaceTest {
     public void assertMapWorkfolderClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
-        new Workspace(server, "name").mapWorkfolder(new Project(server, "$/serverpath"), ".");        
+        new Workspace(server, "name").mapWorkfolder(new Project(server, "$/serverpath", new ArrayList<String>()), ".");        
         verify(spy).close();
+    }
+    
+    @Test
+    public void assertCloakIsExecutedForEachFolder() throws Exception {
+        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
+        Workspace workspace = new Workspace(server, "name");
+        List<String> cloakPaths = new ArrayList<String>();
+        cloakPaths.add("$/serverpath/hide1");
+        cloakPaths.add("$/serverpath/hide2");
+        workspace.mapWorkfolder(new Project(server, "$/serverpath", cloakPaths), ".");
+
+        class CloakArgumentMatcher extends ArgumentMatcher<MaskedArgumentListBuilder> {
+        	private String path;
+        	
+        	public CloakArgumentMatcher(String path) {
+        		this.path = path;
+			}
+        	
+            public boolean matches(Object obj) {
+            	MaskedArgumentListBuilder actual = (MaskedArgumentListBuilder) obj;
+            	return actual.toStringWithQuote().contains(path);
+            }
+        }
+        
+        verify(server).execute(argThat(new CloakArgumentMatcher(cloakPaths.get(0))));
+        verify(server).execute(argThat(new CloakArgumentMatcher(cloakPaths.get(1))));
     }
     
     @Test

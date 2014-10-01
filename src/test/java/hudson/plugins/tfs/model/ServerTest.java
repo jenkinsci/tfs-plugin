@@ -3,6 +3,8 @@ package hudson.plugins.tfs.model;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+
 import hudson.plugins.tfs.TfTool;
 
 import org.junit.Before;
@@ -29,16 +31,16 @@ public class ServerTest {
     @Test
     public void assertGetProjectWithSameProjectPathReturnsSameInstance() {
         Server server = new Server("url");
-        assertNotNull("Project object can not be null", server.getProject("$/projectPath"));
+        assertNotNull("Project object can not be null", server.getProject("$/projectPath", new ArrayList<String>()));
         assertSame("getProject() returned different objects", 
-                server.getProject("$/projectPath"), server.getProject("$/projectPath"));
+                server.getProject("$/projectPath", new ArrayList<String>()), server.getProject("$/projectPath", new ArrayList<String>()));
     }
     
     @Test
     public void assertGetProjectWithDifferentProjectPathReturnsNotSameInstance() {
         Server server = new Server("url");
         assertNotSame("getProject() did not return different objects", 
-                server.getProject("$/projectPath"), server.getProject("$/otherPath"));
+                server.getProject("$/projectPath", new ArrayList<String>()), server.getProject("$/otherPath", new ArrayList<String>()));
     }
     
     @Test
