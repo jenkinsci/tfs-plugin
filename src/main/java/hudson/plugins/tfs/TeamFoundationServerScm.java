@@ -106,14 +106,17 @@ public class TeamFoundationServerScm extends SCM {
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.password = password;
-        
+        this.cloakPaths = splitCloakPaths(cloakPaths);;
+    }
+    
+    private List<String> splitCloakPaths(String cloakPaths) {
         List<String> cloakPathsList = new ArrayList<String>();
-        if (cloakPaths != null && !cloakPaths.isEmpty()) {
-        	for (String cloakPath : cloakPaths.split(";")) {
-        		cloakPathsList.add(cloakPath.trim());
-        	}
+        if (cloakPaths != null && cloakPaths.trim().length() > 0) {
+            for (String cloakPath : cloakPaths.split(";")) {
+                cloakPathsList.add(cloakPath.trim());
+            }
         }
-        this.cloakPaths = cloakPathsList;
+        return cloakPathsList;
     }
 
     /* Migrate legacy data */
