@@ -17,3 +17,5 @@ Wiki and Info
 [MIT Licence]: http://opensource.org/licenses/MIT
 [CloudBees]: https://jenkins.ci.cloudbees.com/job/plugins/job/tfs-plugin/
 [Jenkins JIRA]: http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?mode=hide&reset=true&jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27tfs%27
+
+[ ![Codeship Status for sandyzden/tfs-plugin](https://www.codeship.io/projects/50d6cd90-4266-0132-f008-1ee65c15bb4c/status)](https://www.codeship.io/projects/44395)
