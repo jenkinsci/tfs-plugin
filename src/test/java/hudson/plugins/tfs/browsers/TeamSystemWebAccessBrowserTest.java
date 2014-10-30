@@ -11,7 +11,6 @@ import hudson.plugins.tfs.model.ChangeSet;
 
 import java.net.URL;
 
-import hudson.util.Secret;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
 
@@ -50,7 +49,7 @@ public class TeamSystemWebAccessBrowserTest {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject<?,?> project = mock(AbstractProject.class);
         when(build.getProject()).thenReturn(project);
-        when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80", null, null, false, null, null, (Secret) null));
+        when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80", null, null, false, null, null, null));
         
         ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
         new ChangeLogSet(build, new ChangeSet[]{ changeset});        

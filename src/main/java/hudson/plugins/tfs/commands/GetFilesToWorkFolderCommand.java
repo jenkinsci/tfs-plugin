@@ -50,6 +50,7 @@ public class GetFilesToWorkFolderCommand extends AbstractCommand implements Pars
             arguments.add("-version:" + versionSpec);
         }
         arguments.add("-noprompt");
+		arguments.add("-force");
         addLoginArgument(arguments);
         return arguments;
     }
