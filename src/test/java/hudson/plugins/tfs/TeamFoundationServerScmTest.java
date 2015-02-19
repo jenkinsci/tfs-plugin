@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.thoughtworks.xstream.XStream;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -38,7 +39,31 @@ public class TeamFoundationServerScmTest {
             workspace = null;
         }
     }
-    
+
+    /**
+     Up until version 3.1.1, the plugin used to store the password in a base64-encoded string.
+     As of bd98b91ea614c307a6bb1e0af36d9dd2a5646e29, an encrypted version of the password is stored.
+     This test makes sure a job can be upgraded without loss of the password.
+     */
+    @Test public void upgradeFromScrambledPassword() {
+        final String xmlString =
+                "<scm class='hudson.plugins.tfs.TeamFoundationServerScm' plugin='tfs@3.1.1'>\n" +
+                "    <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
+                "    <projectPath>$/example/path</projectPath>\n" +
+                "    <localPath>.</localPath>\n" +
+                "    <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
+                "    <userPassword>ZXhhbXBsZVBhc3N3b3Jk</userPassword>\n" +
+                "    <userName>example\\tfsbuilder</userName>\n" +
+                "    <useUpdate>false</useUpdate>\n" +
+                "</scm>";
+        final XStream serializer = new XStream();
+
+        final TeamFoundationServerScm tfsScmObject = (TeamFoundationServerScm) serializer.fromXML(xmlString);
+
+        final String actual = tfsScmObject.getUserPassword();
+        assertEquals("examplePassword", actual);
+    }
+
     @Test
     public void assertWorkspaceNameReplacesJobName() {
         AbstractBuild build = mock(AbstractBuild.class);
