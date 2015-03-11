@@ -34,6 +34,9 @@
             <f:textbox name="tfs.workspaceName" value="${h.defaulted(scm.workspaceName, 'Hudson-${JOB_NAME}-${NODE_NAME}')}"
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/workspaceNameCheck?value='+escape(this.value)"/>
         </f:entry>
+        <f:entry field="localWorkspace" title="Use local workspace">
+            <f:checkbox default="false"/>
+        </f:entry>
     </f:advanced>
     
     <t:listScmBrowsers name="tfs.browser" />

@@ -85,7 +85,7 @@ public class TFSLabeler extends Notifier {
 
             final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
             final TfTool tool = new TfTool(tfsScm.getDescriptor().getTfExecutable(), localLauncher, listener, workspace);
-            Server server = new Server(tool, tfsScm.getServerUrl(build), tfsScm.getUserName(), tfsScm.getUserPassword());
+            Server server = new Server(tool, tfsScm.getServerUrl(build), tfsScm.getUserName(), tfsScm.getUserPassword(), tfsScm.isLocalWorkspace());
 
             Computer computer = Computer.currentComputer();
             String normalizedLabelName = computeDynamicValue(build, getLabelName());

@@ -70,6 +70,7 @@ public class TeamFoundationServerScm extends SCM {
     private final String projectPath;
     private final String localPath;
     private final String workspaceName;
+    private final boolean localWorkspace;
     private final String userPassword;
     private final String userName;
     private final boolean useUpdate;
@@ -82,7 +83,7 @@ public class TeamFoundationServerScm extends SCM {
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword, boolean localWorkspace) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
@@ -90,6 +91,7 @@ public class TeamFoundationServerScm extends SCM {
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.userPassword = Scrambler.scramble(userPassword);
+        this.localWorkspace = localWorkspace;
     }
 
     // Bean properties need for job configuration
@@ -115,6 +117,10 @@ public class TeamFoundationServerScm extends SCM {
 
     public String getUserPassword() {
         return Scrambler.descramble(userPassword);
+    }
+
+    public boolean isLocalWorkspace() {
+        return localWorkspace;
     }
 
     public String getUserName() {
@@ -273,7 +279,7 @@ public class TeamFoundationServerScm extends SCM {
     }
     
     protected Server createServer(TfTool tool, Run<?,?> run) {
-        return new Server(tool, getServerUrl(run), getUserName(), getUserPassword());
+        return new Server(tool, getServerUrl(run), getUserName(), getUserPassword(), isLocalWorkspace());
     }
 
     @Override

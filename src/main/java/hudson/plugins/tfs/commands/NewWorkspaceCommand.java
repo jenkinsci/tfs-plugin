@@ -17,6 +17,9 @@ public class NewWorkspaceCommand extends AbstractCommand {
         arguments.add("-new");
         arguments.add(String.format("%s;%s", workspaceName, getConfig().getUserName()));
         arguments.add("-noprompt");
+        if (getConfig().isLocalWorkspace()) {
+            arguments.add("-location:local");
+        }
         addServerArgument(arguments);
         addLoginArgument(arguments);
         return arguments;

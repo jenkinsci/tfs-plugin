@@ -18,7 +18,7 @@ public class ServerIntegrationTest {
      * otherwise an @link UnsatisfiedLinkError would have been thrown earlier.
      */
     public void canFindTfsSdkNativeLibraries() {
-        final Server server = new Server(null, "http://tfs.invalid:8080/tfs", "username", "password");
+        final Server server = new Server(null, "http://tfs.invalid:8080/tfs", "username", "password", false);
         try {
             final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
             tpc.getVersionControlClient();

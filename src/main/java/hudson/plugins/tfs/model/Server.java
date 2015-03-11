@@ -31,16 +31,18 @@ public class Server implements ServerConfigurationProvider, Closable {
     private final String url;
     private final String userName;
     private final String userPassword;
+    private final boolean localWorkspace;
     private Workspaces workspaces;
     private Map<String, Project> projects = new HashMap<String, Project>();
     private final TfTool tool;
     private final TFSTeamProjectCollection tpc;
 
-    public Server(TfTool tool, String url, String username, String password) {
+    public Server(TfTool tool, String url, String username, String password, boolean localWorkspace) {
         this.tool = tool;
         this.url = url;
         this.userName = username;
         this.userPassword = password;
+        this.localWorkspace = localWorkspace;
         final URI uri = URIUtils.newURI(url);
 
         Credentials credentials = null;
@@ -94,7 +96,7 @@ public class Server implements ServerConfigurationProvider, Closable {
     }
 
     Server(String url) {
-        this(null, url, null, null);
+        this(null, url, null, null, false);
     }
 
     public Project getProject(String projectPath) {
@@ -130,6 +132,10 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public String getUserPassword() {
         return userPassword;
+    }
+
+    public boolean isLocalWorkspace() {
+        return localWorkspace;
     }
 
     public String getLocalHostname() throws IOException, InterruptedException {

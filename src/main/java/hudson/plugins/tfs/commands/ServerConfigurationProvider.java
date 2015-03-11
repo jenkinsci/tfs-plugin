@@ -11,4 +11,7 @@ public interface ServerConfigurationProvider {
     public String getUserPassword();
     
     public String getLocalHostname() throws IOException, InterruptedException;
+
+    public boolean isLocalWorkspace();
+
 }
