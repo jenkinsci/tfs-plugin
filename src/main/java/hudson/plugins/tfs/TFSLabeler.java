@@ -49,15 +49,6 @@ public class TFSLabeler extends Notifier {
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return true;
         }
-
-        @Override
-        public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return new TFSLabeler(
-                    req.getParameter("tfsLabeler.whenToLabel"),
-                    req.getParameter("tfsLabeler.labelName")
-            );
-        }
-
     }
 
     @DataBoundConstructor
