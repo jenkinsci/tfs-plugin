@@ -3,12 +3,12 @@ TFS SDK for Java Redistributables
 =================================
 
 You may redistribute the following files under the 
-Team Foundation Server 2012 Software Development Kit for Java 
+Team Foundation Server Software Development Kit for Java 
 Software License Terms.
 
 ThirdPartyNotices.html
 
-lib/com.microsoft.tfs.sdk-11.0.0.jar
+lib/com.microsoft.tfs.sdk-12.0.2.jar
 
 native/macosx/libnative_misc.jnilib
 native/macosx/libnative_keychain.jnilib
