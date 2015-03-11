@@ -80,6 +80,7 @@ public class TeamFoundationServerScm extends SCM {
     private /* almost final */ Secret password;
     private final String userName;
     private final boolean useUpdate;
+    private final boolean useRestUrls;
     
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
@@ -89,12 +90,12 @@ public class TeamFoundationServerScm extends SCM {
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
 
     @Deprecated
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password) {
-        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password,boolean useRestUrls) {
+        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password), useRestUrls);
     }
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password, boolean useRestUrls) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
@@ -102,6 +103,7 @@ public class TeamFoundationServerScm extends SCM {
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.password = password;
+        this.useRestUrls = useRestUrls;
     }
 
     /* Migrate legacy data */
@@ -112,6 +114,7 @@ public class TeamFoundationServerScm extends SCM {
         }
         return this;
     }
+    
 
     // Bean properties need for job configuration
     public String getServerUrl() {
@@ -133,7 +136,11 @@ public class TeamFoundationServerScm extends SCM {
     public boolean isUseUpdate() {
         return useUpdate;
     }
-
+    
+    public boolean isUseRestUrls(){
+        return useRestUrls;
+    }
+    
     public String getUserPassword() {
         return Secret.toString(password);
     }
@@ -144,7 +151,7 @@ public class TeamFoundationServerScm extends SCM {
 
     public String getUserName() {
         return userName;
-    }    
+    }  
     // Bean properties END
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
@@ -396,7 +403,7 @@ public class TeamFoundationServerScm extends SCM {
         @Override
         public SCM newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             TeamFoundationServerScm scm = (TeamFoundationServerScm) super.newInstance(req, formData);
-            scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class,req,formData,"browser");
+            scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class,req,formData,"scm");
             return scm;
         }
         
