@@ -106,8 +106,10 @@ public class TeamFoundationServerScm extends SCM {
 
     /* Migrate legacy data */
     private Object readResolve() {
-        if (password == null && userPassword != null)
+        if (password == null && userPassword != null) {
             password = Secret.fromString(Scrambler.descramble(userPassword));
+            userPassword = null;
+        }
         return this;
     }
 
