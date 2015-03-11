@@ -76,7 +76,7 @@ public class TeamFoundationServerScm extends SCM {
     private final String projectPath;
     private final String localPath;
     private final String workspaceName;
-    private transient @Deprecated String userPassword;
+    private @Deprecated String userPassword;
     private /* almost final */ Secret password;
     private final String userName;
     private final boolean useUpdate;
@@ -106,8 +106,10 @@ public class TeamFoundationServerScm extends SCM {
 
     /* Migrate legacy data */
     private Object readResolve() {
-        if (password == null && userPassword != null)
-            password = Secret.fromString(Scrambler.scramble(userPassword));
+        if (password == null && userPassword != null) {
+            password = Secret.fromString(Scrambler.descramble(userPassword));
+            userPassword = null;
+        }
         return this;
     }
 
