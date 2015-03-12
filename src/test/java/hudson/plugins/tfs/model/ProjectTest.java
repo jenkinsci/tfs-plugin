@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -97,7 +98,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     public void assertGetFiles() throws Exception {
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
-        Project project = new Project(server, "$/serverpath");
+        Project project = new Project(server, "$/serverpath", new ArrayList<String>());
         project.getFiles(".");
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
     }
@@ -106,7 +107,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     public void assertGetFilesUsesVersion() throws Exception {
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
-        Project project = new Project(server, "$/serverpath");
+        Project project = new Project(server, "$/serverpath", new ArrayList<String>());
         project.getFiles(".", "C5");
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
     }
@@ -116,7 +117,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Reader spy = spy(new StringReader(""));
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getFiles("localpath");
+        new Project(server, "$/serverpath", new ArrayList<String>()).getFiles("localpath");
 
         verify(spy).close();
     }
@@ -129,7 +130,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
                 "--------- -------------- -------------------- ----------------------------------------------------------------------------\n" +
                 "\n" +
                 "12495     SND\\redsolo_cp 2008-jun-27 13:21:25 changed and created one\n"));
-        Project project = new Project(server, "$/serverpath");
+        Project project = new Project(server, "$/serverpath", new ArrayList<String>());
         String workspaceChangesetVersion = project.getWorkspaceChangesetVersion("localpath", "workspace_name", "owner");
         assertNotNull("The returned workspace changeset versions is null", workspaceChangesetVersion);
         assertEquals("Workspace changeset number was incorrect", "12495", workspaceChangesetVersion);
@@ -141,7 +142,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Reader spy = spy(new StringReader(""));
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getWorkspaceChangesetVersion("localpath", "workspace_name", "owner");
+        new Project(server, "$/serverpath", new ArrayList<String>()).getWorkspaceChangesetVersion("localpath", "workspace_name", "owner");
 
         verify(spy).close();
     }    

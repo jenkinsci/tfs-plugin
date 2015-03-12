@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 
 import hudson.FilePath;
@@ -18,12 +19,14 @@ public class CheckoutAction {
 
     private final String workspaceName;
     private final String projectPath;
+    private Collection<String> cloakPaths;
     private final String localFolder;
     private final boolean useUpdate;
 
-    public CheckoutAction(String workspaceName, String projectPath, String localFolder, boolean useUpdate) {
+    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakPaths, String localFolder, boolean useUpdate) {
         this.workspaceName = workspaceName;
         this.projectPath = projectPath;
+        this.cloakPaths = cloakPaths;
         this.localFolder = localFolder;
         this.useUpdate = useUpdate;
     }
@@ -51,7 +54,7 @@ public class CheckoutAction {
     private Project getProject(Server server, FilePath workspacePath)
 			throws IOException, InterruptedException {
 		Workspaces workspaces = server.getWorkspaces();
-        Project project = server.getProject(projectPath);
+        Project project = server.getProject(projectPath, cloakPaths);
         
         if (workspaces.exists(workspaceName) && !useUpdate) {
             Workspace workspace = workspaces.getWorkspace(workspaceName);

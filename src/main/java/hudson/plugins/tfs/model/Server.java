@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.TFSConfigurationServer;
+
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
@@ -14,6 +15,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -97,9 +99,9 @@ public class Server implements ServerConfigurationProvider, Closable {
         this(null, url, null, null);
     }
 
-    public Project getProject(String projectPath) {
+    public Project getProject(String projectPath, Collection<String> cloakPaths) {
         if (! projects.containsKey(projectPath)) {
-            projects.put(projectPath, new Project(this, projectPath));
+            projects.put(projectPath, new Project(this, projectPath, cloakPaths));
         }
         return projects.get(projectPath);
     }
