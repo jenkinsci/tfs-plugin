@@ -129,10 +129,10 @@ public class Project {
         return getVCCHistory(fromVersion, toVersion, true);
     }
     
-	public List<ChangeSet> getDetailedHistory(String label) {
-		LabelVersionSpec fromVersion = new LabelVersionSpec(new LabelSpec(label, null));
-		return getVCCHistory(fromVersion, null, true);
-	}
+    public List<ChangeSet> getDetailedHistory(String singleVersionSpec) {
+        final VersionSpec fromVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
+        return getVCCHistory(fromVersion, null, true);
+    }
 
     /**
      * Returns a list of change sets not containing the modified items.

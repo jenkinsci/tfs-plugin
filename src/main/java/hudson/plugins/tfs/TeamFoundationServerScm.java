@@ -231,13 +231,9 @@ public class TeamFoundationServerScm extends SCM {
 			throws IOException, InterruptedException, ParseException {
 		
 		VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
-		String label = buildVariableResolver.resolve(VERSION_SPEC);
-		if (StringUtils.isNotEmpty(label)) {
-			if (label.startsWith("L")) {
-		        String preffixRemoved = label.substring(1);
-				return action.checkoutByLabel(server, workspaceFilePath, preffixRemoved);
-			}
-			//TODO to be implemented another checkout strategies...
+		String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
+		if (StringUtils.isNotEmpty(singleVersionSpec)) {
+			return action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
 		}
 		
 		return action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());

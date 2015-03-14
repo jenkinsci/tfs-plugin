@@ -44,14 +44,14 @@ public class CheckoutActionTest {
     }
     
     @Test
-    public void assertFirstCheckoutByLabelNotUsingUpdate() throws Exception {
+    public void assertFirstCheckoutBySingleVersionSpecNotUsingUpdate() throws Exception {
     	when(server.getWorkspaces()).thenReturn(workspaces);
     	when(server.getProject("project")).thenReturn(project);
     	when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
     	when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
     	when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
     	
-    	new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs,MY_LABEL);
+    	new CheckoutAction("workspace", "project", ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
     	
     	verify(workspaces).newWorkspace("workspace");
     	verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
@@ -76,13 +76,13 @@ public class CheckoutActionTest {
     }
 
     @Test
-    public void assertFirstCheckoutByLabelUsingUpdate() throws Exception {
+    public void assertFirstCheckoutBySingleVersionSpecUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
@@ -106,7 +106,7 @@ public class CheckoutActionTest {
     }
     
     @Test
-    public void assertSecondCheckoutByLabelUsingUpdate() throws Exception {
+    public void assertSecondCheckoutBySingleVersionSpecUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
@@ -114,7 +114,7 @@ public class CheckoutActionTest {
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
         verify(project).getFiles(".", MY_LABEL);
         verify(workspaces, never()).newWorkspace("workspace");
@@ -140,14 +140,14 @@ public class CheckoutActionTest {
     }
 
     @Test
-    public void assertSecondCheckoutByLabelNotUsingUpdate() throws Exception {
+    public void assertSecondCheckoutBySingleVersionSpecNotUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
@@ -180,7 +180,7 @@ public class CheckoutActionTest {
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(project, never()).getDetailedHistory(isA(Calendar.class), isA(Calendar.class));
     }
@@ -211,7 +211,7 @@ public class CheckoutActionTest {
         when(project.getDetailedHistory(isA(String.class))).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
-        List<ChangeSet> actualList = action.checkoutByLabel(server, hudsonWs, MY_LABEL);
+        List<ChangeSet> actualList = action.checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
         verify(project).getDetailedHistory(isA(String.class));
@@ -266,7 +266,7 @@ public class CheckoutActionTest {
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", "tfs-ws", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", "tfs-ws", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The local TFS folder was not cleaned", 0, tfsWs.list((FileFilter)null).size());
@@ -294,14 +294,14 @@ public class CheckoutActionTest {
     
     @Bug(3882)
     @Test
-    public void assertCheckoutByLabelDeletesWorkspaceAtStartIfNotUsingUpdate() throws Exception {
+    public void assertCheckoutBySingleVersionSpecDeletesWorkspaceAtStartIfNotUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -348,13 +348,13 @@ public class CheckoutActionTest {
     
     @Bug(3882)
     @Test
-    public void assertCheckoutByLabelDoesNotDeleteWorkspaceAtStartIfUsingUpdate() throws Exception {
+    public void assertCheckoutBySingleVersionSpecDoesNotDeleteWorkspaceAtStartIfUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
         
-        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -380,13 +380,13 @@ public class CheckoutActionTest {
     
     @Bug(3882)
     @Test
-    public void assertCheckoutByLabelDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
+    public void assertCheckoutBySingleVersionSpecDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
         
-        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
