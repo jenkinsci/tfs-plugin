@@ -60,8 +60,8 @@ public class TfToolTest {
         tool.execute(new String[]{"history"});
     }
 
-    @Test
-    public void assertPartialSuccessReturnCodeDoesNotThrowAbortException() throws Exception {
+    @Test(expected=AbortException.class)
+    public void assertPartialSuccessReturnCodeThrowsAbortException() throws Exception {
         when(launcher.launch(isA(Launcher.ProcStarter.class))).thenReturn(proc);
         when(proc.join()).thenReturn(TfTool.PARTIAL_SUCCESS_EXIT_CODE);
 
