@@ -18,10 +18,16 @@
 
     <f:advanced>
 
-		<f:entry field="useUpdate" title="Use update" description="If checked, Hudson will not delete the workspace at end of each build, making the build faster. But this causes the artifacts from the previous build to remain when a new build starts.">
+		<f:entry field="useUpdate" title="Use update" description="If checked, Jenkins will not delete the workspace at end of each build, making the build faster. But this causes the artifacts from the previous build to remain when a new build starts.">
 			<f:checkbox default="true"/>
 		</f:entry>
     
+
+    <f:entry field="useOverwrite" title="Use overwrite" description="If checked Jenkins will use the /overwrite flag for the get command. 
+      This causes any modifications to files in the workspace to be ignored and overwritten with new content from the repository.">
+      <f:checkbox default="false"/>
+    </f:entry>
+
 	    <f:entry field="localPath" title="Local workfolder">
 	        <f:textbox default="."
 	             clazz="required" checkMessage="${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}"/>

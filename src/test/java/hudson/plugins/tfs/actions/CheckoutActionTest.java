@@ -51,11 +51,11 @@ public class CheckoutActionTest {
     	when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
     	when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
     	
-    	new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs,MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", false, false).checkoutByLabel(server, hudsonWs,MY_LABEL);
     	
     	verify(workspaces).newWorkspace("workspace");
     	verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-    	verify(project).getFiles(".", MY_LABEL);
+        verify(project).getFiles(".", MY_LABEL, false);
     	verify(workspaces).deleteWorkspace(workspace);    	
     }
     
@@ -67,11 +67,11 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", false, false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
         
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+        verify(project).getFiles(".", "D2009-09-24T00:00:00Z", false);
         verify(workspaces).deleteWorkspace(workspace);
     }
 
@@ -81,12 +81,12 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
-        
-        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
-        
+
+        new CheckoutAction("workspace", "project", ".", true, false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", MY_LABEL);
+        verify(project).getFiles(".", MY_LABEL, false);
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
 
@@ -96,12 +96,12 @@ public class CheckoutActionTest {
     	when(server.getProject("project")).thenReturn(project);
     	when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
     	when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
-    	
-    	new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
-    	
-    	verify(workspaces).newWorkspace("workspace");
+
+        new CheckoutAction("workspace", "project", ".", true, false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
+
+        verify(workspaces).newWorkspace("workspace");
     	verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-    	verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+        verify(project).getFiles(".", "D2009-09-24T00:00:00Z", false);
     	verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
     
@@ -114,9 +114,9 @@ public class CheckoutActionTest {
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", true, false).checkoutByLabel(server, hudsonWs, MY_LABEL);
 
-        verify(project).getFiles(".", MY_LABEL);
+        verify(project).getFiles(".", MY_LABEL, false);
         verify(workspaces, never()).newWorkspace("workspace");
         verify(workspace, never()).mapWorkfolder(project, ".");
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
@@ -131,9 +131,9 @@ public class CheckoutActionTest {
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+        verify(project).getFiles(".", "D2009-09-24T00:00:00Z", false);
         verify(workspaces, never()).newWorkspace("workspace");
         verify(workspace, never()).mapWorkfolder(project, ".");
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
@@ -147,11 +147,11 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", false, false).checkoutByLabel(server, hudsonWs, MY_LABEL);
 
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", MY_LABEL);
+        verify(project).getFiles(".", MY_LABEL, false);
         verify(workspaces).deleteWorkspace(workspace);
     }
 
@@ -163,11 +163,11 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", false, false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
 
         verify(workspaces).newWorkspace("workspace");
         verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+        verify(project).getFiles(".", "D2009-09-24T00:00:00Z", false);
         verify(workspaces).deleteWorkspace(workspace);
     }
    
@@ -180,7 +180,7 @@ public class CheckoutActionTest {
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", true, false).checkoutByLabel(server, hudsonWs, MY_LABEL);
         
         verify(project, never()).getDetailedHistory(isA(Calendar.class), isA(Calendar.class));
     }
@@ -194,7 +194,7 @@ public class CheckoutActionTest {
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(project, never()).getDetailedHistory(isA(Calendar.class), isA(Calendar.class));
     }
@@ -210,7 +210,7 @@ public class CheckoutActionTest {
         when(workspace.getComputer()).thenReturn("LocalComputer");
         when(project.getDetailedHistory(isA(String.class))).thenReturn(list);
         
-        CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
+        CheckoutAction action = new CheckoutAction("workspace", "project", ".", true, false);
         List<ChangeSet> actualList = action.checkoutByLabel(server, hudsonWs, MY_LABEL);
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
@@ -228,7 +228,7 @@ public class CheckoutActionTest {
         when(workspace.getComputer()).thenReturn("LocalComputer");
         when(project.getDetailedHistory(isA(Calendar.class), isA(Calendar.class))).thenReturn(list);
         
-        CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
+        CheckoutAction action = new CheckoutAction("workspace", "project", ".", true, false);
         List<ChangeSet> actualList = action.checkout(server, hudsonWs, Util.getCalendar(2008, 9, 24), Util.getCalendar(2008, 10, 24));
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
@@ -247,7 +247,7 @@ public class CheckoutActionTest {
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", "tfs-ws", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", "tfs-ws", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The local TFS folder was not cleaned", 0, tfsWs.list((FileFilter)null).size());
@@ -265,9 +265,9 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
-        
-        new CheckoutAction("workspace", "project", "tfs-ws", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
-        
+
+        new CheckoutAction("workspace", "project", "tfs-ws", false, false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The local TFS folder was not cleaned", 0, tfsWs.list((FileFilter)null).size());
         assertEquals("The Hudson workspace path was cleaned", 2, hudsonWs.list((FileFilter)null).size());
@@ -285,8 +285,8 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        
-        new CheckoutAction("workspace", "project", "tfs-ws", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+
+        new CheckoutAction("workspace", "project", "tfs-ws", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The TFS workspace path was cleaned", 1, hudsonWs.list((FileFilter)null).size());
@@ -301,7 +301,7 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", false, false).checkoutByLabel(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -320,7 +320,7 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -338,7 +338,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
         
-        new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -354,7 +354,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
         
-        new CheckoutAction("workspace", "project", ".", true).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", true, false).checkoutByLabel(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -370,7 +370,7 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
         
-        new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -386,7 +386,7 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
         
-        new CheckoutAction("workspace", "project", ".", false).checkoutByLabel(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", ".", false, false).checkoutByLabel(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -406,11 +406,11 @@ public class CheckoutActionTest {
         when(workspace.getComputer()).thenReturn("LocalComputer");
         when(project.getDetailedHistory(isA(Calendar.class), isA(Calendar.class))).thenReturn(list);
         
-        CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
+        CheckoutAction action = new CheckoutAction("workspace", "project", ".", true, false);
         List<ChangeSet> actualList = action.checkout(server, hudsonWs, Util.getCalendar(2008, 9, 24), Util.getCalendar(2009, 9, 24));
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
         verify(project).getDetailedHistory(eq(Util.getCalendar(2008, 9, 24)), eq(Util.getCalendar(2009, 9, 24)));
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+        verify(project).getFiles(".", "D2009-09-24T00:00:00Z", false);
     }
 }

@@ -20,7 +20,7 @@ public class GetFilesToWorkFolderCommandTest {
         when(config.getUserName()).thenReturn("snd\\user_cp");
         when(config.getUserPassword()).thenReturn("password");
         
-        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath").getArguments();
+        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", false).getArguments();
         assertNotNull("Arguments were null", arguments);
         assertEquals("get localPath -recursive -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
@@ -31,7 +31,7 @@ public class GetFilesToWorkFolderCommandTest {
         when(config.getUserName()).thenReturn("snd\\user_cp");
         when(config.getUserPassword()).thenReturn("password");
         
-        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", true).getArguments();
+        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", true, false).getArguments();
         assertNotNull("Arguments were null", arguments);
         assertEquals("get localPath -recursive -preview -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
@@ -42,21 +42,21 @@ public class GetFilesToWorkFolderCommandTest {
         when(config.getUserName()).thenReturn("snd\\user_cp");
         when(config.getUserPassword()).thenReturn("password");
         
-        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", false, "C100").getArguments();
+        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", false, "C100", false).getArguments();
         assertNotNull("Arguments were null", arguments);
         assertEquals("get localPath -recursive -version:C100 -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 
     @Test
     public void assertEmptyListWithEmptyOutput() throws Exception {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".", false);
         List<String> list = command.parse(new StringReader(""));
         assertEquals("Number of files was incorrect", 0, list.size());
     }
 
     @Test
     public void assertEmptyListWithNoChangesOutput() throws Exception {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".", false);
         List<String> list = command.parse(new StringReader("All files are up to date.\n"));
         assertEquals("Number of files was incorrect", 0, list.size());
     }    
@@ -73,7 +73,7 @@ public class GetFilesToWorkFolderCommandTest {
                 "\n" +
                 "C:\\Projects\\tfs\\tfsandbox_ms\\path1:\n" +
                 "Getting pom2.xml\n");
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(ServerConfigurationProvider.class), ".", false);
         List<String> list = command.parse(reader);
         assertEquals("Number of files was incorrect", 4, list.size());
         assertEquals("File name was incorrect", "C:\\Projects\\tfs\\tfsandbox_ms\\path1", list.get(0));

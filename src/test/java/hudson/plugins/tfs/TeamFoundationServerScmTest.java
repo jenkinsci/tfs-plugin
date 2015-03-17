@@ -93,6 +93,7 @@ public class TeamFoundationServerScmTest {
                         "  <password>zs+99bxCGlcSxR3Umnj0q0OjYXVSiB+qLzS0ZjuHz2M=</password>\n" +
                         "  <userName>example\\tfsbuilder</userName>\n" +
                         "  <useUpdate>false</useUpdate>\n" +
+                        "  <useOverwrite>false</useOverwrite>\n" +
                         "</hudson.plugins.tfs.TeamFoundationServerScm>";
 
         final String actualUpgradedXml = serializer.toXML(tfsScmObject);
