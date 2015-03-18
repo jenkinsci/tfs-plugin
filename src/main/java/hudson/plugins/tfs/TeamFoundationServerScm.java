@@ -198,7 +198,15 @@ public class TeamFoundationServerScm extends SCM {
             build.addAction(workspaceConfiguration);
             CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
             try {
-                List<ChangeSet> list = checkout(build, workspaceFilePath, server, action);
+                List<ChangeSet> list;
+                VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
+                String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
+                if (StringUtils.isNotEmpty(singleVersionSpec)) {
+                    list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
+                }
+                else {
+                    list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
+                }
                 ChangeSetWriter writer = new ChangeSetWriter();
                 writer.write(list, changelogFile);
             } catch (ParseException pe) {
@@ -225,19 +233,6 @@ public class TeamFoundationServerScm extends SCM {
         }
         return true;
     }
-
-	private List<ChangeSet> checkout(AbstractBuild<?, ?> build,
-			FilePath workspaceFilePath, Server server, CheckoutAction action)
-			throws IOException, InterruptedException, ParseException {
-		
-		VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
-		String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
-		if (StringUtils.isNotEmpty(singleVersionSpec)) {
-			return action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
-		}
-		
-		return action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
-	}
 
     void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
         this.workspaceChangesetVersion = workspaceChangesetVersion;
