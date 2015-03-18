@@ -196,11 +196,11 @@ public class TeamFoundationServerScm extends SCM {
             }
             
             build.addAction(workspaceConfiguration);
+            VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
+            String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
             CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
             try {
                 List<ChangeSet> list;
-                VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
-                String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
                 if (StringUtils.isNotEmpty(singleVersionSpec)) {
                     list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
                 }
