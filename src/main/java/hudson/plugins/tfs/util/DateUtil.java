@@ -1,6 +1,9 @@
 package hudson.plugins.tfs.util;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+
 import java.text.DateFormat;
+import java.text.FieldPosition;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,7 +26,18 @@ public class DateUtil {
             return dateFormat;
         }
     };
-    
+
+    public static String toString(final DateVersionSpec dateVersionSpec) {
+        final Date dateTime = dateVersionSpec.getDate().getTime();
+        final FieldPosition fieldPosition = new FieldPosition(-1);
+        final SimpleDateFormat simpleDateFormat = TFS_DATETIME_FORMATTER.get();
+        final StringBuffer sb = new StringBuffer();
+        sb.append('D');
+        simpleDateFormat.format(dateTime, sb, fieldPosition);
+        final String result = sb.toString();
+        return result;
+    }
+
     public static Date parseDate(String dateString) throws ParseException {
         return parseDate(dateString, Locale.getDefault(), TimeZone.getDefault());
     }
