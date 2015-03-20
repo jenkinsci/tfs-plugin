@@ -7,6 +7,7 @@ import java.text.FieldPosition;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -28,7 +29,16 @@ public class DateUtil {
     };
 
     public static String toString(final DateVersionSpec dateVersionSpec) {
-        final Date dateTime = dateVersionSpec.getDate().getTime();
+        final Calendar calendar = dateVersionSpec.getDate();
+        return toString(calendar);
+    }
+
+    public static String toString(final Calendar calendar) {
+        final Date dateTime = calendar.getTime();
+        return toString(dateTime);
+    }
+
+    public static String toString(Date dateTime) {
         final FieldPosition fieldPosition = new FieldPosition(-1);
         final SimpleDateFormat simpleDateFormat = TFS_DATETIME_FORMATTER.get();
         final StringBuffer sb = new StringBuffer();
