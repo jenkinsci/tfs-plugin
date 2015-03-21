@@ -21,7 +21,7 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
             ServerConfigurationProvider configurationProvider, String remotePath, Calendar toTimestamp) {
         super(configurationProvider, remotePath);
 
-        this.versionSpec = new DateVersionSpec(getExclusiveToTimestamp(toTimestamp));
+        this.versionSpec = new DateVersionSpec(toTimestamp);
     }
 
     public RemoteChangesetVersionCommand(
@@ -40,11 +40,24 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
     
     @Override
     String getVersionSpecification() {
-        // TODO: just call versionSpec.toString() once DateVersionSpec.toString() uses ISO 8601 format
-        if (versionSpec instanceof DateVersionSpec){
+        final VersionSpec adjustedVersionSpec;
+        if (versionSpec instanceof DateVersionSpec) {
+            // The to timestamp is exclusive, ie it will only show history before the to timestamp.
+            // This command should be inclusive.
             final DateVersionSpec dateVersionSpec = (DateVersionSpec) versionSpec;
+            final Calendar calendar = dateVersionSpec.getDate();
+            final Calendar adjustedCalendar = (Calendar) calendar.clone();
+            adjustedCalendar.add(Calendar.SECOND, 1);
+            adjustedVersionSpec = new DateVersionSpec(adjustedCalendar);
+        }
+        else {
+            adjustedVersionSpec = versionSpec;
+        }
+        // TODO: just call adjustedVersionSpec.toString() once DateVersionSpec.toString() uses ISO 8601 format
+        if (adjustedVersionSpec instanceof DateVersionSpec){
+            final DateVersionSpec dateVersionSpec = (DateVersionSpec) adjustedVersionSpec;
             return DateUtil.toString(dateVersionSpec);
         }
-        return versionSpec.toString();
+        return adjustedVersionSpec.toString();
     }
 }
