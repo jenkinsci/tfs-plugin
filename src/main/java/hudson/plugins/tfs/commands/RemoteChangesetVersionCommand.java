@@ -24,6 +24,13 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
         this.versionSpec = new DateVersionSpec(getExclusiveToTimestamp(toTimestamp));
     }
 
+    public RemoteChangesetVersionCommand(
+            ServerConfigurationProvider configurationProvider, String remotePath, VersionSpec versionSpec) {
+        super(configurationProvider, remotePath);
+
+        this.versionSpec = versionSpec;
+    }
+
     @Override
     public MaskedArgumentListBuilder getArguments() {
         MaskedArgumentListBuilder arguments = super.getArguments();

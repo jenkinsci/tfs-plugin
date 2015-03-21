@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
@@ -26,6 +28,18 @@ public class RemoteChangesetVersionCommandTest {
         MaskedArgumentListBuilder arguments = new RemoteChangesetVersionCommand(config, "$/tfsandbox", fixedPointInTime).getArguments();
         assertNotNull("Arguments were null", arguments);
         assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:D2013-07-02T15:40:51Z -format:brief -login:snd\\user_cp,password -server:https://tfs02.codeplex.com", arguments.toStringWithQuote());
+    }
+
+    @Test
+    public void assertVersionSpec() {
+        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
+        when(config.getUrl()).thenReturn("https://tfs02.codeplex.com");
+        when(config.getUserName()).thenReturn("snd\\user_cp");
+        when(config.getUserPassword()).thenReturn("password");
+
+        MaskedArgumentListBuilder arguments = new RemoteChangesetVersionCommand(config, "$/tfsandbox", new ChangesetVersionSpec(42)).getArguments();
+        assertNotNull("Arguments were null", arguments);
+        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:C42 -format:brief -login:snd\\user_cp,password -server:https://tfs02.codeplex.com", arguments.toStringWithQuote());
     }
 
     @Test
