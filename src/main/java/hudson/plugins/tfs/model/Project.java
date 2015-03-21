@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import hudson.model.User;
+import hudson.plugins.tfs.commands.AbstractChangesetVersionCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
@@ -208,6 +209,11 @@ public class Project {
     public int getRemoteChangesetVersion(String remotePath, Calendar toTimestamp)
             throws IOException, InterruptedException, ParseException {
         RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, remotePath, toTimestamp);
+        return extractChangesetNumber(command);
+    }
+
+    int extractChangesetNumber(final AbstractChangesetVersionCommand command)
+            throws IOException, InterruptedException, ParseException {
         Reader reader = null;
         try {
             reader = server.execute(command.getArguments());
