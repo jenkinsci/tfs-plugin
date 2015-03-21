@@ -212,6 +212,19 @@ public class Project {
         return extractChangesetNumber(command);
     }
 
+    /**
+     * Gets remote changeset version for specified remote path, as of versionSpec.
+     *
+     * @param remotePath for which to get latest changeset version
+     * @param versionSpec a version specification to convert to a changeset number
+     * @return changeset version for specified remote path
+     */
+    public int getRemoteChangesetVersion(final String remotePath, final VersionSpec versionSpec)
+            throws IOException, InterruptedException, ParseException {
+        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, remotePath, versionSpec);
+        return extractChangesetNumber(command);
+    }
+
     int extractChangesetNumber(final AbstractChangesetVersionCommand command)
             throws IOException, InterruptedException, ParseException {
         Reader reader = null;
@@ -234,7 +247,18 @@ public class Project {
             throws IOException, InterruptedException, ParseException {
         return getRemoteChangesetVersion(projectPath, toTimestamp);
     }
-    
+
+    /**
+     * Gets remote changeset version for the project's remote path, as of versionSpec.
+     *
+     * @param versionSpec a version specification to convert to a changeset number
+     * @return changeset version for the project's remote path
+     */
+    public int getRemoteChangesetVersion(final VersionSpec versionSpec)
+            throws IOException, InterruptedException, ParseException {
+        return getRemoteChangesetVersion(projectPath, versionSpec);
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder(13, 27).append(projectPath).toHashCode();
