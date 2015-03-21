@@ -1,5 +1,8 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
+import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import java.util.Calendar;
@@ -12,13 +15,13 @@ import java.util.Calendar;
  */
 public class RemoteChangesetVersionCommand extends AbstractChangesetVersionCommand {
 
-    private final Calendar toTimestamp;
+    private final VersionSpec versionSpec;
     
     public RemoteChangesetVersionCommand(
             ServerConfigurationProvider configurationProvider, String remotePath, Calendar toTimestamp) {
         super(configurationProvider, remotePath);
 
-        this.toTimestamp = getExclusiveToTimestamp(toTimestamp);
+        this.versionSpec = new DateVersionSpec(getExclusiveToTimestamp(toTimestamp));
     }
 
     @Override
@@ -30,6 +33,11 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
     
     @Override
     String getVersionSpecification() {
-        return String.format("%s", AbstractCommand.getRangeSpecification(toTimestamp, 0));
+        // TODO: just call versionSpec.toString() once DateVersionSpec.toString() uses ISO 8601 format
+        if (versionSpec instanceof DateVersionSpec){
+            final DateVersionSpec dateVersionSpec = (DateVersionSpec) versionSpec;
+            return DateUtil.toString(dateVersionSpec);
+        }
+        return versionSpec.toString();
     }
 }
