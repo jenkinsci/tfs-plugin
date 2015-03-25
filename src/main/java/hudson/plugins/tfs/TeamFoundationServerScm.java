@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import hudson.util.Secret;
 import net.sf.json.JSONObject;
 
@@ -204,7 +205,7 @@ public class TeamFoundationServerScm extends SCM {
                 String projectPath = workspaceConfiguration.getProjectPath();
                 Project project = server.getProject(projectPath);
                 // TODO: even better would be to call this first, then use the changeset when calling checkout
-                buildChangeset = project.getRemoteChangesetVersion(build.getTimestamp());
+                buildChangeset = project.getRemoteChangesetVersion(new DateVersionSpec(build.getTimestamp()));
                 setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
 
                 // by adding this action, we prevent calcRevisionsFromBuild() from being called

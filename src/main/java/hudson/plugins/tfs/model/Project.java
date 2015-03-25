@@ -200,19 +200,6 @@ public class Project {
     }
 
     /**
-     * Gets remote changeset version for specified remote path, as of toTimestamp.
-     * 
-     * @param remotePath for which to get latest changeset version
-     * @param toTimestamp the date/time of the last build
-     * @return changeset version for specified remote path
-     */
-    public int getRemoteChangesetVersion(String remotePath, Calendar toTimestamp)
-            throws IOException, InterruptedException, ParseException {
-        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, remotePath, toTimestamp);
-        return extractChangesetNumber(command);
-    }
-
-    /**
      * Gets remote changeset version for specified remote path, as of versionSpec.
      *
      * @param remotePath for which to get latest changeset version
@@ -235,17 +222,6 @@ public class Project {
         } finally {
             IOUtils.closeQuietly(reader);
         }
-    }
-
-    /**
-     * Gets remote changeset version for the project's remote path, as of toTimestamp.
-     * 
-     * @param toTimestamp the date/time of the last build
-     * @return changeset version for the project's remote path
-     */
-    public int getRemoteChangesetVersion(Calendar toTimestamp)
-            throws IOException, InterruptedException, ParseException {
-        return getRemoteChangesetVersion(projectPath, toTimestamp);
     }
 
     /**

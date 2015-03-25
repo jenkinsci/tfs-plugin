@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
@@ -16,7 +17,7 @@ import org.junit.Test;
 
 public class RemoteChangesetVersionCommandTest {
 
-    private static final Calendar fixedPointInTime = Util.getCalendar(2013, 07, 02, 15, 40, 50);
+    private static final DateVersionSpec fixedPointInTime = new DateVersionSpec(Util.getCalendar(2013, 07, 02, 15, 40, 50));
     
     @Test
     public void assertArguments() {

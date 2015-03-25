@@ -16,13 +16,6 @@ import java.util.Calendar;
 public class RemoteChangesetVersionCommand extends AbstractChangesetVersionCommand {
 
     private final VersionSpec versionSpec;
-    
-    public RemoteChangesetVersionCommand(
-            ServerConfigurationProvider configurationProvider, String remotePath, Calendar toTimestamp) {
-        super(configurationProvider, remotePath);
-
-        this.versionSpec = new DateVersionSpec(toTimestamp);
-    }
 
     public RemoteChangesetVersionCommand(
             ServerConfigurationProvider configurationProvider, String remotePath, VersionSpec versionSpec) {
