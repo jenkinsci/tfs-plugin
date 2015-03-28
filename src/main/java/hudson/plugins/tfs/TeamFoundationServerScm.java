@@ -199,21 +199,7 @@ public class TeamFoundationServerScm extends SCM {
             build.addAction(workspaceConfiguration);
             VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
             String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
-            int buildChangeset;
-            try {
-                setWorkspaceChangesetVersion(null);
-                String projectPath = workspaceConfiguration.getProjectPath();
-                Project project = server.getProject(projectPath);
-                // TODO: even better would be to call this first, then use the changeset when calling checkout
-                buildChangeset = project.getRemoteChangesetVersion(new DateVersionSpec(build.getTimestamp()));
-                setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
-
-                // by adding this action, we prevent calcRevisionsFromBuild() from being called
-                build.addAction(new TFSRevisionState(buildChangeset, projectPath));
-            } catch (ParseException pe) {
-                listener.fatalError(pe.getMessage());
-                throw new AbortException();
-            }
+            recordWorkspaceChangesetVersion(build, listener, server, workspaceConfiguration, singleVersionSpec);
 
             CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
             try {
@@ -234,6 +220,24 @@ public class TeamFoundationServerScm extends SCM {
             server.close();
         }
         return true;
+    }
+
+    void recordWorkspaceChangesetVersion(final AbstractBuild<?, ?> build, final BuildListener listener, final Server server, final WorkspaceConfiguration workspaceConfiguration, final String singleVersionSpec) throws IOException, InterruptedException {
+        int buildChangeset;
+        try {
+            setWorkspaceChangesetVersion(null);
+            String projectPath = workspaceConfiguration.getProjectPath();
+            Project project = server.getProject(projectPath);
+            // TODO: even better would be to call this first, then use the changeset when calling checkout
+            buildChangeset = project.getRemoteChangesetVersion(new DateVersionSpec(build.getTimestamp()));
+            setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
+
+            // by adding this action, we prevent calcRevisionsFromBuild() from being called
+            build.addAction(new TFSRevisionState(buildChangeset, projectPath));
+        } catch (ParseException pe) {
+            listener.fatalError(pe.getMessage());
+            throw new AbortException();
+        }
     }
 
     void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
