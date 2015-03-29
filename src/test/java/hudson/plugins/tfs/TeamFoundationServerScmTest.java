@@ -10,18 +10,22 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import com.thoughtworks.xstream.XStream;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.ParametersAction;
 
+import hudson.plugins.tfs.model.Project;
 import hudson.util.Secret;
 import hudson.util.TextFile;
 import hudson.util.XStream2;
@@ -257,6 +261,23 @@ public class TeamFoundationServerScmTest {
         Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(mock(AbstractBuild.class), env );        
         assertEquals("Workspace changeset version was not null", null, env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
+    }
+
+    @Test public void recordWorkspaceChangesetVersion() throws Exception {
+        final TeamFoundationServerScm scm = new TeamFoundationServerScm("serverUrl", "projectPath", "localPath", false, "workspace", "userName", "password");
+        final AbstractBuild build = mock(AbstractBuild.class);
+        when(build.getTimestamp()).thenReturn(new GregorianCalendar(2015, 03, 28, 22, 04));
+        final BuildListener listener = null;
+        final Project project = mock(Project.class);
+        when(project.getRemoteChangesetVersion(isA(VersionSpec.class))).thenReturn(42);
+        final String projectPath = "projectPath";
+        final String singleVersionSpec = null;
+
+        scm.recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
+
+        final Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(build, env);
+        assertEquals("42", env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
     }
 
     /**
