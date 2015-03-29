@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.util.Secret;
 import net.sf.json.JSONObject;
 
@@ -225,11 +226,17 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     void recordWorkspaceChangesetVersion(final AbstractBuild<?, ?> build, final BuildListener listener, final Project project, final String projectPath, final String singleVersionSpec) throws IOException, InterruptedException {
+        final VersionSpec workspaceVersion;
+        if (!StringUtils.isEmpty(singleVersionSpec)) {
+            workspaceVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
+        }
+        else {
+            workspaceVersion = new DateVersionSpec(build.getTimestamp());
+        }
         int buildChangeset;
         try {
             setWorkspaceChangesetVersion(null);
-            // TODO: even better would be to call this first, then use the changeset when calling checkout
-            buildChangeset = project.getRemoteChangesetVersion(new DateVersionSpec(build.getTimestamp()));
+            buildChangeset = project.getRemoteChangesetVersion(workspaceVersion);
             setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
 
             // by adding this action, we prevent calcRevisionsFromBuild() from being called

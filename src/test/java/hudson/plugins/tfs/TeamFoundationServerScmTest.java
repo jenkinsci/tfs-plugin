@@ -280,6 +280,22 @@ public class TeamFoundationServerScmTest {
         assertEquals("42", env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
     }
 
+    @Test public void recordWorkspaceChangesetVersionWithSingleVersionSpec() throws Exception {
+        final TeamFoundationServerScm scm = new TeamFoundationServerScm("serverUrl", "projectPath", "localPath", false, "workspace", "userName", "password");
+        final AbstractBuild build = mock(AbstractBuild.class);
+        final BuildListener listener = null;
+        final Project project = mock(Project.class);
+        when(project.getRemoteChangesetVersion(isA(VersionSpec.class))).thenReturn(42);
+        final String projectPath = "projectPath";
+        final String singleVersionSpec = "Lfoo";
+
+        scm.recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
+
+        final Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(build, env);
+        assertEquals("42", env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
+    }
+
     /**
      * Workspace name must be less than 64 characters, cannot end with a space or period, and cannot contain any of the following characters: "/:<>|*?
      */
