@@ -1,6 +1,8 @@
 package hudson.plugins.tfs.commands;
 
+import com.google.common.base.Strings;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LabelVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
@@ -50,6 +52,20 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
         if (adjustedVersionSpec instanceof DateVersionSpec){
             final DateVersionSpec dateVersionSpec = (DateVersionSpec) adjustedVersionSpec;
             return DateUtil.toString(dateVersionSpec);
+        }
+        else if (adjustedVersionSpec instanceof LabelVersionSpec) {
+            final LabelVersionSpec labelVersionSpec = (LabelVersionSpec) adjustedVersionSpec;
+            // TODO: It seems to me LabelVersionSpec.toString() should emit "Lfoo" when its scope is null
+            final String label = labelVersionSpec.getLabel();
+            final String scope = labelVersionSpec.getScope();
+            final StringBuilder sb = new StringBuilder(1 + label.length() + Strings.nullToEmpty(scope).length());
+            sb.append('L');
+            sb.append(label);
+            if (!Strings.isNullOrEmpty(scope)) {
+                sb.append('@');
+                sb.append(scope);
+            }
+            return sb.toString();
         }
         return adjustedVersionSpec.toString();
     }
