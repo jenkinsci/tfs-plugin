@@ -43,7 +43,7 @@ public class DateUtil {
     public static String toString(final Date dateTime) {
         final FieldPosition fieldPosition = new FieldPosition(-1);
         final SimpleDateFormat simpleDateFormat = TFS_DATETIME_FORMATTER.get();
-        final StringBuffer sb = new StringBuffer();
+        final StringBuffer sb = new StringBuffer(1 + ISO_8601_DATE_TIME_MINUS_FRACTIONS.length());
         sb.append('D');
         simpleDateFormat.format(dateTime, sb, fieldPosition);
         final String result = sb.toString();
