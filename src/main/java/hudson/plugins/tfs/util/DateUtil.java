@@ -19,10 +19,12 @@ public class DateUtil {
     private DateUtil() {        
     }
 
+    private static final String ISO_8601_DATE_TIME_MINUS_FRACTIONS = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
     public static final ThreadLocal<SimpleDateFormat> TFS_DATETIME_FORMATTER = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_8601_DATE_TIME_MINUS_FRACTIONS);
             dateFormat.setTimeZone(new SimpleTimeZone(0,"GMT"));
             return dateFormat;
         }
