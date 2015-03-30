@@ -38,7 +38,7 @@ public class DateUtil {
         return toString(dateTime);
     }
 
-    public static String toString(Date dateTime) {
+    public static String toString(final Date dateTime) {
         final FieldPosition fieldPosition = new FieldPosition(-1);
         final SimpleDateFormat simpleDateFormat = TFS_DATETIME_FORMATTER.get();
         final StringBuffer sb = new StringBuffer();
