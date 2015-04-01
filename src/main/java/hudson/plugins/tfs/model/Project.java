@@ -92,7 +92,7 @@ public class Project {
         try {
             final Changeset[] serverChangesets = vcc.queryHistory(
                     projectPath,
-                    fromVersion,
+                    fromVersion != null ? fromVersion : toVersion,
                     0 /* deletionId */,
                     RecursionType.FULL,
                     null /* user */,
@@ -131,8 +131,8 @@ public class Project {
     }
     
     public List<ChangeSet> getDetailedHistory(String singleVersionSpec) {
-        final VersionSpec fromVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
-        return getVCCHistory(fromVersion, null, true);
+        final VersionSpec toVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
+        return getVCCHistory(null, toVersion, true);
     }
 
     /**
