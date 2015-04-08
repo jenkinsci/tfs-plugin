@@ -81,7 +81,14 @@
           <goals>deploy</goals>
         </configuration>
       </plugin>
-
+      <plugin>
+        <groupId>org.jenkins-ci.tools</groupId>
+        <artifactId>maven-hpi-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <compatibleSinceVersion>3.2.0</compatibleSinceVersion>
+        </configuration>
+      </plugin>
       <plugin>
 	<groupId>org.codehaus.mojo</groupId>
 	<artifactId>animal-sniffer-maven-plugin</artifactId>
