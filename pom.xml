@@ -48,12 +48,6 @@
 
   <developers>
     <developer>
-      <id>redsolo</id>
-      <name>Erik Ramfelt</name>
-      <email>eramfelt@gmail.com</email>
-      <timezone>+1</timezone>
-    </developer>
-    <developer>
       <id>olivierdagenais</id>
       <name>Olivier Dagenais</name>
       <email>olivier.dagenais@gmail.com</email>
