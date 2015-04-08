@@ -20,31 +20,33 @@ public class CheckoutAction {
     private final String projectPath;
     private final String localFolder;
     private final boolean useUpdate;
+    private final boolean useOverwrite;
 
-    public CheckoutAction(String workspaceName, String projectPath, String localFolder, boolean useUpdate) {
+    public CheckoutAction(String workspaceName, String projectPath, String localFolder, boolean useUpdate, boolean useOverwrite) {
         this.workspaceName = workspaceName;
         this.projectPath = projectPath;
         this.localFolder = localFolder;
         this.useUpdate = useUpdate;
+        this.useOverwrite = useOverwrite;
     }
 
     public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp, Calendar currentBuildTimestamp) throws IOException, InterruptedException, ParseException {
-        
+
         Project project = getProject(server, workspacePath);
         
-        project.getFiles(localFolder, "D" + DateUtil.TFS_DATETIME_FORMATTER.get().format(currentBuildTimestamp.getTime()));
+        project.getFiles(localFolder, "D" + DateUtil.TFS_DATETIME_FORMATTER.get().format(currentBuildTimestamp.getTime()), useOverwrite);
         
         if (lastBuildTimestamp != null) {
             return project.getDetailedHistory(lastBuildTimestamp, currentBuildTimestamp);
         }
-        
+
         return new ArrayList<ChangeSet>();
     }
 
     public List<ChangeSet> checkoutByLabel(Server server, FilePath workspacePath, String label) throws IOException, InterruptedException {
-    	Project project = getProject(server, workspacePath);
-    	project.getFiles(localFolder, label);
-    	
+        Project project = getProject(server, workspacePath);
+        project.getFiles(localFolder, label, useOverwrite);
+
     	return project.getDetailedHistory(label);
     }
 

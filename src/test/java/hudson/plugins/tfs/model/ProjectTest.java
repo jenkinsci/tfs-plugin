@@ -98,7 +98,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
         Project project = new Project(server, "$/serverpath");
-        project.getFiles(".");
+        project.getFiles(".", false);
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
     }
     
@@ -107,7 +107,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
         Project project = new Project(server, "$/serverpath");
-        project.getFiles(".", "C5");
+        project.getFiles(".", "C5", false);
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
     }
 
@@ -116,7 +116,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Reader spy = spy(new StringReader(""));
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getFiles("localpath");
+        new Project(server, "$/serverpath").getFiles("localpath", false);
 
         verify(spy).close();
     }

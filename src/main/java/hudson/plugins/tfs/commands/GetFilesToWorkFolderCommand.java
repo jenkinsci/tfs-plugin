@@ -18,28 +18,30 @@ public class GetFilesToWorkFolderCommand extends AbstractCommand implements Pars
     private final String workFolder;
     private final boolean preview;
     private final String versionSpec;
+    private final boolean useOverwrite;
 
-    public GetFilesToWorkFolderCommand(ServerConfigurationProvider configurationProvider, String workFolder, boolean preview, String versionSpec) {
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider configurationProvider, String workFolder, boolean preview, String versionSpec, boolean useOverwrite) {
         super(configurationProvider);
         this.workFolder = workFolder;
         this.preview = preview;
         this.versionSpec = versionSpec;
+        this.useOverwrite = useOverwrite;
     }
 
-    public GetFilesToWorkFolderCommand(ServerConfigurationProvider configurationProvider, String workFolder, String versionSpec) {
-        this(configurationProvider, workFolder, false, versionSpec);
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider configurationProvider, String workFolder, String versionSpec, boolean useOverwrite) {
+        this(configurationProvider, workFolder, false, versionSpec, useOverwrite);
     }
 
-    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder, boolean preview) {
-        this(provider, workFolder, preview, null);
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder, boolean preview, boolean useOverwrite) {
+        this(provider, workFolder, preview, null, useOverwrite);
     }
 
-    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder) {
-        this(provider, workFolder, false, null);
+    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder, boolean useOverwrite) {
+        this(provider, workFolder, false, null, useOverwrite);
     }
 
     public MaskedArgumentListBuilder getArguments() {
-        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
+        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();
         arguments.add("get");
         arguments.add(workFolder);
         arguments.add("-recursive");
@@ -50,6 +52,9 @@ public class GetFilesToWorkFolderCommand extends AbstractCommand implements Pars
             arguments.add("-version:" + versionSpec);
         }
         arguments.add("-noprompt");
+        if (useOverwrite) {
+            arguments.add( "-overwrite");
+        }
         addLoginArgument(arguments);
         return arguments;
     }

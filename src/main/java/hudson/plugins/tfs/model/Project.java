@@ -162,8 +162,8 @@ public class Project {
      * Gets all files from server.
      * @param localPath the local path to get all files into
      */
-    public void getFiles(String localPath) throws IOException, InterruptedException {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath);
+    public void getFiles(String localPath, boolean useOverwrite) throws IOException, InterruptedException {
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, useOverwrite);
         server.execute(command.getArguments()).close();
     }
 
@@ -172,8 +172,8 @@ public class Project {
      * @param localPath the local path to get all files into
      * @param versionSpec the version spec to use when getting the files
      */
-    public void getFiles(String localPath, String versionSpec) throws IOException, InterruptedException {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec);
+    public void getFiles(String localPath, String versionSpec, boolean useOverwrite) throws IOException, InterruptedException {
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec, useOverwrite);
         server.execute(command.getArguments()).close();
     }
 

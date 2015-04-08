@@ -69,7 +69,7 @@ public class TeamFoundationServerScm extends SCM {
     public static final String SERVERURL_ENV_STR = "TFS_SERVERURL";
     public static final String USERNAME_ENV_STR = "TFS_USERNAME";
     public static final String WORKSPACE_CHANGESET_ENV_STR = "TFS_CHANGESET";
-    
+
     private static final String VERSION_SPEC = "VERSION_SPEC";
 
     private final String serverUrl;
@@ -80,7 +80,8 @@ public class TeamFoundationServerScm extends SCM {
     private /* almost final */ Secret password;
     private final String userName;
     private final boolean useUpdate;
-    
+    private final boolean useOverwrite;
+
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
@@ -90,14 +91,15 @@ public class TeamFoundationServerScm extends SCM {
 
     @Deprecated
     public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password) {
-        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
+        this(serverUrl, projectPath, localPath, useUpdate, false, workspaceName, userName, Secret.fromString(password));
     }
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, boolean useOverwrite, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
+        this.useOverwrite = useOverwrite;
         this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
@@ -132,6 +134,10 @@ public class TeamFoundationServerScm extends SCM {
 
     public boolean isUseUpdate() {
         return useUpdate;
+    }
+
+    public boolean isUseOverwrite() {
+        return useOverwrite;
     }
 
     public String getUserPassword() {
@@ -196,7 +202,7 @@ public class TeamFoundationServerScm extends SCM {
             }
             
             build.addAction(workspaceConfiguration);
-            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
             try {
                 List<ChangeSet> list = checkout(build, workspaceFilePath, server, action);
                 ChangeSetWriter writer = new ChangeSetWriter();
