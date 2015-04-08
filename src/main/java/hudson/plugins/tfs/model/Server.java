@@ -43,6 +43,8 @@ public class Server implements ServerConfigurationProvider, Closable {
         this.userPassword = password;
         final URI uri = URIUtils.newURI(url);
 
+        ensureNativeLibrariesConfigured();
+
         Credentials credentials = null;
         // In case no user name is provided and the current platform supports
         // default credentials, use default credentials
@@ -54,7 +56,6 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
 
         if (credentials != null) {
-            ensureNativeLibrariesConfigured();
             this.tpc = new TFSTeamProjectCollection(uri, credentials);
         }
         else {
