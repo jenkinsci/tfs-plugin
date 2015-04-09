@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import hudson.model.User;
+import hudson.plugins.tfs.commands.AbstractChangesetVersionCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
@@ -91,7 +92,7 @@ public class Project {
         try {
             final Changeset[] serverChangesets = vcc.queryHistory(
                     projectPath,
-                    fromVersion,
+                    fromVersion != null ? fromVersion : toVersion,
                     0 /* deletionId */,
                     RecursionType.FULL,
                     null /* user */,
@@ -129,10 +130,10 @@ public class Project {
         return getVCCHistory(fromVersion, toVersion, true);
     }
     
-	public List<ChangeSet> getDetailedHistory(String label) {
-		LabelVersionSpec fromVersion = new LabelVersionSpec(new LabelSpec(label, null));
-		return getVCCHistory(fromVersion, null, true);
-	}
+    public List<ChangeSet> getDetailedHistory(String singleVersionSpec) {
+        final VersionSpec toVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
+        return getVCCHistory(null, toVersion, true);
+    }
 
     /**
      * Returns a list of change sets not containing the modified items.
@@ -199,15 +200,20 @@ public class Project {
     }
 
     /**
-     * Gets remote changeset version for specified remote path, as of toTimestamp.
-     * 
+     * Gets remote changeset version for specified remote path, as of versionSpec.
+     *
      * @param remotePath for which to get latest changeset version
-     * @param toTimestamp the date/time of the last build
+     * @param versionSpec a version specification to convert to a changeset number
      * @return changeset version for specified remote path
      */
-    public int getRemoteChangesetVersion(String remotePath, Calendar toTimestamp)
+    public int getRemoteChangesetVersion(final String remotePath, final VersionSpec versionSpec)
             throws IOException, InterruptedException, ParseException {
-        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, remotePath, toTimestamp);
+        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, remotePath, versionSpec);
+        return extractChangesetNumber(command);
+    }
+
+    int extractChangesetNumber(final AbstractChangesetVersionCommand command)
+            throws IOException, InterruptedException, ParseException {
         Reader reader = null;
         try {
             reader = server.execute(command.getArguments());
@@ -219,16 +225,16 @@ public class Project {
     }
 
     /**
-     * Gets remote changeset version for the project's remote path, as of toTimestamp.
-     * 
-     * @param toTimestamp the date/time of the last build
+     * Gets remote changeset version for the project's remote path, as of versionSpec.
+     *
+     * @param versionSpec a version specification to convert to a changeset number
      * @return changeset version for the project's remote path
      */
-    public int getRemoteChangesetVersion(Calendar toTimestamp)
+    public int getRemoteChangesetVersion(final VersionSpec versionSpec)
             throws IOException, InterruptedException, ParseException {
-        return getRemoteChangesetVersion(projectPath, toTimestamp);
+        return getRemoteChangesetVersion(projectPath, versionSpec);
     }
-    
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder(13, 27).append(projectPath).toHashCode();

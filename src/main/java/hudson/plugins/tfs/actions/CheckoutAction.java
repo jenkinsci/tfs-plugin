@@ -41,11 +41,11 @@ public class CheckoutAction {
         return new ArrayList<ChangeSet>();
     }
 
-    public List<ChangeSet> checkoutByLabel(Server server, FilePath workspacePath, String label) throws IOException, InterruptedException {
-    	Project project = getProject(server, workspacePath);
-    	project.getFiles(localFolder, label);
-    	
-    	return project.getDetailedHistory(label);
+    public List<ChangeSet> checkoutBySingleVersionSpec(Server server, FilePath workspacePath, String singleVersionSpec) throws IOException, InterruptedException {
+        Project project = getProject(server, workspacePath);
+        project.getFiles(localFolder, singleVersionSpec);
+
+        return project.getDetailedHistory(singleVersionSpec);
     }
 
     private Project getProject(Server server, FilePath workspacePath)

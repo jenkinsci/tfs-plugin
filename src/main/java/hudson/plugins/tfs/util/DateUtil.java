@@ -1,9 +1,13 @@
 package hudson.plugins.tfs.util;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+
 import java.text.DateFormat;
+import java.text.FieldPosition;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -15,15 +19,37 @@ public class DateUtil {
     private DateUtil() {        
     }
 
+    private static final String ISO_8601_DATE_TIME_MINUS_FRACTIONS = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
     public static final ThreadLocal<SimpleDateFormat> TFS_DATETIME_FORMATTER = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_8601_DATE_TIME_MINUS_FRACTIONS);
             dateFormat.setTimeZone(new SimpleTimeZone(0,"GMT"));
             return dateFormat;
         }
     };
-    
+
+    public static String toString(final DateVersionSpec dateVersionSpec) {
+        final Calendar calendar = dateVersionSpec.getDate();
+        return toString(calendar);
+    }
+
+    public static String toString(final Calendar calendar) {
+        final Date dateTime = calendar.getTime();
+        return toString(dateTime);
+    }
+
+    public static String toString(final Date dateTime) {
+        final FieldPosition fieldPosition = new FieldPosition(-1);
+        final SimpleDateFormat simpleDateFormat = TFS_DATETIME_FORMATTER.get();
+        final StringBuffer sb = new StringBuffer(1 + ISO_8601_DATE_TIME_MINUS_FRACTIONS.length());
+        sb.append('D');
+        simpleDateFormat.format(dateTime, sb, fieldPosition);
+        final String result = sb.toString();
+        return result;
+    }
+
     public static Date parseDate(String dateString) throws ParseException {
         return parseDate(dateString, Locale.getDefault(), TimeZone.getDefault());
     }

@@ -4,6 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LabelVersionSpec;
 import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
@@ -14,7 +19,7 @@ import org.junit.Test;
 
 public class RemoteChangesetVersionCommandTest {
 
-    private static final Calendar fixedPointInTime = Util.getCalendar(2013, 07, 02, 15, 40, 50);
+    private static final DateVersionSpec fixedPointInTime = new DateVersionSpec(Util.getCalendar(2013, 07, 02, 15, 40, 50));
     
     @Test
     public void assertArguments() {
@@ -26,6 +31,18 @@ public class RemoteChangesetVersionCommandTest {
         MaskedArgumentListBuilder arguments = new RemoteChangesetVersionCommand(config, "$/tfsandbox", fixedPointInTime).getArguments();
         assertNotNull("Arguments were null", arguments);
         assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:D2013-07-02T15:40:51Z -format:brief -login:snd\\user_cp,password -server:https://tfs02.codeplex.com", arguments.toStringWithQuote());
+    }
+
+    @Test
+    public void assertVersionSpec() {
+        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
+        when(config.getUrl()).thenReturn("https://tfs02.codeplex.com");
+        when(config.getUserName()).thenReturn("snd\\user_cp");
+        when(config.getUserPassword()).thenReturn("password");
+
+        MaskedArgumentListBuilder arguments = new RemoteChangesetVersionCommand(config, "$/tfsandbox", new ChangesetVersionSpec(42)).getArguments();
+        assertNotNull("Arguments were null", arguments);
+        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:C42 -format:brief -login:snd\\user_cp,password -server:https://tfs02.codeplex.com", arguments.toStringWithQuote());
     }
 
     @Test
@@ -79,6 +96,37 @@ public class RemoteChangesetVersionCommandTest {
         RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", fixedPointInTime);
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "12497", changesetNumber);
-    }    
+    }
 
+    @Test public void getVersionSpecificationWhenDateVersionSpec() {
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, fixedPointInTime);
+
+        final String actual = command.getVersionSpecification();
+
+        assertEquals("D2013-07-02T15:40:51Z", actual);
+    }
+
+    @Test public void getVersionSpecificationWhenChangesetVersionSpec() {
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new ChangesetVersionSpec(42));
+
+        final String actual = command.getVersionSpecification();
+
+        assertEquals("C42", actual);
+    }
+
+    @Test public void getVersionSpecificationWhenLabelVersionSpecWithoutScope() {
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new LabelVersionSpec(new LabelSpec("Foo", null)));
+
+        final String actual = command.getVersionSpecification();
+
+        assertEquals("LFoo", actual);
+    }
+
+    @Test public void getVersionSpecificationWhenLabelVersionSpecWithScope() {
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new LabelVersionSpec(new LabelSpec("Foo", "Bar")));
+
+        final String actual = command.getVersionSpecification();
+
+        assertEquals("LFoo@Bar", actual);
+    }
 }

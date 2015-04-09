@@ -12,6 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.util.Secret;
 import net.sf.json.JSONObject;
 
@@ -196,26 +198,23 @@ public class TeamFoundationServerScm extends SCM {
             }
             
             build.addAction(workspaceConfiguration);
+            VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
+            String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
+            final String projectPath = workspaceConfiguration.getProjectPath();
+            final Project project = server.getProject(projectPath);
+            recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
+
             CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
             try {
-                List<ChangeSet> list = checkout(build, workspaceFilePath, server, action);
+                List<ChangeSet> list;
+                if (StringUtils.isNotEmpty(singleVersionSpec)) {
+                    list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
+                }
+                else {
+                    list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
+                }
                 ChangeSetWriter writer = new ChangeSetWriter();
                 writer.write(list, changelogFile);
-            } catch (ParseException pe) {
-                listener.fatalError(pe.getMessage());
-                throw new AbortException();
-            }
-    
-            try {
-                setWorkspaceChangesetVersion(null);
-                String projectPath = workspaceConfiguration.getProjectPath();
-                Project project = server.getProject(projectPath);
-                // TODO: even better would be to call this first, then use the changeset when calling checkout
-                int buildChangeset = project.getRemoteChangesetVersion(build.getTimestamp());
-                setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
-                
-                // by adding this action, we prevent calcRevisionsFromBuild() from being called
-                build.addAction(new TFSRevisionState(buildChangeset, projectPath));
             } catch (ParseException pe) {
                 listener.fatalError(pe.getMessage());
                 throw new AbortException();
@@ -226,22 +225,27 @@ public class TeamFoundationServerScm extends SCM {
         return true;
     }
 
-	private List<ChangeSet> checkout(AbstractBuild<?, ?> build,
-			FilePath workspaceFilePath, Server server, CheckoutAction action)
-			throws IOException, InterruptedException, ParseException {
-		
-		VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
-		String label = buildVariableResolver.resolve(VERSION_SPEC);
-		if (StringUtils.isNotEmpty(label)) {
-			if (label.startsWith("L")) {
-		        String preffixRemoved = label.substring(1);
-				return action.checkoutByLabel(server, workspaceFilePath, preffixRemoved);
-			}
-			//TODO to be implemented another checkout strategies...
-		}
-		
-		return action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
-	}
+    void recordWorkspaceChangesetVersion(final AbstractBuild<?, ?> build, final BuildListener listener, final Project project, final String projectPath, final String singleVersionSpec) throws IOException, InterruptedException {
+        final VersionSpec workspaceVersion;
+        if (!StringUtils.isEmpty(singleVersionSpec)) {
+            workspaceVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
+        }
+        else {
+            workspaceVersion = new DateVersionSpec(build.getTimestamp());
+        }
+        int buildChangeset;
+        try {
+            setWorkspaceChangesetVersion(null);
+            buildChangeset = project.getRemoteChangesetVersion(workspaceVersion);
+            setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
+
+            // by adding this action, we prevent calcRevisionsFromBuild() from being called
+            build.addAction(new TFSRevisionState(buildChangeset, projectPath));
+        } catch (ParseException pe) {
+            listener.fatalError(pe.getMessage());
+            throw new AbortException();
+        }
+    }
 
     void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
         this.workspaceChangesetVersion = workspaceChangesetVersion;
