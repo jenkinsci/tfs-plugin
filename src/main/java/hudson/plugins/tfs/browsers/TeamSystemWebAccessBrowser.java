@@ -52,7 +52,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         return baseUrl;
     }
 
-    /**
+    /*
      * http://tswaserver:8090/cs.aspx?cs=99
      */
     @Override
@@ -60,20 +60,15 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         return new URL(String.format("%scs.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
     }
 
-    /**
+    /*
      * http://tswaserver:8090/view.aspx?path=$/Project/Folder/file.cs&cs=99
-     * @param item
-     * @return
      */
     public URL getFileLink(ChangeSet.Item item) throws IOException {
         return new URL(String.format("%sview.aspx?path=%s&cs=%s", getBaseUrlString(item.getParent()), item.getPath(), item.getParent().getVersion()));
     }
 
-    /**
+    /*
      * http://tswaserver:8090/diff.aspx?opath=$/Project/Folder/file.cs&ocs=99&mpath=$/Project/Folder/file.cs&mcs=98
-     * @param item
-     * @return
-     * @throws IOException
      */
     public URL getDiffLink(ChangeSet.Item item) throws IOException {
         ChangeSet parent = item.getParent();

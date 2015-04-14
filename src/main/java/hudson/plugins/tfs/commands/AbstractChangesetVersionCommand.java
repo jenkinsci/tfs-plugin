@@ -25,7 +25,7 @@ public abstract class AbstractChangesetVersionCommand extends AbstractCommand im
     /**
      * Returns arguments for TFS history command:
      * 
-     *    <i>tf history {path} -recursive -noprompt -stopafter:1 -version:{versionSpecification} -format:brief</i></p>
+     *    <i>tf history {path} -recursive -noprompt -stopafter:1 -version:{versionSpecification} -format:brief</i>
      *    
      */
     public MaskedArgumentListBuilder getArguments() {
