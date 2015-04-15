@@ -9,7 +9,7 @@
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
   <name>Team Foundation Server Plug-in</name>
-  <version>3.1.2-SNAPSHOT</version>
+  <version>3.2.0</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
@@ -57,6 +57,7 @@
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/tfs-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/tfs-plugin.git</developerConnection>
+    <tag>tfs-3.2.0</tag>
   </scm>
 
   <distributionManagement>
