@@ -11,6 +11,9 @@
   <name>Team Foundation Server Plug-in</name>
   <version>3.2.1-SNAPSHOT</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
+  <properties>
+    <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+  </properties>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
     <license>
@@ -84,6 +87,17 @@
         <configuration>
           <compatibleSinceVersion>3.2.0</compatibleSinceVersion>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-junit47</artifactId>
+            <version>${maven-surefire-plugin.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
 	<groupId>org.codehaus.mojo</groupId>
