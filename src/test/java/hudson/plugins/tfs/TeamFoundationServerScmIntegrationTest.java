@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 
 /**
  * Tests that connect to a TFS server identified by the tfs_server_name property.
+ * These are so-called integration (L2) tests.
  */
 @Category(IntegrationTests.class)
 public class TeamFoundationServerScmIntegrationTest {
