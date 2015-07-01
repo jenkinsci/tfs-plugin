@@ -13,6 +13,7 @@
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
   <properties>
     <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
