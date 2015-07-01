@@ -22,11 +22,22 @@ public class TeamFoundationServerScmIntegrationTest {
 
     @Before
     public void connectToTfs() throws URISyntaxException {
+        final String serverUrl = buildTfsServerUrl();
+        scm = new TeamFoundationServerScm(serverUrl, "projectPath", "localPath", false, "workspaceName", null, (Secret) null);
+    }
+
+    /**
+     * Creates a string representing the URL to a default TFS server installation, based on the
+     * <code>tfs_server_name</code> property.
+     *
+     * @return a string of the form <code>http://${tfs_server_name}:8080/tfs</code>
+     * @throws URISyntaxException
+     */
+    public String buildTfsServerUrl() throws URISyntaxException {
         final String tfs_server_name = Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
         Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", tfs_server_name);
         final URI serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs", null, null);
-        final String serverUrl = serverUri.toString();
-        scm = new TeamFoundationServerScm(serverUrl, "projectPath", "localPath", false, "workspaceName", null, (Secret) null);
+        return serverUri.toString();
     }
 
     @Test
