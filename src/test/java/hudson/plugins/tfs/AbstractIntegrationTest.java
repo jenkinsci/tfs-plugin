@@ -1,6 +1,6 @@
 package hudson.plugins.tfs;
 
-import org.apache.http.client.utils.URIUtils;
+import org.apache.maven.wagon.providers.http.httpclient.client.utils.URIUtils;
 import org.junit.Assert;
 
 import java.net.URI;
