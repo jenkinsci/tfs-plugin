@@ -18,13 +18,13 @@ public abstract class AbstractIntegrationTest {
      * Creates a string representing the URL to a default TFS server installation, based on the
      * <code>tfs_server_name</code> property.
      *
-     * @return a string of the form <code>http://${tfs_server_name}:8080/tfs</code>
+     * @return a string of the form <code>http://${tfs_server_name}:8080/tfs/jenkins-tfs-plugin</code>
      * @throws URISyntaxException
      */
     public static String buildTfsServerUrl() throws URISyntaxException {
         final String tfs_server_name = getTfsServerName();
         Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", tfs_server_name);
-        final URI serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs", null, null);
+        final URI serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs/" + TeamProjectCollection, null, null);
         return serverUri.toString();
     }
 
