@@ -19,10 +19,14 @@ public abstract class AbstractIntegrationTest {
      * @throws URISyntaxException
      */
     public static String buildTfsServerUrl() throws URISyntaxException {
-        final String tfs_server_name = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
+        final String tfs_server_name = getTfsServerName();
         Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", tfs_server_name);
         final URI serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs", null, null);
         return serverUri.toString();
+    }
+
+    public static String getTfsServerName() {
+        return hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
     }
 
     /**
