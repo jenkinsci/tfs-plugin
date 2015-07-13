@@ -37,11 +37,18 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface EndToEndTfs {
 
+    /**
+     * Specifies the class that will be given a chance to participate.
+     */
+    Class<? extends JenkinsRecipe.Runner<EndToEndTfs>> value();
+
     class RunnerImpl extends JenkinsRecipe.Runner<EndToEndTfs>  {
 
         private static final String workspaceComment = "Created by the Jenkins tfs-plugin functional tests.";
 
         private final String serverUrl;
+
+        private JenkinsRecipe.Runner<EndToEndTfs> runner;
 
         public RunnerImpl() throws URISyntaxException {
             serverUrl = AbstractIntegrationTest.buildTfsServerUrl();
@@ -98,6 +105,12 @@ public @interface EndToEndTfs {
             finally {
                 server.close();
             }
+
+            final Class<? extends JenkinsRecipe.Runner<EndToEndTfs>> runnerClass = recipe.value();
+            if (runnerClass != null) {
+                runner = runnerClass.newInstance();
+                runner.setup(jenkinsRule, recipe);
+            }
         }
 
         static void checkIn(Workspace workspace, String comment) {
@@ -135,10 +148,16 @@ public @interface EndToEndTfs {
 
         @Override
         public void decorateHome(JenkinsRule jenkinsRule, File home) throws Exception {
+            if (runner != null) {
+                runner.decorateHome(jenkinsRule, home);
+            }
         }
 
         @Override
         public void tearDown(JenkinsRule jenkinsRule, EndToEndTfs recipe) throws Exception {
+            if (runner != null) {
+                runner.tearDown(jenkinsRule, recipe);
+            }
         }
     }
 }
