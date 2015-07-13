@@ -9,7 +9,10 @@ import java.net.URISyntaxException;
 
 public abstract class AbstractIntegrationTest {
 
+    public static final String TeamProjectCollection = "jenkins-tfs-plugin";
     public static final String TeamProjectPrefix = "$/FunctionalTests";
+    public static final String TestUserName = "jenkins-tfs-plugin";
+    public static final String TestUserPassword = "for-test-only";
 
     /**
      * Creates a string representing the URL to a default TFS server installation, based on the
