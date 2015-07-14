@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<build>
+  <actions>
+    <hudson.model.CauseAction>
+      <causes>
+        <hudson.triggers.SCMTrigger_-SCMTriggerCause/>
+      </causes>
+    </hudson.model.CauseAction>
+    <hudson.triggers.SCMTrigger_-BuildAction/>
+    <hudson.plugins.tfs.model.WorkspaceConfiguration plugin="tfs@3.2.0">
+      <workspaceName>Hudson-oldPollingFallback-MASTER</workspaceName>
+      <workfolder>.</workfolder>
+      <projectPath>$/FunctionalTests/TeamFoundationServerScmFunctionalTest/oldPollingFallback</projectPath>
+      <serverUrl>http://${tfs_server_name}:8080/tfs/jenkins-tfs-plugin</serverUrl>
+      <workspaceExists>true</workspaceExists>
+    </hudson.plugins.tfs.model.WorkspaceConfiguration>
+  </actions>
+  <timestamp>1436542800239</timestamp>
+  <result>FAILURE</result>
+  <duration>134</duration>
+  <charset>windows-1252</charset>
+  <keepLog>false</keepLog>
+  <builtOn></builtOn>
+  <workspace>oldPollingFallback/workspace</workspace>
+  <hudsonVersion>1.448</hudsonVersion>
+  <scm class="hudson.scm.NullChangeLogParser"/>
+</build>
