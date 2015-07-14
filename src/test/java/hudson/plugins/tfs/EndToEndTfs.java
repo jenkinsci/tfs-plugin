@@ -125,7 +125,7 @@ public @interface EndToEndTfs {
             }
         }
 
-        static Workspace createWorkspace(VersionControlClient vcc, String workspaceName) {
+        static Workspace createWorkspace(final VersionControlClient vcc, final String workspaceName) {
             Workspace workspace = vcc.getLocalWorkspace(workspaceName, ".");
             if (workspace != null) {
                 for (WorkingFolder workingFolder : workspace.getFolders()) {
