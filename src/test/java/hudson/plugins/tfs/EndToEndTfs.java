@@ -60,6 +60,7 @@ public @interface EndToEndTfs {
             final Class clazz = testDescription.getTestClass();
             final String testClassName = clazz.getSimpleName();
             final String testCaseName = testDescription.getMethodName();
+            final String hostName = AbstractIntegrationTest.tryToDetermineHostName();
             final File currentFolder = new File("").getAbsoluteFile();
             final File workspaces = new File(currentFolder, "workspaces");
             // TODO: Consider NOT using the Server class
@@ -68,7 +69,8 @@ public @interface EndToEndTfs {
                 final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
                 final VersionControlClient vcc = tpc.getVersionControlClient();
 
-                final String workspaceName = testClassName + "-" + testCaseName;
+                // workspaceName MUST be unique across computers hitting the same server
+                final String workspaceName = hostName + "-" + testCaseName;
                 final Workspace workspace = createWorkspace(vcc, workspaceName);
 
                 final String pathInTfvc = AbstractIntegrationTest.determinePathInTfvcForTestCase(testDescription);
