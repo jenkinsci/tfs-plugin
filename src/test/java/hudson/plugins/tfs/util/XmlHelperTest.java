@@ -23,6 +23,50 @@ import java.net.URL;
 
 public class XmlHelperTest {
 
+    @Test public void peekValue_Document() throws Exception {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        final DocumentBuilder db = dbf.newDocumentBuilder();
+        final Document doc = db.newDocument();
+        // <build>
+        final Element root = doc.createElement("build");
+            // <queueId>76</queueId>
+            final Element queueIdNode = doc.createElement("queueId");
+            queueIdNode.appendChild(doc.createTextNode("76"));
+            root.appendChild(queueIdNode);
+
+            // <timestamp>84</timestamp>
+            final Element timestampNode = doc.createElement("timestamp");
+            timestampNode.appendChild(doc.createTextNode("84"));
+            root.appendChild(timestampNode);
+        // </build>
+        doc.appendChild(root);
+
+        final String actualFound = XmlHelper.peekValue(doc, "/build/timestamp");
+
+        Assert.assertEquals("84", actualFound);
+
+        final String actualNotFound = XmlHelper.peekValue(doc, "/build/startTime");
+
+        Assert.assertEquals(null, actualNotFound);
+    }
+
+    @Test public void peekValue_File() throws Exception {
+        final Class<? extends XmlHelperTest> clazz = this.getClass();
+        final String resourceBase = clazz.getSimpleName() + "/peekValue_File/";
+        final URL inputUrl = clazz.getResource(resourceBase + "input.xml");
+        File tmp = null;
+        try {
+            tmp = File.createTempFile("XmlHelperTest", "xml");
+            FileUtils.copyURLToFile(inputUrl, tmp);
+
+            final String actual = XmlHelper.peekValue(tmp, "/build/timestamp");
+
+            Assert.assertEquals("1436542800239", actual);
+        } finally {
+            FileUtils.deleteQuietly(tmp);
+        }
+    }
+
     @Test public void pokeValue_Document() throws Exception {
         final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         final DocumentBuilder db = dbf.newDocumentBuilder();
