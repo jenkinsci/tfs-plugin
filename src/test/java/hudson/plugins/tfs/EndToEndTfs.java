@@ -49,6 +49,11 @@ public @interface EndToEndTfs {
         private final String serverUrl;
 
         private JenkinsRecipe.Runner<EndToEndTfs> runner;
+        private Server server = null;
+        private String testClassName;
+        private String testCaseName;
+        private String workspaceName;
+        private String pathInTfvc;
 
         public RunnerImpl() throws URISyntaxException {
             serverUrl = AbstractIntegrationTest.buildTfsServerUrl();
@@ -58,61 +63,77 @@ public @interface EndToEndTfs {
         public void setup(JenkinsRule jenkinsRule, EndToEndTfs recipe) throws Exception {
             final Description testDescription = jenkinsRule.getTestDescription();
             final Class clazz = testDescription.getTestClass();
-            final String testClassName = clazz.getSimpleName();
-            final String testCaseName = testDescription.getMethodName();
+            testClassName = clazz.getSimpleName();
+            testCaseName = testDescription.getMethodName();
             final String hostName = AbstractIntegrationTest.tryToDetermineHostName();
             final File currentFolder = new File("").getAbsoluteFile();
             final File workspaces = new File(currentFolder, "workspaces");
             // TODO: Consider NOT using the Server class
-            final Server server = new Server(new TfTool(null, null, null, null), serverUrl, AbstractIntegrationTest.TestUserName, AbstractIntegrationTest.TestUserPassword);
-            try {
-                final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
-                final VersionControlClient vcc = tpc.getVersionControlClient();
+            server = new Server(new TfTool(null, null, null, null), serverUrl, AbstractIntegrationTest.TestUserName, AbstractIntegrationTest.TestUserPassword);
 
-                // workspaceName MUST be unique across computers hitting the same server
-                final String workspaceName = hostName + "-" + testCaseName;
-                final Workspace workspace = createWorkspace(vcc, workspaceName);
+            final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
+            final VersionControlClient vcc = tpc.getVersionControlClient();
 
-                final String pathInTfvc = AbstractIntegrationTest.determinePathInTfvcForTestCase(testDescription);
-                final File localTestClassFolder = new File(workspaces, testClassName);
-                final File localBaseFolderFile = new File(localTestClassFolder, testCaseName);
-                //noinspection ResultOfMethodCallIgnored
-                localBaseFolderFile.mkdirs();
-                final String localBaseFolder = localBaseFolderFile.getAbsolutePath();
-                final WorkingFolder workingFolder = new WorkingFolder(pathInTfvc, localBaseFolder);
-                workspace.createWorkingFolder(workingFolder);
+            // workspaceName MUST be unique across computers hitting the same server
+            workspaceName = hostName + "-" + testCaseName;
+            final Workspace workspace = createWorkspace(vcc, workspaceName);
 
-                // TODO: Is this necessary if we're about to delete it, anyway?
-                workspace.get(GetOptions.NONE);
+            pathInTfvc = AbstractIntegrationTest.determinePathInTfvcForTestCase(testDescription);
+            final File localTestClassFolder = new File(workspaces, testClassName);
+            final File localBaseFolderFile = new File(localTestClassFolder, testCaseName);
+            //noinspection ResultOfMethodCallIgnored
+            localBaseFolderFile.mkdirs();
+            final String localBaseFolder = localBaseFolderFile.getAbsolutePath();
+            final WorkingFolder workingFolder = new WorkingFolder(pathInTfvc, localBaseFolder);
+            workspace.createWorkingFolder(workingFolder);
 
-                // Delete the folder associated with this test in TFVC
-                workspace.pendDelete(
-                        new String[]{pathInTfvc},
-                        RecursionType.FULL,
-                        LockLevel.UNCHANGED,
-                        GetOptions.NONE,
-                        PendChangesOptions.NONE);
-                checkIn(workspace, "Cleaning up for the " + workspaceName + " test.");
+            // TODO: Is this necessary if we're about to delete it, anyway?
+            workspace.get(GetOptions.NONE);
 
-                // create the folder in TFVC
-                workspace.pendAdd(
-                        new String[]{localBaseFolder},
-                        false,
-                        null,
-                        LockLevel.UNCHANGED,
-                        GetOptions.NONE,
-                        PendChangesOptions.NONE);
-                checkIn(workspace, "Setting up for the " + workspaceName + " test.");
-            }
-            finally {
-                server.close();
-            }
+            // Delete the folder associated with this test in TFVC
+            workspace.pendDelete(
+                    new String[]{pathInTfvc},
+                    RecursionType.FULL,
+                    LockLevel.UNCHANGED,
+                    GetOptions.NONE,
+                    PendChangesOptions.NONE);
+            checkIn(workspace, "Cleaning up for the " + workspaceName + " test.");
+
+            // create the folder in TFVC
+            workspace.pendAdd(
+                    new String[]{localBaseFolder},
+                    false,
+                    null,
+                    LockLevel.UNCHANGED,
+                    GetOptions.NONE,
+                    PendChangesOptions.NONE);
+            checkIn(workspace, "Setting up for the " + workspaceName + " test.");
 
             final Class<? extends JenkinsRecipe.Runner<EndToEndTfs>> runnerClass = recipe.value();
             if (runnerClass != null) {
                 runner = runnerClass.newInstance();
                 runner.setup(jenkinsRule, recipe);
             }
+        }
+
+        public String getPathInTfvc() {
+            return pathInTfvc;
+        }
+
+        public String getWorkspaceName() {
+            return workspaceName;
+        }
+
+        public String getTestCaseName() {
+            return testCaseName;
+        }
+
+        public String getTestClassName() {
+            return testClassName;
+        }
+
+        public Server getServer() {
+            return server;
         }
 
         static void checkIn(Workspace workspace, String comment) {
@@ -159,6 +180,9 @@ public @interface EndToEndTfs {
         public void tearDown(JenkinsRule jenkinsRule, EndToEndTfs recipe) throws Exception {
             if (runner != null) {
                 runner.tearDown(jenkinsRule, recipe);
+            }
+            if (server != null) {
+                server.close();
             }
         }
     }
