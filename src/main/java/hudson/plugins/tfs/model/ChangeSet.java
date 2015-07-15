@@ -24,20 +24,22 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     private Date date;
     private String comment;
     private List<Item> items;
+    private List<WorkItem> workItems;
     private String checkedInByUserString;
-    
+
     public ChangeSet() {
         this("", null, "", "");
     }
-    
+
     public ChangeSet(String version, Date date, String userString, String comment) {
         this.version = version;
         this.date = date;
         this.comment = comment;
         items = new ArrayList<Item>();
+        workItems = new ArrayList<WorkItem>();
         setUser(userString);
     }
-    
+
     public ChangeSet(String version, Date date, User author, String comment) {
         this.version = version;
         this.date = date;
@@ -45,8 +47,9 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         this.userString = author.getId();
         this.comment = comment;
         items = new ArrayList<Item>();
+        workItems = new ArrayList<WorkItem>();
     }
-    
+
     @Override
     public Collection<String> getAffectedPaths() {
         Collection<String> paths = new ArrayList<String>(items.size());
@@ -73,7 +76,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     public String getMsg() {
         return comment;
     }
-    
+
     @Exported
     public String getVersion() {
         return version;
@@ -92,8 +95,8 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     public String getUser() {
         return userString;
     }
-    
-    public void setUser(String user) {        
+
+    public void setUser(String user) {
         String[] split = user.split("\\\\");
         if (split.length == 2) {
             this.domain = split[0];
@@ -108,7 +111,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     public Date getDate() {
         return date;
     }
-    
+
     public void setDateStr(String dateStr) throws ParseException {
         date = DateUtil.TFS_DATETIME_FORMATTER.get().parse(dateStr);
     }
@@ -117,7 +120,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     public String getComment() {
         return comment;
     }
-    
+
     public void setComment(String comment) {
         this.comment = comment;
     }
@@ -139,7 +142,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     public User getCheckedInByUser() {
         if (checkedInByUser == null) {
-           checkedInByUser = User.get(checkedInByUserString);  
+           checkedInByUser = User.get(checkedInByUserString);
         }
         return checkedInByUser;
     }
@@ -152,17 +155,26 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     public List<Item> getItems() {
         return items;
     }
-    
+
     public void add(ChangeSet.Item item) {
         items.add(item);
         item.setParent(this);
+    }
+
+    @Exported
+    public List<WorkItem> getWorkItems() {
+        return workItems;
+    }
+
+    public void add(ChangeSet.WorkItem workItem) {
+        workItems.add(workItem);
     }
 
     @Override
     protected void setParent(hudson.scm.ChangeLogSet parent) {
         super.setParent(parent);
     }
-    
+
     @ExportedBean(defaultVisibility=999)
     public static class Item {
         private String path;
@@ -172,7 +184,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         public Item() {
             this("","");
         }
-        
+
         public Item(String path, String action) {
             this.path = path;
             this.action = action;
@@ -195,7 +207,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
             this.path = path;
         }
 
-        @Exported   
+        @Exported
         public String getAction() {
             return action;
         }
@@ -213,6 +225,60 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
                 return EditType.ADD;
             }
             return EditType.EDIT;
+        }
+    }
+
+    @ExportedBean(defaultVisibility=999)
+    public static class WorkItem {
+        private int id;
+        private String title;
+        private String type;
+        private WorkItem parent;
+
+        public WorkItem() {
+            this(0,"", "");
+        }
+
+        public WorkItem(int id, String title, String type) {
+            this.id = id;
+            this.title = title;
+            this.type = type;
+        }
+
+        @Exported
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        @Exported
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        @Exported
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        @Exported
+        public WorkItem getParent() {
+            return parent;
+        }
+
+        public void setParent(WorkItem parent) {
+            this.parent = parent;
         }
     }
 }

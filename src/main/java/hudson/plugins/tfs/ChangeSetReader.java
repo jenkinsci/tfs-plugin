@@ -19,9 +19,9 @@ import hudson.util.Digester2;
 
 /**
  * TeamFoundation change log reader.
- * 
+ *
  * @author Erik Ramfelt
- */ 
+ */
 public class ChangeSetReader extends ChangeLogParser {
 
     @Override
@@ -51,7 +51,16 @@ public class ChangeSetReader extends ChangeLogParser {
         digester.addSetProperties("*/changeset/items/item");
         digester.addBeanPropertySetter("*/changeset/items/item", "path");
         digester.addSetNext("*/changeset/items/item", "add");
-        
+
+        digester.addObjectCreate("*/changeset/workitems/workitem", ChangeSet.WorkItem.class);
+        digester.addSetProperties("*/changeset/workitems/workitem");
+        digester.addBeanPropertySetter("*/changeset/workitems/workitem/title", "title");
+        digester.addSetNext("*/changeset/workitems/workitem", "add");
+        digester.addObjectCreate("*/parent", ChangeSet.WorkItem.class);
+        digester.addSetProperties("*/parent");
+        digester.addBeanPropertySetter("*/parent/title", "title");
+        digester.addSetNext("*/parent", "setParent");
+
         digester.parse(reader);
 
         return new ChangeLogSet(build, changesetList);

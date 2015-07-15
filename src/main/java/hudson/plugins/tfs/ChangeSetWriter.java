@@ -15,7 +15,7 @@ import org.apache.commons.io.IOUtils;
 
 /**
  * Team Foundation change log writer.
- * 
+ *
  * @author Erik Ramfelt
  */
 public class ChangeSetWriter {
@@ -38,19 +38,19 @@ public class ChangeSetWriter {
      * Writes the list of change sets to the writer
      * @param changeSets list of change sets
      * @param output output writer
-     */    
+     */
     public void write(List<ChangeSet> changeSets, Writer output) {
         PrintWriter writer = new PrintWriter(output);
-        
+
         writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         writer.println("<changelog>");
-        
+
         for (ChangeSet changeSet : changeSets) {
             writer.println(String.format("\t<changeset version=\"%s\">", changeSet.getVersion()));
             write(changeSet, writer);
             writer.println("\t</changeset>");
         }
-        
+
         writer.println("</changelog>");
         writer.flush();
     }
@@ -73,13 +73,30 @@ public class ChangeSetWriter {
             }
             writer.println("\t\t</items>");
         }
+        if (changeSet.getWorkItems().size() > 0) {
+            writer.println("\t\t<workitems>");
+            for (ChangeSet.WorkItem item : changeSet.getWorkItems()) {
+                writer.println(String.format("\t\t\t<workitem id=\"%s\" type=\"%s\"><title>%s</title>", escapeForXml(item.getId()), escapeForXml(item.getType()), escapeForXml(item.getTitle())));
+                writeParent(item, writer);
+                writer.println("\t\t</workitem>");
+            }
+            writer.println("\t\t</workitems>");
+        }
     }
 
+    private void writeParent(ChangeSet.WorkItem workItem, PrintWriter writer) {
+        ChangeSet.WorkItem parent = workItem.getParent();
+        if (parent != null) {
+            writer.println(String.format("\t\t\t\t<parent id=\"%s\" type=\"%s\"><title>%s</title>", escapeForXml(parent.getId()), escapeForXml(parent.getType()), escapeForXml(parent.getTitle())));
+            writeParent(parent, writer);
+            writer.println("\t\t\t\t</parent>");
+        }
+    }
     /**
-     * 
+     *
      * Converts the input in the way that it can be written to the XML.
      * Special characters are converted to XML understandable way.
-     * 
+     *
      * @param object The object to be escaped.
      * @return Escaped string that can be written to XML.
      */

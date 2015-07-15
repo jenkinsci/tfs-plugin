@@ -1,27 +1,26 @@
 package hudson.plugins.tfs.model;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.Calendar;
-import java.util.List;
-
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ChangeType;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ItemType;
 import hudson.model.User;
 import hudson.plugins.tfs.SwedishLocaleTestCase;
 import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.model.ChangeSet.Item;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import hudson.tasks.Mailer;
-
 import org.junit.Test;
 
-import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
-import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ChangeType;
-import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
-import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ItemType;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.Calendar;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.*;
 
 public class ProjectTest extends SwedishLocaleTestCase {
 
@@ -30,21 +29,19 @@ public class ProjectTest extends SwedishLocaleTestCase {
             = new com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Item();
         serverItem.setItemType(ItemType.FILE);
         serverItem.setServerItem("$/tfsandbox");
-        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange
-            = new Change(serverItem, ChangeType.ADD, null);
-        return serverChange;
+        return new Change(serverItem, ChangeType.ADD, null);
     }
 
     @Test
     public void assertConvertServerChange() throws Exception {
         final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange = createServerChange();
-        
+
         final Item actual = Project.convertServerChange(serverChange);
-        
+
         assertEquals("$/tfsandbox", actual.getPath());
         assertEquals("add", actual.getAction());
     }
-    
+
     private UserLookup createMockUserLookup(String accountName, String displayName, String emailAddress) {
         UserLookup userLookup = mock(UserLookup.class);
         User user = mock(User.class);
@@ -59,12 +56,16 @@ public class ProjectTest extends SwedishLocaleTestCase {
         when(userLookup.find(accountName)).thenReturn(user);
         return userLookup;
     }
-    
+
     @Test
     public void assertConvertServerChangeset() throws Exception {
+        Server server = mock(Server.class);
+        TFSTeamProjectCollection tpc = mock(TFSTeamProjectCollection.class);
+        when(server.getTeamProjectCollection()).thenReturn(tpc);
+
         final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange = createServerChange();
         final String comment = "Created team project folder $/tfsandbox via the Team Project Creation Wizard";
-        final Calendar juneTwentySeventh = Util.getCalendar(2008, 06, 27, 11, 16, 06);
+        final Calendar juneTwentySeventh = Util.getCalendar(2008, 6, 27, 11, 16, 6);
         final String userString = "EXAMPLE\\ljenkins";
         Changeset serverChangeset = new Changeset(userString, comment, null, null);
         serverChangeset.setChangesetID(12472);
@@ -76,7 +77,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final String userEmailAddress = "leeroy.jenkins@example.com";
         final UserLookup userLookup = createMockUserLookup(userString, userDisplayName, userEmailAddress);
 
-        hudson.plugins.tfs.model.ChangeSet actual = Project.convertServerChangeset(serverChangeset, userLookup);
+        hudson.plugins.tfs.model.ChangeSet actual = Project.convertServerChangeset(serverChangeset, userLookup, null);
 
         final User author = actual.getAuthor();
         assertEquals("The version was incorrect", "12472", actual.getVersion());
@@ -101,7 +102,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         project.getFiles(".");
         verify(server).execute(isA(MaskedArgumentListBuilder.class));
     }
-    
+
     @Test
     public void assertGetFilesUsesVersion() throws Exception {
         Server server = mock(Server.class);
@@ -120,7 +121,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
 
         verify(spy).close();
     }
-       
+
     @Test
     public void assertGetWorkspaceChangesetVersion() throws Exception {
         Server server = mock(Server.class);
@@ -144,5 +145,5 @@ public class ProjectTest extends SwedishLocaleTestCase {
         new Project(server, "$/serverpath").getWorkspaceChangesetVersion("localpath", "workspace_name", "owner");
 
         verify(spy).close();
-    }    
+    }
 }

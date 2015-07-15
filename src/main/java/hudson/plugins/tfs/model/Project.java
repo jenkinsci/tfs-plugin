@@ -1,11 +1,29 @@
 package hudson.plugins.tfs.model;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
+import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
+import com.microsoft.tfs.core.clients.workitem.WorkItem;
+import com.microsoft.tfs.core.clients.workitem.WorkItemClient;
+import com.microsoft.tfs.core.clients.workitem.query.Query;
+import com.microsoft.tfs.core.clients.workitem.query.WorkItemLinkInfo;
 import hudson.model.User;
 import hudson.plugins.tfs.commands.AbstractChangesetVersionCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet.Item;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -14,24 +32,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
-import com.microsoft.tfs.core.TFSTeamProjectCollection;
-import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
-import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
-import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
-import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
-import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelSpec;
-import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
-import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
-import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LabelVersionSpec;
-import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
-import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
-import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
-import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
 
 public class Project {
 
@@ -51,12 +51,42 @@ public class Project {
         (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change serverChange) {
         final String path = serverChange.getItem().getServerItem();
         final String action = serverChange.getChangeType().toUIString(true);
-        final Item result = new Item(path, action);
-        return result;
+        return new Item(path, action);
+    }
+
+    static ChangeSet.WorkItem convertWorkItem(WorkItem workItem) {
+        ChangeSet.WorkItem item = new ChangeSet.WorkItem(workItem.getID(), workItem.getTitle(), workItem.getType().getName());
+        WorkItem parentWorkItem = getParentWorkItem(workItem);
+
+        if (parentWorkItem != null) {
+            item.setParent(convertWorkItem(parentWorkItem));
+        }
+        return item;
+    }
+
+    static WorkItem getParentWorkItem(WorkItem workItem)
+    {
+        WorkItem parent = null;
+        WorkItemClient wic = workItem.getClient();
+
+        Query wiQuery =  workItem.getClient().createQuery("SELECT [System.Id]" +
+                " FROM WorkItemLinks " +
+                " WHERE [Source].[System.Id] = " + workItem.getID());
+
+        WorkItemLinkInfo[] wiTrees = wiQuery.runLinkQuery();
+        int parentLinkId = workItem.getClient().getLinkTypes().getLinkTypeEnds().get("Parent").getID();
+        for (WorkItemLinkInfo wiTree : wiTrees) {
+            if (wiTree.getLinkTypeID() == parentLinkId) {
+                parent = wic.getWorkItemByID(wiTree.getTargetID());
+                break;
+            }
+        }
+
+        return parent;
     }
 
     static hudson.plugins.tfs.model.ChangeSet convertServerChangeset
-        (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset, UserLookup userLookup) {
+        (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset, UserLookup userLookup, WorkItemClient wic) {
         final String version = Integer.toString(serverChangeset.getChangesetID(), 10);
         final Date date = serverChangeset.getDate().getTime();
         final String author = serverChangeset.getCommitter();
@@ -68,6 +98,14 @@ public class Project {
         for (final Change serverChange : serverChanges) {
             final Item item = convertServerChange(serverChange);
             result.add(item);
+        }
+
+        if (wic != null) {
+            WorkItem[] workItems = serverChangeset.getWorkItems(wic);
+            for (final WorkItem workItem : workItems) {
+                final ChangeSet.WorkItem item = convertWorkItem(workItem);
+                result.add(item);
+            }
         }
         return result;
     }
@@ -89,6 +127,7 @@ public class Project {
         }
         final UserLookup userLookup = new TfsUserLookup(ims);
         final VersionControlClient vcc = tpc.getVersionControlClient();
+
         try {
             final Changeset[] serverChangesets = vcc.queryHistory(
                     projectPath,
@@ -106,8 +145,9 @@ public class Project {
             );
             final List<ChangeSet> result = new ArrayList<ChangeSet>();
             if (serverChangesets != null) {
+                WorkItemClient wic = tpc.getWorkItemClient();
                 for (final Changeset serverChangeset : serverChangesets) {
-                    final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup);
+                    final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup, wic);
                     result.add(changeSet);
                 }
             }
@@ -129,7 +169,7 @@ public class Project {
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
         return getVCCHistory(fromVersion, toVersion, true);
     }
-    
+
     public List<ChangeSet> getDetailedHistory(String singleVersionSpec) {
         final VersionSpec toVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
         return getVCCHistory(null, toVersion, true);
@@ -180,14 +220,14 @@ public class Project {
 
     /**
      * Gets workspace changeset version for specified local path.
-     * 
+     *
      * @param localPath for which to get latest workspace changeset version
      * @param workspaceName name of workspace for which to get latest changeset version
      * @return workspace changeset version for specified local path
      */
-    public String getWorkspaceChangesetVersion(String localPath, String workspaceName, String workspaceOwner) 
-                                                                                       throws IOException, 
-                                                                                              InterruptedException, 
+    public String getWorkspaceChangesetVersion(String localPath, String workspaceName, String workspaceOwner)
+                                                                                       throws IOException,
+                                                                                              InterruptedException,
                                                                                               ParseException {
         WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(server,localPath,workspaceName, workspaceOwner);
         Reader reader = null;
