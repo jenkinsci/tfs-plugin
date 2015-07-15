@@ -47,6 +47,15 @@ public @interface EndToEndTfs {
      * This class provides an implementation that does almost nothing.
      */
     class StubRunner extends JenkinsRecipe.Runner<EndToEndTfs> {
+        private RunnerImpl parent;
+
+        protected RunnerImpl getParent() {
+            return parent;
+        }
+
+        private void setParent(final RunnerImpl parent) {
+            this.parent = parent;
+        }
     }
 
     class RunnerImpl extends JenkinsRecipe.Runner<EndToEndTfs>  {
@@ -119,6 +128,7 @@ public @interface EndToEndTfs {
             final Class<? extends StubRunner> runnerClass = recipe.value();
             if (runnerClass != null) {
                 runner = runnerClass.newInstance();
+                runner.setParent(this);
                 runner.setup(jenkinsRule, recipe);
             }
         }
