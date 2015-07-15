@@ -40,7 +40,14 @@ public @interface EndToEndTfs {
     /**
      * Specifies the class that will be given a chance to participate.
      */
-    Class<? extends JenkinsRecipe.Runner<EndToEndTfs>> value();
+    Class<? extends StubRunner> value();
+
+    /**
+     * The {@link EndToEndTfs} annotation requires a value of type {@link Class}.
+     * This class provides an implementation that does almost nothing.
+     */
+    class StubRunner extends JenkinsRecipe.Runner<EndToEndTfs> {
+    }
 
     class RunnerImpl extends JenkinsRecipe.Runner<EndToEndTfs>  {
 
@@ -48,7 +55,7 @@ public @interface EndToEndTfs {
 
         private final String serverUrl;
 
-        private JenkinsRecipe.Runner<EndToEndTfs> runner;
+        private StubRunner runner;
         private Server server = null;
         private String testClassName;
         private String testCaseName;
@@ -109,7 +116,7 @@ public @interface EndToEndTfs {
                     PendChangesOptions.NONE);
             checkIn(workspace, "Setting up for the " + workspaceName + " test.");
 
-            final Class<? extends JenkinsRecipe.Runner<EndToEndTfs>> runnerClass = recipe.value();
+            final Class<? extends StubRunner> runnerClass = recipe.value();
             if (runnerClass != null) {
                 runner = runnerClass.newInstance();
                 runner.setup(jenkinsRule, recipe);

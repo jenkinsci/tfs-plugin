@@ -53,7 +53,7 @@ public class TeamFoundationServerScmFunctionalTest {
      * Injects the current time in milliseconds into the <code>/build/timestamp</code> element
      * of the last <code>build.xml</code>.
      */
-    public static class OldPollingFallback extends JenkinsRecipe.Runner<EndToEndTfs> {
+    public static class OldPollingFallback extends EndToEndTfs.StubRunner {
 
         private static final String jobFolder = "jobs/oldPollingFallback/";
 
