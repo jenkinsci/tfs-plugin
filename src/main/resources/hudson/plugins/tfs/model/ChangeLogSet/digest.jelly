@@ -9,6 +9,16 @@
         <j:forEach var="cs" items="${it.items}" varStatus="loop">
           <li>
             ${cs.msgAnnotated} (<a href="changes#detail${loop.index}">detail</a>)
+            <dl>
+            <j:forEach var="workItem" items="${cs.workItems}">
+                <dt>${workItem.type}</dt><dd>${workItem.id}: ${workItem.title}</dd>
+                <j:set var="parent" value="${workItem.parent}" />
+                <j:while test="${not empty parent}" >
+                  <dt>${parent.type}</dt><dd>${parent.id}: ${parent.title}</dd>
+                  <j:set var="parent" value="${parent.parent}" />
+                </j:while>
+            </j:forEach>
+            </dl>
           </li>
         </j:forEach>
       </ol>

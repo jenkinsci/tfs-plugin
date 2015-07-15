@@ -24,6 +24,12 @@ public class ChangeSetWriterTest {
         ChangeSet changeset = new ChangeSet("1122", Util.getCalendar(2008, 12, 12).getTime(), "rnd\\user", "comment");
         changeset.getItems().add(new ChangeSet.Item("path", "add"));
         changeset.getItems().add(new ChangeSet.Item("path2", "delete"));
+        ChangeSet.WorkItem task = new ChangeSet.WorkItem(12345, "Test changeset work item", "Task");
+        ChangeSet.WorkItem pbi = new ChangeSet.WorkItem(4567, "work item", "Product Backlog Item");
+        ChangeSet.WorkItem change = new ChangeSet.WorkItem(7890, "change", "Change");
+        pbi.setParent(change);
+        task.setParent(pbi);
+        changeset.getWorkItems().add(task);
         ArrayList<ChangeSet> sets = new ArrayList<ChangeSet>();
         sets.add(changeset);
 
@@ -39,6 +45,17 @@ public class ChangeSetWriterTest {
                                     "<item action=\"add\">path</item>" +
                                     "<item action=\"delete\">path2</item>" +
                                 "</items>" +
+                                "<workitems>" +
+                                    "<workitem id=\"12345\" type=\"Task\">" +
+                                        "<title>Test changeset work item</title>" +
+                                        "<parent id=\"4567\" type=\"Product Backlog Item\">" +
+                                            "<title>work item</title>" +
+                                            "<parent id=\"7890\" type=\"Change\">" +
+                                                "<title>change</title>" +
+                                            "</parent>" +
+                                        "</parent>" +
+                                    "</workitem>" +
+                                "</workitems>" +
                             "</changeset>" +
         		"</changelog>", output.getBuffer().toString());
     }
