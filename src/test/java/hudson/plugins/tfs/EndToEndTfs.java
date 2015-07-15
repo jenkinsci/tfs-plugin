@@ -167,6 +167,10 @@ public @interface EndToEndTfs {
             return testClassName;
         }
 
+        public String getServerUrl() {
+            return serverUrl;
+        }
+
         public Server getServer() {
             return server;
         }
