@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,41 +22,21 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Computer;
-import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.ParametersAction;
 
 import hudson.plugins.tfs.model.Project;
 import hudson.util.Secret;
-import hudson.util.TextFile;
+import hudson.util.SecretOverride;
 import hudson.util.XStream2;
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRecipe;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TestPluginManager;
 
-import javax.servlet.ServletContext;
 
 @SuppressWarnings("unchecked")
 public class TeamFoundationServerScmTest {
 
     private FilePath workspace;
-
-    @Rule public JenkinsRule j = new JenkinsRule(){
-        // Override to establish a stable secret key
-        @Override protected Hudson newHudson() throws Exception {
-            ServletContext webServer = createWebServer();
-            File home = createTmpDir();
-            final String secretKey = "5e2422dc868f119d5033f4619a6f223d71d132a17f8a63f1056c9a1f57c65006";
-            TextFile secretFile = new TextFile(new File(home,"secret.key"));
-            secretFile.write(secretKey);
-            for (JenkinsRecipe.Runner r : recipes)
-                r.decorateHome(this,home);
-            return new Hudson(home, webServer, TestPluginManager.INSTANCE);
-        }
-    };
 
     @After public void tearDown() throws Exception {
         if (workspace != null) {
@@ -70,43 +51,56 @@ public class TeamFoundationServerScmTest {
      This test makes sure a job can be upgraded without loss of the password.
      */
     @Test public void upgradeFromScrambledPassword() {
-        final String xmlString =
-                "<scm class='hudson.plugins.tfs.TeamFoundationServerScm' plugin='tfs@3.1.1'>\n" +
-                "    <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
-                "    <projectPath>$/example/path</projectPath>\n" +
-                "    <localPath>.</localPath>\n" +
-                "    <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
-                "    <userPassword>ZXhhbXBsZVBhc3N3b3Jk</userPassword>\n" +
-                "    <userName>example\\tfsbuilder</userName>\n" +
-                "    <useUpdate>false</useUpdate>\n" +
-                "</scm>";
-        final XStream serializer = new XStream2();
+        SecretOverride secretOverride = null;
+        try {
+            secretOverride = new SecretOverride("5e2422dc868f119d5033f4619a6f223d71d132a17f8a63f1056c9a1f57c65006");
+            final String xmlString =
+                    "<scm class='hudson.plugins.tfs.TeamFoundationServerScm' plugin='tfs@3.1.1'>\n" +
+                    "    <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
+                    "    <projectPath>$/example/path</projectPath>\n" +
+                    "    <localPath>.</localPath>\n" +
+                    "    <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
+                    "    <userPassword>ZXhhbXBsZVBhc3N3b3Jk</userPassword>\n" +
+                    "    <userName>example\\tfsbuilder</userName>\n" +
+                    "    <useUpdate>false</useUpdate>\n" +
+                    "</scm>";
+            final XStream serializer = new XStream2();
 
-        final TeamFoundationServerScm tfsScmObject = (TeamFoundationServerScm) serializer.fromXML(xmlString);
+            final TeamFoundationServerScm tfsScmObject = (TeamFoundationServerScm) serializer.fromXML(xmlString);
 
-        final String actual = tfsScmObject.getUserPassword();
-        assertEquals("examplePassword", actual);
-        assertEquals("examplePassword", Secret.toString(tfsScmObject.getPassword()));
+            final String actual = tfsScmObject.getUserPassword();
+            assertEquals("examplePassword", actual);
+            assertEquals("examplePassword", Secret.toString(tfsScmObject.getPassword()));
 
-        final String expectedUpgradedXml =
-                "<hudson.plugins.tfs.TeamFoundationServerScm>\n" +
-                        "  <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
-                        "  <projectPath>$/example/path</projectPath>\n" +
-                        "  <localPath>.</localPath>\n" +
-                        "  <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
-                        "  <password>zs+99bxCGlcSxR3Umnj0q0OjYXVSiB+qLzS0ZjuHz2M=</password>\n" +
-                        "  <userName>example\\tfsbuilder</userName>\n" +
-                        "  <useUpdate>false</useUpdate>\n" +
-                        "</hudson.plugins.tfs.TeamFoundationServerScm>";
+            final String expectedUpgradedXml =
+                    "<hudson.plugins.tfs.TeamFoundationServerScm>\n" +
+                            "  <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
+                            "  <projectPath>$/example/path</projectPath>\n" +
+                            "  <localPath>.</localPath>\n" +
+                            "  <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
+                            "  <password>zs+99bxCGlcSxR3Umnj0q0OjYXVSiB+qLzS0ZjuHz2M=</password>\n" +
+                            "  <userName>example\\tfsbuilder</userName>\n" +
+                            "  <useUpdate>false</useUpdate>\n" +
+                            "</hudson.plugins.tfs.TeamFoundationServerScm>";
 
-        final String actualUpgradedXml = serializer.toXML(tfsScmObject);
+            final String actualUpgradedXml = serializer.toXML(tfsScmObject);
 
-        assertEquals(expectedUpgradedXml, actualUpgradedXml);
+            assertEquals(expectedUpgradedXml, actualUpgradedXml);
 
-        final TeamFoundationServerScm tfsScmObject2 = (TeamFoundationServerScm) serializer.fromXML(actualUpgradedXml);
-        final String actual2 = tfsScmObject2.getUserPassword();
-        assertEquals("examplePassword", actual2);
-        assertEquals("examplePassword", Secret.toString(tfsScmObject.getPassword()));
+            final TeamFoundationServerScm tfsScmObject2 = (TeamFoundationServerScm) serializer.fromXML(actualUpgradedXml);
+            final String actual2 = tfsScmObject2.getUserPassword();
+            assertEquals("examplePassword", actual2);
+            assertEquals("examplePassword", Secret.toString(tfsScmObject.getPassword()));
+        }
+        finally {
+            if (secretOverride != null) {
+                try {
+                    secretOverride.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
     }
 
     @Test
