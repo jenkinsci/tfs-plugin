@@ -13,6 +13,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionTyp
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.plugins.tfs.model.Server;
+import hudson.plugins.tfs.util.XmlHelper;
 import org.apache.commons.io.FileUtils;
 import org.junit.runner.Description;
 import org.jvnet.hudson.test.JenkinsRecipe;
@@ -55,6 +56,23 @@ public @interface EndToEndTfs {
 
         private void setParent(final RunnerImpl parent) {
             this.parent = parent;
+        }
+
+        protected String getJobFolder() {
+            return "jobs/" + getParent().getTestCaseName() + "/";
+        }
+
+        @Override
+        public void decorateHome(final JenkinsRule jenkinsRule, final File home) throws Exception {
+            final String jobFolder = getJobFolder();
+            final String configXmlPath = jobFolder + "config.xml";
+            final File configXmlFile = new File(home, configXmlPath);
+
+            final String tfsServerUrl = AbstractIntegrationTest.buildTfsServerUrl();
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/serverUrl", tfsServerUrl);
+
+            final String projectPath = getParent().getPathInTfvc();
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/projectPath", projectPath);
         }
     }
 

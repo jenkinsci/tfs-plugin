@@ -55,15 +55,11 @@ public class TeamFoundationServerScmFunctionalTest {
      */
     public static class OldPollingFallback extends EndToEndTfs.StubRunner {
 
-        private static final String jobFolder = "jobs/oldPollingFallback/";
-
         @Override public void decorateHome(final JenkinsRule jenkinsRule, final File home)
                 throws Exception {
-            final String configXmlPath = jobFolder + "config.xml";
-            final File configXmlFile = new File(home, configXmlPath);
-            final String tfsServerUrl = AbstractIntegrationTest.buildTfsServerUrl();
-            XmlHelper.pokeValue(configXmlFile, "/project/scm/serverUrl", tfsServerUrl);
+            super.decorateHome(jenkinsRule, home);
 
+            final String jobFolder = getJobFolder();
             final String lastBuildXmlPath = jobFolder + "builds/2015-07-10_12-11-34/build.xml";
             final File lastBuildXmlFile = new File(home, lastBuildXmlPath);
             final long rightNowMilliseconds = System.currentTimeMillis();
