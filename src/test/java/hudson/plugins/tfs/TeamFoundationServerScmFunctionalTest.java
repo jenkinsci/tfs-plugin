@@ -1,7 +1,10 @@
 package hudson.plugins.tfs;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import hudson.model.Project;
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
 import hudson.scm.PollingResult;
 import jenkins.model.Jenkins;
@@ -9,10 +12,12 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.jvnet.hudson.test.JenkinsRecipe;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -65,6 +70,72 @@ public class TeamFoundationServerScmFunctionalTest {
             final long rightNowMilliseconds = System.currentTimeMillis();
             final String value = String.valueOf(rightNowMilliseconds);
             XmlHelper.pokeValue(lastBuildXmlFile, "/build/timestamp", value);
+        }
+    }
+
+    /**
+     * As of version 3.2.0, passwords are no longer encoded but encrypted.
+     * Such a job should have its encoded password upgraded to encrypted
+     * and still be able to poll and build.
+     */
+    @LocalData
+    @EndToEndTfs(CurrentChangesetInjector.class)
+    @Test public void upgradeEncodedPassword()
+            throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
+        final Jenkins jenkins = j.jenkins;
+        final TaskListener taskListener = j.createTaskListener();
+        final List<Project> projects = jenkins.getProjects();
+        final Project project = projects.get(0);
+        PollingResult actualPollingResult;
+
+        actualPollingResult = project.poll(taskListener);
+        Assert.assertEquals(PollingResult.Change.NONE, actualPollingResult.change);
+
+        project.save(/* force the project to be written to disk, which should encrypt the password */);
+
+        actualPollingResult = project.poll(taskListener);
+        Assert.assertEquals(PollingResult.Change.NONE, actualPollingResult.change);
+        final File home = j.jenkins.getRootDir();
+        final String configXmlPath = "jobs/upgradeEncodedPassword/config.xml";
+        final File configXmlFile = new File(home, configXmlPath);
+        final String userPassword = XmlHelper.peekValue(configXmlFile, "/project/scm/userPassword");
+        Assert.assertEquals("Encoded password should no longer be there", null, userPassword);
+        final String password = XmlHelper.peekValue(configXmlFile, "/project/scm/password");
+        Assert.assertEquals("Encrypted password should be there", "pmJe5VYJg6gr2BdipI1sMGJScFwmT+pZbz7B2jISBrw=", password);
+
+        // TODO: Check in & record changeset, poll & assert SIGNIFICANT
+        // TODO: build & assert new last build recorded changeset from above
+        // TODO: poll & assert NONE
+    }
+
+    /**
+     * Injects some values into the last <code>build.xml</code> to pretend we're up-to-date with TFS.
+     */
+    public static class CurrentChangesetInjector extends EndToEndTfs.StubRunner {
+
+        @Override public void decorateHome(final JenkinsRule jenkinsRule, final File home)
+                throws Exception {
+            super.decorateHome(jenkinsRule, home);
+
+            final String jobFolder = getJobFolder();
+            final String lastBuildXmlPath = jobFolder + "builds/2015-07-15_20-37-42/build.xml";
+            final File lastBuildXmlFile = new File(home, lastBuildXmlPath);
+
+            final EndToEndTfs.RunnerImpl parent = getParent();
+            final String projectPath = parent.getPathInTfvc();
+            final String serverUrl = parent.getServerUrl();
+            final Server server = parent.getServer();
+            final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
+            final VersionControlClient vcc = tpc.getVersionControlClient();
+            final int latestChangesetID = vcc.getLatestChangesetID();
+            final String changesetVersion = String.valueOf(latestChangesetID);
+
+            XmlHelper.pokeValue(lastBuildXmlFile, "/build/actions/hudson.plugins.tfs.model.WorkspaceConfiguration/projectPath", projectPath);
+            XmlHelper.pokeValue(lastBuildXmlFile, "/build/actions/hudson.plugins.tfs.model.WorkspaceConfiguration/serverUrl", serverUrl);
+
+            XmlHelper.pokeValue(lastBuildXmlFile, "/build/actions/hudson.plugins.tfs.TFSRevisionState/changesetVersion", changesetVersion);
+            XmlHelper.pokeValue(lastBuildXmlFile, "/build/actions/hudson.plugins.tfs.TFSRevisionState/projectPath", projectPath);
+
         }
     }
 }
