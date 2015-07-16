@@ -29,7 +29,7 @@ import java.util.List;
  * Tests may connect to a TFS server identified by the tfs_server_name property.
  */
 @Category(IntegrationTests.class)
-public class TeamFoundationServerScmFunctionalTest {
+public class FunctionalTest {
 
     @Rule public JenkinsRule j = new JenkinsRule();
 
