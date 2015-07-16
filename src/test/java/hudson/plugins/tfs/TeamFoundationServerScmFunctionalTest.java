@@ -7,6 +7,7 @@ import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
 import hudson.scm.PollingResult;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -82,10 +83,14 @@ public class TeamFoundationServerScmFunctionalTest {
     @EndToEndTfs(CurrentChangesetInjector.class)
     @Test public void upgradeEncodedPassword()
             throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
+        final String encryptedPassword = "pmJe5VYJg6gr2BdipI1sMGJScFwmT+pZbz7B2jISBrw=";
         final Jenkins jenkins = j.jenkins;
         final TaskListener taskListener = j.createTaskListener();
         final List<Project> projects = jenkins.getProjects();
         final Project project = projects.get(0);
+        final TeamFoundationServerScm scm = (TeamFoundationServerScm) project.getScm();
+        final Secret passwordSecret = scm.getPassword();
+        Assert.assertEquals(encryptedPassword, passwordSecret.getEncryptedValue());
         PollingResult actualPollingResult;
 
         actualPollingResult = project.poll(taskListener);
@@ -101,7 +106,7 @@ public class TeamFoundationServerScmFunctionalTest {
         final String userPassword = XmlHelper.peekValue(configXmlFile, "/project/scm/userPassword");
         Assert.assertEquals("Encoded password should no longer be there", null, userPassword);
         final String password = XmlHelper.peekValue(configXmlFile, "/project/scm/password");
-        Assert.assertEquals("Encrypted password should be there", "pmJe5VYJg6gr2BdipI1sMGJScFwmT+pZbz7B2jISBrw=", password);
+        Assert.assertEquals("Encrypted password should be there", encryptedPassword, password);
 
         // TODO: Check in & record changeset, poll & assert SIGNIFICANT
         // TODO: build & assert new last build recorded changeset from above
