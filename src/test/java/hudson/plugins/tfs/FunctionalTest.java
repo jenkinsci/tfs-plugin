@@ -124,7 +124,8 @@ public class FunctionalTest {
                 throws Exception {
             super.decorateHome(jenkinsRule, home);
 
-            final String jobFolder = getJobFolder();
+            final EndToEndTfs.RunnerImpl parent = getParent();
+            final String jobFolder = parent.getJobFolder();
             final String lastBuildXmlPath = jobFolder + "builds/2015-07-10_12-11-34/build.xml";
             final File lastBuildXmlFile = new File(home, lastBuildXmlPath);
             final long rightNowMilliseconds = System.currentTimeMillis();
@@ -181,11 +182,11 @@ public class FunctionalTest {
                 throws Exception {
             super.decorateHome(jenkinsRule, home);
 
-            final String jobFolder = getJobFolder();
+            final EndToEndTfs.RunnerImpl parent = getParent();
+            final String jobFolder = parent.getJobFolder();
             final String lastBuildXmlPath = jobFolder + "builds/2015-07-15_20-37-42/build.xml";
             final File lastBuildXmlFile = new File(home, lastBuildXmlPath);
 
-            final EndToEndTfs.RunnerImpl parent = getParent();
             final String projectPath = parent.getPathInTfvc();
             final String serverUrl = parent.getServerUrl();
             final Server server = parent.getServer();

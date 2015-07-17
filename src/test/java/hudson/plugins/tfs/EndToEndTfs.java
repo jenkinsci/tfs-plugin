@@ -58,20 +58,16 @@ public @interface EndToEndTfs {
             this.parent = parent;
         }
 
-        protected String getJobFolder() {
-            return "jobs/" + getParent().getTestCaseName() + "/";
-        }
-
         @Override
         public void decorateHome(final JenkinsRule jenkinsRule, final File home) throws Exception {
-            final String jobFolder = getJobFolder();
+            final String jobFolder = parent.getJobFolder();
             final String configXmlPath = jobFolder + "config.xml";
             final File configXmlFile = new File(home, configXmlPath);
 
             final String tfsServerUrl = AbstractIntegrationTest.buildTfsServerUrl();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/serverUrl", tfsServerUrl);
 
-            final String projectPath = getParent().getPathInTfvc();
+            final String projectPath = parent.getPathInTfvc();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/projectPath", projectPath);
         }
     }
@@ -173,6 +169,10 @@ public @interface EndToEndTfs {
 
         public Server getServer() {
             return server;
+        }
+
+        public String getJobFolder() {
+            return "jobs/" + testCaseName + "/";
         }
 
         static void checkIn(Workspace workspace, String comment) {
