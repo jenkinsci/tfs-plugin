@@ -2,11 +2,14 @@ package hudson.plugins.tfs;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
+import hudson.model.AbstractBuild;
 import hudson.model.Project;
+import hudson.model.Queue;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
 import hudson.scm.PollingResult;
+import hudson.triggers.SCMTrigger;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.junit.Assert;
@@ -21,7 +24,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Tests that exercise real-world functionality, using temporary Jenkins instances.
@@ -32,6 +39,58 @@ import java.util.List;
 public class FunctionalTest {
 
     @Rule public JenkinsRule j = new JenkinsRule();
+
+    /**
+     * Runs the project's {@link SCMTrigger} to poll for changes, which may schedule a build.
+     *
+     * If it does schedule a build, we'll wait for that build to complete and return it;
+     * otherwise we return {@code null}.
+     *
+     * This assumes Jenkins (or the project/job) was configured with a quietPeriod, to give us
+     * time to retrieve the item from the queue (especially when execution is paused in the debugger)
+     * so we can wait on it.
+     *
+     * @param project The {@link Project} for which to poll and build.
+     * @return The {@link AbstractBuild} that resulted from the build, if applicable; otherwise {@code null}.
+     */
+    public static AbstractBuild runScmPollTrigger(final Project project)
+            throws InterruptedException, ExecutionException {
+        final Jenkins jenkins = (Jenkins) project.getParent();
+        final Queue queue = jenkins.getQueue();
+
+        final SCMTrigger scmTrigger = (SCMTrigger) project.getTrigger(SCMTrigger.class);
+        // This is a roundabout way of calling SCMTrigger#run(),
+        // because if we set SCMTrigger#synchronousPolling to true
+        // Trigger#checkTriggers() unconditionally runs the trigger,
+        // even if we set its schedule (spec) to an empty string
+        // (which normally disables the schedule).
+        // Having synchronous polling (& building!) in our tests
+        // is more important than skipping the usual method call chain.
+        // http://docs.oracle.com/javase/tutorial/java/javaOO/nested.html
+        final SCMTrigger.Runner runner = scmTrigger.new Runner();
+        runner.run();
+
+        final Queue.Item[] items = queue.getItems();
+        final boolean buildQueued = items.length == 1;
+        final AbstractBuild build;
+        if (buildQueued) {
+            final Queue.WaitingItem queuedItem = (Queue.WaitingItem) items[0];
+            // now that we have the queued item, we can "shorten the quiet period to zero"
+            final GregorianCalendar due = new GregorianCalendar();
+            due.add(Calendar.SECOND, -1);
+            queuedItem.timestamp = due;
+            // force re-evaluation of the queue, which should notice the item shouldn't wait anymore
+            queue.maintain();
+            queue.scheduleMaintenance();
+
+            final Future<? extends AbstractBuild> future = (Future) queuedItem.getFuture();
+            build = future.get();
+        }
+        else {
+            build = null;
+        }
+        return build;
+    }
 
     /*
      * If there's no SCMRevisionState present, we revert to old-school polling,
