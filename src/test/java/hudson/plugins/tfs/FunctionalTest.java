@@ -92,7 +92,7 @@ public class FunctionalTest {
         return build;
     }
 
-    /*
+    /**
      * If there's no SCMRevisionState present, we revert to old-school polling,
      * using the timestamp of the last build to see if there have been any changes in TFVC,
      * at the project's path, since the specified time.
