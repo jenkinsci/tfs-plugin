@@ -78,12 +78,14 @@ public @interface EndToEndTfs {
 
         private final String serverUrl;
 
+        private File localBaseFolderFile;
         private StubRunner runner;
         private Server server = null;
         private String testClassName;
         private String testCaseName;
         private String workspaceName;
         private String pathInTfvc;
+        private Workspace workspace;
 
         public RunnerImpl() throws URISyntaxException {
             serverUrl = AbstractIntegrationTest.buildTfsServerUrl();
@@ -106,11 +108,11 @@ public @interface EndToEndTfs {
 
             // workspaceName MUST be unique across computers hitting the same server
             workspaceName = hostName + "-" + testCaseName;
-            final Workspace workspace = createWorkspace(vcc, workspaceName);
+            workspace = createWorkspace(vcc, workspaceName);
 
             pathInTfvc = AbstractIntegrationTest.determinePathInTfvcForTestCase(testDescription);
             final File localTestClassFolder = new File(workspaces, testClassName);
-            final File localBaseFolderFile = new File(localTestClassFolder, testCaseName);
+            localBaseFolderFile = new File(localTestClassFolder, testCaseName);
             //noinspection ResultOfMethodCallIgnored
             localBaseFolderFile.mkdirs();
             final String localBaseFolder = localBaseFolderFile.getAbsolutePath();
@@ -147,6 +149,10 @@ public @interface EndToEndTfs {
             }
         }
 
+        public File getLocalBaseFolderFile() {
+            return localBaseFolderFile;
+        }
+
         public String getPathInTfvc() {
             return pathInTfvc;
         }
@@ -173,6 +179,10 @@ public @interface EndToEndTfs {
 
         public String getJobFolder() {
             return "jobs/" + testCaseName + "/";
+        }
+
+        public Workspace getWorkspace() {
+            return workspace;
         }
 
         static void checkIn(Workspace workspace, String comment) {
