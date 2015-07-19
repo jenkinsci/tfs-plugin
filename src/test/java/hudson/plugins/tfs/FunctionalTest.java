@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.JenkinsRecipe;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
 import org.xml.sax.SAXException;
@@ -38,7 +39,25 @@ import java.util.concurrent.Future;
 @Category(IntegrationTests.class)
 public class FunctionalTest {
 
-    @Rule public JenkinsRule j = new JenkinsRule();
+    /**
+     * A special version of {@link JenkinsRule} that assumes {@link EndToEndTfs} decorates a test,
+     * giving access to the {@link hudson.plugins.tfs.EndToEndTfs.RunnerImpl} and all the cool
+     * stuff it has.
+     */
+    public class TfsJenkinsRule extends JenkinsRule{
+        public EndToEndTfs.RunnerImpl getTfsRunner() {
+            EndToEndTfs.RunnerImpl result = null;
+            for (final JenkinsRecipe.Runner recipe : recipes) {
+                if (recipe instanceof EndToEndTfs.RunnerImpl) {
+                    result = (EndToEndTfs.RunnerImpl) recipe;
+                    break;
+                }
+            }
+            return result;
+        }
+    }
+
+    @Rule public TfsJenkinsRule j = new TfsJenkinsRule();
 
     /**
      * Runs the project's {@link SCMTrigger} to poll for changes, which may schedule a build.
