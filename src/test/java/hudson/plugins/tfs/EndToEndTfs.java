@@ -205,7 +205,21 @@ public @interface EndToEndTfs {
         }
 
         static Workspace createWorkspace(final VersionControlClient vcc, final String workspaceName) {
-            Workspace workspace = vcc.getLocalWorkspace(workspaceName, ".");
+            deleteWorkspace(vcc, workspaceName);
+
+            final Workspace workspace = vcc.createWorkspace(
+                    null,
+                    workspaceName,
+                    null,
+                    null,
+                    workspaceComment,
+                    WorkspaceLocation.LOCAL,
+                    WorkspaceOptions.NONE);
+            return workspace;
+        }
+
+        static void deleteWorkspace(final VersionControlClient vcc, final String workspaceName) {
+            final Workspace workspace = vcc.getLocalWorkspace(workspaceName, ".");
             if (workspace != null) {
                 for (WorkingFolder workingFolder : workspace.getFolders()) {
                     final String localItem = workingFolder.getLocalItem();
@@ -216,15 +230,6 @@ public @interface EndToEndTfs {
                 }
                 vcc.deleteWorkspace(workspace);
             }
-            workspace = vcc.createWorkspace(
-                    null,
-                    workspaceName,
-                    null,
-                    null,
-                    workspaceComment,
-                    WorkspaceLocation.LOCAL,
-                    WorkspaceOptions.NONE);
-            return workspace;
         }
 
         @Override
