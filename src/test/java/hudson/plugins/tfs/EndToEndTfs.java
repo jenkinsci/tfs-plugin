@@ -15,6 +15,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
 import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
 import org.junit.runner.Description;
 import org.jvnet.hudson.test.JenkinsRecipe;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -130,6 +131,7 @@ public @interface EndToEndTfs {
                     GetOptions.NONE,
                     PendChangesOptions.NONE);
             checkIn(workspace, "Cleaning up for the " + testCaseName + " test.");
+            // we don't need to verify this check-in, because a first run on a server will be a no-op
 
             // create the folder in TFVC
             workspace.pendAdd(
@@ -139,7 +141,8 @@ public @interface EndToEndTfs {
                     LockLevel.UNCHANGED,
                     GetOptions.NONE,
                     PendChangesOptions.NONE);
-            checkIn(workspace, "Setting up for the " + testCaseName + " test.");
+            final int changeSet = checkIn(workspace, "Setting up for the " + testCaseName + " test.");
+            Assert.assertTrue(changeSet >= 0);
 
             final Class<? extends StubRunner> runnerClass = recipe.value();
             if (runnerClass != null) {
@@ -185,14 +188,16 @@ public @interface EndToEndTfs {
             return workspace;
         }
 
-        static void checkIn(Workspace workspace, String comment) {
+        static int checkIn(Workspace workspace, String comment) {
             final PendingSet pendingSet = workspace.getPendingChanges();
+            int result = -1;
             if (pendingSet != null) {
                 final PendingChange[] pendingChanges = pendingSet.getPendingChanges();
                 if (pendingChanges != null) {
-                    workspace.checkIn(pendingChanges, comment);
+                    result = workspace.checkIn(pendingChanges, comment);
                 }
             }
+            return result;
         }
 
         static Workspace createWorkspace(final VersionControlClient vcc, final String workspaceName) {
