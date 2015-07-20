@@ -129,7 +129,7 @@ public @interface EndToEndTfs {
                     LockLevel.UNCHANGED,
                     GetOptions.NONE,
                     PendChangesOptions.NONE);
-            checkIn(workspace, "Cleaning up for the " + workspaceName + " test.");
+            checkIn(workspace, "Cleaning up for the " + testCaseName + " test.");
 
             // create the folder in TFVC
             workspace.pendAdd(
@@ -139,7 +139,7 @@ public @interface EndToEndTfs {
                     LockLevel.UNCHANGED,
                     GetOptions.NONE,
                     PendChangesOptions.NONE);
-            checkIn(workspace, "Setting up for the " + workspaceName + " test.");
+            checkIn(workspace, "Setting up for the " + testCaseName + " test.");
 
             final Class<? extends StubRunner> runnerClass = recipe.value();
             if (runnerClass != null) {
