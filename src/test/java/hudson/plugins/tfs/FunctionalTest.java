@@ -1,13 +1,20 @@
 package hudson.plugins.tfs;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
+import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.model.AbstractBuild;
+import hudson.model.Cause;
 import hudson.model.Project;
 import hudson.model.Queue;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
+import hudson.scm.ChangeLogSet;
 import hudson.scm.PollingResult;
 import hudson.triggers.SCMTrigger;
 import hudson.util.Secret;
@@ -109,6 +116,66 @@ public class FunctionalTest {
             build = null;
         }
         return build;
+    }
+
+    @LocalData
+    @EndToEndTfs(EndToEndTfs.StubRunner.class)
+    @Test public void newJob() throws InterruptedException, ExecutionException {
+        final Jenkins jenkins = j.jenkins;
+        final TaskListener taskListener = j.createTaskListener();
+        final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
+        final Workspace workspace = tfsRunner.getWorkspace();
+        final Server server = tfsRunner.getServer();
+        final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
+        final VersionControlClient vcc = tpc.getVersionControlClient();
+        final List<Project> projects = jenkins.getProjects();
+        final Project project = projects.get(0);
+        int latestChangesetID;
+
+        // first poll should queue a build because we were never built
+        latestChangesetID = vcc.getLatestChangesetID();
+        final AbstractBuild firstBuild = runScmPollTrigger(project);
+
+        Assert.assertNotNull(firstBuild);
+        Assert.assertEquals(Result.SUCCESS, firstBuild.getResult());
+        final ChangeLogSet firstChangeSet = firstBuild.getChangeSet();
+        Assert.assertEquals(true, firstChangeSet.isEmptySet());
+        final TFSRevisionState firstRevisionState = firstBuild.getAction(TFSRevisionState.class);
+        Assert.assertEquals(latestChangesetID, firstRevisionState.changesetVersion);
+        final List<Cause> firstCauses = firstBuild.getCauses();
+        Assert.assertEquals(1, firstCauses.size());
+        final Cause firstCause = firstCauses.get(0);
+        Assert.assertTrue(firstCause instanceof SCMTrigger.SCMTriggerCause);
+
+        // second poll should report no changes since last build
+        final PollingResult secondPoll = project.poll(taskListener);
+
+        Assert.assertEquals(PollingResult.Change.NONE, secondPoll.change);
+
+        // make a change in source control
+        workspace.pendAdd(
+                new String[]{new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt").getAbsolutePath()},
+                false,
+                null,
+                LockLevel.UNCHANGED,
+                GetOptions.NONE,
+                PendChangesOptions.NONE);
+        EndToEndTfs.RunnerImpl.checkIn(workspace, tfsRunner.getTestCaseName() + " Add a file.");
+
+        // third poll should trigger a build
+        latestChangesetID = vcc.getLatestChangesetID();
+        final AbstractBuild secondBuild = runScmPollTrigger(project);
+
+        Assert.assertNotNull(secondBuild);
+        Assert.assertEquals(Result.SUCCESS, secondBuild.getResult());
+        final ChangeLogSet secondChangeSet = secondBuild.getChangeSet();
+        Assert.assertEquals(1, secondChangeSet.getItems().length);
+        final TFSRevisionState secondRevisionState = secondBuild.getAction(TFSRevisionState.class);
+        Assert.assertEquals(latestChangesetID, secondRevisionState.changesetVersion);
+        final List<Cause> secondCauses = secondBuild.getCauses();
+        Assert.assertEquals(1, secondCauses.size());
+        final Cause secondCause = secondCauses.get(0);
+        Assert.assertTrue(secondCause instanceof SCMTrigger.SCMTriggerCause);
     }
 
     /**
