@@ -8,7 +8,7 @@
 		<serverUrl></serverUrl>
 		<projectPath></projectPath>
 		<localPath>.</localPath>
-		<workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>
+		<workspaceName>Hudson-${JOB_NAME}-${COMPUTERNAME}</workspaceName>
 		<password>pmJe5VYJg6gr2BdipI1sMGJScFwmT+pZbz7B2jISBrw=</password>
 		<userName>jenkins-tfs-plugin</userName>
 		<useUpdate>false</useUpdate>
