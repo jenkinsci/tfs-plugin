@@ -244,6 +244,9 @@ public @interface EndToEndTfs {
             if (runner != null) {
                 runner.tearDown(jenkinsRule, recipe);
             }
+            final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
+            final VersionControlClient vcc = tpc.getVersionControlClient();
+            deleteWorkspace(vcc, workspaceName);
             if (server != null) {
                 server.close();
             }
