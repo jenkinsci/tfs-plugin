@@ -120,7 +120,7 @@ public class FunctionalTest {
 
     @LocalData
     @EndToEndTfs(EndToEndTfs.StubRunner.class)
-    @Test public void newJob() throws InterruptedException, ExecutionException {
+    @Test public void newJob() throws InterruptedException, ExecutionException, IOException {
         final Jenkins jenkins = j.jenkins;
         final TaskListener taskListener = j.createTaskListener();
         final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
@@ -153,14 +153,17 @@ public class FunctionalTest {
         Assert.assertEquals(PollingResult.Change.NONE, secondPoll.change);
 
         // make a change in source control
+        final File todoFile = new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt");
+        todoFile.createNewFile();
         workspace.pendAdd(
-                new String[]{new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt").getAbsolutePath()},
+                new String[]{todoFile.getAbsolutePath()},
                 false,
                 null,
                 LockLevel.UNCHANGED,
                 GetOptions.NONE,
                 PendChangesOptions.NONE);
-        tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
+        final int changeSet = tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
+        Assert.assertTrue(changeSet >= 0);
 
         // third poll should trigger a build
         latestChangesetID = vcc.getLatestChangesetID();
