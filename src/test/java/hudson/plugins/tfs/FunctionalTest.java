@@ -160,7 +160,7 @@ public class FunctionalTest {
                 LockLevel.UNCHANGED,
                 GetOptions.NONE,
                 PendChangesOptions.NONE);
-        EndToEndTfs.RunnerImpl.checkIn(workspace, tfsRunner.getTestCaseName() + " Add a file.");
+        tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
 
         // third poll should trigger a build
         latestChangesetID = vcc.getLatestChangesetID();

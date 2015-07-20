@@ -130,7 +130,7 @@ public @interface EndToEndTfs {
                     LockLevel.UNCHANGED,
                     GetOptions.NONE,
                     PendChangesOptions.NONE);
-            checkIn(workspace, "Cleaning up for the " + testCaseName + " test.");
+            checkIn("Cleaning up for the " + testCaseName + " test.");
             // we don't need to verify this check-in, because a first run on a server will be a no-op
 
             // create the folder in TFVC
@@ -141,7 +141,7 @@ public @interface EndToEndTfs {
                     LockLevel.UNCHANGED,
                     GetOptions.NONE,
                     PendChangesOptions.NONE);
-            final int changeSet = checkIn(workspace, "Setting up for the " + testCaseName + " test.");
+            final int changeSet = checkIn("Setting up for the " + testCaseName + " test.");
             Assert.assertTrue(changeSet >= 0);
 
             final Class<? extends StubRunner> runnerClass = recipe.value();
@@ -186,6 +186,10 @@ public @interface EndToEndTfs {
 
         public Workspace getWorkspace() {
             return workspace;
+        }
+
+        public int checkIn(final String comment) {
+            return checkIn(workspace, comment);
         }
 
         static int checkIn(Workspace workspace, String comment) {
