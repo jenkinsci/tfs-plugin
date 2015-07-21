@@ -12,6 +12,7 @@ import hudson.model.Project;
 import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
 import hudson.scm.ChangeLogSet;
@@ -126,8 +127,7 @@ public class FunctionalTest {
         final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
         final Workspace workspace = tfsRunner.getWorkspace();
         final Server server = tfsRunner.getServer();
-        final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
-        final VersionControlClient vcc = tpc.getVersionControlClient();
+        final MockableVersionControlClient vcc = server.getVersionControlClient();
         final List<Project> projects = jenkins.getProjects();
         final Project project = projects.get(0);
         int latestChangesetID;
@@ -279,8 +279,7 @@ public class FunctionalTest {
             final String projectPath = parent.getPathInTfvc();
             final String serverUrl = parent.getServerUrl();
             final Server server = parent.getServer();
-            final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
-            final VersionControlClient vcc = tpc.getVersionControlClient();
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
             final int latestChangesetID = vcc.getLatestChangesetID();
             final String changesetVersion = String.valueOf(latestChangesetID);
 

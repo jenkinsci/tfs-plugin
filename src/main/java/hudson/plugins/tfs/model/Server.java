@@ -111,12 +111,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
         return projects.get(projectPath);
     }
-    
-    public TFSTeamProjectCollection getTeamProjectCollection()
-    {
-        return this.tpc;
-    }
-    
+
     public Workspaces getWorkspaces() {
         if (workspaces == null) {
             workspaces = new Workspaces(this);

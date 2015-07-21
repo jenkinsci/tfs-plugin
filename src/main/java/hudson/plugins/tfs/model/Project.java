@@ -78,10 +78,9 @@ public class Project {
      * @return a list of change sets
      */
     private List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails) {
-        final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
         final IIdentityManagementService ims = server.createIdentityManagementService();
         final UserLookup userLookup = new TfsUserLookup(ims);
-        final VersionControlClient vcc = tpc.getVersionControlClient();
+        final MockableVersionControlClient vcc = server.getVersionControlClient();
         try {
             final Changeset[] serverChangesets = vcc.queryHistory(
                     projectPath,
