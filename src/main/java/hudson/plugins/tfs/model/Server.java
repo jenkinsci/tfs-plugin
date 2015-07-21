@@ -17,6 +17,7 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.httpclient.Credentials;
@@ -120,6 +121,15 @@ public class Server implements ServerConfigurationProvider, Closable {
     
     public Reader execute(MaskedArgumentListBuilder arguments) throws IOException, InterruptedException {
         return tool.execute(arguments.toCommandArray(), arguments.toMaskArray());
+    }
+
+    public <T> T execute(final Callable<T> callable) {
+        try {
+            return callable.call();
+        } catch (final Exception e) {
+            // convert from checked to unchecked exception
+            throw new RuntimeException(e);
+        }
     }
 
     public String getUrl() {
