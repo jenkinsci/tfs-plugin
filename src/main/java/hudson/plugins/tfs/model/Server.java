@@ -1,6 +1,9 @@
 package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.TFSConfigurationServer;
+import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
@@ -174,5 +177,15 @@ public class Server implements ServerConfigurationProvider, Closable {
             this.tpc.close();
         }
         
+    }
+
+    public IIdentityManagementService createIdentityManagementService() {
+        IIdentityManagementService ims;
+        try {
+            ims = new IdentityManagementService(tpc);
+        } catch (IdentityManagementException e) {
+            ims = new LegacyIdentityManagementService();
+        }
+        return ims;
     }
 }
