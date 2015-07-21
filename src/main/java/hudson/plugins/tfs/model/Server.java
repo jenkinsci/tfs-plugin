@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.TFSConfigurationServer;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
@@ -40,6 +41,7 @@ public class Server implements ServerConfigurationProvider, Closable {
     private Map<String, Project> projects = new HashMap<String, Project>();
     private final TfTool tool;
     private final TFSTeamProjectCollection tpc;
+    private MockableVersionControlClient mockableVcc;
 
     public Server(TfTool tool, String url, String username, String password) {
         this.tool = tool;
@@ -121,7 +123,19 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
         return workspaces;
     }
-    
+
+    public MockableVersionControlClient getVersionControlClient() {
+        if (mockableVcc == null) {
+            synchronized (this) {
+                if (mockableVcc == null) {
+                    final VersionControlClient vcc = tpc.getVersionControlClient();
+                    mockableVcc = new MockableVersionControlClient(vcc);
+                }
+            }
+        }
+        return mockableVcc;
+    }
+
     public Reader execute(MaskedArgumentListBuilder arguments) throws IOException, InterruptedException {
         return tool.execute(arguments.toCommandArray(), arguments.toMaskArray());
     }
