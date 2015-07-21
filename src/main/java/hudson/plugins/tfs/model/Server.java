@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.TFSConfigurationServer;
+import hudson.model.TaskListener;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
@@ -135,6 +136,11 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public String getLocalHostname() throws IOException, InterruptedException {
         return tool.getHostname();
+    }
+
+    public TaskListener getListener() {
+        // TODO: rip out TfTool and accept the TaskListener in our constructor
+        return tool.getListener();
     }
 
     public synchronized void close() {
