@@ -1,9 +1,7 @@
 package hudson.plugins.tfs;
 
-import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
-import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
@@ -12,6 +10,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.PendingSet;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
 import org.apache.commons.io.FileUtils;
@@ -104,8 +103,7 @@ public @interface EndToEndTfs {
             // TODO: Consider NOT using the Server class
             server = new Server(new TfTool(null, null, null, null), serverUrl, AbstractIntegrationTest.TestUserName, AbstractIntegrationTest.TestUserPassword);
 
-            final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
-            final VersionControlClient vcc = tpc.getVersionControlClient();
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
 
             // workspaceName MUST be unique across computers hitting the same server
             workspaceName = hostName + "-" + testCaseName;
@@ -204,7 +202,7 @@ public @interface EndToEndTfs {
             return result;
         }
 
-        static Workspace createWorkspace(final VersionControlClient vcc, final String workspaceName) {
+        static Workspace createWorkspace(final MockableVersionControlClient vcc, final String workspaceName) {
             deleteWorkspace(vcc, workspaceName);
 
             final Workspace workspace = vcc.createWorkspace(
@@ -218,7 +216,7 @@ public @interface EndToEndTfs {
             return workspace;
         }
 
-        static void deleteWorkspace(final VersionControlClient vcc, final String workspaceName) {
+        static void deleteWorkspace(final MockableVersionControlClient vcc, final String workspaceName) {
             final Workspace workspace = vcc.getLocalWorkspace(workspaceName, ".");
             if (workspace != null) {
                 for (WorkingFolder workingFolder : workspace.getFolders()) {
@@ -244,8 +242,7 @@ public @interface EndToEndTfs {
             if (runner != null) {
                 runner.tearDown(jenkinsRule, recipe);
             }
-            final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
-            final VersionControlClient vcc = tpc.getVersionControlClient();
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
             deleteWorkspace(vcc, workspaceName);
             if (server != null) {
                 server.close();

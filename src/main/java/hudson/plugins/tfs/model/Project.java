@@ -19,8 +19,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.microsoft.tfs.core.TFSTeamProjectCollection;
-import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
@@ -30,8 +28,6 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSp
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LabelVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
-import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
-import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
 
 public class Project {
 
@@ -80,15 +76,9 @@ public class Project {
      * @return a list of change sets
      */
     private List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails) {
-        final TFSTeamProjectCollection tpc = server.getTeamProjectCollection();
-        IIdentityManagementService ims;
-        try {
-            ims = new IdentityManagementService(tpc);
-        } catch (IdentityManagementException e) {
-            ims = new LegacyIdentityManagementService();
-        }
+        final IIdentityManagementService ims = server.createIdentityManagementService();
         final UserLookup userLookup = new TfsUserLookup(ims);
-        final VersionControlClient vcc = tpc.getVersionControlClient();
+        final MockableVersionControlClient vcc = server.getVersionControlClient();
         try {
             final Changeset[] serverChangesets = vcc.queryHistory(
                     projectPath,

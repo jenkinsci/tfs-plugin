@@ -1,6 +1,11 @@
 package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.TFSConfigurationServer;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
+import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
+import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
+import hudson.model.TaskListener;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
@@ -16,6 +21,7 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.httpclient.Credentials;
@@ -35,6 +41,7 @@ public class Server implements ServerConfigurationProvider, Closable {
     private Map<String, Project> projects = new HashMap<String, Project>();
     private final TfTool tool;
     private final TFSTeamProjectCollection tpc;
+    private MockableVersionControlClient mockableVcc;
 
     public Server(TfTool tool, String url, String username, String password) {
         this.tool = tool;
@@ -104,21 +111,37 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
         return projects.get(projectPath);
     }
-    
-    public TFSTeamProjectCollection getTeamProjectCollection()
-    {
-        return this.tpc;
-    }
-    
+
     public Workspaces getWorkspaces() {
         if (workspaces == null) {
             workspaces = new Workspaces(this);
         }
         return workspaces;
     }
-    
+
+    public MockableVersionControlClient getVersionControlClient() {
+        if (mockableVcc == null) {
+            synchronized (this) {
+                if (mockableVcc == null) {
+                    final VersionControlClient vcc = tpc.getVersionControlClient();
+                    mockableVcc = new MockableVersionControlClient(vcc);
+                }
+            }
+        }
+        return mockableVcc;
+    }
+
     public Reader execute(MaskedArgumentListBuilder arguments) throws IOException, InterruptedException {
         return tool.execute(arguments.toCommandArray(), arguments.toMaskArray());
+    }
+
+    public <T> T execute(final Callable<T> callable) {
+        try {
+            return callable.call();
+        } catch (final Exception e) {
+            // convert from checked to unchecked exception
+            throw new RuntimeException(e);
+        }
     }
 
     public String getUrl() {
@@ -135,6 +158,11 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public String getLocalHostname() throws IOException, InterruptedException {
         return tool.getHostname();
+    }
+
+    public TaskListener getListener() {
+        // TODO: rip out TfTool and accept the TaskListener in our constructor
+        return tool.getListener();
     }
 
     public synchronized void close() {
@@ -158,5 +186,15 @@ public class Server implements ServerConfigurationProvider, Closable {
             this.tpc.close();
         }
         
+    }
+
+    public IIdentityManagementService createIdentityManagementService() {
+        IIdentityManagementService ims;
+        try {
+            ims = new IdentityManagementService(tpc);
+        } catch (IdentityManagementException e) {
+            ims = new LegacyIdentityManagementService();
+        }
+        return ims;
     }
 }
