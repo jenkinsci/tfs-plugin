@@ -153,4 +153,18 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "--------- ----- -------- -------"
         );
     }
+
+    @Test public void logWithOneWorkspace() throws IOException {
+
+        final ArrayList<Workspace> workspaces = new ArrayList<Workspace>(1);
+        workspaces.add(new Workspace(null, "asterix", "ASTERIX", "redsolo_cp", "This is a comment"));
+
+        ListWorkspacesCommand.log(workspaces, listener.getLogger());
+
+        assertLog(
+                "Workspace Owner      Computer Comment          ",
+                "--------- ---------- -------- -----------------",
+                "asterix   redsolo_cp ASTERIX  This is a comment"
+        );
+    }
 }

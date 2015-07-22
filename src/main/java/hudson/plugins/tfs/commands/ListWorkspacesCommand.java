@@ -62,6 +62,16 @@ public class ListWorkspacesCommand extends AbstractCommand implements ParseableC
         int maxOwner = "Owner".length();
         int maxComputer = "Computer".length();
         int maxComment = "Comment".length();
+        for (final Workspace workspace : workspaces) {
+            final String name = workspace.getName();
+            maxName = Math.max(maxName, name.length());
+            final String ownerName = workspace.getOwner();
+            maxOwner = Math.max(maxOwner, ownerName.length());
+            final String computer = workspace.getComputer();
+            maxComputer = Math.max(maxComputer, computer.length());
+            final String comment = workspace.getComment();
+            maxComment = Math.max(maxComment, comment.length());
+        }
         final String template =
                 "%1$-" + maxName + "s %2$-" + maxOwner + "s %3$-" + maxComputer + "s %4$-" + maxComment + "s";
         final String header = String.format(template, "Workspace", "Owner", "Computer", "Comment");
@@ -72,5 +82,14 @@ public class ListWorkspacesCommand extends AbstractCommand implements ParseableC
                 StringUtils.repeat("-", maxComputer),
                 StringUtils.repeat("-", maxComment));
         logger.println(divider);
+
+        for (final Workspace workspace : workspaces) {
+            final String name = workspace.getName();
+            final String ownerName = workspace.getOwner();
+            final String computer = workspace.getComputer();
+            final String comment = workspace.getComment();
+            final String line = String.format(template, name, ownerName, computer, comment);
+            logger.println(line);
+        }
     }
 }
