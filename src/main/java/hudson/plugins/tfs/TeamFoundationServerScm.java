@@ -95,6 +95,10 @@ public class TeamFoundationServerScm extends SCM {
         this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
     }
 
+    TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName) {
+        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, null, (Secret)null);
+    }
+
     @DataBoundConstructor
     public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
