@@ -83,4 +83,8 @@ public class MockableVersionControlClient implements Closable {
                 sortAscending
         );
     }
+
+    public Workspace queryWorkspace(final String name, final String owner) {
+        return vcc.queryWorkspace(name, owner);
+    }
 }
