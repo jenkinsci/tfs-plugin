@@ -66,20 +66,4 @@ public class WorkspaceTest {
         
         verify(workspaces).exists(new Workspace(server, "name"));
     }
-    
-    @Test
-    public void assertGetMappingsIsExecuted() throws Exception {
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
-        Workspace workspace = new Workspace(server, "name");
-        workspace.getMappings();
-        verify(server).execute(isA(MaskedArgumentListBuilder.class));
-    }
-    
-    @Test
-    public void assertGetMappingsClosesReader() throws Exception {
-        Reader spy = spy(new StringReader(""));
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
-        new Workspace(server, "name").getMappings();        
-        verify(spy).close();
-    }
 }

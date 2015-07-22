@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import hudson.plugins.tfs.commands.GetWorkspaceMappingsCommand;
 import hudson.plugins.tfs.commands.MapWorkfolderCommand;
 import hudson.plugins.tfs.commands.UnmapWorkfolderCommand;
 
@@ -40,14 +39,6 @@ public class Workspace {
     public void unmapWorkfolder(String workFolder) throws IOException, InterruptedException {
         UnmapWorkfolderCommand command = new UnmapWorkfolderCommand(server, workFolder, name);
         server.execute(command.getArguments()).close();
-    }
-
-    public List<WorkspaceMapping> getMappings() throws IOException, InterruptedException, ParseException {
-        GetWorkspaceMappingsCommand command = new GetWorkspaceMappingsCommand(server, name);
-        Reader reader = server.execute(command.getArguments());
-        List<WorkspaceMapping> mappings = command.parse(reader);
-        reader.close();
-        return mappings;
     }
 
     public boolean exists() throws IOException, InterruptedException {
