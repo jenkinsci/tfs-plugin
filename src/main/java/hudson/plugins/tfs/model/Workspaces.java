@@ -33,13 +33,8 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      */
     private List<Workspace> getListFromServer() throws IOException, InterruptedException {
         ListWorkspacesCommand command = new ListWorkspacesCommand(this, server);
-        Reader reader = null;
-        try {
-            reader = server.execute(command.getArguments());
-            return command.parse(reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
-        }
+        final List<Workspace> result = server.execute(command.getCallable());
+        return result;
     }
     
     /**

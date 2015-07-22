@@ -70,7 +70,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
     }
 
-    static synchronized void ensureNativeLibrariesConfigured() {
+    public static synchronized void ensureNativeLibrariesConfigured() {
         final String nativeFolder = System.getProperty(nativeFolderPropertyName);
         if (nativeFolder == null) {
             final Class<TFSTeamProjectCollection> metaclass = TFSTeamProjectCollection.class;

@@ -3,11 +3,14 @@ package hudson.plugins.tfs.model;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
+import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.clients.versioncontrol.exceptions.ServerPathFormatException;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.*;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import com.microsoft.tfs.util.Closable;
+
+import javax.annotation.Nonnull;
 
 /**
  * A non-final wrapper over {@link com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient}
@@ -86,5 +89,13 @@ public class MockableVersionControlClient implements Closable {
 
     public Workspace queryWorkspace(final String name, final String owner) {
         return vcc.queryWorkspace(name, owner);
+    }
+
+    public Workspace[] queryWorkspaces(
+            final String workspaceName,
+            final String workspaceOwner,
+            final String computer,
+            @Nonnull final WorkspacePermissions permissionsFilter) {
+        return vcc.queryWorkspaces(workspaceName, workspaceOwner, computer, permissionsFilter);
     }
 }
