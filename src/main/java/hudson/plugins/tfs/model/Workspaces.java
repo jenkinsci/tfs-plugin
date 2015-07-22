@@ -94,7 +94,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      */
     public Workspace newWorkspace(String name) throws IOException, InterruptedException {
         NewWorkspaceCommand command = new NewWorkspaceCommand(server, name);
-        server.execute(command.getArguments()).close();        
+        server.execute(command.getCallable());
         Workspace workspace = new Workspace(server, name);
         workspaces.put(name, workspace);
         return workspace;
@@ -107,7 +107,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     public void deleteWorkspace(Workspace workspace) throws IOException, InterruptedException {
         DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(server, workspace.getName());
         workspaces.remove(workspace.getName());
-        server.execute(command.getArguments()).close();
+        server.execute(command.getCallable());
     }
 
     public Workspace createWorkspace(String name, String computer, String owner, String comment) {

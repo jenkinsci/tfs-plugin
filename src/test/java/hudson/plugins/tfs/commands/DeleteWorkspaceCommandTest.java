@@ -1,24 +1,30 @@
 package hudson.plugins.tfs.commands;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import hudson.plugins.tfs.commands.DeleteWorkspaceCommand;
-import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
-
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import org.junit.Test;
 
+import java.util.concurrent.Callable;
 
-public class DeleteWorkspaceCommandTest {
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.when;
+
+
+public class DeleteWorkspaceCommandTest extends AbstractCallableCommandTest {
 
     @Test
-    public void assertArguments() {
-        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        when(config.getUrl()).thenReturn("https//tfs02.codeplex.com");
-        when(config.getUserName()).thenReturn("snd\\user_cp");
-        when(config.getUserPassword()).thenReturn("password");
-        
-        MaskedArgumentListBuilder arguments = new DeleteWorkspaceCommand(config, "workspacename").getArguments();
-        assertNotNull("Arguments were null", arguments);
-        assertEquals("workspace -delete workspacename;snd\\user_cp -noprompt -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+    public void assertLogging() throws Exception {
+        when(server.getUserName()).thenReturn("snd\\user_cp");
+        when(vcc.queryWorkspace(isA(String.class), isA(String.class))).thenReturn(null);
+        doNothing().when(vcc).deleteWorkspace(isA(Workspace.class));
+        final DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(server, "TheWorkspaceName");
+        final Callable<Void> callable = command.getCallable();
+
+        callable.call();
+
+        assertLog(
+                "Deleting workspace 'TheWorkspaceName;snd\\user_cp'...",
+                "Deleted workspace 'TheWorkspaceName;snd\\user_cp'."
+        );
     }
 }

@@ -2,6 +2,7 @@ package hudson.plugins.tfs.model;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.concurrent.Callable;
 
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
@@ -76,7 +77,7 @@ public class WorkspacesTest {
 
     @Test
     public void assertNewWorkspaceIsAddedToMap() throws Exception {
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
+        when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
         Workspace workspace = workspaces.newWorkspace("name1");
@@ -86,22 +87,22 @@ public class WorkspacesTest {
 
     @Test
     public void assertGettingNewWorkspaceIsNotRetrievingServerList() throws Exception {
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
+        when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
         workspaces.newWorkspace("name1");
         assertNotNull("The get new workspace returned null", workspaces.getWorkspace("name1"));
-        verify(server, times(1)).execute(isA(MaskedArgumentListBuilder.class));
+        verify(server, times(1)).execute(isA(Callable.class));
     }
 
     @Test
     public void assertNewWorkspaceExistsIsNotRetrievingServerList() throws Exception {
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
+        when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
         Workspace workspace = workspaces.newWorkspace("name1");
         assertTrue("The get new workspace did not exists", workspaces.exists(workspace));
-        verify(server, times(1)).execute(isA(MaskedArgumentListBuilder.class));
+        verify(server, times(1)).execute(isA(Callable.class));
     }
 
     @Test
@@ -145,28 +146,12 @@ public class WorkspacesTest {
         new Workspaces(server).exists(new Workspace(server, "name1"));        
         verify(spy).close();
     }
-    
-    @Test
-    public void assertNewWorkspaceClosesReader() throws Exception {
-        Reader spy = spy(new StringReader(""));
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Workspaces(server).newWorkspace("name1");        
-        verify(spy).close();
-    }
-    
+
     @Test
     public void assertGetWorkspacesClosesReader() throws Exception {
         Reader spy = spy(new StringReader(""));
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
         new Workspaces(server).getWorkspace("name1");        
-        verify(spy).close();
-    }
-    
-    @Test
-    public void assertDeleteWorkspaceClosesReader() throws Exception {
-        Reader spy = spy(new StringReader(""));
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
-        new Workspaces(server).deleteWorkspace(new Workspace(server, "name"));        
         verify(spy).close();
     }
 }
