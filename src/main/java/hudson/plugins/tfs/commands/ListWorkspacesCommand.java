@@ -4,8 +4,10 @@ import hudson.Util;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.util.TextTableParser;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,5 +55,22 @@ public class ListWorkspacesCommand extends AbstractCommand implements ParseableC
             list.add(workspace);            
         }
         return list;
+    }
+
+    static void log(final List<Workspace> workspaces, final PrintStream logger) {
+        int maxName = "Workspace".length();
+        int maxOwner = "Owner".length();
+        int maxComputer = "Computer".length();
+        int maxComment = "Comment".length();
+        final String template =
+                "%1$-" + maxName + "s %2$-" + maxOwner + "s %3$-" + maxComputer + "s %4$-" + maxComment + "s";
+        final String header = String.format(template, "Workspace", "Owner", "Computer", "Comment");
+        logger.println(header);
+        final String divider = String.format(template,
+                StringUtils.repeat("-", maxName),
+                StringUtils.repeat("-", maxOwner),
+                StringUtils.repeat("-", maxComputer),
+                StringUtils.repeat("-", maxComment));
+        logger.println(divider);
     }
 }

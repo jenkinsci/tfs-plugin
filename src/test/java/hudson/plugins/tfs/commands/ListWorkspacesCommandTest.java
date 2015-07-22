@@ -3,7 +3,9 @@ package hudson.plugins.tfs.commands;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
@@ -17,7 +19,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
 import org.mockito.Mockito;
 
-public class ListWorkspacesCommandTest {
+public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
 
     @Test
     public void assertArguments() {
@@ -142,4 +144,13 @@ public class ListWorkspacesCommandTest {
         Mockito.verify(factory).createWorkspace("Hudson.JOBXXXXXXXXXXXXXX", "XXXX-XXXX-007", "First.LastXX", "");
     }
 
+    @Test public void logWithNoWorkspaces() throws IOException {
+
+        ListWorkspacesCommand.log(new ArrayList<Workspace>(0), listener.getLogger());
+
+        assertLog(
+                "Workspace Owner Computer Comment",
+                "--------- ----- -------- -------"
+        );
+    }
 }
