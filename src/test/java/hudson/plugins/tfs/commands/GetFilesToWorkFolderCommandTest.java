@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import java.io.StringReader;
 import java.util.List;
 
-import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import org.junit.Test;
@@ -26,23 +25,12 @@ public class GetFilesToWorkFolderCommandTest {
     }
 
     @Test
-    public void assertPreviewArgument() {
-        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        when(config.getUserName()).thenReturn("snd\\user_cp");
-        when(config.getUserPassword()).thenReturn("password");
-        
-        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", true).getArguments();
-        assertNotNull("Arguments were null", arguments);
-        assertEquals("get localPath -recursive -preview -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
-    }
-
-    @Test
     public void assertVersionSpecArgument() {
         ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
         when(config.getUserName()).thenReturn("snd\\user_cp");
         when(config.getUserPassword()).thenReturn("password");
         
-        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", false, "C100").getArguments();
+        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", "C100").getArguments();
         assertNotNull("Arguments were null", arguments);
         assertEquals("get localPath -recursive -version:C100 -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
