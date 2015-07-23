@@ -229,7 +229,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean())).thenReturn(list);
+        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
         final Calendar startDate = Util.getCalendar(2008, 9, 24);
@@ -238,7 +238,7 @@ public class CheckoutActionTest {
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
         final DateVersionSpec startDateVersionSpec = new DateVersionSpec(startDate);
-        verify(project).getVCCHistory(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(true));
+        verify(project).getVCCHistory(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(true), anyInt());
     }
     
     @Test
@@ -410,7 +410,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean())).thenReturn(list);
+        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
         final Calendar startDate = Util.getCalendar(2008, 9, 24);
@@ -422,7 +422,9 @@ public class CheckoutActionTest {
         final DateVersionSpec endDateVersionSpec = new DateVersionSpec(endDate);
         verify(project).getVCCHistory(
                 argThat(new DateVersionSpecMatcher(startDateVersionSpec)),
-                argThat(new DateVersionSpecMatcher(endDateVersionSpec)), eq(true));
+                argThat(new DateVersionSpecMatcher(endDateVersionSpec)),
+                eq(true),
+                anyInt());
         verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
     }
 

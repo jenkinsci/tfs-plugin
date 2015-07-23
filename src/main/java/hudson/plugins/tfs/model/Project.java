@@ -73,9 +73,10 @@ public class Project {
      * @param fromVersion the version to get the history from
      * @param toVersion the version to get the history to
      * @param includeFileDetails whether or not to include details of modified items
+     * @param maxCount the maximum number of changes to return (pass Integer.MAX_VALUE for all available values). Must be > 0.
      * @return a list of change sets
      */
-    public List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails) {
+    public List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails, int maxCount) {
         final IIdentityManagementService ims = server.createIdentityManagementService();
         final UserLookup userLookup = new TfsUserLookup(ims);
         final MockableVersionControlClient vcc = server.getVersionControlClient();
@@ -88,7 +89,7 @@ public class Project {
                     null /* user */,
                     fromVersion,
                     toVersion,
-                    Integer.MAX_VALUE,
+                    maxCount,
                     includeFileDetails /* includeFileDetails */,
                     true /* slotMode */,
                     false /* includeDownloadInfo */,
@@ -117,12 +118,12 @@ public class Project {
     public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
-        return getVCCHistory(fromVersion, toVersion, true);
+        return getVCCHistory(fromVersion, toVersion, true, Integer.MAX_VALUE);
     }
     
     public List<ChangeSet> getDetailedHistory(String singleVersionSpec) {
         final VersionSpec toVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
-        return getVCCHistory(null, toVersion, true);
+        return getVCCHistory(null, toVersion, true, Integer.MAX_VALUE);
     }
 
     /**
@@ -134,7 +135,7 @@ public class Project {
     public List<ChangeSet> getBriefHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
-        return getVCCHistory(fromVersion, toVersion, false);
+        return getVCCHistory(fromVersion, toVersion, false, Integer.MAX_VALUE);
     }
 
     /**
@@ -146,7 +147,7 @@ public class Project {
     public List<ChangeSet> getBriefHistory(int fromChangeset, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
         final ChangesetVersionSpec fromVersion = new ChangesetVersionSpec(fromChangeset);
         final VersionSpec toVersion = new DateVersionSpec(toTimestamp);
-        return getVCCHistory(fromVersion, toVersion, false);
+        return getVCCHistory(fromVersion, toVersion, false, Integer.MAX_VALUE);
     }
 
     /**

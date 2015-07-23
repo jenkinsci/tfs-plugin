@@ -53,7 +53,7 @@ public class CheckoutAction {
         project.getFiles(localFolder, versionSpecString);
 
         if (lastBuildVersionSpec != null) {
-            return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true);
+            return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true, Integer.MAX_VALUE);
         }
 
         return new ArrayList<ChangeSet>();
