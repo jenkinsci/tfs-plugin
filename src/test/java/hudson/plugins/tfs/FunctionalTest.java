@@ -243,6 +243,11 @@ public class FunctionalTest {
                 throws Exception {
             super.decorateHome(jenkinsRule, home);
 
+            // Add a small pause to make sure we record the timestamp one second later
+            // than the last check-in, otherwise we have the polling occurring on the same
+            // second as the check-in and finding an SCM change where there should be none.
+            Thread.sleep(1000 /* ms */);
+
             final EndToEndTfs.RunnerImpl parent = getParent();
             final String jobFolder = parent.getJobFolder();
             final String lastBuildXmlPath = jobFolder + "builds/2015-07-10_12-11-34/build.xml";
