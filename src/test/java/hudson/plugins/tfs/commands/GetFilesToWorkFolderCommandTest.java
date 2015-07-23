@@ -15,17 +15,6 @@ import org.junit.Test;
 public class GetFilesToWorkFolderCommandTest {
 
     @Test
-    public void assertArguments() {
-        final Server config = mock(Server.class);
-        when(config.getUserName()).thenReturn("snd\\user_cp");
-        when(config.getUserPassword()).thenReturn("password");
-        
-        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath").getArguments();
-        assertNotNull("Arguments were null", arguments);
-        assertEquals("get localPath -recursive -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
-    }
-
-    @Test
     public void assertVersionSpecArgument() {
         final Server config = mock(Server.class);
         when(config.getUserName()).thenReturn("snd\\user_cp");
@@ -38,14 +27,14 @@ public class GetFilesToWorkFolderCommandTest {
 
     @Test
     public void assertEmptyListWithEmptyOutput() throws Exception {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(Server.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(Server.class), ".", "T");
         List<String> list = command.parse(new StringReader(""));
         assertEquals("Number of files was incorrect", 0, list.size());
     }
 
     @Test
     public void assertEmptyListWithNoChangesOutput() throws Exception {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(Server.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(Server.class), ".", "T");
         List<String> list = command.parse(new StringReader("All files are up to date.\n"));
         assertEquals("Number of files was incorrect", 0, list.size());
     }    
@@ -62,7 +51,7 @@ public class GetFilesToWorkFolderCommandTest {
                 "\n" +
                 "C:\\Projects\\tfs\\tfsandbox_ms\\path1:\n" +
                 "Getting pom2.xml\n");
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(Server.class), ".");
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(mock(Server.class), ".", "T");
         List<String> list = command.parse(reader);
         assertEquals("Number of files was incorrect", 4, list.size());
         assertEquals("File name was incorrect", "C:\\Projects\\tfs\\tfsandbox_ms\\path1", list.get(0));

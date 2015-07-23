@@ -164,7 +164,7 @@ public class Project {
      * @param localPath the local path to get all files into
      */
     public void getFiles(String localPath) throws IOException, InterruptedException {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath);
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, "T");
         server.execute(command.getArguments()).close();
     }
 

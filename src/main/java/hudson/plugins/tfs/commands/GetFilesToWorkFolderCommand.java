@@ -25,10 +25,6 @@ public class GetFilesToWorkFolderCommand extends AbstractCommand implements Pars
         this.versionSpec = versionSpec;
     }
 
-    public GetFilesToWorkFolderCommand(final Server provider, final String workFolder) {
-        this(provider, workFolder, null);
-    }
-
     public MaskedArgumentListBuilder getArguments() {
         MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();        
         arguments.add("get");
