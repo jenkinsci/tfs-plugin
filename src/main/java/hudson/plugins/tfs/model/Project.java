@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
 import hudson.model.User;
 import hudson.plugins.tfs.commands.AbstractChangesetVersionCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
@@ -148,6 +149,16 @@ public class Project {
         final ChangesetVersionSpec fromVersion = new ChangesetVersionSpec(fromChangeset);
         final VersionSpec toVersion = new DateVersionSpec(toTimestamp);
         return getVCCHistory(fromVersion, toVersion, false, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Returns the latest changeset at the project's path.
+     * @return the {@link ChangeSet} instance representing the last entry in the history for the path
+     */
+    public ChangeSet getLatestChangeset() throws IOException, InterruptedException, ParseException {
+        final List<ChangeSet> changeSets = getVCCHistory(LatestVersionSpec.INSTANCE, null, false, 1);
+        final ChangeSet result = changeSets.size() > 0 ? changeSets.get(0) : null;
+        return result;
     }
 
     /**
