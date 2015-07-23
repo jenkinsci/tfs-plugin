@@ -50,7 +50,7 @@ public class Project {
         return result;
     }
 
-    static hudson.plugins.tfs.model.ChangeSet convertServerChangeset
+    public static hudson.plugins.tfs.model.ChangeSet convertServerChangeset
         (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset, UserLookup userLookup) {
         final String version = Integer.toString(serverChangeset.getChangesetID(), 10);
         final Date date = serverChangeset.getDate().getTime();
