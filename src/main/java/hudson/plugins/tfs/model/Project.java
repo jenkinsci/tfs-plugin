@@ -162,15 +162,6 @@ public class Project {
     /**
      * Gets all files from server.
      * @param localPath the local path to get all files into
-     */
-    public void getFiles(String localPath) throws IOException, InterruptedException {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, "T");
-        server.execute(command.getArguments()).close();
-    }
-
-    /**
-     * Gets all files from server.
-     * @param localPath the local path to get all files into
      * @param versionSpec the version spec to use when getting the files
      */
     public void getFiles(String localPath, String versionSpec) throws IOException, InterruptedException {

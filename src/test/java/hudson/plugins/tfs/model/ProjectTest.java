@@ -94,15 +94,6 @@ public class ProjectTest extends SwedishLocaleTestCase {
     }
 
     @Test
-    public void assertGetFiles() throws Exception {
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
-        Project project = new Project(server, "$/serverpath");
-        project.getFiles(".");
-        verify(server).execute(isA(MaskedArgumentListBuilder.class));
-    }
-    
-    @Test
     public void assertGetFilesUsesVersion() throws Exception {
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
@@ -116,7 +107,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Reader spy = spy(new StringReader(""));
         Server server = mock(Server.class);
         when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getFiles("localpath");
+        new Project(server, "$/serverpath").getFiles("localpath", "T");
 
         verify(spy).close();
     }
