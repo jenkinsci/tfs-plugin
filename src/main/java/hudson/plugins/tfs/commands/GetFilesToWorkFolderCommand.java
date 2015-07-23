@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 public class GetFilesToWorkFolderCommand extends AbstractCommand implements ParseableCommand<List<String>> {
@@ -18,13 +19,13 @@ public class GetFilesToWorkFolderCommand extends AbstractCommand implements Pars
     private final String workFolder;
     private final String versionSpec;
 
-    public GetFilesToWorkFolderCommand(ServerConfigurationProvider configurationProvider, String workFolder, String versionSpec) {
-        super(configurationProvider);
+    public GetFilesToWorkFolderCommand(final Server server, final String workFolder, final String versionSpec) {
+        super(server);
         this.workFolder = workFolder;
         this.versionSpec = versionSpec;
     }
 
-    public GetFilesToWorkFolderCommand(ServerConfigurationProvider provider, String workFolder) {
+    public GetFilesToWorkFolderCommand(final Server provider, final String workFolder) {
         this(provider, workFolder, null);
     }
 
