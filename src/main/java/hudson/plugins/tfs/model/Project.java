@@ -193,14 +193,9 @@ public class Project {
 
     int extractChangesetNumber(final RemoteChangesetVersionCommand command)
             throws IOException, InterruptedException, ParseException {
-        Reader reader = null;
-        try {
-            reader = server.execute(command.getArguments());
-            final String changesetString = command.parse(reader);
-            return Integer.parseInt(changesetString, 10);
-        } finally {
-            IOUtils.closeQuietly(reader);
-        }
+        final ChangeSet changeSet = server.execute(command.getCallable());
+        final String changesetString = changeSet.getVersion();
+        return Integer.parseInt(changesetString, 10);
     }
 
     /**
