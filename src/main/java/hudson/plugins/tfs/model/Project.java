@@ -2,7 +2,6 @@ package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
 import hudson.model.User;
-import hudson.plugins.tfs.commands.AbstractChangesetVersionCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet.Item;
@@ -192,7 +191,7 @@ public class Project {
         return extractChangesetNumber(command);
     }
 
-    int extractChangesetNumber(final AbstractChangesetVersionCommand command)
+    int extractChangesetNumber(final RemoteChangesetVersionCommand command)
             throws IOException, InterruptedException, ParseException {
         Reader reader = null;
         try {

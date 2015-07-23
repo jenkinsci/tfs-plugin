@@ -6,7 +6,13 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LabelVersionS
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
+import hudson.plugins.tfs.util.TextTableParser;
+import org.apache.commons.lang.StringUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.text.ParseException;
 import java.util.Calendar;
 
 /**
@@ -15,20 +21,35 @@ import java.util.Calendar;
  * @author Olivier Dagenais
  *
  */
-public class RemoteChangesetVersionCommand extends AbstractChangesetVersionCommand {
+public class RemoteChangesetVersionCommand extends AbstractCommand implements ParseableCommand<String> {
 
     private final VersionSpec versionSpec;
+    private final String path;
 
     public RemoteChangesetVersionCommand(
             ServerConfigurationProvider configurationProvider, String remotePath, VersionSpec versionSpec) {
-        super(configurationProvider, remotePath);
+        super(configurationProvider);
+        this.path = remotePath;
 
         this.versionSpec = versionSpec;
     }
 
-    @Override
+    /**
+     * Returns arguments for TFS history command:
+     *
+     *    <i>tf history {path} -recursive -noprompt -stopafter:1 -version:{versionSpecification} -format:brief</i>
+     *
+     */
     public MaskedArgumentListBuilder getArguments() {
-        MaskedArgumentListBuilder arguments = super.getArguments();
+        MaskedArgumentListBuilder arguments = new MaskedArgumentListBuilder();
+        arguments.add("history");
+        arguments.add(path);
+        arguments.add("-recursive");
+        arguments.add("-stopafter:1");
+        arguments.add("-noprompt");
+        arguments.add(String.format("-version:%s", getVersionSpecification()));
+        arguments.add("-format:brief");
+        addLoginArgument(arguments);
         addServerArgument(arguments);
         return arguments;
     }
@@ -50,7 +71,6 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
         return adjustedVersionSpec;
     }
 
-    @Override
     String getVersionSpecification() {
         final VersionSpec adjustedVersionSpec = adjustVersionSpec(versionSpec);
         return toString(adjustedVersionSpec);
@@ -77,5 +97,15 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
             return sb.toString();
         }
         return versionSpec.toString();
+    }
+
+    public String parse(Reader consoleReader) throws ParseException, IOException {
+        TextTableParser parser = new TextTableParser(new BufferedReader(consoleReader), 1);
+
+        while (parser.nextRow()) {
+            return parser.getColumn(0);
+        }
+
+        return StringUtils.EMPTY;
     }
 }
