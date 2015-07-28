@@ -80,6 +80,8 @@ public class TFSLabeler extends Notifier {
 
             Computer computer = Computer.currentComputer();
             String normalizedLabelName = computeDynamicValue(build, getLabelName());
+            normalizedLabelName = normalizedLabelName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
+            normalizedLabelName = normalizedLabelName.replaceAll("[\\.\\s]+$", "_");
             String tfsWorkspace = tfsScm.getWorkspaceName(build, computer);
 
             try {
@@ -102,18 +104,8 @@ public class TFSLabeler extends Notifier {
      */
     private String computeDynamicValue(AbstractBuild build, String parameterizedValue)
             throws IllegalStateException, InterruptedException, IOException {
-
-        final EnvVars envVars = build.getEnvironment(TaskListener.NULL);
-        final VariableResolver<String> environmentVariables = new VariableResolver<String>() {
-            public String resolve(String name) {
-                return envVars.get(name);
-            }
-
-        };
-        final BuildVariableResolver buildVariables = new BuildVariableResolver(build.getProject());
-        @SuppressWarnings("unchecked")
-        final Union<String> bothVariables = new VariableResolver.Union<String>(buildVariables, environmentVariables);
-        String value = Util.replaceMacro(parameterizedValue, bothVariables);
+        Computer computer = Computer.currentComputer();
+        String value = Util.replaceMacro(parameterizedValue, new BuildVariableResolver(build, computer));
 
         logger.fine("oldValue = " + parameterizedValue + "; newValue = " + value);
         return value;

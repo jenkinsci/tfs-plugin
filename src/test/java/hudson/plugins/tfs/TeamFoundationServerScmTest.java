@@ -102,18 +102,7 @@ public class TeamFoundationServerScmTest {
             }
         }
     }
-
-    @Test
-    public void assertWorkspaceNameReplacesJobName() {
-        AbstractBuild build = mock(AbstractBuild.class);
-        AbstractProject project = mock(AbstractProject.class);
-        when(build.getProject()).thenReturn(project);
-        when(project.getName()).thenReturn("ThisIsAJob");
-
-        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, ".", false, "erik_${JOB_NAME}");
-        assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getWorkspaceName(build, mock(Computer.class)));
-    }
-    
+   
     @Test 
     public void assertDoUsernameCheckRegexWorks() {
         assertFalse(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX.matcher("redsolo").matches());
@@ -334,7 +323,7 @@ public class TeamFoundationServerScmTest {
         when(build.getAction(ParametersAction.class)).thenReturn(action);
 
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, "$/$PARAM/path", ".", false, "");
-        assertEquals("The project path wasnt resolved", "$/RESOLVED/path", scm.getProjectPath(build));
+        assertEquals("The project path wasnt resolved", "$/RESOLVED/path", scm.getProjectPath(build, mock(Computer.class)));
     }    
     
     @Test public void assertWorkspaceNameResolvesBuildVariables() {
