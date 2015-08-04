@@ -36,23 +36,7 @@ public class BuildVariableResolverTest {
         verifyZeroInteractions(project);
         verifyZeroInteractions(computer);
     }
-    
-    @Test public void assertJobNameIsResolved() {
-        when(project.getName()).thenReturn("ThisIsAJob");
-
-        BuildVariableResolver resolver = new BuildVariableResolver(project, computer);
-        assertEquals("Variable resolution was incorrect", "ThisIsAJob", resolver.resolve("JOB_NAME"));
-        verifyZeroInteractions(computer);
-    }
-    
-    @Test public void assertJobNameWithoutComputerIsResolved() {
-        when(project.getName()).thenReturn("ThisIsAJob");
-
-        BuildVariableResolver resolver = new BuildVariableResolver(project);
-        assertEquals("Variable resolution was incorrect", "ThisIsAJob", resolver.resolve("JOB_NAME"));
-        assertNull("Variable resolution was performed", resolver.resolve("NONE_EXISTING_KEY"));
-    }
-    
+   
     @Test public void assertComputerEnvVarIsResolved() throws Exception {
         EnvVars map = new EnvVars();
         map.put("ENV_VAR", "This is an env var");
@@ -74,32 +58,7 @@ public class BuildVariableResolverTest {
         assertEquals("Variable resolution was incorrect", "Other_user", resolver.resolve("USER_NAME"));
         verifyZeroInteractions(project);
     }
-    
-    @Test public void assertNodeNameIsResolved() {
-        when(computer.getName()).thenReturn("AKIRA");
-        
-        BuildVariableResolver resolver = new BuildVariableResolver(project, computer);
-        assertEquals("Variable resolution was incorrect", "AKIRA", resolver.resolve("NODE_NAME"));
-        verifyZeroInteractions(project);
-    }
-    
-    /**
-     * Asserts that NODE_NAME works on the master computer, as the MasterComputer.getName() returns null.
-     */
-    @Test public void assertMasterNodeNameIsResolved() {
-        when(computer.getName()).thenReturn("");
-        
-        BuildVariableResolver resolver = new BuildVariableResolver(project, computer);
-        assertEquals("Variable resolution was incorrect", "MASTER", resolver.resolve("NODE_NAME"));
-        verifyZeroInteractions(project);
-    }
-    
-    @Test public void assertNoComputeraDoesNotThrowNPEWhenResolvingNodeName() {
-        BuildVariableResolver resolver = new BuildVariableResolver(project);
-        assertNull("Variable resolution was incorrect", resolver.resolve("NODE_NAME"));
-        verifyZeroInteractions(project);
-    }
-    
+   
     @Test public void assertBuildEnvVarIsResolved() throws Exception {
         EnvVars map = new EnvVars();
         map.put("BUILD_ID", "121212");

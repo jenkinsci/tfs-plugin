@@ -40,28 +40,9 @@ public class BuildVariableResolver implements VariableResolver<String> {
     private final Computer computer;
 
     private static final Logger LOGGER = Logger.getLogger(BuildVariableResolver.class.getName());
-    
-    public BuildVariableResolver(final Job<?, ?> job) {
-        computer = null;
-        lazyResolvers.put("JOB_NAME", new LazyResolver() {
-            public String getValue() {
-                return job.getName();
-            }            
-        });
-    }
-    
+
     public BuildVariableResolver(final AbstractProject<?, ?> project, final Computer computer) {
         this.computer = computer;
-        lazyResolvers.put("JOB_NAME", new LazyResolver() {
-            public String getValue() {
-                return project.getName();
-            }            
-        });
-        lazyResolvers.put("NODE_NAME", new LazyComputerResolver() {
-            public String getValue(Computer computer) {
-                return (Util.fixEmpty(computer.getName()) == null ? "MASTER" : computer.getName());
-            }            
-        });
         lazyResolvers.put("USER_NAME", new LazyComputerResolver() {
             public String getValue(Computer computer) throws IOException, InterruptedException {
                 return (String) computer.getSystemProperties().get("user.name");
@@ -76,13 +57,16 @@ public class BuildVariableResolver implements VariableResolver<String> {
      * {@link AbstractBuild#getEnvVars()}.  
      * @param build used to get the project and the build env vars
      */
-    public BuildVariableResolver(final AbstractBuild<?, ?> build, final Computer computer)
-            throws IOException, InterruptedException {
+    public BuildVariableResolver(final AbstractBuild<?, ?> build, final Computer computer) {
         this(build.getProject(), computer);
-        
-        final Map<String, String> envVars = build.getEnvironment(TaskListener.NULL);
-        if (envVars != null) {
-            otherResolvers.add(new VariableResolver.ByMap<String>(envVars));
+
+        try {
+            final Map<String, String> envVars = build.getEnvironment(TaskListener.NULL);
+            if (envVars != null) {
+                otherResolvers.add(new VariableResolver.ByMap<String>(envVars));
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Retrieving the build environment variables failed because of " + e);
         }
     }
     

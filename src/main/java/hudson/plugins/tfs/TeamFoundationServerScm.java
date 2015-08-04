@@ -25,6 +25,7 @@ import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import static hudson.Main.run;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -157,7 +158,7 @@ public class TeamFoundationServerScm extends SCM {
         normalizedWorkspaceName = workspaceName;
         if (build != null) {
             normalizedWorkspaceName = substituteBuildParameter(build, normalizedWorkspaceName);
-            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build.getProject(), computer));
+            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build, computer));
         }
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\\.\\s]+$", "_");
@@ -168,8 +169,8 @@ public class TeamFoundationServerScm extends SCM {
         return substituteBuildParameter(run, serverUrl);
     }
 
-    String getProjectPath(Run<?,?> run) {
-        return Util.replaceMacro(substituteBuildParameter(run, projectPath), new BuildVariableResolver(run.getParent()));
+    String getProjectPath(AbstractBuild<?,?> build, Computer computer) {
+        return Util.replaceMacro(substituteBuildParameter(build, projectPath), new BuildVariableResolver(build, computer));
     }
 
     private String substituteBuildParameter(Run<?,?> run, String text) {
@@ -186,8 +187,9 @@ public class TeamFoundationServerScm extends SCM {
     public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
         try {
-            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
-            
+            Computer computer = Computer.currentComputer();
+            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, computer), getProjectPath(build, computer), getLocalPath());
+
             // Check if the configuration has changed
             if (build.getPreviousBuild() != null) {
                 BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), build.getPreviousBuild());
@@ -258,12 +260,13 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public boolean pollChanges(AbstractProject hudsonProject, Launcher launcher, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         Run<?,?> lastRun = hudsonProject.getLastBuild();
-        if (lastRun == null) {
+        if ((lastRun == null) || !(lastRun instanceof AbstractBuild<?, ?>)) {
             return true;
         } else {
-            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
+            AbstractBuild<?, ?> build = (AbstractBuild<?, ?>) lastRun;
+            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), build);
             try {
-                return (server.getProject(getProjectPath(lastRun)).getDetailedHistory(
+                return (server.getProject(getProjectPath(build, Computer.currentComputer())).getDetailedHistory(
                             lastRun.getTimestamp(), 
                             Calendar.getInstance()
                         ).size() > 0);
