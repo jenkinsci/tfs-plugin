@@ -32,7 +32,7 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
         addServerArgument(arguments);
         return arguments;
     }
-    
+
     static VersionSpec adjustVersionSpec(final VersionSpec versionSpec) {
         final VersionSpec adjustedVersionSpec;
         if (versionSpec instanceof DateVersionSpec) {
@@ -53,6 +53,10 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
     @Override
     String getVersionSpecification() {
         final VersionSpec adjustedVersionSpec = adjustVersionSpec(versionSpec);
+        return toString(adjustedVersionSpec);
+    }
+
+    public static String toString(final VersionSpec adjustedVersionSpec) {
         // TODO: just call adjustedVersionSpec.toString() once DateVersionSpec.toString() uses ISO 8601 format
         if (adjustedVersionSpec instanceof DateVersionSpec){
             final DateVersionSpec dateVersionSpec = (DateVersionSpec) adjustedVersionSpec;
