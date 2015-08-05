@@ -4,6 +4,9 @@
       <f:textbox name="tfs.tfExecutable" value="${descriptor.tfExecutable}"
                  checkUrl="'${rootURL}/scm/TeamFoundationServerScm/executableCheck?value='+escape(this.value)"/>
     </f:entry>
+    <f:entry field="tfs.localWorkspace" title="Use local workspace" help="/plugin/tfs/localWorkspace.html">
+        <f:checkbox checked="${descriptor.localWorkspace}" default="false"/>
+    </f:entry>
   </f:section>
 </j:jelly>
 

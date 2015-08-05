@@ -70,6 +70,7 @@ public class TeamFoundationServerScm extends SCM {
     private final String projectPath;
     private final String localPath;
     private final String workspaceName;
+    private final boolean overrideLocalWorkspaceSetting;
     private final boolean localWorkspace;
     private final String userPassword;
     private final String userName;
@@ -83,7 +84,7 @@ public class TeamFoundationServerScm extends SCM {
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName()); 
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword, boolean localWorkspace) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String userPassword, String localWorkspace) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.useUpdate = useUpdate;
@@ -91,7 +92,8 @@ public class TeamFoundationServerScm extends SCM {
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.userPassword = Scrambler.scramble(userPassword);
-        this.localWorkspace = localWorkspace;
+        this.overrideLocalWorkspaceSetting = Boolean.TRUE.toString().equalsIgnoreCase(localWorkspace) || Boolean.FALSE.toString().equalsIgnoreCase(localWorkspace);
+        this.localWorkspace = Boolean.parseBoolean(localWorkspace);
     }
 
     // Bean properties need for job configuration
@@ -119,7 +121,12 @@ public class TeamFoundationServerScm extends SCM {
         return Scrambler.descramble(userPassword);
     }
 
+    public boolean isGloballyConfigured() {
+        return !overrideLocalWorkspaceSetting;
+    }
+
     public boolean isLocalWorkspace() {
+        if (isGloballyConfigured()) return getDescriptor().isLocalWorkspace();
         return localWorkspace;
     }
 
@@ -343,6 +350,7 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern DOMAIN_SLASH_USER_REGEX = Pattern.compile("^([a-z][a-z0-9.-]+)\\\\([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         private String tfExecutable;
+        private boolean localWorkspace;
         
         public DescriptorImpl() {
             super(TeamFoundationServerScm.class, TeamFoundationServerRepositoryBrowser.class);
@@ -356,7 +364,11 @@ public class TeamFoundationServerScm extends SCM {
                 return tfExecutable;
             }
         }
-        
+
+        public boolean isLocalWorkspace() {
+            return localWorkspace;
+        }
+
         @Override
         public SCM newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             TeamFoundationServerScm scm = (TeamFoundationServerScm) super.newInstance(req, formData);
@@ -406,6 +418,7 @@ public class TeamFoundationServerScm extends SCM {
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             tfExecutable = Util.fixEmpty(req.getParameter("tfs.tfExecutable").trim());
+            this.localWorkspace = formData.getBoolean("localWorkspace");
             save();
             return true;
         }

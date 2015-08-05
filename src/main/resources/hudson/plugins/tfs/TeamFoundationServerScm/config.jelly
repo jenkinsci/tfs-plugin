@@ -34,8 +34,16 @@
             <f:textbox name="tfs.workspaceName" value="${h.defaulted(scm.workspaceName, 'Hudson-${JOB_NAME}-${NODE_NAME}')}"
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/workspaceNameCheck?value='+escape(this.value)"/>
         </f:entry>
-        <f:entry field="localWorkspace" title="Use local workspace">
-            <f:checkbox default="false"/>
+
+        <f:entry title="TFS workspace type" field="localWorkspace" help="/plugin/tfs/localWorkspace.html">
+            <j:set var="useLocalWorkspaceDisplay" value="Use local workspace" />
+            <j:set var="useServerWorkspaceDisplay" value="Use server workspace" />
+            <j:set var="onlyForThisJobDisplay" value=" (only for this job)" />
+            <select name="localWorkspace" value="${it.localWorkspace}">
+                <option selected="${instance.globallyConfigured ? 'true' : null}" value="global"><j:expr value="${descriptor.localWorkspace ? useLocalWorkspaceDisplay : useServerWorkspaceDisplay}" /> (default setting from global configuration)</option>
+                <option style="font-weight:bold" selected="${!instance.globallyConfigured &amp;&amp; instance.localWorkspace ? 'true' : null}" value="true"><j:expr value="${useLocalWorkspaceDisplay + onlyForThisJobDisplay}" /></option>
+                <option style="font-weight:bold" selected="${!instance.globallyConfigured &amp;&amp; !instance.localWorkspace ? 'true' : null}" value="false"><j:expr value="${useServerWorkspaceDisplay + onlyForThisJobDisplay}" /></option>
+            </select>
         </f:entry>
     </f:advanced>
     
