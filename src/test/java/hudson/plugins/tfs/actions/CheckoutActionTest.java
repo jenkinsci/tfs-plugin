@@ -229,10 +229,12 @@ public class CheckoutActionTest {
         when(project.getDetailedHistory(isA(Calendar.class), isA(Calendar.class))).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
-        List<ChangeSet> actualList = action.checkout(server, hudsonWs, Util.getCalendar(2008, 9, 24), Util.getCalendar(2008, 10, 24));
+        final Calendar startDate = Util.getCalendar(2008, 9, 24);
+        final Calendar endDate = Util.getCalendar(2008, 10, 24);
+        List<ChangeSet> actualList = action.checkout(server, hudsonWs, startDate, endDate);
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
-        verify(project).getDetailedHistory(eq(Util.getCalendar(2008, 9, 24)), isA(Calendar.class));
+        verify(project).getDetailedHistory(eq(startDate), isA(Calendar.class));
     }
     
     @Test
