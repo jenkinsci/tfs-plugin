@@ -188,9 +188,10 @@ public class TeamFoundationServerScm extends SCM {
         try {
             WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
             
+            final AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
             // Check if the configuration has changed
-            if (build.getPreviousBuild() != null) {
-                BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), build.getPreviousBuild());
+            if (previousBuild != null) {
+                BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), previousBuild);
                 if ((nodeConfiguration != null) &&
                         nodeConfiguration.workspaceExists() 
                         && (! workspaceConfiguration.equals(nodeConfiguration))) {
@@ -215,7 +216,7 @@ public class TeamFoundationServerScm extends SCM {
                     list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
                 }
                 else {
-                    list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
+                    list = action.checkout(server, workspaceFilePath, (previousBuild != null ? previousBuild.getTimestamp() : null), build.getTimestamp());
                 }
                 ChangeSetWriter writer = new ChangeSetWriter();
                 writer.write(list, changelogFile);
