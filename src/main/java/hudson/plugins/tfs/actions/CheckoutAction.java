@@ -6,13 +6,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.FilePath;
+import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
-import hudson.plugins.tfs.util.DateUtil;
 
 public class CheckoutAction {
 
@@ -29,15 +31,31 @@ public class CheckoutAction {
     }
 
     public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp, Calendar currentBuildTimestamp) throws IOException, InterruptedException, ParseException {
-        
-        Project project = getProject(server, workspacePath);
-        
-        project.getFiles(localFolder, "D" + DateUtil.TFS_DATETIME_FORMATTER.get().format(currentBuildTimestamp.getTime()));
-        
+
+        final VersionSpec lastBuildVersionSpec;
         if (lastBuildTimestamp != null) {
-            return project.getDetailedHistory(lastBuildTimestamp, currentBuildTimestamp);
+            lastBuildVersionSpec = new DateVersionSpec(lastBuildTimestamp);
         }
-        
+        else{
+            lastBuildVersionSpec = null;
+        }
+
+        final VersionSpec currentBuildVersionSpec = new DateVersionSpec(currentBuildTimestamp);
+
+        return checkout(server, workspacePath, lastBuildVersionSpec, currentBuildVersionSpec);
+    }
+
+    public List<ChangeSet> checkout(final Server server, final FilePath workspacePath, final VersionSpec lastBuildVersionSpec, final VersionSpec currentBuildVersionSpec) throws IOException, InterruptedException {
+
+        Project project = getProject(server, workspacePath);
+
+        final String versionSpecString = RemoteChangesetVersionCommand.toString(currentBuildVersionSpec);
+        project.getFiles(localFolder, versionSpecString);
+
+        if (lastBuildVersionSpec != null) {
+            return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true);
+        }
+
         return new ArrayList<ChangeSet>();
     }
 
