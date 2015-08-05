@@ -56,14 +56,14 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
         return toString(adjustedVersionSpec);
     }
 
-    public static String toString(final VersionSpec adjustedVersionSpec) {
-        // TODO: just call adjustedVersionSpec.toString() once DateVersionSpec.toString() uses ISO 8601 format
-        if (adjustedVersionSpec instanceof DateVersionSpec){
-            final DateVersionSpec dateVersionSpec = (DateVersionSpec) adjustedVersionSpec;
+    public static String toString(final VersionSpec versionSpec) {
+        // TODO: just call versionSpec.toString() once DateVersionSpec.toString() uses ISO 8601 format
+        if (versionSpec instanceof DateVersionSpec){
+            final DateVersionSpec dateVersionSpec = (DateVersionSpec) versionSpec;
             return DateUtil.toString(dateVersionSpec);
         }
-        else if (adjustedVersionSpec instanceof LabelVersionSpec) {
-            final LabelVersionSpec labelVersionSpec = (LabelVersionSpec) adjustedVersionSpec;
+        else if (versionSpec instanceof LabelVersionSpec) {
+            final LabelVersionSpec labelVersionSpec = (LabelVersionSpec) versionSpec;
             // TODO: It seems to me LabelVersionSpec.toString() should emit "Lfoo" when its scope is null
             final String label = labelVersionSpec.getLabel();
             final String scope = labelVersionSpec.getScope();
@@ -76,6 +76,6 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
             }
             return sb.toString();
         }
-        return adjustedVersionSpec.toString();
+        return versionSpec.toString();
     }
 }
