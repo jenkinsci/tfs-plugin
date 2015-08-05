@@ -75,7 +75,7 @@ public class Project {
      * @param includeFileDetails whether or not to include details of modified items
      * @return a list of change sets
      */
-    private List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails) {
+    public List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails) {
         final IIdentityManagementService ims = server.createIdentityManagementService();
         final UserLookup userLookup = new TfsUserLookup(ims);
         final MockableVersionControlClient vcc = server.getVersionControlClient();
