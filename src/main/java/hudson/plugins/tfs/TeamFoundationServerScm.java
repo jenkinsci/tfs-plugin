@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -70,8 +71,7 @@ public class TeamFoundationServerScm extends SCM {
     private final String projectPath;
     private final String localPath;
     private final String workspaceName;
-    private final boolean overrideLocalWorkspaceSetting;
-    private final boolean localWorkspace;
+    private final String localWorkspace;
     private final String userPassword;
     private final String userName;
     private final boolean useUpdate;
@@ -92,8 +92,7 @@ public class TeamFoundationServerScm extends SCM {
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.userPassword = Scrambler.scramble(userPassword);
-        this.overrideLocalWorkspaceSetting = Boolean.TRUE.toString().equalsIgnoreCase(localWorkspace) || Boolean.FALSE.toString().equalsIgnoreCase(localWorkspace);
-        this.localWorkspace = Boolean.parseBoolean(localWorkspace);
+        this.localWorkspace = localWorkspace != null ? localWorkspace.toLowerCase() : null;
     }
 
     // Bean properties need for job configuration
@@ -121,12 +120,7 @@ public class TeamFoundationServerScm extends SCM {
         return Scrambler.descramble(userPassword);
     }
 
-    public boolean isGloballyConfigured() {
-        return !overrideLocalWorkspaceSetting;
-    }
-
-    public boolean isLocalWorkspace() {
-        if (isGloballyConfigured()) return getDescriptor().isLocalWorkspace();
+    public String getLocalWorkspace() {
         return localWorkspace;
     }
 
@@ -134,6 +128,18 @@ public class TeamFoundationServerScm extends SCM {
         return userName;
     }    
     // Bean properties END
+
+    boolean isLocalWorkspaceUsed() {
+        return isGloballyConfigured() ? getDescriptor().isLocalWorkspace() : Boolean.parseBoolean(localWorkspace);
+    }
+
+    boolean isGloballyConfigured() {
+        return !isOverrideLocalWorkspaceSetting();
+    }
+
+    private boolean isOverrideLocalWorkspaceSetting() {
+        return Boolean.TRUE.toString().equalsIgnoreCase(localWorkspace) || Boolean.FALSE.toString().equalsIgnoreCase(localWorkspace);
+    }
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
         normalizedWorkspaceName = workspaceName;
@@ -286,7 +292,7 @@ public class TeamFoundationServerScm extends SCM {
     }
     
     protected Server createServer(TfTool tool, Run<?,?> run) {
-        return new Server(tool, getServerUrl(run), getUserName(), getUserPassword(), isLocalWorkspace());
+        return new Server(tool, getServerUrl(run), getUserName(), getUserPassword(), isLocalWorkspaceUsed());
     }
 
     @Override
@@ -427,6 +433,25 @@ public class TeamFoundationServerScm extends SCM {
         public String getDisplayName() {
             return "Team Foundation Server";
         }
+
+        /**
+         * This method is invoked by Jelly for the empty &lt;f:select/&gt; element.
+         * The data binding is done by the enclosing &lt;f:entry/&gt; element.
+         * @return the list box model for the local workspace value
+         */
+        public ListBoxModel doFillLocalWorkspaceItems() {
+            final String useLocalWorkspaceDisplay = "Use local workspace";
+            final String useServerWorkspaceDisplay = "Use server workspace";
+            final String useDefaultWorkspaceDisplay = isLocalWorkspace() ? useLocalWorkspaceDisplay : useServerWorkspaceDisplay;
+            final String onlyForThisJobDisplay = " (only for this job)";
+            final String defaultSettingDisplay = " (default setting from global configuration)";
+            final ListBoxModel items = new ListBoxModel();
+            items.add(new ListBoxModel.Option(useDefaultWorkspaceDisplay + defaultSettingDisplay, "default"));
+            items.add(new ListBoxModel.Option(useLocalWorkspaceDisplay + onlyForThisJobDisplay, "true"));
+            items.add(new ListBoxModel.Option(useServerWorkspaceDisplay + onlyForThisJobDisplay, "false"));
+            return items;
+        }
+
     }
 
     @Override

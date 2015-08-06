@@ -275,62 +275,61 @@ public class TeamFoundationServerScmTest {
     private TeamFoundationServerScm createTeamFoundationServerScmWithMockedDescriptor(boolean globalSetting, String jobSetting) {
         final TeamFoundationServerScm.DescriptorImpl descriptorMock = mock(TeamFoundationServerScm.DescriptorImpl.class);
         when(descriptorMock.isLocalWorkspace()).thenReturn(globalSetting);
-        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, "", false, "", "", "", jobSetting) {
+        return new TeamFoundationServerScm(null, null, "", false, "", "", "", jobSetting) {
             @Override
             public DescriptorImpl getDescriptor() {
                 return descriptorMock;
             }
         };
-        return scm;
     }
 
     @Test public void assertLocalWorkspaceIfGlobalFalseJobTrue() {
         TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(false, "true");
-        assertThat(scm.isLocalWorkspace(), is(true));
+        assertThat(scm.isLocalWorkspaceUsed(), is(true));
     }
 
     @Test public void assertLocalWorkspaceIfGlobalTrueJobTrue() {
         TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(true, "true");
-        assertThat(scm.isLocalWorkspace(), is(true));
+        assertThat(scm.isLocalWorkspaceUsed(), is(true));
     }
 
     @Test public void assertLocalWorkspaceIfGlobalTrueJobNull() {
         TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(true, null);
-        assertThat(scm.isLocalWorkspace(), is(true));
+        assertThat(scm.isLocalWorkspaceUsed(), is(true));
     }
 
     @Test public void assertLocalWorkspaceIfGlobalTrueJobNoBoolean() {
         TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(true, "something other");
-        assertThat(scm.isLocalWorkspace(), is(true));
+        assertThat(scm.isLocalWorkspaceUsed(), is(true));
     }
 
     @Test public void assertLocalWorkspaceIfGlobalTrueJobFalse() {
         TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(true, "false");
-        assertThat(scm.isLocalWorkspace(), is(false));
+        assertThat(scm.isLocalWorkspaceUsed(), is(false));
     }
 
     @Test public void assertLocalWorkspaceIfGlobalFalseJobFalse() {
         TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(false, "false");
-        assertThat(scm.isLocalWorkspace(), is(false));
+        assertThat(scm.isLocalWorkspaceUsed(), is(false));
     }
 
     @Test public void assertLocalWorkspaceIfGlobalFalseJobNull() {
         TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(false, null);
-        assertThat(scm.isLocalWorkspace(), is(false));
+        assertThat(scm.isLocalWorkspaceUsed(), is(false));
     }
 
     @Test public void assertLocalWorkspaceIfGlobalFalseJobNoBoolean() {
         TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(false, "global");
-        assertThat(scm.isLocalWorkspace(), is(false));
+        assertThat(scm.isLocalWorkspaceUsed(), is(false));
     }
 
     @Test public void assertGloballyConfiguredNull() {
-        TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(false, "global");
+        TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(false, null);
         assertThat(scm.isGloballyConfigured(), is(true));
     }
 
     @Test public void assertGloballyConfiguredNoBoolean() {
-        TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(false, "global");
+        TeamFoundationServerScm scm = createTeamFoundationServerScmWithMockedDescriptor(false, "default");
         assertThat(scm.isGloballyConfigured(), is(true));
     }
 
