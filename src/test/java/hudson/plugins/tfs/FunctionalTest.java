@@ -93,6 +93,12 @@ public class FunctionalTest {
         final SCMTrigger.Runner runner = scmTrigger.new Runner();
         runner.run();
 
+        final AbstractBuild build = waitForQueuedBuild(project);
+        return build;
+    }
+
+    static AbstractBuild waitForQueuedBuild(final Project project)
+            throws InterruptedException, ExecutionException {
         final Jenkins jenkins = (Jenkins) project.getParent();
         final Queue queue = jenkins.getQueue();
         final Queue.Item[] items = queue.getItems();
