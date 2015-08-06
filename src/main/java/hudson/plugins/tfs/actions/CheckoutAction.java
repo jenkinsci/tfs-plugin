@@ -50,7 +50,8 @@ public class CheckoutAction {
         Project project = getProject(server, workspacePath);
 
         final String versionSpecString = RemoteChangesetVersionCommand.toString(currentBuildVersionSpec);
-        project.getFiles(localFolder, versionSpecString);
+        final String normalizedFolder = determineCheckoutPath(workspacePath, localFolder);
+        project.getFiles(normalizedFolder, versionSpecString);
 
         if (lastBuildVersionSpec != null) {
             return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true, Integer.MAX_VALUE);
@@ -61,7 +62,8 @@ public class CheckoutAction {
 
     public List<ChangeSet> checkoutBySingleVersionSpec(Server server, FilePath workspacePath, String singleVersionSpec) throws IOException, InterruptedException {
         Project project = getProject(server, workspacePath);
-        project.getFiles(localFolder, singleVersionSpec);
+        final String normalizedFolder = determineCheckoutPath(workspacePath, localFolder);
+        project.getFiles(normalizedFolder, singleVersionSpec);
 
         return project.getDetailedHistory(singleVersionSpec);
     }
