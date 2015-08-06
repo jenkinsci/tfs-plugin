@@ -4,6 +4,8 @@ import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
+import com.microsoft.tfs.core.clients.versioncontrol.events.VersionControlEventEngine;
+import com.microsoft.tfs.core.clients.versioncontrol.exceptions.ItemNotMappedException;
 import com.microsoft.tfs.core.clients.versioncontrol.exceptions.ServerPathFormatException;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.*;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
@@ -50,12 +52,20 @@ public class MockableVersionControlClient implements Closable {
         vcc.deleteWorkspace(workspace);
     }
 
+    public VersionControlEventEngine getEventEngine() {
+        return vcc.getEventEngine();
+    }
+
     public Workspace getLocalWorkspace(final String workspaceName, final String workspaceOwner) {
         return vcc.getLocalWorkspace(workspaceName, workspaceOwner);
     }
 
     public int getLatestChangesetID() {
         return vcc.getLatestChangesetID();
+    }
+
+    public Workspace getWorkspace(final String localPath) throws ItemNotMappedException {
+        return vcc.getWorkspace(localPath);
     }
 
     public Changeset[] queryHistory(
