@@ -81,9 +81,6 @@ public class FunctionalTest {
      */
     public static AbstractBuild runScmPollTrigger(final Project project)
             throws InterruptedException, ExecutionException {
-        final Jenkins jenkins = (Jenkins) project.getParent();
-        final Queue queue = jenkins.getQueue();
-
         final SCMTrigger scmTrigger = (SCMTrigger) project.getTrigger(SCMTrigger.class);
         // This is a roundabout way of calling SCMTrigger#run(),
         // because if we set SCMTrigger#synchronousPolling to true
@@ -96,6 +93,8 @@ public class FunctionalTest {
         final SCMTrigger.Runner runner = scmTrigger.new Runner();
         runner.run();
 
+        final Jenkins jenkins = (Jenkins) project.getParent();
+        final Queue queue = jenkins.getQueue();
         final Queue.Item[] items = queue.getItems();
         final boolean buildQueued = items.length == 1;
         final AbstractBuild build;
