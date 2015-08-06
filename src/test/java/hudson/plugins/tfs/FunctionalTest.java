@@ -4,6 +4,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Project;
@@ -177,6 +178,11 @@ public class FunctionalTest {
         Assert.assertEquals(1, secondCauses.size());
         final Cause secondCause = secondCauses.get(0);
         Assert.assertTrue(secondCause instanceof SCMTrigger.SCMTriggerCause);
+        final FilePath jenkinsWorkspace = secondBuild.getWorkspace();
+        final FilePath[] workspaceFiles = jenkinsWorkspace.list("*.*", "$tf");
+        Assert.assertEquals(1, workspaceFiles.length);
+        final FilePath workspaceFile = workspaceFiles[0];
+        Assert.assertEquals("TODO.txt", workspaceFile.getName());
     }
 
     /**
