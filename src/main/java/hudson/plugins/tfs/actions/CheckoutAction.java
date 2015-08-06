@@ -66,6 +66,12 @@ public class CheckoutAction {
         return project.getDetailedHistory(singleVersionSpec);
     }
 
+    static String determineCheckoutPath(final FilePath workspacePath, final String localFolder) {
+        final FilePath combinedPath = new FilePath(workspacePath, localFolder);
+        final String result = combinedPath.getRemote();
+        return result;
+    }
+
     private Project getProject(Server server, FilePath workspacePath)
 			throws IOException, InterruptedException {
 		Workspaces workspaces = server.getWorkspaces();

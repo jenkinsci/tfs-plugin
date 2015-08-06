@@ -18,8 +18,10 @@ import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
 
+import hudson.remoting.VirtualChannel;
 import org.hamcrest.CustomMatcher;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
@@ -449,5 +451,107 @@ public class CheckoutActionTest {
             }
             return false;
         }
+    }
+
+    @Test
+    public void determineCheckoutPath_absoluteOverrideOnNix() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String nixPath = "/opt/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, nixPath);
+        final String localFolder = "/home/jenkins/tfs-plugin";
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, localFolder);
+
+        Assert.assertEquals(localFolder, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_absoluteOverrideOnWindows() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:\\.jenkins\\jobs\\tfs-plugin\\workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+        final String localFolder = "C:\\Users\\Jenkins\\tfs-plugin";
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, localFolder);
+
+        Assert.assertEquals(localFolder, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_absoluteOverrideOnWindowsWithForwardSlashes() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+        final String localFolder = "C:/Users/Jenkins/tfs-plugin";
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, localFolder);
+
+        Assert.assertEquals(localFolder, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_defaultOnNix() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String nixPath = "/opt/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, nixPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, ".");
+
+        Assert.assertEquals(nixPath, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_defaultOnWindows() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:\\.jenkins\\jobs\\tfs-plugin\\workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, ".");
+
+        Assert.assertEquals(windowsPath, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_defaultOnWindowsWithForwardSlashes() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, ".");
+
+        Assert.assertEquals(windowsPath, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_relativeOnNix() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String nixPath = "/opt/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, nixPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, "../files");
+
+        Assert.assertEquals("/opt/.jenkins/jobs/tfs-plugin/files", actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_relativeOnWindows() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:\\.jenkins\\jobs\\tfs-plugin\\workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, "..\\files");
+
+        Assert.assertEquals("C:\\.jenkins\\jobs\\tfs-plugin\\files", actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_relativeOnWindowsWithForwardSlashes() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, "../files");
+
+        Assert.assertEquals("C:/.jenkins/jobs/tfs-plugin/files", actual);
     }
 }
