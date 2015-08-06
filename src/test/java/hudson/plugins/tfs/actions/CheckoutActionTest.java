@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.FilePath;
 import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.model.ChangeSet;
@@ -16,6 +18,7 @@ import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
 
+import org.hamcrest.CustomMatcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -226,13 +229,16 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getDetailedHistory(isA(Calendar.class), isA(Calendar.class))).thenReturn(list);
+        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean())).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
-        List<ChangeSet> actualList = action.checkout(server, hudsonWs, Util.getCalendar(2008, 9, 24), Util.getCalendar(2008, 10, 24));
+        final Calendar startDate = Util.getCalendar(2008, 9, 24);
+        final Calendar endDate = Util.getCalendar(2008, 10, 24);
+        List<ChangeSet> actualList = action.checkout(server, hudsonWs, startDate, endDate);
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
-        verify(project).getDetailedHistory(eq(Util.getCalendar(2008, 9, 24)), isA(Calendar.class));
+        final DateVersionSpec startDateVersionSpec = new DateVersionSpec(startDate);
+        verify(project).getVCCHistory(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(true));
     }
     
     @Test
@@ -404,13 +410,42 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getDetailedHistory(isA(Calendar.class), isA(Calendar.class))).thenReturn(list);
+        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean())).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
-        List<ChangeSet> actualList = action.checkout(server, hudsonWs, Util.getCalendar(2008, 9, 24), Util.getCalendar(2009, 9, 24));
+        final Calendar startDate = Util.getCalendar(2008, 9, 24);
+        final Calendar endDate = Util.getCalendar(2009, 9, 24);
+        List<ChangeSet> actualList = action.checkout(server, hudsonWs, startDate, endDate);
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
-        
-        verify(project).getDetailedHistory(eq(Util.getCalendar(2008, 9, 24)), eq(Util.getCalendar(2009, 9, 24)));
+
+        final DateVersionSpec startDateVersionSpec = new DateVersionSpec(startDate);
+        final DateVersionSpec endDateVersionSpec = new DateVersionSpec(endDate);
+        verify(project).getVCCHistory(
+                argThat(new DateVersionSpecMatcher(startDateVersionSpec)),
+                argThat(new DateVersionSpecMatcher(endDateVersionSpec)), eq(true));
         verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+    }
+
+    private static class DateVersionSpecMatcher extends CustomMatcher<DateVersionSpec> {
+
+        private final DateVersionSpec base;
+
+        public DateVersionSpecMatcher(final DateVersionSpec base) {
+            super(base == null ? "(null)" : base.toString());
+            this.base = base;
+        }
+
+        public boolean matches(final Object item) {
+            if (base == null) {
+                return item == null;
+            }
+            if (item != null && item instanceof DateVersionSpec) {
+                final DateVersionSpec candidate = (DateVersionSpec) item;
+                final Calendar baseDate = base.getDate();
+                final Calendar candidateDate = candidate.getDate();
+                return baseDate.equals(candidateDate);
+            }
+            return false;
+        }
     }
 }

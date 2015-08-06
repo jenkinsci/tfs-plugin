@@ -32,9 +32,8 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
         addServerArgument(arguments);
         return arguments;
     }
-    
-    @Override
-    String getVersionSpecification() {
+
+    static VersionSpec adjustVersionSpec(final VersionSpec versionSpec) {
         final VersionSpec adjustedVersionSpec;
         if (versionSpec instanceof DateVersionSpec) {
             // The to timestamp is exclusive, ie it will only show history before the to timestamp.
@@ -48,13 +47,23 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
         else {
             adjustedVersionSpec = versionSpec;
         }
-        // TODO: just call adjustedVersionSpec.toString() once DateVersionSpec.toString() uses ISO 8601 format
-        if (adjustedVersionSpec instanceof DateVersionSpec){
-            final DateVersionSpec dateVersionSpec = (DateVersionSpec) adjustedVersionSpec;
+        return adjustedVersionSpec;
+    }
+
+    @Override
+    String getVersionSpecification() {
+        final VersionSpec adjustedVersionSpec = adjustVersionSpec(versionSpec);
+        return toString(adjustedVersionSpec);
+    }
+
+    public static String toString(final VersionSpec versionSpec) {
+        // TODO: just call versionSpec.toString() once DateVersionSpec.toString() uses ISO 8601 format
+        if (versionSpec instanceof DateVersionSpec){
+            final DateVersionSpec dateVersionSpec = (DateVersionSpec) versionSpec;
             return DateUtil.toString(dateVersionSpec);
         }
-        else if (adjustedVersionSpec instanceof LabelVersionSpec) {
-            final LabelVersionSpec labelVersionSpec = (LabelVersionSpec) adjustedVersionSpec;
+        else if (versionSpec instanceof LabelVersionSpec) {
+            final LabelVersionSpec labelVersionSpec = (LabelVersionSpec) versionSpec;
             // TODO: It seems to me LabelVersionSpec.toString() should emit "Lfoo" when its scope is null
             final String label = labelVersionSpec.getLabel();
             final String scope = labelVersionSpec.getScope();
@@ -67,6 +76,6 @@ public class RemoteChangesetVersionCommand extends AbstractChangesetVersionComma
             }
             return sb.toString();
         }
-        return adjustedVersionSpec.toString();
+        return versionSpec.toString();
     }
 }

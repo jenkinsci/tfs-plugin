@@ -4,6 +4,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Project;
@@ -80,9 +81,6 @@ public class FunctionalTest {
      */
     public static AbstractBuild runScmPollTrigger(final Project project)
             throws InterruptedException, ExecutionException {
-        final Jenkins jenkins = (Jenkins) project.getParent();
-        final Queue queue = jenkins.getQueue();
-
         final SCMTrigger scmTrigger = (SCMTrigger) project.getTrigger(SCMTrigger.class);
         // This is a roundabout way of calling SCMTrigger#run(),
         // because if we set SCMTrigger#synchronousPolling to true
@@ -95,6 +93,14 @@ public class FunctionalTest {
         final SCMTrigger.Runner runner = scmTrigger.new Runner();
         runner.run();
 
+        final AbstractBuild build = waitForQueuedBuild(project);
+        return build;
+    }
+
+    static AbstractBuild waitForQueuedBuild(final Project project)
+            throws InterruptedException, ExecutionException {
+        final Jenkins jenkins = (Jenkins) project.getParent();
+        final Queue queue = jenkins.getQueue();
         final Queue.Item[] items = queue.getItems();
         final boolean buildQueued = items.length == 1;
         final AbstractBuild build;
@@ -177,6 +183,32 @@ public class FunctionalTest {
         Assert.assertEquals(1, secondCauses.size());
         final Cause secondCause = secondCauses.get(0);
         Assert.assertTrue(secondCause instanceof SCMTrigger.SCMTriggerCause);
+        final FilePath jenkinsWorkspace = secondBuild.getWorkspace();
+        final FilePath[] workspaceFiles = jenkinsWorkspace.list("*.*", "$tf");
+        Assert.assertEquals(1, workspaceFiles.length);
+        final FilePath workspaceFile = workspaceFiles[0];
+        Assert.assertEquals("TODO.txt", workspaceFile.getName());
+
+        // force a build via a manual trigger
+        final Cause.UserIdCause cause = new Cause.UserIdCause();
+        project.scheduleBuild(cause);
+        final AbstractBuild thirdBuild = waitForQueuedBuild(project);
+
+        Assert.assertNotNull(thirdBuild);
+        Assert.assertEquals(Result.SUCCESS, thirdBuild.getResult());
+        final ChangeLogSet thirdChangeSet = thirdBuild.getChangeSet();
+        Assert.assertEquals(0, thirdChangeSet.getItems().length);
+        final TFSRevisionState thirdRevisionState = thirdBuild.getAction(TFSRevisionState.class);
+        Assert.assertEquals(latestChangesetID, thirdRevisionState.changesetVersion);
+        final List<Cause> thirdCauses = thirdBuild.getCauses();
+        Assert.assertEquals(1, thirdCauses.size());
+        final Cause thirdCause = thirdCauses.get(0);
+        Assert.assertTrue(thirdCause instanceof Cause.UserIdCause);
+        final FilePath thirdBuildWorkspace = thirdBuild.getWorkspace();
+        final FilePath[] thirdBuildWorkspaceFiles = thirdBuildWorkspace.list("*.*", "$tf");
+        Assert.assertEquals(1, thirdBuildWorkspaceFiles.length);
+        final FilePath thirdBuildWorkspaceFile = thirdBuildWorkspaceFiles[0];
+        Assert.assertEquals("TODO.txt", thirdBuildWorkspaceFile.getName());
     }
 
     /**

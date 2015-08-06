@@ -30,6 +30,7 @@ import hudson.util.Secret;
 import hudson.util.SecretOverride;
 import hudson.util.XStream2;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 
 
@@ -267,8 +268,9 @@ public class TeamFoundationServerScmTest {
         final String projectPath = "projectPath";
         final String singleVersionSpec = null;
 
-        scm.recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
+        final int actual = scm.recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
 
+        Assert.assertEquals(42, actual);
         final Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(build, env);
         assertEquals("42", env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));
@@ -283,8 +285,9 @@ public class TeamFoundationServerScmTest {
         final String projectPath = "projectPath";
         final String singleVersionSpec = "Lfoo";
 
-        scm.recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
+        final int actual = scm.recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
 
+        Assert.assertEquals(42, actual);
         final Map<String, String> env = new HashMap<String, String>();
         scm.buildEnvVars(build, env);
         assertEquals("42", env.get(TeamFoundationServerScm.WORKSPACE_CHANGESET_ENV_STR));

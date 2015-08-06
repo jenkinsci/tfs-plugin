@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.util.Secret;
@@ -188,9 +189,10 @@ public class TeamFoundationServerScm extends SCM {
         try {
             WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
             
+            final AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
             // Check if the configuration has changed
-            if (build.getPreviousBuild() != null) {
-                BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), build.getPreviousBuild());
+            if (previousBuild != null) {
+                BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), previousBuild);
                 if ((nodeConfiguration != null) &&
                         nodeConfiguration.workspaceExists() 
                         && (! workspaceConfiguration.equals(nodeConfiguration))) {
@@ -206,30 +208,48 @@ public class TeamFoundationServerScm extends SCM {
             String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
             final String projectPath = workspaceConfiguration.getProjectPath();
             final Project project = server.getProject(projectPath);
-            recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
+            final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
 
             CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
-            try {
-                List<ChangeSet> list;
-                if (StringUtils.isNotEmpty(singleVersionSpec)) {
-                    list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
-                }
-                else {
-                    list = action.checkout(server, workspaceFilePath, (build.getPreviousBuild() != null ? build.getPreviousBuild().getTimestamp() : null), build.getTimestamp());
-                }
-                ChangeSetWriter writer = new ChangeSetWriter();
-                writer.write(list, changelogFile);
-            } catch (ParseException pe) {
-                listener.fatalError(pe.getMessage());
-                throw new AbortException();
+            List<ChangeSet> list;
+            if (StringUtils.isNotEmpty(singleVersionSpec)) {
+                list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
             }
+            else {
+                final VersionSpec previousBuildVersionSpec = determineVersionSpecFromBuild(previousBuild, 1, changeSet);
+                final ChangesetVersionSpec currentBuildVersionSpec = new ChangesetVersionSpec(changeSet);
+                list = action.checkout(server, workspaceFilePath, previousBuildVersionSpec, currentBuildVersionSpec);
+            }
+            ChangeSetWriter writer = new ChangeSetWriter();
+            writer.write(list, changelogFile);
         } finally {
             server.close();
         }
         return true;
     }
 
-    void recordWorkspaceChangesetVersion(final AbstractBuild<?, ?> build, final BuildListener listener, final Project project, final String projectPath, final String singleVersionSpec) throws IOException, InterruptedException {
+    static VersionSpec determineVersionSpecFromBuild(final AbstractBuild<?, ?> build, final int offset, final int maximumChangeSetNumber) {
+        final VersionSpec result;
+        if (build != null) {
+            final TFSRevisionState revisionState = build.getAction(TFSRevisionState.class);
+            if (revisionState != null) {
+                final int changeSetNumber = revisionState.changesetVersion + offset;
+                if (changeSetNumber <= maximumChangeSetNumber) {
+                    result = new ChangesetVersionSpec(changeSetNumber);
+                } else {
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
+        }
+        else {
+            result = null;
+        }
+        return result;
+    }
+
+    int recordWorkspaceChangesetVersion(final AbstractBuild<?, ?> build, final BuildListener listener, final Project project, final String projectPath, final String singleVersionSpec) throws IOException, InterruptedException {
         final VersionSpec workspaceVersion;
         if (!StringUtils.isEmpty(singleVersionSpec)) {
             workspaceVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
@@ -245,6 +265,8 @@ public class TeamFoundationServerScm extends SCM {
 
             // by adding this action, we prevent calcRevisionsFromBuild() from being called
             build.addAction(new TFSRevisionState(buildChangeset, projectPath));
+
+            return buildChangeset;
         } catch (ParseException pe) {
             listener.fatalError(pe.getMessage());
             throw new AbortException();
