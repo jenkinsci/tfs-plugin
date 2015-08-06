@@ -216,7 +216,7 @@ public class TeamFoundationServerScm extends SCM {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
             }
             else {
-                final VersionSpec previousBuildVersionSpec = determineVersionSpecFromBuild(previousBuild, 1);
+                final VersionSpec previousBuildVersionSpec = determineVersionSpecFromBuild(previousBuild, 1, changeSet);
                 final ChangesetVersionSpec currentBuildVersionSpec = new ChangesetVersionSpec(changeSet);
                 list = action.checkout(server, workspaceFilePath, previousBuildVersionSpec, currentBuildVersionSpec);
             }
@@ -228,13 +228,17 @@ public class TeamFoundationServerScm extends SCM {
         return true;
     }
 
-    static VersionSpec determineVersionSpecFromBuild(final AbstractBuild<?, ?> build, final int offset) {
+    static VersionSpec determineVersionSpecFromBuild(final AbstractBuild<?, ?> build, final int offset, final int maximumChangeSetNumber) {
         final VersionSpec result;
         if (build != null) {
             final TFSRevisionState revisionState = build.getAction(TFSRevisionState.class);
             if (revisionState != null) {
                 final int changeSetNumber = revisionState.changesetVersion + offset;
-                result = new ChangesetVersionSpec(changeSetNumber);
+                if (changeSetNumber <= maximumChangeSetNumber) {
+                    result = new ChangesetVersionSpec(changeSetNumber);
+                } else {
+                    result = null;
+                }
             } else {
                 result = null;
             }

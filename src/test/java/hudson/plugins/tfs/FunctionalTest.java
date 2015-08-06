@@ -188,6 +188,27 @@ public class FunctionalTest {
         Assert.assertEquals(1, workspaceFiles.length);
         final FilePath workspaceFile = workspaceFiles[0];
         Assert.assertEquals("TODO.txt", workspaceFile.getName());
+
+        // force a build via a manual trigger
+        final Cause.UserIdCause cause = new Cause.UserIdCause();
+        project.scheduleBuild(cause);
+        final AbstractBuild thirdBuild = waitForQueuedBuild(project);
+
+        Assert.assertNotNull(thirdBuild);
+        Assert.assertEquals(Result.SUCCESS, thirdBuild.getResult());
+        final ChangeLogSet thirdChangeSet = thirdBuild.getChangeSet();
+        Assert.assertEquals(0, thirdChangeSet.getItems().length);
+        final TFSRevisionState thirdRevisionState = thirdBuild.getAction(TFSRevisionState.class);
+        Assert.assertEquals(latestChangesetID, thirdRevisionState.changesetVersion);
+        final List<Cause> thirdCauses = thirdBuild.getCauses();
+        Assert.assertEquals(1, thirdCauses.size());
+        final Cause thirdCause = thirdCauses.get(0);
+        Assert.assertTrue(thirdCause instanceof Cause.UserIdCause);
+        final FilePath thirdBuildWorkspace = thirdBuild.getWorkspace();
+        final FilePath[] thirdBuildWorkspaceFiles = thirdBuildWorkspace.list("*.*", "$tf");
+        Assert.assertEquals(1, thirdBuildWorkspaceFiles.length);
+        final FilePath thirdBuildWorkspaceFile = thirdBuildWorkspaceFiles[0];
+        Assert.assertEquals("TODO.txt", thirdBuildWorkspaceFile.getName());
     }
 
     /**
