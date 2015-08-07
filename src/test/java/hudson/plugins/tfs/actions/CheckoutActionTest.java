@@ -123,7 +123,6 @@ public class CheckoutActionTest {
 
         verify(project).getFiles(isA(String.class), eq(MY_LABEL));
         verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
-        verify(workspace, never()).mapWorkfolder(project, ".");
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
     
@@ -140,7 +139,6 @@ public class CheckoutActionTest {
 
         verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
         verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
-        verify(workspace, never()).mapWorkfolder(project, ".");
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
 

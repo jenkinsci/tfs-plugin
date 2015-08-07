@@ -5,8 +5,6 @@ import java.io.IOException;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import hudson.plugins.tfs.commands.MapWorkfolderCommand;
-
 public class Workspace {
 
     private final Server server;
@@ -25,11 +23,6 @@ public class Workspace {
     
     public Workspace(Server server, String name) {
         this(server, name, "", "", "");
-    }
-
-    public void mapWorkfolder(Project project, String workFolder) throws IOException, InterruptedException {
-        MapWorkfolderCommand command = new MapWorkfolderCommand(server, project.getProjectPath(), workFolder, name);
-        server.execute(command.getArguments()).close();
     }
 
     public boolean exists() throws IOException, InterruptedException {
