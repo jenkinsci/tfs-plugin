@@ -16,9 +16,7 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.VariableResolver;
 import hudson.util.VariableResolver.Union;
-import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.util.logging.Logger;
