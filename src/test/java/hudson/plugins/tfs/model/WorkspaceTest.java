@@ -38,23 +38,7 @@ public class WorkspaceTest {
         new Workspace(server, "name").mapWorkfolder(new Project(server, "$/serverpath"), ".");        
         verify(spy).close();
     }
-    
-    @Test
-    public void assertUnmapWorkfolderIsExecuted() throws Exception {
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));        
-        Workspace workspace = new Workspace(server, "name");
-        workspace.unmapWorkfolder(".");        
-        verify(server).execute(isA(MaskedArgumentListBuilder.class));
-    }
-    
-    @Test
-    public void assertUnmapWorkfolderClosesReader() throws Exception {
-        Reader spy = spy(new StringReader(""));
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);        
-        new Workspace(server, "name").unmapWorkfolder("$/serverpath");        
-        verify(spy).close();
-    }
-    
+
     @Test
     public void assertExistsUsesWorkspacesClass() throws Exception {
         Workspaces workspaces = mock(Workspaces.class);
