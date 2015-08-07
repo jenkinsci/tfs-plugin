@@ -206,9 +206,9 @@
     <dependency>
       <groupId>com.microsoft.tfs.sdk</groupId>
       <artifactId>com.microsoft.tfs.sdk</artifactId>
-      <version>11.0.0</version>
+      <version>14.0.1</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/com.microsoft.tfs.sdk-11.0.0.jar</systemPath>
+      <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/com.microsoft.tfs.sdk-14.0.1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
