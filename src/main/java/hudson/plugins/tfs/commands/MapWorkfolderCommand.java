@@ -7,13 +7,7 @@ public class MapWorkfolderCommand extends AbstractCommand {
     private final String projectPath;
     private final String workFolder;
     private final String workspaceName;
-
-    public MapWorkfolderCommand(ServerConfigurationProvider provider, 
-            String projectPath, String workFolder) {
-        this(provider, projectPath, workFolder, null);
-    }
-
-    public MapWorkfolderCommand(ServerConfigurationProvider provider, 
+    public MapWorkfolderCommand(ServerConfigurationProvider provider,
             String projectPath, String workFolder, String workspaceName) {
         super(provider);
         this.projectPath = projectPath;
