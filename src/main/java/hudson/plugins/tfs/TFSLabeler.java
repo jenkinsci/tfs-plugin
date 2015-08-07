@@ -67,10 +67,10 @@ public class TFSLabeler extends Notifier {
 
         TeamFoundationServerScm tfsScm = (TeamFoundationServerScm) scm;
 
-        boolean buildSucess = Result.SUCCESS.equals(build.getResult());
+        boolean buildSuccess = Result.SUCCESS.equals(build.getResult());
 
         String whenCreateLabel = getWhenToLabel();
-        if ("always".equals(whenCreateLabel) || ("success".equals(whenCreateLabel) && buildSucess)) {
+        if ("always".equals(whenCreateLabel) || ("success".equals(whenCreateLabel) && buildSuccess)) {
 
             final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
             final TfTool tool = new TfTool(tfsScm.getDescriptor().getTfExecutable(), localLauncher, listener, workspace);
