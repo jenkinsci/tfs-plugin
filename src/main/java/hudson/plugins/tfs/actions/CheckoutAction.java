@@ -90,8 +90,9 @@ public class CheckoutAction {
             if (!useUpdate && localFolderPath.exists()) {
                 localFolderPath.deleteContents();
             }
-            workspace = workspaces.newWorkspace(workspaceName);
-            workspace.mapWorkfolder(project, localFolderPath.getRemote());
+            final String serverPath = project.getProjectPath();
+            final String localPath = localFolderPath.getRemote();
+            workspace = workspaces.newWorkspace(workspaceName, serverPath, localPath);
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }

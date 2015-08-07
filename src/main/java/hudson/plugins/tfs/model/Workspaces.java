@@ -83,18 +83,18 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     }
 
     /**
-     * Create workspace on server and return a workspace object with the specified name
-     * @param name the name of the new workspace
+     * Create workspace on server, map it and return a workspace object with the specified name
+     * @param workspaceName the name of the new workspace
      * @return a workspace
      */
-    public Workspace newWorkspace(String name) throws IOException, InterruptedException {
-        NewWorkspaceCommand command = new NewWorkspaceCommand(server, name);
+    public Workspace newWorkspace(final String workspaceName, final String serverPath, final String localPath) throws IOException, InterruptedException {
+        NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, localPath);
         server.execute(command.getCallable());
-        Workspace workspace = new Workspace(server, name);
-        workspaces.put(name, workspace);
+        Workspace workspace = new Workspace(server, workspaceName);
+        workspaces.put(workspaceName, workspace);
         return workspace;
     }
-    
+
     /**
      * Deletes the workspace from the server
      * @param workspace the workspace to delete

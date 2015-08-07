@@ -93,7 +93,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        Workspace workspace = workspaces.newWorkspace("name1");
+        Workspace workspace = workspaces.newWorkspace("name1", null, null);
         assertNotNull("The new workspace was null", workspace);
         assertTrue("The workspace was reported as non existant", workspaces.exists(workspace));
     }
@@ -103,7 +103,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        workspaces.newWorkspace("name1");
+        workspaces.newWorkspace("name1", null, null);
         assertNotNull("The get new workspace returned null", workspaces.getWorkspace("name1"));
         verify(server, times(1)).execute(isA(Callable.class));
     }
@@ -113,7 +113,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        Workspace workspace = workspaces.newWorkspace("name1");
+        Workspace workspace = workspaces.newWorkspace("name1", null, null);
         assertTrue("The get new workspace did not exists", workspaces.exists(workspace));
         verify(server, times(1)).execute(isA(Callable.class));
     }
@@ -124,7 +124,7 @@ public class WorkspacesTest {
         Workspaces workspaces = new Workspaces(server);
         // Populate the map in test object
         assertFalse("The workspace was reported as existant", workspaces.exists(new Workspace(server, "name")));
-        Workspace workspace = workspaces.newWorkspace("name");
+        Workspace workspace = workspaces.newWorkspace("name", null, null);
         assertTrue("The workspace was reported as non existant", workspaces.exists(new Workspace(server, "name")));
         workspaces.deleteWorkspace(workspace);
         assertFalse("The workspace was reported as existant", workspaces.exists(workspace));
