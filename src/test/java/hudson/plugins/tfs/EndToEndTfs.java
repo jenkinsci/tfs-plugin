@@ -188,8 +188,8 @@ public @interface EndToEndTfs {
             return "jobs/" + testCaseName + "/";
         }
 
-        public StubRunner getInnerRunner() {
-            return runner;
+        public <T extends StubRunner> T getInnerRunner(final Class<T> type) {
+            return type.cast(runner);
         }
 
         public Workspace getWorkspace() {
