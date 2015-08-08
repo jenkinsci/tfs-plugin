@@ -188,6 +188,10 @@ public @interface EndToEndTfs {
             return "jobs/" + testCaseName + "/";
         }
 
+        public StubRunner getInnerRunner() {
+            return runner;
+        }
+
         public Workspace getWorkspace() {
             return workspace;
         }
