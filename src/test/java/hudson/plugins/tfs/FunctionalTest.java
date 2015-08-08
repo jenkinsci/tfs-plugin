@@ -97,6 +97,15 @@ public class FunctionalTest {
         return build;
     }
 
+    public static AbstractBuild runUserTrigger(final Project project)
+            throws InterruptedException, ExecutionException {
+        final Cause.UserIdCause cause = new Cause.UserIdCause();
+        project.scheduleBuild(cause);
+
+        final AbstractBuild build = waitForQueuedBuild(project);
+        return build;
+    }
+
     static AbstractBuild waitForQueuedBuild(final Project project)
             throws InterruptedException, ExecutionException {
         final Jenkins jenkins = (Jenkins) project.getParent();
@@ -190,9 +199,7 @@ public class FunctionalTest {
         Assert.assertEquals("TODO.txt", workspaceFile.getName());
 
         // force a build via a manual trigger
-        final Cause.UserIdCause cause = new Cause.UserIdCause();
-        project.scheduleBuild(cause);
-        final AbstractBuild thirdBuild = waitForQueuedBuild(project);
+        final AbstractBuild thirdBuild = runUserTrigger(project);
 
         Assert.assertNotNull(thirdBuild);
         Assert.assertEquals(Result.SUCCESS, thirdBuild.getResult());
