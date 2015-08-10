@@ -103,8 +103,16 @@ public class TfTool {
         
         int result = proc.join();
         LOGGER.fine(String.format("The TFS command '%s' returned with an error code of %d", toolArguments[1], result));
-        if ((result == SUCCESS_EXIT_CODE) || (result == PARTIAL_SUCCESS_EXIT_CODE)) {
+        if (result == SUCCESS_EXIT_CODE) {
             return new InputStreamReader(new ByteArrayInputStream(consoleStream.toByteArray()));
+        } else if (result == PARTIAL_SUCCESS_EXIT_CODE) {
+            // this partial success is e.g. returned if a repository checkout succeeds to get some files
+            // but fails to get all files, essentially this is still a failure though and can cause hard to 
+            // figure out build failures
+            // It can be observed with wrong repository URL parameters or also when path length issues
+            // prevent a full checkout on a Windows node.
+            listener.fatalError(String.format("Executable only succeeded partially, aborting: [%d]", result));
+            throw new AbortException();
         } else {
             listener.fatalError(String.format("Executable returned an unexpected result code [%d]", result));
             throw new AbortException();
