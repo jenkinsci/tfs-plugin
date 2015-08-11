@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.commands;
 
+import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 /**
@@ -12,7 +13,7 @@ public class LabelCommand extends AbstractCommand {
     private final String workspaceName;
     private final String projectPath;
 
-    public LabelCommand(final ServerConfigurationProvider configurationProvider,
+    public LabelCommand(final Server configurationProvider,
                         final String labelName,
                         final String workspaceName,
                         final String projectPath) {
