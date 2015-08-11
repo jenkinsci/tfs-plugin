@@ -9,6 +9,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.exceptions.ItemNotMappedExc
 import com.microsoft.tfs.core.clients.versioncontrol.exceptions.ServerPathFormatException;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.*;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelItemSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import com.microsoft.tfs.util.Closable;
 
@@ -27,6 +28,13 @@ public class MockableVersionControlClient implements Closable {
 
     public void close() {
         vcc.close();
+    }
+
+    public LabelResult[] createLabel(
+            final VersionControlLabel label,
+            final LabelItemSpec[] items,
+            final LabelChildOption options) {
+        return vcc.createLabel(label, items, options);
     }
 
     public Workspace createWorkspace(
