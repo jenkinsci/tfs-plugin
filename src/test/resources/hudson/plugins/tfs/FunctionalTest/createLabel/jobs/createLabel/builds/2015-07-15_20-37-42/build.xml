@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<build>
+  <actions>
+    <hudson.model.CauseAction>
+      <causes>
+        <hudson.model.Cause_-UserIdCause/>
+      </causes>
+    </hudson.model.CauseAction>
+    <hudson.plugins.tfs.model.WorkspaceConfiguration plugin="tfs@3.1.1">
+      <workspaceName>Hudson-upgradeEncodedPassword-MASTER</workspaceName>
+      <workfolder>.</workfolder>
+      <projectPath></projectPath>
+      <serverUrl></serverUrl>
+      <workspaceExists>true</workspaceExists>
+    </hudson.plugins.tfs.model.WorkspaceConfiguration>
+    <hudson.plugins.tfs.TFSRevisionState plugin="tfs@3.1.1">
+      <changesetVersion></changesetVersion>
+      <projectPath></projectPath>
+    </hudson.plugins.tfs.TFSRevisionState>
+  </actions>
+  <timestamp>1437007062000</timestamp>
+  <result>SUCCESS</result>
+  <duration>8897</duration>
+  <charset>windows-1252</charset>
+  <keepLog>false</keepLog>
+  <builtOn></builtOn>
+  <workspace>upgradeEncodedPassword/workspace</workspace>
+  <hudsonVersion>1.448</hudsonVersion>
+  <scm class="hudson.plugins.tfs.ChangeSetReader" plugin="tfs@3.1.1"/>
+</build>
