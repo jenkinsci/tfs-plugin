@@ -82,7 +82,7 @@ public class TFSLabeler extends Notifier {
 
             try {
                 logger.info(String.format("Create label '%s' on workspace '%s'", normalizedLabelName, tfsWorkspace));
-                LabelCommand labelCommand = new LabelCommand(server, normalizedLabelName, tfsWorkspace, tfsScm.getLocalPath());
+                LabelCommand labelCommand = new LabelCommand(server, normalizedLabelName, tfsWorkspace, tfsScm.getProjectPath());
                 server.execute(labelCommand.getArguments());
             } finally {
                 server.close();

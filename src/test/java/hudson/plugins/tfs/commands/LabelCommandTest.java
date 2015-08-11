@@ -18,8 +18,8 @@ public class LabelCommandTest {
         when(config.getUserName()).thenReturn("snd\\user_cp");
         when(config.getUserPassword()).thenReturn("password");
 
-        MaskedArgumentListBuilder arguments = new LabelCommand(config, "int_build.10", "Jenkins-JOB-MASTER", ".").getArguments();
+        MaskedArgumentListBuilder arguments = new LabelCommand(config, "int_build.10", "Jenkins-JOB-MASTER", "$/project/path").getArguments();
         assertNotNull("Arguments were null", arguments);
-        assertEquals("label int_build.10 . -version:WJenkins-JOB-MASTER -comment:Automatically_applied_by_Jenkins_TFS_plugin -noprompt -recursive -server:https://tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        assertEquals("label int_build.10 $/project/path -version:WJenkins-JOB-MASTER -comment:Automatically_applied_by_Jenkins_TFS_plugin -noprompt -recursive -server:https://tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
     }
 }
