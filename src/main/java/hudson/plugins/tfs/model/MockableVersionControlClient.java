@@ -97,6 +97,23 @@ public class MockableVersionControlClient implements Closable {
         );
     }
 
+    public VersionControlLabel[] queryLabels(
+            final String label,
+            final String scope,
+            final String owner,
+            final boolean includeItemDetails,
+            final String filterItem,
+            final VersionSpec filterItemVersion) {
+        return vcc.queryLabels(
+                label,
+                scope,
+                owner,
+                includeItemDetails,
+                filterItem,
+                filterItemVersion
+        );
+    }
+
     public Workspace queryWorkspace(final String name, final String owner) {
         return vcc.queryWorkspace(name, owner);
     }
