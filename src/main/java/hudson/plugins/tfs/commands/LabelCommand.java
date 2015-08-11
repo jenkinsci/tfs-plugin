@@ -8,11 +8,14 @@ import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
  */
 public class LabelCommand extends AbstractCommand {
 
-    private String labelName;
-    private String workspaceName;
-    private String projectPath;
+    private final String labelName;
+    private final String workspaceName;
+    private final String projectPath;
 
-    public LabelCommand(ServerConfigurationProvider configurationProvider, String labelName, String workspaceName, String projectPath) {
+    public LabelCommand(final ServerConfigurationProvider configurationProvider,
+                        final String labelName,
+                        final String workspaceName,
+                        final String projectPath) {
         super(configurationProvider);
         this.labelName = labelName;
         this.workspaceName = workspaceName;
