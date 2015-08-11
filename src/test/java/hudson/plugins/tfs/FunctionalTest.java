@@ -3,7 +3,9 @@ package hudson.plugins.tfs;
 import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.VersionControlLabel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
@@ -13,12 +15,14 @@ import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
+import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.XmlHelper;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.PollingResult;
 import hudson.triggers.SCMTrigger;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -130,6 +134,70 @@ public class FunctionalTest {
             build = null;
         }
         return build;
+    }
+
+    @LocalData
+    @EndToEndTfs(CreateLabel.class)
+    @Test public void createLabel() throws ExecutionException, InterruptedException {
+        final Jenkins jenkins = j.jenkins;
+        final TaskListener taskListener = j.createTaskListener();
+        final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
+        final CreateLabel innerRunner = tfsRunner.getInnerRunner(CreateLabel.class);
+        final String generatedLabelName = innerRunner.getGeneratedLabelName();
+        final Server server = tfsRunner.getServer();
+        final MockableVersionControlClient vcc = server.getVersionControlClient();
+        final List<Project> projects = jenkins.getProjects();
+        final Project project = projects.get(0);
+        final int latestChangesetID = vcc.getLatestChangesetID();
+
+        // polling should report no changes
+        final PollingResult pollingResult = project.poll(taskListener);
+
+        Assert.assertEquals(PollingResult.Change.NONE, pollingResult.change);
+
+        // trigger build
+        final AbstractBuild build = runUserTrigger(project);
+
+        // verify new label created against latestChangesetId
+        Assert.assertNotNull(build);
+        Assert.assertEquals(Result.SUCCESS, build.getResult());
+        final ChangeLogSet changeSet = build.getChangeSet();
+        Assert.assertEquals(0, changeSet.getItems().length);
+        final TFSRevisionState revisionState = build.getAction(TFSRevisionState.class);
+        Assert.assertEquals(latestChangesetID, revisionState.changesetVersion);
+        final String owner = AbstractIntegrationTest.TestUserName;
+        final ChangesetVersionSpec spec = new ChangesetVersionSpec(latestChangesetID);
+        final VersionControlLabel[] labels = vcc.queryLabels(generatedLabelName, null, owner, false, null, spec);
+        Assert.assertEquals(1, labels.length);
+        final VersionControlLabel label = labels[0];
+        Assert.assertFalse(StringUtils.isEmpty(label.getComment()));
+    }
+
+    public static class CreateLabel extends CurrentChangesetInjector {
+
+        private final String generatedLabelName;
+
+        public CreateLabel(){
+            final Calendar now = Calendar.getInstance();
+            final String iso8601DateString = DateUtil.toString(now);
+            generatedLabelName = "CreateLabel_" + iso8601DateString.replace(':', '-');
+        }
+
+        public String getGeneratedLabelName() {
+            return generatedLabelName;
+        }
+
+        @Override public void decorateHome(final JenkinsRule jenkinsRule, final File home) throws Exception {
+            super.decorateHome(jenkinsRule, home);
+
+            final EndToEndTfs.RunnerImpl parent = getParent();
+            final String jobFolder = parent.getJobFolder();
+            final String configXmlPath = jobFolder + "config.xml";
+            final File configXmlFile = new File(home, configXmlPath);
+
+            final String labelNameXPath = "/project/publishers/hudson.plugins.tfs.TFSLabeler/labelName";
+            XmlHelper.pokeValue(configXmlFile, labelNameXPath, generatedLabelName);
+        }
     }
 
     @LocalData
