@@ -30,28 +30,21 @@ public class IntegrationTestHelper {
     }
 
     public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
-        serverUrl = buildServerUrl(tfsServerName);
-    }
-
-    public String getServerUrl() {
-        return serverUrl;
-    }
-
-    /**
-     * Creates a string representing the URL to a VSO account or a default TFS server installation,
-     * based on the <code>tfs_server_name</code> property.
-     *
-     * @return a string representing a URL to a VSO or TFS server.
-     * @throws URISyntaxException
-     */
-    public static String buildServerUrl(final String tfs_server_name) throws URISyntaxException {
         final URI serverUri;
-        if ("vso".equals(tfs_server_name)) {
+        if ("vso".equals(tfsServerName)) {
             serverUri = URIUtils.createURI("https", "automated-testing.visualstudio.com", 443, "DefaultCollection", null, null);
         } else {
-            serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs/" + TeamProjectCollection, null, null);
+            serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + TeamProjectCollection, null, null);
         }
-        return serverUri.toString();
+        serverUrl = serverUri.toString();
+    }
+
+
+    /**
+     * A string representing the URL to a VSO account or a default TFS server installation.
+     */
+    public String getServerUrl() {
+        return serverUrl;
     }
 
     public static String getTfsServerName() {
