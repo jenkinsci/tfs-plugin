@@ -44,7 +44,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
         final URI serverUri = URI.create(serverUrl);
         Server.ensureNativeLibrariesConfigured();
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                IntegrationTestHelper.TestUserName, IntegrationTestHelper.TestUserPassword);
+                helper.getUserName(), helper.getUserPassword());
         final TFSTeamProjectCollection tpc = new TFSTeamProjectCollection(serverUri, credentials);
 
         try {
@@ -86,7 +86,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
         final URI serverUri = URI.create(serverUrl);
         Server.ensureNativeLibrariesConfigured();
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                IntegrationTestHelper.TestUserName, IntegrationTestHelper.TestUserPassword);
+                helper.getUserName(), helper.getUserPassword());
         final TFSTeamProjectCollection tpc = new TFSTeamProjectCollection(serverUri, credentials);
 
         try {

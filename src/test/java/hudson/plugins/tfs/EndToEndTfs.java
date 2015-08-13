@@ -83,7 +83,7 @@ public @interface EndToEndTfs {
             final String workspaceName = "Hudson-${JOB_NAME}-${COMPUTERNAME}";
             XmlHelper.pokeValue(configXmlFile, "/project/scm/workspaceName", workspaceName);
 
-            final String userName = IntegrationTestHelper.TestUserName;
+            final String userName = helper.getUserName();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/userName", userName);
         }
     }
@@ -119,7 +119,7 @@ public @interface EndToEndTfs {
             final File currentFolder = new File("").getAbsoluteFile();
             final File workspaces = new File(currentFolder, "workspaces");
             // TODO: Consider NOT using the Server class
-            server = new Server(new TfTool(null, null, null, null), serverUrl, IntegrationTestHelper.TestUserName, IntegrationTestHelper.TestUserPassword);
+            server = new Server(new TfTool(null, null, null, null), serverUrl, helper.getUserName(), helper.getUserPassword());
 
             final MockableVersionControlClient vcc = server.getVersionControlClient();
 

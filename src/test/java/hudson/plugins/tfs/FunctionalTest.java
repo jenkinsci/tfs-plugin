@@ -165,7 +165,7 @@ public class FunctionalTest {
         Assert.assertEquals(0, changeSet.getItems().length);
         final TFSRevisionState revisionState = build.getAction(TFSRevisionState.class);
         Assert.assertEquals(latestChangesetID, revisionState.changesetVersion);
-        final String owner = IntegrationTestHelper.TestUserName;
+        final String owner = server.getUserName();
         final ChangesetVersionSpec spec = new ChangesetVersionSpec(latestChangesetID);
         final VersionControlLabel[] labels = vcc.queryLabels(generatedLabelName, null, owner, false, null, spec);
         Assert.assertEquals(1, labels.length);
