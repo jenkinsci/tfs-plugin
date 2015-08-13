@@ -18,9 +18,6 @@ import java.util.Enumeration;
 
 public class IntegrationTestHelper {
 
-    public static final String TestUserName = "jenkins-tfs-plugin";
-    public static final String TestUserPassword = "for-test-only";
-
     private final String serverUrl;
     private final String userName;
     private final String userPassword;
@@ -37,8 +34,8 @@ public class IntegrationTestHelper {
             this.userPassword = "TODO";
         } else {
             serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + "jenkins-tfs-plugin", null, null);
-            this.userName = TestUserName;
-            this.userPassword = TestUserPassword;
+            this.userName = "jenkins-tfs-plugin";
+            this.userPassword = "for-test-only";
         }
         serverUrl = serverUri.toString();
     }
