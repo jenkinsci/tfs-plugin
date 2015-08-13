@@ -29,15 +29,15 @@ public class IntegrationTestHelper {
 
     public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
         final URI serverUri;
+        final String tfsUserName = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_name"));
+        final String tfsUserPassword = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_password"));
         if ("vso".equals(tfsServerName)) {
             serverUri = URIUtils.createURI("https", "automated-testing.visualstudio.com", 443, "DefaultCollection", null, null);
-            this.userName = "TODO";
-            this.userPassword = "TODO";
+            this.userName = tfsUserName;
+            this.userPassword = tfsUserPassword;
         } else {
             serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + "jenkins-tfs-plugin", null, null);
-            final String tfsUserName = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_name"));
             this.userName = (tfsUserName != null) ? tfsUserName : "jenkins-tfs-plugin";
-            final String tfsUserPassword = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_password"));
             this.userPassword = (tfsUserPassword != null) ? tfsUserPassword : "for-test-only";
         }
         serverUrl = serverUri.toString();
