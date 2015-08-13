@@ -26,7 +26,11 @@ public class IntegrationTestHelper {
     private final String serverUrl;
 
     public IntegrationTestHelper() throws URISyntaxException {
-        serverUrl = buildTfsServerUrl();
+        this(getTfsServerName());
+    }
+
+    public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
+        serverUrl = buildServerUrl(tfsServerName);
     }
 
     public String getServerUrl() {
@@ -40,13 +44,8 @@ public class IntegrationTestHelper {
      * @return a string representing a URL to a VSO or TFS server.
      * @throws URISyntaxException
      */
-    public static String buildTfsServerUrl() throws URISyntaxException {
-        final String tfs_server_name = getTfsServerName();
-        Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", tfs_server_name);
-        return buildServerUrl(tfs_server_name);
-    }
-
     public static String buildServerUrl(final String tfs_server_name) throws URISyntaxException {
+        Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", tfs_server_name);
         final URI serverUri;
         if ("vso".equals(tfs_server_name)) {
             serverUri = URIUtils.createURI("https", "automated-testing.visualstudio.com", 443, "DefaultCollection", null, null);
