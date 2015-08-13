@@ -23,8 +23,8 @@ public class DeleteWorkspaceCommandTest extends AbstractCallableCommandTest {
         callable.call();
 
         assertLog(
-                "Deleting workspace 'TheWorkspaceName;snd\\user_cp'...",
-                "Deleted workspace 'TheWorkspaceName;snd\\user_cp'."
+                "Deleting workspace 'TheWorkspaceName' owned by 'snd\\user_cp'...",
+                "Deleted workspace 'TheWorkspaceName'."
         );
     }
 }

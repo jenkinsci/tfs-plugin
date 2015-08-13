@@ -14,10 +14,10 @@ import java.util.concurrent.Callable;
 
 public class NewWorkspaceCommand extends AbstractCallableCommand {
 
-    private static final String CreatingTemplate = "Creating workspace '%s;%s'...";
-    private static final String CreatedTemplate = "Created workspace '%s;%s'.";
-    private static final String MappingTemplate = "Mapping '%s' to local folder '%s' in workspace '%s;%s'...";
-    private static final String MappedTemplate = "Mapped '%s' to local folder '%s' in workspace '%s;%s'.";
+    private static final String CreatingTemplate = "Creating workspace '%s' owned by '%s'...";
+    private static final String CreatedTemplate = "Created workspace '%s'.";
+    private static final String MappingTemplate = "Mapping '%s' to local folder '%s' in workspace '%s'...";
+    private static final String MappedTemplate = "Mapped '%s' to local folder '%s' in workspace '%s'.";
 
     private final String workspaceName;
     private final String serverPath;
@@ -52,16 +52,16 @@ public class NewWorkspaceCommand extends AbstractCallableCommand {
                         WorkspaceOptions.NONE
                 );
 
-                final String createdMessage = String.format(CreatedTemplate, workspaceName, userName);
+                final String createdMessage = String.format(CreatedTemplate, workspaceName);
                 logger.println(createdMessage);
 
                 if (serverPath != null && localPath != null) {
-                    final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName, userName);
+                    final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
                     logger.println(mappingMessage);
 
                     workspace.map(serverPath, localPath);
 
-                    final String mappedMessage = String.format(MappedTemplate, serverPath, localPath, workspaceName, userName);
+                    final String mappedMessage = String.format(MappedTemplate, serverPath, localPath, workspaceName);
                     logger.println(mappedMessage);
                 }
 

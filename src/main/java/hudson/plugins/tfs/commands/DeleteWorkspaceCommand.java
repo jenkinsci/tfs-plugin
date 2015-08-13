@@ -11,8 +11,8 @@ import java.util.concurrent.Callable;
 
 public class DeleteWorkspaceCommand extends AbstractCallableCommand {
 
-    private static final String DeletingTemplate = "Deleting workspace '%s;%s'...";
-    private static final String DeletedTemplate = "Deleted workspace '%s;%s'.";
+    private static final String DeletingTemplate = "Deleting workspace '%s' owned by '%s'...";
+    private static final String DeletedTemplate = "Deleted workspace '%s'.";
 
     private final String workspaceName;
 
@@ -36,7 +36,7 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
                 final Workspace innerWorkspace = vcc.queryWorkspace(workspaceName, VersionControlConstants.AUTHENTICATED_USER);
                 vcc.deleteWorkspace(innerWorkspace);
 
-                final String deletedMessage = String.format(DeletedTemplate, workspaceName, userName);
+                final String deletedMessage = String.format(DeletedTemplate, workspaceName);
                 logger.println(deletedMessage);
 
                 return null;

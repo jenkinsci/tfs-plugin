@@ -29,8 +29,8 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
         callable.call();
 
         assertLog(
-                "Creating workspace 'TheWorkspaceName;snd\\user_cp'...",
-                "Created workspace 'TheWorkspaceName;snd\\user_cp'."
+                "Creating workspace 'TheWorkspaceName' owned by 'snd\\user_cp'...",
+                "Created workspace 'TheWorkspaceName'."
         );
     }
 
@@ -50,10 +50,10 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
         callable.call();
 
         assertLog(
-                "Creating workspace 'TheWorkspaceName;snd\\user_cp'...",
-                "Created workspace 'TheWorkspaceName;snd\\user_cp'.",
-                "Mapping '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName;snd\\user_cp'...",
-                "Mapped '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName;snd\\user_cp'."
+                "Creating workspace 'TheWorkspaceName' owned by 'snd\\user_cp'...",
+                "Created workspace 'TheWorkspaceName'.",
+                "Mapping '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName'...",
+                "Mapped '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName'."
         );
     }
 }
