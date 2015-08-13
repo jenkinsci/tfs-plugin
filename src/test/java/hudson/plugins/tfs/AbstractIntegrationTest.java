@@ -33,6 +33,10 @@ public abstract class AbstractIntegrationTest {
     public static String buildTfsServerUrl() throws URISyntaxException {
         final String tfs_server_name = getTfsServerName();
         Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", tfs_server_name);
+        return buildServerUrl(tfs_server_name);
+    }
+
+    public static String buildServerUrl(final String tfs_server_name) throws URISyntaxException {
         final URI serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs/" + TeamProjectCollection, null, null);
         return serverUri.toString();
     }
