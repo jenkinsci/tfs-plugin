@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
@@ -13,10 +14,10 @@ import java.util.concurrent.Callable;
 
 public class NewWorkspaceCommand extends AbstractCallableCommand {
 
-    private static final String CreatingTemplate = "Creating workspace '%s;%s'...";
-    private static final String CreatedTemplate = "Created workspace '%s;%s'.";
-    private static final String MappingTemplate = "Mapping '%s' to local folder '%s' in workspace '%s;%s'...";
-    private static final String MappedTemplate = "Mapped '%s' to local folder '%s' in workspace '%s;%s'.";
+    private static final String CreatingTemplate = "Creating workspace '%s' owned by '%s'...";
+    private static final String CreatedTemplate = "Created workspace '%s'.";
+    private static final String MappingTemplate = "Mapping '%s' to local folder '%s' in workspace '%s'...";
+    private static final String MappedTemplate = "Mapped '%s' to local folder '%s' in workspace '%s'.";
 
     private final String workspaceName;
     private final String serverPath;
@@ -44,23 +45,23 @@ public class NewWorkspaceCommand extends AbstractCallableCommand {
                 final Workspace workspace = vcc.createWorkspace(
                         null,
                         workspaceName,
-                        null,
-                        null,
+                        VersionControlConstants.AUTHENTICATED_USER,
+                        VersionControlConstants.AUTHENTICATED_USER,
                         null /* TODO: set comment to something nice/useful */,
                         WorkspaceLocation.SERVER /* TODO: pull request #33 adds LOCAL support */,
                         WorkspaceOptions.NONE
                 );
 
-                final String createdMessage = String.format(CreatedTemplate, workspaceName, userName);
+                final String createdMessage = String.format(CreatedTemplate, workspaceName);
                 logger.println(createdMessage);
 
                 if (serverPath != null && localPath != null) {
-                    final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName, userName);
+                    final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
                     logger.println(mappingMessage);
 
                     workspace.map(serverPath, localPath);
 
-                    final String mappedMessage = String.format(MappedTemplate, serverPath, localPath, workspaceName, userName);
+                    final String mappedMessage = String.format(MappedTemplate, serverPath, localPath, workspaceName);
                     logger.println(mappedMessage);
                 }
 
