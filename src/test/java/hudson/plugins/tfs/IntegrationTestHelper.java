@@ -1,5 +1,6 @@
 package hudson.plugins.tfs;
 
+import hudson.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.providers.http.httpclient.client.utils.URIUtils;
 import org.junit.Assert;
@@ -34,8 +35,10 @@ public class IntegrationTestHelper {
             this.userPassword = "TODO";
         } else {
             serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + "jenkins-tfs-plugin", null, null);
-            this.userName = "jenkins-tfs-plugin";
-            this.userPassword = "for-test-only";
+            final String tfsUserName = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_name"));
+            this.userName = (tfsUserName != null) ? tfsUserName : "jenkins-tfs-plugin";
+            final String tfsUserPassword = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_password"));
+            this.userPassword = (tfsUserPassword != null) ? tfsUserPassword : "for-test-only";
         }
         serverUrl = serverUri.toString();
     }
