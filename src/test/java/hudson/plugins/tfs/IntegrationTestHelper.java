@@ -23,6 +23,16 @@ public class IntegrationTestHelper {
     public static final String TestUserName = "jenkins-tfs-plugin";
     public static final String TestUserPassword = "for-test-only";
 
+    private final String serverUrl;
+
+    public IntegrationTestHelper() throws URISyntaxException {
+        serverUrl = buildTfsServerUrl();
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
     /**
      * Creates a string representing the URL to a VSO account or a default TFS server installation,
      * based on the <code>tfs_server_name</code> property.
