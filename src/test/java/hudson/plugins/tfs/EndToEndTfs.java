@@ -50,6 +50,7 @@ public @interface EndToEndTfs {
      */
     class StubRunner extends JenkinsRecipe.Runner<EndToEndTfs> {
         private RunnerImpl parent;
+        private IntegrationTestHelper helper;
 
         protected RunnerImpl getParent() {
             return parent;
@@ -57,6 +58,14 @@ public @interface EndToEndTfs {
 
         private void setParent(final RunnerImpl parent) {
             this.parent = parent;
+        }
+
+        protected IntegrationTestHelper getHelper() {
+            return helper;
+        }
+
+        private void setHelper(final IntegrationTestHelper helper) {
+            this.helper = helper;
         }
 
         @Override
@@ -83,6 +92,7 @@ public @interface EndToEndTfs {
 
         private static final String workspaceComment = "Created by the Jenkins tfs-plugin functional tests.";
 
+        private final IntegrationTestHelper helper;
         private final String serverUrl;
 
         private File localBaseFolderFile;
@@ -95,7 +105,8 @@ public @interface EndToEndTfs {
         private Workspace workspace;
 
         public RunnerImpl() throws URISyntaxException {
-            serverUrl = IntegrationTestHelper.buildTfsServerUrl();
+            helper = new IntegrationTestHelper();
+            serverUrl = helper.getServerUrl();
         }
 
         @Override
@@ -153,6 +164,7 @@ public @interface EndToEndTfs {
             if (runnerClass != null) {
                 runner = runnerClass.newInstance();
                 runner.setParent(this);
+                runner.setHelper(this.helper);
                 runner.setup(jenkinsRule, recipe);
             }
         }
