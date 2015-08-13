@@ -13,13 +13,13 @@ import java.net.URISyntaxException;
  * These are so-called integration (L2) tests.
  */
 @Category(IntegrationTests.class)
-public class TeamFoundationServerScmIntegrationTest extends AbstractIntegrationTest {
+public class TeamFoundationServerScmIntegrationTest {
 
     private TeamFoundationServerScm scm;
 
     @Before
     public void connectToTfs() throws URISyntaxException {
-        final String serverUrl = buildTfsServerUrl();
+        final String serverUrl = AbstractIntegrationTest.buildTfsServerUrl();
         scm = new TeamFoundationServerScm(serverUrl, "projectPath", "localPath", false, "workspaceName", null, (Secret) null);
     }
 
