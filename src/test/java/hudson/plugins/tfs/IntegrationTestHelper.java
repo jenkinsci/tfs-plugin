@@ -18,8 +18,6 @@ import java.util.Enumeration;
 
 public class IntegrationTestHelper {
 
-    public static final String TeamProjectCollection = "jenkins-tfs-plugin";
-    public static final String TeamProjectPrefix = "$/FunctionalTests";
     public static final String TestUserName = "jenkins-tfs-plugin";
     public static final String TestUserPassword = "for-test-only";
 
@@ -34,7 +32,7 @@ public class IntegrationTestHelper {
         if ("vso".equals(tfsServerName)) {
             serverUri = URIUtils.createURI("https", "automated-testing.visualstudio.com", 443, "DefaultCollection", null, null);
         } else {
-            serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + TeamProjectCollection, null, null);
+            serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + "jenkins-tfs-plugin", null, null);
         }
         serverUrl = serverUri.toString();
     }
@@ -64,7 +62,7 @@ public class IntegrationTestHelper {
         final Class clazz = testDescription.getTestClass();
         final String testClassName = clazz.getSimpleName();
         final String testCaseName = testDescription.getMethodName();
-        return TeamProjectPrefix + "/" + testClassName + "/" + testCaseName;
+        return "$/FunctionalTests" + "/" + testClassName + "/" + testCaseName;
     }
 
     // Adapted from http://stackoverflow.com/a/20793241
