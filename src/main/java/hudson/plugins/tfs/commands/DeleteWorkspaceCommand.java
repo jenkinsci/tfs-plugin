@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
@@ -32,7 +33,7 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
                 final String deletingMessage = String.format(DeletingTemplate, workspaceName, userName);
                 logger.println(deletingMessage);
 
-                final Workspace innerWorkspace = vcc.queryWorkspace(workspaceName, server.getUserName());
+                final Workspace innerWorkspace = vcc.queryWorkspace(workspaceName, VersionControlConstants.AUTHENTICATED_USER);
                 vcc.deleteWorkspace(innerWorkspace);
 
                 final String deletedMessage = String.format(DeletedTemplate, workspaceName, userName);

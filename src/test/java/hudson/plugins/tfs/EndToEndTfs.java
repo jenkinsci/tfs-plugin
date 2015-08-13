@@ -2,6 +2,7 @@ package hudson.plugins.tfs;
 
 import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
@@ -218,8 +219,8 @@ public @interface EndToEndTfs {
             final Workspace workspace = vcc.createWorkspace(
                     null,
                     workspaceName,
-                    null,
-                    null,
+                    VersionControlConstants.AUTHENTICATED_USER,
+                    VersionControlConstants.AUTHENTICATED_USER,
                     workspaceComment,
                     WorkspaceLocation.LOCAL,
                     WorkspaceOptions.NONE);
@@ -227,7 +228,7 @@ public @interface EndToEndTfs {
         }
 
         static void deleteWorkspace(final MockableVersionControlClient vcc, final String workspaceName) {
-            final Workspace workspace = vcc.getLocalWorkspace(workspaceName, ".");
+            final Workspace workspace = vcc.getLocalWorkspace(workspaceName, VersionControlConstants.AUTHENTICATED_USER);
             if (workspace != null) {
                 for (WorkingFolder workingFolder : workspace.getFolders()) {
                     final String localItem = workingFolder.getLocalItem();

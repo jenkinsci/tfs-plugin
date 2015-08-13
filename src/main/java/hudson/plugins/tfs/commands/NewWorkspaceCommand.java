@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
@@ -44,8 +45,8 @@ public class NewWorkspaceCommand extends AbstractCallableCommand {
                 final Workspace workspace = vcc.createWorkspace(
                         null,
                         workspaceName,
-                        null,
-                        null,
+                        VersionControlConstants.AUTHENTICATED_USER,
+                        VersionControlConstants.AUTHENTICATED_USER,
                         null /* TODO: set comment to something nice/useful */,
                         WorkspaceLocation.SERVER /* TODO: pull request #33 adds LOCAL support */,
                         WorkspaceOptions.NONE
