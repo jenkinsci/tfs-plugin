@@ -24,10 +24,10 @@ public class IntegrationTestHelper {
     public static final String TestUserPassword = "for-test-only";
 
     /**
-     * Creates a string representing the URL to a default TFS server installation, based on the
-     * <code>tfs_server_name</code> property.
+     * Creates a string representing the URL to a VSO account or a default TFS server installation,
+     * based on the <code>tfs_server_name</code> property.
      *
-     * @return a string of the form <code>http://${tfs_server_name}:8080/tfs/jenkins-tfs-plugin</code>
+     * @return a string representing a URL to a VSO or TFS server.
      * @throws URISyntaxException
      */
     public static String buildTfsServerUrl() throws URISyntaxException {
@@ -37,7 +37,12 @@ public class IntegrationTestHelper {
     }
 
     public static String buildServerUrl(final String tfs_server_name) throws URISyntaxException {
-        final URI serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs/" + TeamProjectCollection, null, null);
+        final URI serverUri;
+        if ("vso".equals(tfs_server_name)) {
+            serverUri = URIUtils.createURI("https", "automated-testing.visualstudio.com", 443, "DefaultCollection", null, null);
+        } else {
+            serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs/" + TeamProjectCollection, null, null);
+        }
         return serverUri.toString();
     }
 
