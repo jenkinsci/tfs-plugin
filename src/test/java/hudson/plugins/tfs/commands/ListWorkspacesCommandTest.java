@@ -15,7 +15,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
-import hudson.plugins.tfs.AbstractIntegrationTest;
+import hudson.plugins.tfs.IntegrationTestHelper;
 import hudson.plugins.tfs.IntegrationTests;
 import hudson.plugins.tfs.commands.ListWorkspacesCommand.WorkspaceFactory;
 import hudson.plugins.tfs.model.Server;
@@ -39,11 +39,11 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
 
     @Category(IntegrationTests.class)
     @Test public void assertLoggingWithComputer() throws Exception {
-        final String serverUrl = AbstractIntegrationTest.buildTfsServerUrl();
+        final String serverUrl = IntegrationTestHelper.buildTfsServerUrl();
         final URI serverUri = URI.create(serverUrl);
         Server.ensureNativeLibrariesConfigured();
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                AbstractIntegrationTest.TestUserName, AbstractIntegrationTest.TestUserPassword);
+                IntegrationTestHelper.TestUserName, IntegrationTestHelper.TestUserPassword);
         final TFSTeamProjectCollection tpc = new TFSTeamProjectCollection(serverUri, credentials);
 
         try {
@@ -80,11 +80,11 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
 
     @Category(IntegrationTests.class)
     @Test public void assertLoggingWithoutComputer() throws Exception {
-        final String serverUrl = AbstractIntegrationTest.buildTfsServerUrl();
+        final String serverUrl = IntegrationTestHelper.buildTfsServerUrl();
         final URI serverUri = URI.create(serverUrl);
         Server.ensureNativeLibrariesConfigured();
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
-                AbstractIntegrationTest.TestUserName, AbstractIntegrationTest.TestUserPassword);
+                IntegrationTestHelper.TestUserName, IntegrationTestHelper.TestUserPassword);
         final TFSTeamProjectCollection tpc = new TFSTeamProjectCollection(serverUri, credentials);
 
         try {

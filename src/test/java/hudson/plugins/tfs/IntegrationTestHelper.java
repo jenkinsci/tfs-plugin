@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-public class AbstractIntegrationTest {
+public class IntegrationTestHelper {
 
     public static final String TeamProjectCollection = "jenkins-tfs-plugin";
     public static final String TeamProjectPrefix = "$/FunctionalTests";

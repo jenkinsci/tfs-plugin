@@ -65,7 +65,7 @@ public @interface EndToEndTfs {
             final String configXmlPath = jobFolder + "config.xml";
             final File configXmlFile = new File(home, configXmlPath);
 
-            final String tfsServerUrl = AbstractIntegrationTest.buildTfsServerUrl();
+            final String tfsServerUrl = IntegrationTestHelper.buildTfsServerUrl();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/serverUrl", tfsServerUrl);
 
             final String projectPath = parent.getPathInTfvc();
@@ -74,7 +74,7 @@ public @interface EndToEndTfs {
             final String workspaceName = "Hudson-${JOB_NAME}-${COMPUTERNAME}";
             XmlHelper.pokeValue(configXmlFile, "/project/scm/workspaceName", workspaceName);
 
-            final String userName = AbstractIntegrationTest.TestUserName;
+            final String userName = IntegrationTestHelper.TestUserName;
             XmlHelper.pokeValue(configXmlFile, "/project/scm/userName", userName);
         }
     }
@@ -95,7 +95,7 @@ public @interface EndToEndTfs {
         private Workspace workspace;
 
         public RunnerImpl() throws URISyntaxException {
-            serverUrl = AbstractIntegrationTest.buildTfsServerUrl();
+            serverUrl = IntegrationTestHelper.buildTfsServerUrl();
         }
 
         @Override
@@ -104,11 +104,11 @@ public @interface EndToEndTfs {
             final Class clazz = testDescription.getTestClass();
             testClassName = clazz.getSimpleName();
             testCaseName = testDescription.getMethodName();
-            final String hostName = AbstractIntegrationTest.tryToDetermineHostName();
+            final String hostName = IntegrationTestHelper.tryToDetermineHostName();
             final File currentFolder = new File("").getAbsoluteFile();
             final File workspaces = new File(currentFolder, "workspaces");
             // TODO: Consider NOT using the Server class
-            server = new Server(new TfTool(null, null, null, null), serverUrl, AbstractIntegrationTest.TestUserName, AbstractIntegrationTest.TestUserPassword);
+            server = new Server(new TfTool(null, null, null, null), serverUrl, IntegrationTestHelper.TestUserName, IntegrationTestHelper.TestUserPassword);
 
             final MockableVersionControlClient vcc = server.getVersionControlClient();
 
@@ -116,7 +116,7 @@ public @interface EndToEndTfs {
             workspaceName = hostName + "-" + testCaseName;
             workspace = createWorkspace(vcc, workspaceName);
 
-            pathInTfvc = AbstractIntegrationTest.determinePathInTfvcForTestCase(testDescription);
+            pathInTfvc = IntegrationTestHelper.determinePathInTfvcForTestCase(testDescription);
             final File localTestClassFolder = new File(workspaces, testClassName);
             localBaseFolderFile = new File(localTestClassFolder, testCaseName);
             //noinspection ResultOfMethodCallIgnored
