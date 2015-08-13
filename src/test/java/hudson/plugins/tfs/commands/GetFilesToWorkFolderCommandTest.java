@@ -1,24 +1,45 @@
 package hudson.plugins.tfs.commands;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import hudson.plugins.tfs.model.Server;
-import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.concurrent.Callable;
 
+import com.microsoft.tfs.core.clients.versioncontrol.events.GetEvent;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
-public class GetFilesToWorkFolderCommandTest {
+public class GetFilesToWorkFolderCommandTest extends AbstractCallableCommandTest {
 
-    @Test
-    public void assertVersionSpecArgument() {
-        final Server config = mock(Server.class);
-        when(config.getUserName()).thenReturn("snd\\user_cp");
-        when(config.getUserPassword()).thenReturn("password");
-        
-        MaskedArgumentListBuilder arguments = new GetFilesToWorkFolderCommand(config, "localPath", "C100").getArguments();
-        assertNotNull("Arguments were null", arguments);
-        assertEquals("get localPath -recursive -version:C100 -noprompt -login:snd\\user_cp,password", arguments.toStringWithQuote());
+    @Ignore("Finish test when we have MockableWorkspace and MockableVersionControlEventEngine")
+    @Test public void assertLogging() throws Exception {
+        when(vcc.queryWorkspace(
+                isA(String.class),
+                isA(String.class))).thenReturn(null);
+        final GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, "c:/jenkins/jobs/newJob/workspace", "C618");
+        final Callable<Void> callable = command.getCallable();
+
+        callable.call();
+
+        assertLog(
+                "Getting version 'C618' to 'c:/jenkins/jobs/newJob/workspace'...",
+                "Finished getting version 'C618'."
+        );
+    }
+
+    @Test public void onGet_typical() throws IOException {
+        final GetEvent getEvent = mock(GetEvent.class);
+        final String pathToFile = "C:\\.jenkins\\jobs\\typical\\workspace\\TODO.txt";
+        when(getEvent.getTargetLocalItem()).thenReturn(pathToFile);
+        final GetFilesToWorkFolderCommand cut = new GetFilesToWorkFolderCommand(null, null, null);
+        cut.setLogger(new PrintStream(this.outputStream));
+
+        cut.onGet(getEvent);
+
+        assertLog(
+                pathToFile
+        );
     }
 }

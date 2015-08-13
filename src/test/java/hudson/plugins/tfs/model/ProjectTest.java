@@ -92,23 +92,4 @@ public class ProjectTest extends SwedishLocaleTestCase {
         assertEquals("The item action was incorrect", "add", item.getAction());
 
     }
-
-    @Test
-    public void assertGetFilesUsesVersion() throws Exception {
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(new StringReader(""));
-        Project project = new Project(server, "$/serverpath");
-        project.getFiles(".", "C5");
-        verify(server).execute(isA(MaskedArgumentListBuilder.class));
-    }
-
-    @Test
-    public void assertGetFilesClosesReader() throws Exception {
-        Reader spy = spy(new StringReader(""));
-        Server server = mock(Server.class);
-        when(server.execute(isA(MaskedArgumentListBuilder.class))).thenReturn(spy);
-        new Project(server, "$/serverpath").getFiles("localpath", "T");
-
-        verify(spy).close();
-    }
 }

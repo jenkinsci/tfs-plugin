@@ -161,7 +161,7 @@ public class Project {
      */
     public void getFiles(String localPath, String versionSpec) throws IOException, InterruptedException {
         GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec);
-        server.execute(command.getArguments()).close();
+        server.execute(command.getCallable());
     }
 
     /**
