@@ -1,16 +1,9 @@
 package hudson.plugins.tfs.model;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.text.ParseException;
-import java.util.List;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
-import hudson.plugins.tfs.commands.GetWorkspaceMappingsCommand;
-import hudson.plugins.tfs.commands.MapWorkfolderCommand;
-import hudson.plugins.tfs.commands.UnmapWorkfolderCommand;
 
 public class Workspace {
 
@@ -30,24 +23,6 @@ public class Workspace {
     
     public Workspace(Server server, String name) {
         this(server, name, "", "", "");
-    }
-
-    public void mapWorkfolder(Project project, String workFolder) throws IOException, InterruptedException {
-        MapWorkfolderCommand command = new MapWorkfolderCommand(server, project.getProjectPath(), workFolder, name);
-        server.execute(command.getArguments()).close();
-    }
-
-    public void unmapWorkfolder(String workFolder) throws IOException, InterruptedException {
-        UnmapWorkfolderCommand command = new UnmapWorkfolderCommand(server, workFolder, name);
-        server.execute(command.getArguments()).close();
-    }
-
-    public List<WorkspaceMapping> getMappings() throws IOException, InterruptedException, ParseException {
-        GetWorkspaceMappingsCommand command = new GetWorkspaceMappingsCommand(server, name);
-        Reader reader = server.execute(command.getArguments());
-        List<WorkspaceMapping> mappings = command.parse(reader);
-        reader.close();
-        return mappings;
     }
 
     public boolean exists() throws IOException, InterruptedException {

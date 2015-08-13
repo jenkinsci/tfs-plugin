@@ -18,8 +18,10 @@ import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
 
+import hudson.remoting.VirtualChannel;
 import org.hamcrest.CustomMatcher;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
@@ -50,15 +52,15 @@ public class CheckoutActionTest {
     public void assertFirstCheckoutBySingleVersionSpecNotUsingUpdate() throws Exception {
     	when(server.getWorkspaces()).thenReturn(workspaces);
     	when(server.getProject("project")).thenReturn(project);
+        when(project.getProjectPath()).thenReturn("project");
     	when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
-    	when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+    	when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
     	when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
     	
     	new CheckoutAction("workspace", "project", ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
     	
-    	verify(workspaces).newWorkspace("workspace");
-    	verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-    	verify(project).getFiles(".", MY_LABEL);
+    	verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
+    	verify(project).getFiles(isA(String.class), eq(MY_LABEL));
     	verify(workspaces).deleteWorkspace(workspace);    	
     }
     
@@ -66,15 +68,15 @@ public class CheckoutActionTest {
     public void assertFirstCheckoutNotUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
+        when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
-        verify(workspaces).newWorkspace("workspace");
-        verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
+        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
         verify(workspaces).deleteWorkspace(workspace);
     }
 
@@ -82,14 +84,14 @@ public class CheckoutActionTest {
     public void assertFirstCheckoutBySingleVersionSpecUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
+        when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
-        verify(workspaces).newWorkspace("workspace");
-        verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", MY_LABEL);
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
+        verify(project).getFiles(isA(String.class), eq(MY_LABEL));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
 
@@ -97,14 +99,14 @@ public class CheckoutActionTest {
     public void assertFirstCheckoutUsingUpdate() throws Exception {
     	when(server.getWorkspaces()).thenReturn(workspaces);
     	when(server.getProject("project")).thenReturn(project);
+        when(project.getProjectPath()).thenReturn("project");
     	when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
-    	when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+    	when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
     	
-    	new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
+    	new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
     	
-    	verify(workspaces).newWorkspace("workspace");
-    	verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-    	verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+    	verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
+    	verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
     	verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
     
@@ -119,9 +121,8 @@ public class CheckoutActionTest {
         
         new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
-        verify(project).getFiles(".", MY_LABEL);
-        verify(workspaces, never()).newWorkspace("workspace");
-        verify(workspace, never()).mapWorkfolder(project, ".");
+        verify(project).getFiles(isA(String.class), eq(MY_LABEL));
+        verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
     
@@ -136,9 +137,8 @@ public class CheckoutActionTest {
         
         new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
-        verify(workspaces, never()).newWorkspace("workspace");
-        verify(workspace, never()).mapWorkfolder(project, ".");
+        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
+        verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
 
@@ -146,15 +146,15 @@ public class CheckoutActionTest {
     public void assertSecondCheckoutBySingleVersionSpecNotUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
+        when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
-        verify(workspaces).newWorkspace("workspace");
-        verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", MY_LABEL);
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
+        verify(project).getFiles(isA(String.class), eq(MY_LABEL));
         verify(workspaces).deleteWorkspace(workspace);
     }
 
@@ -162,15 +162,15 @@ public class CheckoutActionTest {
     public void assertSecondCheckoutNotUsingUpdate() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
+        when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs,null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
-        verify(workspaces).newWorkspace("workspace");
-        verify(workspace).mapWorkfolder(project, hudsonWs.getRemote());
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
+        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
         verify(workspaces).deleteWorkspace(workspace);
     }
    
@@ -229,7 +229,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean())).thenReturn(list);
+        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
         final Calendar startDate = Util.getCalendar(2008, 9, 24);
@@ -238,7 +238,7 @@ public class CheckoutActionTest {
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
         final DateVersionSpec startDateVersionSpec = new DateVersionSpec(startDate);
-        verify(project).getVCCHistory(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(true));
+        verify(project).getVCCHistory(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(true), anyInt());
     }
     
     @Test
@@ -251,7 +251,7 @@ public class CheckoutActionTest {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", "tfs-ws", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
@@ -270,7 +270,7 @@ public class CheckoutActionTest {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", "tfs-ws", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
@@ -305,7 +305,8 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(project.getProjectPath()).thenReturn("project");
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
@@ -313,7 +314,7 @@ public class CheckoutActionTest {
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).getWorkspace("workspace");
         verify(workspaces).deleteWorkspace(workspace);
-        verify(workspaces).newWorkspace("workspace");
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -324,7 +325,8 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(project.getProjectPath()).thenReturn("project");
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
@@ -332,7 +334,7 @@ public class CheckoutActionTest {
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).getWorkspace("workspace");
         verify(workspaces).deleteWorkspace(workspace);
-        verify(workspaces).newWorkspace("workspace");
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -373,14 +375,15 @@ public class CheckoutActionTest {
     public void assertCheckoutDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
-        
+        when(project.getProjectPath()).thenReturn("project");
+
         new CheckoutAction("workspace", "project", ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
-        verify(workspaces).newWorkspace("workspace");
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -389,14 +392,15 @@ public class CheckoutActionTest {
     public void assertCheckoutBySingleVersionSpecDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
-        when(workspaces.newWorkspace("workspace")).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         when(server.getProject("project")).thenReturn(project);
-        
+        when(project.getProjectPath()).thenReturn("project");
+
         new CheckoutAction("workspace", "project", ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
-        verify(workspaces).newWorkspace("workspace");
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), isA(String.class));
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -410,7 +414,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean())).thenReturn(list);
+        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", ".", true);
         final Calendar startDate = Util.getCalendar(2008, 9, 24);
@@ -422,8 +426,10 @@ public class CheckoutActionTest {
         final DateVersionSpec endDateVersionSpec = new DateVersionSpec(endDate);
         verify(project).getVCCHistory(
                 argThat(new DateVersionSpecMatcher(startDateVersionSpec)),
-                argThat(new DateVersionSpecMatcher(endDateVersionSpec)), eq(true));
-        verify(project).getFiles(".", "D2009-09-24T00:00:00Z");
+                argThat(new DateVersionSpecMatcher(endDateVersionSpec)),
+                eq(true),
+                anyInt());
+        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
     }
 
     private static class DateVersionSpecMatcher extends CustomMatcher<DateVersionSpec> {
@@ -447,5 +453,107 @@ public class CheckoutActionTest {
             }
             return false;
         }
+    }
+
+    @Test
+    public void determineCheckoutPath_absoluteOverrideOnNix() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String nixPath = "/opt/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, nixPath);
+        final String localFolder = "/home/jenkins/tfs-plugin";
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, localFolder);
+
+        Assert.assertEquals(localFolder, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_absoluteOverrideOnWindows() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:\\.jenkins\\jobs\\tfs-plugin\\workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+        final String localFolder = "C:\\Users\\Jenkins\\tfs-plugin";
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, localFolder);
+
+        Assert.assertEquals(localFolder, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_absoluteOverrideOnWindowsWithForwardSlashes() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+        final String localFolder = "C:/Users/Jenkins/tfs-plugin";
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, localFolder);
+
+        Assert.assertEquals(localFolder, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_defaultOnNix() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String nixPath = "/opt/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, nixPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, ".");
+
+        Assert.assertEquals(nixPath, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_defaultOnWindows() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:\\.jenkins\\jobs\\tfs-plugin\\workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, ".");
+
+        Assert.assertEquals(windowsPath, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_defaultOnWindowsWithForwardSlashes() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, ".");
+
+        Assert.assertEquals(windowsPath, actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_relativeOnNix() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String nixPath = "/opt/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, nixPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, "../files");
+
+        Assert.assertEquals("/opt/.jenkins/jobs/tfs-plugin/files", actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_relativeOnWindows() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:\\.jenkins\\jobs\\tfs-plugin\\workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, "..\\files");
+
+        Assert.assertEquals("C:\\.jenkins\\jobs\\tfs-plugin\\files", actual);
+    }
+
+    @Test
+    public void determineCheckoutPath_relativeOnWindowsWithForwardSlashes() {
+        final VirtualChannel vc = mock(VirtualChannel.class);
+        final String windowsPath = "C:/.jenkins/jobs/tfs-plugin/workspace";
+        final FilePath workspacePath = new FilePath(vc, windowsPath);
+
+        final String actual = CheckoutAction.determineCheckoutPath(workspacePath, "../files");
+
+        Assert.assertEquals("C:/.jenkins/jobs/tfs-plugin/files", actual);
     }
 }

@@ -1,10 +1,9 @@
 package hudson.plugins.tfs.model;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
 import hudson.model.User;
-import hudson.plugins.tfs.commands.AbstractChangesetVersionCommand;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
-import hudson.plugins.tfs.commands.WorkspaceChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet.Item;
 
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class Project {
         return result;
     }
 
-    static hudson.plugins.tfs.model.ChangeSet convertServerChangeset
+    public static hudson.plugins.tfs.model.ChangeSet convertServerChangeset
         (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset, UserLookup userLookup) {
         final String version = Integer.toString(serverChangeset.getChangesetID(), 10);
         final Date date = serverChangeset.getDate().getTime();
@@ -73,39 +72,35 @@ public class Project {
      * @param fromVersion the version to get the history from
      * @param toVersion the version to get the history to
      * @param includeFileDetails whether or not to include details of modified items
+     * @param maxCount the maximum number of changes to return (pass Integer.MAX_VALUE for all available values). Must be > 0.
      * @return a list of change sets
      */
-    public List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails) {
+    public List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails, int maxCount) {
         final IIdentityManagementService ims = server.createIdentityManagementService();
         final UserLookup userLookup = new TfsUserLookup(ims);
         final MockableVersionControlClient vcc = server.getVersionControlClient();
-        try {
-            final Changeset[] serverChangesets = vcc.queryHistory(
-                    projectPath,
-                    fromVersion != null ? fromVersion : toVersion,
-                    0 /* deletionId */,
-                    RecursionType.FULL,
-                    null /* user */,
-                    fromVersion,
-                    toVersion,
-                    Integer.MAX_VALUE,
-                    includeFileDetails /* includeFileDetails */,
-                    true /* slotMode */,
-                    false /* includeDownloadInfo */,
-                    false /* sortAscending */
-            );
-            final List<ChangeSet> result = new ArrayList<ChangeSet>();
-            if (serverChangesets != null) {
-                for (final Changeset serverChangeset : serverChangesets) {
-                    final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup);
-                    result.add(changeSet);
-                }
+        final Changeset[] serverChangesets = vcc.queryHistory(
+                projectPath,
+                fromVersion != null ? fromVersion : toVersion,
+                0 /* deletionId */,
+                RecursionType.FULL,
+                null /* user */,
+                fromVersion,
+                toVersion,
+                maxCount,
+                includeFileDetails /* includeFileDetails */,
+                true /* slotMode */,
+                false /* includeDownloadInfo */,
+                false /* sortAscending */
+        );
+        final List<ChangeSet> result = new ArrayList<ChangeSet>();
+        if (serverChangesets != null) {
+            for (final Changeset serverChangeset : serverChangesets) {
+                final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup);
+                result.add(changeSet);
             }
-            return result;
         }
-        finally {
-            vcc.close();
-        }
+        return result;
     }
 
     /**
@@ -117,12 +112,12 @@ public class Project {
     public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
-        return getVCCHistory(fromVersion, toVersion, true);
+        return getVCCHistory(fromVersion, toVersion, true, Integer.MAX_VALUE);
     }
     
     public List<ChangeSet> getDetailedHistory(String singleVersionSpec) {
         final VersionSpec toVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
-        return getVCCHistory(null, toVersion, true);
+        return getVCCHistory(null, toVersion, true, Integer.MAX_VALUE);
     }
 
     /**
@@ -134,7 +129,7 @@ public class Project {
     public List<ChangeSet> getBriefHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
-        return getVCCHistory(fromVersion, toVersion, false);
+        return getVCCHistory(fromVersion, toVersion, false, Integer.MAX_VALUE);
     }
 
     /**
@@ -146,16 +141,17 @@ public class Project {
     public List<ChangeSet> getBriefHistory(int fromChangeset, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
         final ChangesetVersionSpec fromVersion = new ChangesetVersionSpec(fromChangeset);
         final VersionSpec toVersion = new DateVersionSpec(toTimestamp);
-        return getVCCHistory(fromVersion, toVersion, false);
+        return getVCCHistory(fromVersion, toVersion, false, Integer.MAX_VALUE);
     }
 
     /**
-     * Gets all files from server.
-     * @param localPath the local path to get all files into
+     * Returns the latest changeset at the project's path.
+     * @return the {@link ChangeSet} instance representing the last entry in the history for the path
      */
-    public void getFiles(String localPath) throws IOException, InterruptedException {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath);
-        server.execute(command.getArguments()).close();
+    public ChangeSet getLatestChangeset() throws IOException, InterruptedException, ParseException {
+        final List<ChangeSet> changeSets = getVCCHistory(LatestVersionSpec.INSTANCE, null, false, 1);
+        final ChangeSet result = changeSets.size() > 0 ? changeSets.get(0) : null;
+        return result;
     }
 
     /**
@@ -165,28 +161,7 @@ public class Project {
      */
     public void getFiles(String localPath, String versionSpec) throws IOException, InterruptedException {
         GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec);
-        server.execute(command.getArguments()).close();
-    }
-
-    /**
-     * Gets workspace changeset version for specified local path.
-     * 
-     * @param localPath for which to get latest workspace changeset version
-     * @param workspaceName name of workspace for which to get latest changeset version
-     * @return workspace changeset version for specified local path
-     */
-    public String getWorkspaceChangesetVersion(String localPath, String workspaceName, String workspaceOwner) 
-                                                                                       throws IOException, 
-                                                                                              InterruptedException, 
-                                                                                              ParseException {
-        WorkspaceChangesetVersionCommand command = new WorkspaceChangesetVersionCommand(server,localPath,workspaceName, workspaceOwner);
-        Reader reader = null;
-        try {
-            reader = server.execute(command.getArguments());
-            return command.parse(reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
-        }
+        server.execute(command.getCallable());
     }
 
     /**
@@ -202,16 +177,11 @@ public class Project {
         return extractChangesetNumber(command);
     }
 
-    int extractChangesetNumber(final AbstractChangesetVersionCommand command)
+    int extractChangesetNumber(final RemoteChangesetVersionCommand command)
             throws IOException, InterruptedException, ParseException {
-        Reader reader = null;
-        try {
-            reader = server.execute(command.getArguments());
-            final String changesetString = command.parse(reader);
-            return Integer.parseInt(changesetString, 10);
-        } finally {
-            IOUtils.closeQuietly(reader);
-        }
+        final ChangeSet changeSet = server.execute(command.getCallable());
+        final String changesetString = changeSet.getVersion();
+        return Integer.parseInt(changesetString, 10);
     }
 
     /**

@@ -69,6 +69,12 @@ public @interface EndToEndTfs {
 
             final String projectPath = parent.getPathInTfvc();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/projectPath", projectPath);
+
+            final String workspaceName = "Hudson-${JOB_NAME}-${COMPUTERNAME}";
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/workspaceName", workspaceName);
+
+            final String userName = AbstractIntegrationTest.TestUserName;
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/userName", userName);
         }
     }
 
@@ -180,6 +186,10 @@ public @interface EndToEndTfs {
 
         public String getJobFolder() {
             return "jobs/" + testCaseName + "/";
+        }
+
+        public <T extends StubRunner> T getInnerRunner(final Class<T> type) {
+            return type.cast(runner);
         }
 
         public Workspace getWorkspace() {

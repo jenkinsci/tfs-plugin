@@ -50,10 +50,11 @@ public class CheckoutAction {
         Project project = getProject(server, workspacePath);
 
         final String versionSpecString = RemoteChangesetVersionCommand.toString(currentBuildVersionSpec);
-        project.getFiles(localFolder, versionSpecString);
+        final String normalizedFolder = determineCheckoutPath(workspacePath, localFolder);
+        project.getFiles(normalizedFolder, versionSpecString);
 
         if (lastBuildVersionSpec != null) {
-            return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true);
+            return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true, Integer.MAX_VALUE);
         }
 
         return new ArrayList<ChangeSet>();
@@ -61,9 +62,16 @@ public class CheckoutAction {
 
     public List<ChangeSet> checkoutBySingleVersionSpec(Server server, FilePath workspacePath, String singleVersionSpec) throws IOException, InterruptedException {
         Project project = getProject(server, workspacePath);
-        project.getFiles(localFolder, singleVersionSpec);
+        final String normalizedFolder = determineCheckoutPath(workspacePath, localFolder);
+        project.getFiles(normalizedFolder, singleVersionSpec);
 
         return project.getDetailedHistory(singleVersionSpec);
+    }
+
+    static String determineCheckoutPath(final FilePath workspacePath, final String localFolder) {
+        final FilePath combinedPath = new FilePath(workspacePath, localFolder);
+        final String result = combinedPath.getRemote();
+        return result;
     }
 
     private Project getProject(Server server, FilePath workspacePath)
@@ -82,8 +90,9 @@ public class CheckoutAction {
             if (!useUpdate && localFolderPath.exists()) {
                 localFolderPath.deleteContents();
             }
-            workspace = workspaces.newWorkspace(workspaceName);
-            workspace.mapWorkfolder(project, localFolderPath.getRemote());
+            final String serverPath = project.getProjectPath();
+            final String localPath = localFolderPath.getRemote();
+            workspace = workspaces.newWorkspace(workspaceName, serverPath, localPath);
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }

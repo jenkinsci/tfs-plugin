@@ -33,13 +33,8 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      */
     private List<Workspace> getListFromServer() throws IOException, InterruptedException {
         ListWorkspacesCommand command = new ListWorkspacesCommand(this, server);
-        Reader reader = null;
-        try {
-            reader = server.execute(command.getArguments());
-            return command.parse(reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
-        }
+        final List<Workspace> result = server.execute(command.getCallable());
+        return result;
     }
     
     /**
@@ -88,18 +83,18 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     }
 
     /**
-     * Create workspace on server and return a workspace object with the specified name
-     * @param name the name of the new workspace
+     * Create workspace on server, map it and return a workspace object with the specified name
+     * @param workspaceName the name of the new workspace
      * @return a workspace
      */
-    public Workspace newWorkspace(String name) throws IOException, InterruptedException {
-        NewWorkspaceCommand command = new NewWorkspaceCommand(server, name);
-        server.execute(command.getArguments()).close();        
-        Workspace workspace = new Workspace(server, name);
-        workspaces.put(name, workspace);
+    public Workspace newWorkspace(final String workspaceName, final String serverPath, final String localPath) throws IOException, InterruptedException {
+        NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, localPath);
+        server.execute(command.getCallable());
+        Workspace workspace = new Workspace(server, workspaceName);
+        workspaces.put(workspaceName, workspace);
         return workspace;
     }
-    
+
     /**
      * Deletes the workspace from the server
      * @param workspace the workspace to delete
@@ -107,7 +102,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     public void deleteWorkspace(Workspace workspace) throws IOException, InterruptedException {
         DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(server, workspace.getName());
         workspaces.remove(workspace.getName());
-        server.execute(command.getArguments()).close();
+        server.execute(command.getCallable());
     }
 
     public Workspace createWorkspace(String name, String computer, String owner, String comment) {

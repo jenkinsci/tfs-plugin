@@ -1,24 +1,59 @@
 package hudson.plugins.tfs.commands;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import hudson.plugins.tfs.commands.NewWorkspaceCommand;
-import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
-
+import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
+import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
+import org.junit.Ignore;
 import org.junit.Test;
 
-public class NewWorkspaceCommandTest {
+import java.util.concurrent.Callable;
+
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.when;
+
+public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
     
-    @Test
-    public void assertArguments() {
-        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        when(config.getUrl()).thenReturn("https//tfs02.codeplex.com");
-        when(config.getUserName()).thenReturn("snd\\user_cp");
-        when(config.getUserPassword()).thenReturn("password");
-        
-        MaskedArgumentListBuilder arguments = new NewWorkspaceCommand(config, "TheWorkspaceName").getArguments();
-        assertNotNull("Arguments were null", arguments);
-        assertEquals("workspace -new TheWorkspaceName;snd\\user_cp -noprompt -server:https//tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+    @Test public void assertLogging() throws Exception {
+        when(server.getUserName()).thenReturn("snd\\user_cp");
+        when(vcc.createWorkspace(aryEq((WorkingFolder[]) null),
+                isA(String.class),
+                isA(String.class),
+                isA(String.class),
+                isA(String.class),
+                isA(WorkspaceLocation.class),
+                isA(WorkspaceOptions.class))).thenReturn(null);
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, null);
+        final Callable<Void> callable = command.getCallable();
+
+        callable.call();
+
+        assertLog(
+                "Creating workspace 'TheWorkspaceName;snd\\user_cp'...",
+                "Created workspace 'TheWorkspaceName;snd\\user_cp'."
+        );
+    }
+
+    @Ignore("Finish test when we have MockableWorkspace")
+    @Test public void assertLoggingWhenAlsoMapping() throws Exception {
+        when(server.getUserName()).thenReturn("snd\\user_cp");
+        when(vcc.createWorkspace(aryEq((WorkingFolder[]) null),
+                isA(String.class),
+                isA(String.class),
+                isA(String.class),
+                isA(String.class),
+                isA(WorkspaceLocation.class),
+                isA(WorkspaceOptions.class))).thenReturn(null);
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", "/home/jenkins/jobs/stuff/workspace");
+        final Callable<Void> callable = command.getCallable();
+
+        callable.call();
+
+        assertLog(
+                "Creating workspace 'TheWorkspaceName;snd\\user_cp'...",
+                "Created workspace 'TheWorkspaceName;snd\\user_cp'.",
+                "Mapping '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName;snd\\user_cp'...",
+                "Mapped '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName;snd\\user_cp'."
+        );
     }
 }

@@ -1,24 +1,37 @@
 package hudson.plugins.tfs.commands;
 
-import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LabelChildOption;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LabelResult;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.VersionControlLabel;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelItemSpec;
+import ms.tfs.versioncontrol.clientservices._03._LabelResult;
+import ms.tfs.versioncontrol.clientservices._03._LabelResultStatus;
 import org.junit.Test;
+import org.mockito.Matchers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
+import java.util.concurrent.Callable;
+
 import static org.mockito.Mockito.when;
 
-public class LabelCommandTest {
+public class LabelCommandTest extends AbstractCallableCommandTest {
 
-    @Test
-    public void assertArguments() {
-        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        when(config.getUrl()).thenReturn("https://tfs02.codeplex.com");
-        when(config.getUserName()).thenReturn("snd\\user_cp");
-        when(config.getUserPassword()).thenReturn("password");
+    @Test public void assertLogging() throws Exception {
+        final LabelResult labelResult = new LabelResult(new _LabelResult("label", "scope", _LabelResultStatus.Created));
+        final LabelResult[] labelResults = {labelResult};
 
-        MaskedArgumentListBuilder arguments = new LabelCommand(config, "int_build.10", "Jenkins-JOB-MASTER", ".").getArguments();
-        assertNotNull("Arguments were null", arguments);
-        assertEquals("label int_build.10 . -version:WJenkins-JOB-MASTER -comment:Automatically_applied_by_Jenkins_TFS_plugin -noprompt -recursive -server:https://tfs02.codeplex.com -login:snd\\user_cp,password", arguments.toStringWithQuote());
+        when(vcc.createLabel(
+                Matchers.<VersionControlLabel>anyObject(),
+                Matchers.<LabelItemSpec[]>anyObject(),
+                Matchers.<LabelChildOption>anyObject())).thenReturn(labelResults);
+
+        final LabelCommand command = new LabelCommand(server, "labelName", "hudson-createLabel-TFS2013", "$/project/path");
+        final Callable<Void> callable = command.getCallable();
+
+        callable.call();
+
+        assertLog(
+                "Creating label 'labelName' on '$/project/path' as of the current version in workspace 'hudson-createLabel-TFS2013'...",
+                "Created label 'labelName'."
+        );
     }
 }

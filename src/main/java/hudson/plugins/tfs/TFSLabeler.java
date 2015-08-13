@@ -16,9 +16,7 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.VariableResolver;
 import hudson.util.VariableResolver.Union;
-import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -69,10 +67,10 @@ public class TFSLabeler extends Notifier {
 
         TeamFoundationServerScm tfsScm = (TeamFoundationServerScm) scm;
 
-        boolean buildSucess = Result.SUCCESS.equals(build.getResult());
+        boolean buildSuccess = Result.SUCCESS.equals(build.getResult());
 
         String whenCreateLabel = getWhenToLabel();
-        if ("always".equals(whenCreateLabel) || ("success".equals(whenCreateLabel) && buildSucess)) {
+        if ("always".equals(whenCreateLabel) || ("success".equals(whenCreateLabel) && buildSuccess)) {
 
             final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
             final TfTool tool = new TfTool(tfsScm.getDescriptor().getTfExecutable(), localLauncher, listener, workspace);
@@ -84,10 +82,8 @@ public class TFSLabeler extends Notifier {
 
             try {
                 logger.info(String.format("Create label '%s' on workspace '%s'", normalizedLabelName, tfsWorkspace));
-                LabelCommand labelCommand = new LabelCommand(server, normalizedLabelName, tfsWorkspace, tfsScm.getLocalPath());
-                server.execute(labelCommand.getArguments());
-            } catch (Exception e) {
-                return false;
+                LabelCommand labelCommand = new LabelCommand(server, normalizedLabelName, tfsWorkspace, tfsScm.getProjectPath());
+                server.execute(labelCommand.getCallable());
             } finally {
                 server.close();
             }

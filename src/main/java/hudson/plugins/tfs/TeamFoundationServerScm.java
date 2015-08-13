@@ -522,16 +522,10 @@ public class TeamFoundationServerScm extends SCM {
         final Server server = createServer(tool, build);
         final Project tfsProject = server.getProject(projectPath);
         try {
-            final List<ChangeSet> briefHistory = tfsProject.getBriefHistory(
-                        tfsBaseline.changesetVersion,
-                        Calendar.getInstance()
-                    );
-
-            // TODO: Given we have a tfsBaseline with a changeset, 
-            // briefHistory will probably always contain at least one entry
-            final TFSRevisionState tfsRemote = 
-                    (briefHistory.size() > 0) 
-                    ? new TFSRevisionState(briefHistory.get(0).getVersion(), projectPath)
+            final ChangeSet latest = tfsProject.getLatestChangeset();
+            final TFSRevisionState tfsRemote =
+                    (latest != null)
+                    ? new TFSRevisionState(latest.getVersion(), projectPath)
                     : tfsBaseline;
 
             // TODO: we could return INSIGNIFICANT if all the changesets

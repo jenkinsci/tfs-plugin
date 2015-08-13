@@ -1,60 +1,127 @@
 package hudson.plugins.tfs.commands;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ChangeType;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Item;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ItemType;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LabelVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
+import hudson.model.User;
 import hudson.plugins.tfs.Util;
-import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
+import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.model.Server;
 
 import java.io.StringReader;
-import java.util.Calendar;
+import java.util.concurrent.Callable;
 
+import hudson.plugins.tfs.model.UserLookup;
+import org.junit.Assert;
 import org.junit.Test;
 
-public class RemoteChangesetVersionCommandTest {
+public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTest {
 
-    private static final DateVersionSpec fixedPointInTime = new DateVersionSpec(Util.getCalendar(2013, 07, 02, 15, 40, 50));
-    
-    @Test
-    public void assertArguments() {
-        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        when(config.getUrl()).thenReturn("https://tfs02.codeplex.com");
-        when(config.getUserName()).thenReturn("snd\\user_cp");
-        when(config.getUserPassword()).thenReturn("password");
-        
-        MaskedArgumentListBuilder arguments = new RemoteChangesetVersionCommand(config, "$/tfsandbox", fixedPointInTime).getArguments();
-        assertNotNull("Arguments were null", arguments);
-        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:D2013-07-02T15:40:51Z -format:brief -login:snd\\user_cp,password -server:https://tfs02.codeplex.com", arguments.toStringWithQuote());
+    private static final DateVersionSpec fixedPointInTime = new DateVersionSpec(Util.getCalendar(2013, 07, 02, 15, 40, 50, "UTC"));
+
+    @Test public void assertLoggingWhenChangeset() throws Exception {
+        final User user = mock(User.class);
+        when(user.getId()).thenReturn("piedefer");
+        final UserLookup userLookup = mock(UserLookup.class);
+        when(userLookup.find("piedefer")).thenReturn(user);
+        final Item item = new Item();
+        item.setServerItem("Arithmetica.iTeX");
+        item.setItemType(ItemType.FILE);
+        final Change serverChange = new Change(item, ChangeType.EDIT, null);
+        final Changeset serverChangeset = new Changeset(
+                new Change[]{serverChange},
+                "I have discovered a truly marvellous proof of this, which this margin is too narrow to contain.",
+                null,
+                null,
+                "piedefer",
+                "Pierre de Fermat",
+                fixedPointInTime.getDate(),
+                1637,
+                "piedefer",
+                "Pierre de Fermat",
+                null
+        );
+        final Changeset[] serverChangesets = new Changeset[]{serverChangeset};
+        when(vcc.queryHistory(
+                isA(String.class),
+                isA(VersionSpec.class),
+                anyInt(),
+                isA(RecursionType.class),
+                (String) isNull(),
+                (VersionSpec) isNull(),
+                (VersionSpec) isNull(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                anyBoolean(),
+                anyBoolean())).thenReturn(serverChangesets);
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE);
+        command.setUserLookup(userLookup);
+        final Callable<ChangeSet> callable = command.getCallable();
+
+        final ChangeSet actual = callable.call();
+
+        Assert.assertNotNull(actual);
+        assertLog(
+                "Querying for remote changeset at '$/RemotePath' as of 'T'...",
+                "Query result is: Changeset #1637 by 'piedefer' on '2013-07-02T15:40:50Z'."
+        );
+        Assert.assertEquals(user, actual.getAuthor());
     }
 
-    @Test
-    public void assertVersionSpec() {
-        ServerConfigurationProvider config = mock(ServerConfigurationProvider.class);
-        when(config.getUrl()).thenReturn("https://tfs02.codeplex.com");
-        when(config.getUserName()).thenReturn("snd\\user_cp");
-        when(config.getUserPassword()).thenReturn("password");
+    @Test public void assertLoggingWhenNoResult() throws Exception {
+        when(vcc.queryHistory(
+                isA(String.class),
+                isA(VersionSpec.class),
+                anyInt(),
+                isA(RecursionType.class),
+                (String) isNull(),
+                (VersionSpec) isNull(),
+                (VersionSpec) isNull(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
+                anyBoolean(),
+                anyBoolean())).thenReturn(null);
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE);
+        final Callable<ChangeSet> callable = command.getCallable();
 
-        MaskedArgumentListBuilder arguments = new RemoteChangesetVersionCommand(config, "$/tfsandbox", new ChangesetVersionSpec(42)).getArguments();
-        assertNotNull("Arguments were null", arguments);
-        assertEquals("history $/tfsandbox -recursive -stopafter:1 -noprompt -version:C42 -format:brief -login:snd\\user_cp,password -server:https://tfs02.codeplex.com", arguments.toStringWithQuote());
+        final ChangeSet result = callable.call();
+
+        Assert.assertNull(result);
+        assertLog(
+                "Querying for remote changeset at '$/RemotePath' as of 'T'...",
+                "Query returned no result!"
+        );
     }
 
     @Test
     public void assertNoChangesWithEmptyOutput() throws Exception {
-        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", fixedPointInTime);
+        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(Server.class), "$/tfsandbox", fixedPointInTime);
         String changesetNumber = command.parse(new StringReader(""));
         assertEquals("Change set number was incorrect", "", changesetNumber);
     }
     
     @Test
     public void assertChangesWithEmptyToolOutput() throws Exception {
-        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", fixedPointInTime);
+        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(Server.class), "$/tfsandbox", fixedPointInTime);
         StringReader reader = new StringReader("No history entries were found for the item and version combination specified.\n\n");
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "", changesetNumber);
@@ -68,7 +135,7 @@ public class RemoteChangesetVersionCommandTest {
                 "\n" +
                 "12495     SND\\redsolo_cp 2008-jun-27 13:21:25 changed and created one\n");
         
-        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", fixedPointInTime);
+        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(Server.class), "$/tfsandbox", fixedPointInTime);
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "12495", changesetNumber);
     }    
@@ -81,7 +148,7 @@ public class RemoteChangesetVersionCommandTest {
                 "\n" +
                 "12495     SND\\redsolo_cp 2008-jun-27 13:21:25\n");
         
-        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", fixedPointInTime);
+        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(Server.class), "$/tfsandbox", fixedPointInTime);
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "12495", changesetNumber);
     }    
@@ -93,7 +160,7 @@ public class RemoteChangesetVersionCommandTest {
                 "--------- -------------- -------------------- ----------------------------------------------------------------------------\n" +
                 "12497     SND\\redsolo_cp 2008-jun-27 13:21:25\n");
         
-        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(ServerConfigurationProvider.class), "$/tfsandbox", fixedPointInTime);
+        RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(mock(Server.class), "$/tfsandbox", fixedPointInTime);
         String changesetNumber = command.parse(reader);
         assertEquals("Change set number was incorrect", "12497", changesetNumber);
     }
