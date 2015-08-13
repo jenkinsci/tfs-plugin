@@ -79,33 +79,28 @@ public class Project {
         final IIdentityManagementService ims = server.createIdentityManagementService();
         final UserLookup userLookup = new TfsUserLookup(ims);
         final MockableVersionControlClient vcc = server.getVersionControlClient();
-        try {
-            final Changeset[] serverChangesets = vcc.queryHistory(
-                    projectPath,
-                    fromVersion != null ? fromVersion : toVersion,
-                    0 /* deletionId */,
-                    RecursionType.FULL,
-                    null /* user */,
-                    fromVersion,
-                    toVersion,
-                    maxCount,
-                    includeFileDetails /* includeFileDetails */,
-                    true /* slotMode */,
-                    false /* includeDownloadInfo */,
-                    false /* sortAscending */
-            );
-            final List<ChangeSet> result = new ArrayList<ChangeSet>();
-            if (serverChangesets != null) {
-                for (final Changeset serverChangeset : serverChangesets) {
-                    final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup);
-                    result.add(changeSet);
-                }
+        final Changeset[] serverChangesets = vcc.queryHistory(
+                projectPath,
+                fromVersion != null ? fromVersion : toVersion,
+                0 /* deletionId */,
+                RecursionType.FULL,
+                null /* user */,
+                fromVersion,
+                toVersion,
+                maxCount,
+                includeFileDetails /* includeFileDetails */,
+                true /* slotMode */,
+                false /* includeDownloadInfo */,
+                false /* sortAscending */
+        );
+        final List<ChangeSet> result = new ArrayList<ChangeSet>();
+        if (serverChangesets != null) {
+            for (final Changeset serverChangeset : serverChangesets) {
+                final ChangeSet changeSet = convertServerChangeset(serverChangeset, userLookup);
+                result.add(changeSet);
             }
-            return result;
         }
-        finally {
-            vcc.close();
-        }
+        return result;
     }
 
     /**

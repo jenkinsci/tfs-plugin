@@ -77,28 +77,23 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand {
                     userLookup = new TfsUserLookup(ims);
                 }
                 ChangeSet changeSet = null;
-                try {
-                    final Changeset[] serverChangeSets = vcc.queryHistory(
-                            path,
-                            versionSpec,
-                            0 /* deletionId */,
-                            RecursionType.FULL,
-                            null /* user */,
-                            null,
-                            null,
-                            1     /* maxCount */,
-                            false /* includeFileDetails */,
-                            true  /* slotMode */,
-                            false /* includeDownloadInfo */,
-                            false /* sortAscending */
-                    );
-                    if (serverChangeSets != null && serverChangeSets.length >= 1) {
-                        final Changeset serverChangeset = serverChangeSets[0];
-                        changeSet = Project.convertServerChangeset(serverChangeset, userLookup);
-                    }
-                }
-                finally {
-                    vcc.close();
+                final Changeset[] serverChangeSets = vcc.queryHistory(
+                        path,
+                        versionSpec,
+                        0 /* deletionId */,
+                        RecursionType.FULL,
+                        null /* user */,
+                        null,
+                        null,
+                        1     /* maxCount */,
+                        false /* includeFileDetails */,
+                        true  /* slotMode */,
+                        false /* includeDownloadInfo */,
+                        false /* sortAscending */
+                );
+                if (serverChangeSets != null && serverChangeSets.length >= 1) {
+                    final Changeset serverChangeset = serverChangeSets[0];
+                    changeSet = Project.convertServerChangeset(serverChangeset, userLookup);
                 }
 
                 final String resultMessage;

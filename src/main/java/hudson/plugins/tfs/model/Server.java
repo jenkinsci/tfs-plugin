@@ -166,6 +166,9 @@ public class Server implements ServerConfigurationProvider, Closable {
     }
 
     public synchronized void close() {
+        if (this.mockableVcc != null) {
+            this.mockableVcc.close();
+        }
         if (this.tpc != null) {
             // Close the configuration server connection that should be closed by
             // TFSTeamProjectCollection
@@ -185,7 +188,6 @@ public class Server implements ServerConfigurationProvider, Closable {
             }
             this.tpc.close();
         }
-        
     }
 
     public IIdentityManagementService createIdentityManagementService() {
