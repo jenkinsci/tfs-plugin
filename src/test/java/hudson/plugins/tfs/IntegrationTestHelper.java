@@ -22,6 +22,8 @@ public class IntegrationTestHelper {
     public static final String TestUserPassword = "for-test-only";
 
     private final String serverUrl;
+    private final String userName;
+    private final String userPassword;
 
     public IntegrationTestHelper() throws URISyntaxException {
         this(getTfsServerName());
@@ -31,18 +33,29 @@ public class IntegrationTestHelper {
         final URI serverUri;
         if ("vso".equals(tfsServerName)) {
             serverUri = URIUtils.createURI("https", "automated-testing.visualstudio.com", 443, "DefaultCollection", null, null);
+            this.userName = "TODO";
+            this.userPassword = "TODO";
         } else {
             serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + "jenkins-tfs-plugin", null, null);
+            this.userName = TestUserName;
+            this.userPassword = TestUserPassword;
         }
         serverUrl = serverUri.toString();
     }
-
 
     /**
      * A string representing the URL to a VSO account or a default TFS server installation.
      */
     public String getServerUrl() {
         return serverUrl;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
     }
 
     public static String getTfsServerName() {
