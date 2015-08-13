@@ -55,7 +55,6 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand impleme
         logger.println(gettingMessage);
 
         final Workspace workspace = vcc.getWorkspace(workFolder);
-        //final Workspace workspace = vcc.queryWorkspace(workspaceName, server.getUserName());
         final VersionControlEventEngine eventEngine = vcc.getEventEngine();
         eventEngine.addGetListener(this);
         workspace.get(getVersionSpec, GetOptions.NONE);
