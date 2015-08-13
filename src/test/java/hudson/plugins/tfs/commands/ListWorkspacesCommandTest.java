@@ -39,7 +39,8 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
 
     @Category(IntegrationTests.class)
     @Test public void assertLoggingWithComputer() throws Exception {
-        final String serverUrl = IntegrationTestHelper.buildTfsServerUrl();
+        final IntegrationTestHelper helper = new IntegrationTestHelper();
+        final String serverUrl = helper.getServerUrl();
         final URI serverUri = URI.create(serverUrl);
         Server.ensureNativeLibrariesConfigured();
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
@@ -80,7 +81,8 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
 
     @Category(IntegrationTests.class)
     @Test public void assertLoggingWithoutComputer() throws Exception {
-        final String serverUrl = IntegrationTestHelper.buildTfsServerUrl();
+        final IntegrationTestHelper helper = new IntegrationTestHelper();
+        final String serverUrl = helper.getServerUrl();
         final URI serverUri = URI.create(serverUrl);
         Server.ensureNativeLibrariesConfigured();
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(

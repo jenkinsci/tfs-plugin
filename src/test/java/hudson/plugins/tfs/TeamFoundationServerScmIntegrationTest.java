@@ -19,7 +19,8 @@ public class TeamFoundationServerScmIntegrationTest {
 
     @Before
     public void connectToTfs() throws URISyntaxException {
-        final String serverUrl = IntegrationTestHelper.buildTfsServerUrl();
+        final IntegrationTestHelper helper = new IntegrationTestHelper();
+        final String serverUrl = helper.getServerUrl();
         scm = new TeamFoundationServerScm(serverUrl, "projectPath", "localPath", false, "workspaceName", null, (Secret) null);
     }
 

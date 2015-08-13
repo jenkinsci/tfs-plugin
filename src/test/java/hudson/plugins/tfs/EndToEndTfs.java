@@ -74,7 +74,7 @@ public @interface EndToEndTfs {
             final String configXmlPath = jobFolder + "config.xml";
             final File configXmlFile = new File(home, configXmlPath);
 
-            final String tfsServerUrl = IntegrationTestHelper.buildTfsServerUrl();
+            final String tfsServerUrl = helper.getServerUrl();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/serverUrl", tfsServerUrl);
 
             final String projectPath = parent.getPathInTfvc();

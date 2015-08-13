@@ -387,7 +387,7 @@ public class FunctionalTest {
             final File lastBuildXmlFile = new File(home, lastBuildXmlPath);
 
             final String projectPath = parent.getPathInTfvc();
-            final String serverUrl = parent.getServerUrl();
+            final String serverUrl = getHelper().getServerUrl();
             final Server server = parent.getServer();
             final MockableVersionControlClient vcc = server.getVersionControlClient();
             final int latestChangesetID = vcc.getLatestChangesetID();
