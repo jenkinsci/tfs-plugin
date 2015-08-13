@@ -45,7 +45,6 @@ public class IntegrationTestHelper {
      * @throws URISyntaxException
      */
     public static String buildServerUrl(final String tfs_server_name) throws URISyntaxException {
-        Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", tfs_server_name);
         final URI serverUri;
         if ("vso".equals(tfs_server_name)) {
             serverUri = URIUtils.createURI("https", "automated-testing.visualstudio.com", 443, "DefaultCollection", null, null);
@@ -56,7 +55,9 @@ public class IntegrationTestHelper {
     }
 
     public static String getTfsServerName() {
-        return hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
+        final String result = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
+        Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", result);
+        return result;
     }
 
     /**
