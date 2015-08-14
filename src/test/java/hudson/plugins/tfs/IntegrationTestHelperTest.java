@@ -14,7 +14,7 @@ public class IntegrationTestHelperTest {
     }
 
     @Test public void buildServerUrl_designatedVsoAccount() throws Exception {
-        final IntegrationTestHelper cut = new IntegrationTestHelper("vso");
+        final IntegrationTestHelper cut = new IntegrationTestHelper("automated-testing.visualstudio.com");
 
         final String actual = cut.getServerUrl();
 

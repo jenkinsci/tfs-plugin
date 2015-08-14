@@ -31,8 +31,8 @@ public class IntegrationTestHelper {
         final URI serverUri;
         final String tfsUserName = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_name"));
         final String tfsUserPassword = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_password"));
-        if ("vso".equals(tfsServerName)) {
-            serverUri = URIUtils.createURI("https", "automated-testing.visualstudio.com", 443, "DefaultCollection", null, null);
+        if (tfsServerName.endsWith(".visualstudio.com")) {
+            serverUri = URIUtils.createURI("https", tfsServerName, 443, "DefaultCollection", null, null);
             this.userName = tfsUserName;
             this.userPassword = tfsUserPassword;
         } else {
