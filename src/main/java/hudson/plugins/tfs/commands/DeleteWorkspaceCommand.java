@@ -1,7 +1,9 @@
 package hudson.plugins.tfs.commands;
 
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
+import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
@@ -11,14 +13,20 @@ import java.util.concurrent.Callable;
 
 public class DeleteWorkspaceCommand extends AbstractCallableCommand {
 
-    private static final String DeletingTemplate = "Deleting workspace '%s' owned by '%s'...";
-    private static final String DeletedTemplate = "Deleted workspace '%s'.";
+    private static final String DeletingTemplate = "Deleting workspaces named '%s'...";
+    private static final String DeletedTemplate = "Deleted %d workspace(s) named '%s'.";
 
     private final String workspaceName;
+    private final String computerName;
 
     public DeleteWorkspaceCommand(final Server server, final String workspaceName) {
+        this(server, workspaceName, LocalHost.getShortName());
+    }
+
+    public DeleteWorkspaceCommand(final Server server, final String workspaceName, final String computerName) {
         super(server);
         this.workspaceName = workspaceName;
+        this.computerName = computerName;
     }
 
     public Callable<Void> getCallable() {
@@ -28,15 +36,19 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
                 final MockableVersionControlClient vcc = server.getVersionControlClient();
                 final TaskListener listener = server.getListener();
                 final PrintStream logger = listener.getLogger();
-                final String userName = server.getUserName();
 
-                final String deletingMessage = String.format(DeletingTemplate, workspaceName, userName);
+                final String deletingMessage = String.format(DeletingTemplate, workspaceName);
                 logger.println(deletingMessage);
 
-                final Workspace innerWorkspace = vcc.queryWorkspace(workspaceName, VersionControlConstants.AUTHENTICATED_USER);
-                vcc.deleteWorkspace(innerWorkspace);
+                final WorkspacePermissions filter = WorkspacePermissions.NONE_OR_NOT_SUPPORTED;
+                final Workspace[] workspaces = vcc.queryWorkspaces(workspaceName, null, computerName, filter);
+                int numDeletions = 0;
+                for (final Workspace innerWorkspace : workspaces) {
+                    vcc.deleteWorkspace(innerWorkspace);
+                    numDeletions++;
+                }
 
-                final String deletedMessage = String.format(DeletedTemplate, workspaceName);
+                final String deletedMessage = String.format(DeletedTemplate, numDeletions, workspaceName);
                 logger.println(deletedMessage);
 
                 return null;
