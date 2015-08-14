@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 
 public class DeleteWorkspaceCommand extends AbstractCallableCommand {
 
-    private static final String DeletingTemplate = "Deleting workspaces named '%s'...";
+    private static final String DeletingTemplate = "Deleting workspaces named '%s' from computer '%s'...";
     private static final String DeletedTemplate = "Deleted %d workspace(s) named '%s'.";
 
     private final String workspaceName;
@@ -40,7 +40,7 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
                 final String computerName = (DeleteWorkspaceCommand.this.computerName == null)
                         ? LocalHost.getShortName()
                         : DeleteWorkspaceCommand.this.computerName;
-                final String deletingMessage = String.format(DeletingTemplate, workspaceName);
+                final String deletingMessage = String.format(DeletingTemplate, workspaceName, computerName);
                 logger.println(deletingMessage);
 
                 final WorkspacePermissions filter = WorkspacePermissions.NONE_OR_NOT_SUPPORTED;

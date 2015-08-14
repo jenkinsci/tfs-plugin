@@ -26,7 +26,7 @@ public class DeleteWorkspaceCommandTest extends AbstractCallableCommandTest {
         callable.call();
 
         assertLog(
-                "Deleting workspaces named 'TheWorkspaceName'...",
+                "Deleting workspaces named 'TheWorkspaceName' from computer 'computerName'...",
                 "Deleted 0 workspace(s) named 'TheWorkspaceName'."
         );
     }
