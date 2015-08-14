@@ -37,12 +37,12 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
                 final TaskListener listener = server.getListener();
                 final PrintStream logger = listener.getLogger();
 
-                final String deletingMessage = String.format(DeletingTemplate, workspaceName);
-                logger.println(deletingMessage);
-
                 final String computerName = (DeleteWorkspaceCommand.this.computerName == null)
                         ? LocalHost.getShortName()
                         : DeleteWorkspaceCommand.this.computerName;
+                final String deletingMessage = String.format(DeletingTemplate, workspaceName);
+                logger.println(deletingMessage);
+
                 final WorkspacePermissions filter = WorkspacePermissions.NONE_OR_NOT_SUPPORTED;
                 final Workspace[] workspaces = vcc.queryWorkspaces(workspaceName, null, computerName, filter);
                 int numDeletions = 0;
