@@ -14,6 +14,8 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
+import hudson.util.Secret;
+import hudson.util.SecretOverride;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.runner.Description;
@@ -21,6 +23,7 @@ import org.jvnet.hudson.test.JenkinsRecipe;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -51,6 +54,11 @@ public @interface EndToEndTfs {
     class StubRunner extends JenkinsRecipe.Runner<EndToEndTfs> {
         private RunnerImpl parent;
         private IntegrationTestHelper helper;
+        private String encryptedPassword;
+
+        public String getEncryptedPassword() {
+            return encryptedPassword;
+        }
 
         protected RunnerImpl getParent() {
             return parent;
@@ -85,6 +93,21 @@ public @interface EndToEndTfs {
 
             final String userName = helper.getUserName();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/userName", userName);
+
+            final String userPassword = helper.getUserPassword();
+            final SecretOverride secretOverride = new SecretOverride();
+            try {
+                final Secret secret = Secret.fromString(userPassword);
+                encryptedPassword = secret.getEncryptedValue();
+            }
+            finally {
+                try {
+                    secretOverride.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/password", encryptedPassword);
         }
     }
 
