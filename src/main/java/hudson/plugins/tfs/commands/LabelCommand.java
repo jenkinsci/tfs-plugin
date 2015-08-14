@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LabelChildOption;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LabelResult;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
@@ -53,7 +54,7 @@ public class LabelCommand extends AbstractCallableCommand implements Callable<Vo
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
-        final String userName = server.getUserName();
+        final String userName = VersionControlConstants.AUTHENTICATED_USER;
 
         final String creatingMessage = String.format(CreatingTemplate, labelName, projectPath, workspaceName);
         logger.println(creatingMessage);

@@ -2,6 +2,7 @@ package hudson.plugins.tfs;
 
 import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.VersionControlLabel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
@@ -166,7 +167,7 @@ public class FunctionalTest {
         Assert.assertEquals(0, changeSet.getItems().length);
         final TFSRevisionState revisionState = build.getAction(TFSRevisionState.class);
         Assert.assertEquals(latestChangesetID, revisionState.changesetVersion);
-        final String owner = server.getUserName();
+        final String owner = VersionControlConstants.AUTHENTICATED_USER;
         final ChangesetVersionSpec spec = new ChangesetVersionSpec(latestChangesetID);
         final VersionControlLabel[] labels = vcc.queryLabels(generatedLabelName, null, owner, false, null, spec);
         Assert.assertEquals(1, labels.length);
