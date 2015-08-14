@@ -107,7 +107,11 @@ public @interface EndToEndTfs {
                     // ignore
                 }
             }
-            XmlHelper.pokeValue(configXmlFile, "/project/scm/password", encryptedPassword);
+            final String projectScmPassword = "/project/scm/password";
+            final String currentPassword = XmlHelper.peekValue(configXmlFile, projectScmPassword);
+            if (currentPassword != null) {
+                XmlHelper.pokeValue(configXmlFile, projectScmPassword, encryptedPassword);
+            }
         }
     }
 
