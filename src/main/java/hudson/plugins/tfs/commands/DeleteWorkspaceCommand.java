@@ -20,7 +20,7 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
     private final String computerName;
 
     public DeleteWorkspaceCommand(final Server server, final String workspaceName) {
-        this(server, workspaceName, LocalHost.getShortName());
+        this(server, workspaceName, null);
     }
 
     public DeleteWorkspaceCommand(final Server server, final String workspaceName, final String computerName) {
@@ -40,6 +40,9 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
                 final String deletingMessage = String.format(DeletingTemplate, workspaceName);
                 logger.println(deletingMessage);
 
+                final String computerName = (DeleteWorkspaceCommand.this.computerName == null)
+                        ? LocalHost.getShortName()
+                        : DeleteWorkspaceCommand.this.computerName;
                 final WorkspacePermissions filter = WorkspacePermissions.NONE_OR_NOT_SUPPORTED;
                 final Workspace[] workspaces = vcc.queryWorkspaces(workspaceName, null, computerName, filter);
                 int numDeletions = 0;
