@@ -14,6 +14,10 @@ public class SecretOverride implements Closeable {
         Secret.SECRET = secretKey;
     }
 
+    public SecretOverride() {
+        this("5e2422dc868f119d5033f4619a6f223d71d132a17f8a63f1056c9a1f57c65006");
+    }
+
     public SecretOverride(final String secretKey) {
         set(secretKey);
     }
