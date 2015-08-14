@@ -20,6 +20,7 @@ import hudson.plugins.tfs.util.XmlHelper;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.PollingResult;
 import hudson.triggers.SCMTrigger;
+import hudson.util.Scrambler;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -339,12 +340,14 @@ public class FunctionalTest {
      * and still be able to poll and build.
      */
     @LocalData
-    @EndToEndTfs(CurrentChangesetInjector.class)
+    @EndToEndTfs(UpgradeEncodedPassword.class)
     @Test public void upgradeEncodedPassword()
             throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
-        final String encryptedPassword = "pmJe5VYJg6gr2BdipI1sMGJScFwmT+pZbz7B2jISBrw=";
         final Jenkins jenkins = j.jenkins;
         final TaskListener taskListener = j.createTaskListener();
+        final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
+        final EndToEndTfs.StubRunner stubRunner = tfsRunner.getInnerRunner(EndToEndTfs.StubRunner.class);
+        final String encryptedPassword = stubRunner.getEncryptedPassword();
         final List<Project> projects = jenkins.getProjects();
         final Project project = projects.get(0);
         final TeamFoundationServerScm scm = (TeamFoundationServerScm) project.getScm();
@@ -370,6 +373,21 @@ public class FunctionalTest {
         // TODO: Check in & record changeset, poll & assert SIGNIFICANT
         // TODO: build & assert new last build recorded changeset from above
         // TODO: poll & assert NONE
+    }
+
+    public static class UpgradeEncodedPassword extends CurrentChangesetInjector {
+        @Override public void decorateHome(final JenkinsRule jenkinsRule, final File home) throws Exception {
+            super.decorateHome(jenkinsRule, home);
+
+            final EndToEndTfs.RunnerImpl parent = getParent();
+            final String jobFolder = parent.getJobFolder();
+            final IntegrationTestHelper helper = getHelper();
+            final String userPassword = helper.getUserPassword();
+            final String scrambledPassword = Scrambler.scramble(userPassword);
+            final String configXmlPath = jobFolder + "config.xml";
+            final File configXmlFile = new File(home, configXmlPath);
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/userPassword", scrambledPassword);
+        }
     }
 
     /**
