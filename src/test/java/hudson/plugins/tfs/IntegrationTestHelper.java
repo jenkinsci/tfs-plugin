@@ -1,5 +1,6 @@
 package hudson.plugins.tfs;
 
+import hudson.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.providers.http.httpclient.client.utils.URIUtils;
 import org.junit.Assert;
@@ -16,29 +17,51 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-public abstract class AbstractIntegrationTest {
+public class IntegrationTestHelper {
 
-    public static final String TeamProjectCollection = "jenkins-tfs-plugin";
-    public static final String TeamProjectPrefix = "$/FunctionalTests";
-    public static final String TestUserName = "jenkins-tfs-plugin";
-    public static final String TestUserPassword = "for-test-only";
+    private final String serverUrl;
+    private final String userName;
+    private final String userPassword;
+
+    public IntegrationTestHelper() throws URISyntaxException {
+        this(getTfsServerName());
+    }
+
+    public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
+        final URI serverUri;
+        final String tfsUserName = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_name"));
+        final String tfsUserPassword = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_password"));
+        if (tfsServerName.endsWith(".visualstudio.com")) {
+            serverUri = URIUtils.createURI("https", tfsServerName, 443, "DefaultCollection", null, null);
+            this.userName = tfsUserName;
+            this.userPassword = tfsUserPassword;
+        } else {
+            serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + "jenkins-tfs-plugin", null, null);
+            this.userName = (tfsUserName != null) ? tfsUserName : "jenkins-tfs-plugin";
+            this.userPassword = (tfsUserPassword != null) ? tfsUserPassword : "for-test-only";
+        }
+        serverUrl = serverUri.toString();
+    }
 
     /**
-     * Creates a string representing the URL to a default TFS server installation, based on the
-     * <code>tfs_server_name</code> property.
-     *
-     * @return a string of the form <code>http://${tfs_server_name}:8080/tfs/jenkins-tfs-plugin</code>
-     * @throws URISyntaxException
+     * A string representing the URL to a VSO account or a default TFS server installation.
      */
-    public static String buildTfsServerUrl() throws URISyntaxException {
-        final String tfs_server_name = getTfsServerName();
-        Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", tfs_server_name);
-        final URI serverUri = URIUtils.createURI("http", tfs_server_name, 8080, "tfs/" + TeamProjectCollection, null, null);
-        return serverUri.toString();
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
     }
 
     public static String getTfsServerName() {
-        return hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
+        final String result = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
+        Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", result);
+        return result;
     }
 
     /**
@@ -52,7 +75,7 @@ public abstract class AbstractIntegrationTest {
         final Class clazz = testDescription.getTestClass();
         final String testClassName = clazz.getSimpleName();
         final String testCaseName = testDescription.getMethodName();
-        return TeamProjectPrefix + "/" + testClassName + "/" + testCaseName;
+        return "$/FunctionalTests" + "/" + testClassName + "/" + testCaseName;
     }
 
     // Adapted from http://stackoverflow.com/a/20793241

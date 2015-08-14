@@ -14,6 +14,8 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
+import hudson.util.Secret;
+import hudson.util.SecretOverride;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.runner.Description;
@@ -21,6 +23,7 @@ import org.jvnet.hudson.test.JenkinsRecipe;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -50,6 +53,12 @@ public @interface EndToEndTfs {
      */
     class StubRunner extends JenkinsRecipe.Runner<EndToEndTfs> {
         private RunnerImpl parent;
+        private IntegrationTestHelper helper;
+        private String encryptedPassword;
+
+        public String getEncryptedPassword() {
+            return encryptedPassword;
+        }
 
         protected RunnerImpl getParent() {
             return parent;
@@ -59,13 +68,21 @@ public @interface EndToEndTfs {
             this.parent = parent;
         }
 
+        protected IntegrationTestHelper getHelper() {
+            return helper;
+        }
+
+        private void setHelper(final IntegrationTestHelper helper) {
+            this.helper = helper;
+        }
+
         @Override
         public void decorateHome(final JenkinsRule jenkinsRule, final File home) throws Exception {
             final String jobFolder = parent.getJobFolder();
             final String configXmlPath = jobFolder + "config.xml";
             final File configXmlFile = new File(home, configXmlPath);
 
-            final String tfsServerUrl = AbstractIntegrationTest.buildTfsServerUrl();
+            final String tfsServerUrl = helper.getServerUrl();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/serverUrl", tfsServerUrl);
 
             final String projectPath = parent.getPathInTfvc();
@@ -74,8 +91,27 @@ public @interface EndToEndTfs {
             final String workspaceName = "Hudson-${JOB_NAME}-${COMPUTERNAME}";
             XmlHelper.pokeValue(configXmlFile, "/project/scm/workspaceName", workspaceName);
 
-            final String userName = AbstractIntegrationTest.TestUserName;
+            final String userName = helper.getUserName();
             XmlHelper.pokeValue(configXmlFile, "/project/scm/userName", userName);
+
+            final String userPassword = helper.getUserPassword();
+            final SecretOverride secretOverride = new SecretOverride();
+            try {
+                final Secret secret = Secret.fromString(userPassword);
+                encryptedPassword = secret.getEncryptedValue();
+            }
+            finally {
+                try {
+                    secretOverride.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+            final String projectScmPassword = "/project/scm/password";
+            final String currentPassword = XmlHelper.peekValue(configXmlFile, projectScmPassword);
+            if (currentPassword != null) {
+                XmlHelper.pokeValue(configXmlFile, projectScmPassword, encryptedPassword);
+            }
         }
     }
 
@@ -83,6 +119,7 @@ public @interface EndToEndTfs {
 
         private static final String workspaceComment = "Created by the Jenkins tfs-plugin functional tests.";
 
+        private final IntegrationTestHelper helper;
         private final String serverUrl;
 
         private File localBaseFolderFile;
@@ -95,7 +132,8 @@ public @interface EndToEndTfs {
         private Workspace workspace;
 
         public RunnerImpl() throws URISyntaxException {
-            serverUrl = AbstractIntegrationTest.buildTfsServerUrl();
+            helper = new IntegrationTestHelper();
+            serverUrl = helper.getServerUrl();
         }
 
         @Override
@@ -104,11 +142,11 @@ public @interface EndToEndTfs {
             final Class clazz = testDescription.getTestClass();
             testClassName = clazz.getSimpleName();
             testCaseName = testDescription.getMethodName();
-            final String hostName = AbstractIntegrationTest.tryToDetermineHostName();
+            final String hostName = IntegrationTestHelper.tryToDetermineHostName();
             final File currentFolder = new File("").getAbsoluteFile();
             final File workspaces = new File(currentFolder, "workspaces");
             // TODO: Consider NOT using the Server class
-            server = new Server(new TfTool(null, null, null, null), serverUrl, AbstractIntegrationTest.TestUserName, AbstractIntegrationTest.TestUserPassword);
+            server = new Server(new TfTool(null, null, null, null), serverUrl, helper.getUserName(), helper.getUserPassword());
 
             final MockableVersionControlClient vcc = server.getVersionControlClient();
 
@@ -116,7 +154,7 @@ public @interface EndToEndTfs {
             workspaceName = hostName + "-" + testCaseName;
             workspace = createWorkspace(vcc, workspaceName);
 
-            pathInTfvc = AbstractIntegrationTest.determinePathInTfvcForTestCase(testDescription);
+            pathInTfvc = IntegrationTestHelper.determinePathInTfvcForTestCase(testDescription);
             final File localTestClassFolder = new File(workspaces, testClassName);
             localBaseFolderFile = new File(localTestClassFolder, testCaseName);
             //noinspection ResultOfMethodCallIgnored
@@ -153,6 +191,7 @@ public @interface EndToEndTfs {
             if (runnerClass != null) {
                 runner = runnerClass.newInstance();
                 runner.setParent(this);
+                runner.setHelper(this.helper);
                 runner.setup(jenkinsRule, recipe);
             }
         }

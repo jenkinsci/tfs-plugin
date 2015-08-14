@@ -54,7 +54,7 @@ public class TeamFoundationServerScmTest {
     @Test public void upgradeFromScrambledPassword() {
         SecretOverride secretOverride = null;
         try {
-            secretOverride = new SecretOverride("5e2422dc868f119d5033f4619a6f223d71d132a17f8a63f1056c9a1f57c65006");
+            secretOverride = new SecretOverride();
             final String xmlString =
                     "<scm class='hudson.plugins.tfs.TeamFoundationServerScm' plugin='tfs@3.1.1'>\n" +
                     "    <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
