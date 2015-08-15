@@ -10,6 +10,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.FilePath;
+import hudson.Functions;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Computer;
@@ -17,18 +18,23 @@ import hudson.model.Project;
 import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import hudson.model.labels.LabelAtom;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.XmlHelper;
+import hudson.remoting.VirtualChannel;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.PollingResult;
+import hudson.slaves.DumbSlave;
+import hudson.slaves.SlaveComputer;
 import hudson.triggers.SCMTrigger;
 import hudson.util.Scrambler;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -41,6 +47,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -61,6 +68,49 @@ public class FunctionalTest {
      * stuff it has.
      */
     public class TfsJenkinsRule extends JenkinsRule{
+        /**
+          * https://wiki.jenkins-ci.org/display/JENKINS/Unit+Test+on+Windows#UnitTestonWindows-UnabletodeleteslaveslaveX.log
+          *
+          */
+        private void purgeSlaves() {
+            List<Computer> disconnectingComputers = new ArrayList<Computer>();
+            List<VirtualChannel> closingChannels = new ArrayList<VirtualChannel>();
+            for (Computer computer: jenkins.getComputers()) {
+                if (!(computer instanceof SlaveComputer)) {
+                    continue;
+                }
+                // disconnect slaves.
+                // retrieve the channel before disconnecting.
+                // even a computer gets offline, channel delays to close.
+                if (!computer.isOffline()) {
+                    VirtualChannel ch = computer.getChannel();
+                    computer.disconnect(null);
+                    disconnectingComputers.add(computer);
+                    closingChannels.add(ch);
+                }
+            }
+
+            try {
+                // Wait for all computers disconnected and all channels closed.
+                for (Computer computer: disconnectingComputers) {
+                    computer.waitUntilOffline();
+                }
+                for (VirtualChannel ch: closingChannels) {
+                    ch.join();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void after() {
+            if (Functions.isWindows()) {
+                purgeSlaves();
+            }
+            super.after();
+        }
+
         public EndToEndTfs.RunnerImpl getTfsRunner() {
             EndToEndTfs.RunnerImpl result = null;
             for (final JenkinsRecipe.Runner recipe : recipes) {
@@ -203,6 +253,16 @@ public class FunctionalTest {
             final String labelNameXPath = "/project/publishers/hudson.plugins.tfs.TFSLabeler/labelName";
             XmlHelper.pokeValue(configXmlFile, labelNameXPath, generatedLabelName);
         }
+    }
+
+    @Ignore("Not complete")
+    @LocalData
+    @EndToEndTfs(EndToEndTfs.StubRunner.class)
+    @Test public void agent() throws Exception {
+        // TODO: create a project that verifies the checked out files
+        final LabelAtom label = new LabelAtom("agent");
+        final DumbSlave agent = j.createOnlineSlave(label);
+        // TODO: restrict to only run on agent (slave)
     }
 
     @LocalData
