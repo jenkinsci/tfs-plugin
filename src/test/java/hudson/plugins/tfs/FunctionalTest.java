@@ -237,6 +237,7 @@ public class FunctionalTest {
 
         // make a change in source control
         final File todoFile = new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt");
+        //noinspection ResultOfMethodCallIgnored
         todoFile.createNewFile();
         workspace.pendAdd(
                 new String[]{todoFile.getAbsolutePath()},
