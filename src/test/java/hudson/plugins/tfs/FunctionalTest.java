@@ -3,13 +3,16 @@ package hudson.plugins.tfs;
 import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
+import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.VersionControlLabel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
+import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.Computer;
 import hudson.model.Project;
 import hudson.model.Queue;
 import hudson.model.Result;
@@ -287,6 +290,21 @@ public class FunctionalTest {
         Assert.assertEquals(1, thirdBuildWorkspaceFiles.length);
         final FilePath thirdBuildWorkspaceFile = thirdBuildWorkspaceFiles[0];
         Assert.assertEquals("TODO.txt", thirdBuildWorkspaceFile.getName());
+
+        // finally, delete the project, which should first remove the workspace
+        final TeamFoundationServerScm scm = (TeamFoundationServerScm) project.getScm();
+        final Computer computer = Computer.currentComputer();
+        final String workspaceName = scm.getWorkspaceName(thirdBuild, computer);
+        Assert.assertTrue(jenkinsWorkspace.exists());
+        final String hostName = LocalHost.getShortName();
+        final Workspace[] workspacesBeforeDeletion = vcc.queryWorkspaces(workspaceName, VersionControlConstants.AUTHENTICATED_USER, hostName, WorkspacePermissions.NONE_OR_NOT_SUPPORTED);
+        Assert.assertEquals(1, workspacesBeforeDeletion.length);
+
+        project.delete();
+
+        Assert.assertFalse(jenkinsWorkspace.exists());
+        final Workspace[] workspacesAfterDeletion = vcc.queryWorkspaces(workspaceName, VersionControlConstants.AUTHENTICATED_USER, hostName, WorkspacePermissions.NONE_OR_NOT_SUPPORTED);
+        Assert.assertEquals(0, workspacesAfterDeletion.length);
     }
 
     /**
