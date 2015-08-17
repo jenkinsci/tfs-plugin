@@ -1,21 +1,15 @@
 package hudson.plugins.tfs.model;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import hudson.plugins.tfs.TfTool;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 
 public class ServerTest {
 
-    @Mock TfTool tool;
-    
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
