@@ -34,7 +34,6 @@ import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -255,14 +254,23 @@ public class FunctionalTest {
         }
     }
 
-    @Ignore("Not complete")
     @LocalData
     @EndToEndTfs(EndToEndTfs.StubRunner.class)
     @Test public void agent() throws Exception {
-        // TODO: create a project that verifies the checked out files
+        final Jenkins jenkins = j.jenkins;
+        final List<Project> projects = jenkins.getProjects();
+        final Project project = projects.get(0);
+        final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
+        checkInEmptyFile(tfsRunner);
         final LabelAtom label = new LabelAtom("agent");
         final DumbSlave agent = j.createOnlineSlave(label);
-        // TODO: restrict to only run on agent (slave)
+
+        final AbstractBuild firstBuild = runUserTrigger(project);
+
+        Assert.assertNotNull(firstBuild);
+        Assert.assertEquals(Result.SUCCESS, firstBuild.getResult());
+        final String remoteFS = agent.getRemoteFS();
+        Assert.assertEquals(null, remoteFS);
     }
 
     @LocalData
