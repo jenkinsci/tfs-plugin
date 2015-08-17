@@ -42,16 +42,4 @@ public class ServerTest {
         assertNotSame("getProject() did not return different objects", 
                 server.getProject("$/projectPath"), server.getProject("$/otherPath"));
     }
-    
-    @Test
-    public void assertLocalHostnameIsRetrievedFromTfTool() throws Exception {
-        when(tool.getHostname()).thenReturn("thehostname");
-        Server server = new Server(tool, "url", null, null);
-        try {
-            assertEquals("Hostname was incorrect", "thehostname", server.getLocalHostname());
-            verify(tool).getHostname();
-        } finally {
-            server.close();
-        }
-    }
 }

@@ -125,10 +125,6 @@ public class Server implements ServerConfigurationProvider, Closable {
         return userPassword;
     }
 
-    public String getLocalHostname() throws IOException, InterruptedException {
-        return tool.getHostname();
-    }
-
     public TaskListener getListener() {
         // TODO: rip out TfTool and accept the TaskListener in our constructor
         return tool.getListener();
