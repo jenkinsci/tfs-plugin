@@ -8,14 +8,10 @@ import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
-import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
@@ -98,10 +94,6 @@ public class Server implements ServerConfigurationProvider, Closable {
             }
         }
         return mockableVcc;
-    }
-
-    public Reader execute(MaskedArgumentListBuilder arguments) throws IOException, InterruptedException {
-        return tool.execute(arguments.toCommandArray(), arguments.toMaskArray());
     }
 
     public <T> T execute(final Callable<T> callable) {
