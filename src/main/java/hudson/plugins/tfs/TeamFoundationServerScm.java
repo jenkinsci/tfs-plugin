@@ -185,7 +185,7 @@ public class TeamFoundationServerScm extends SCM {
     
     @Override
     public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
-        Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspaceFilePath), build);
+        Server server = createServer(launcher, listener, build);
         try {
             WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
             
@@ -283,7 +283,7 @@ public class TeamFoundationServerScm extends SCM {
         if (lastRun == null) {
             return true;
         } else {
-            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
+            Server server = createServer(launcher, listener, lastRun);
             try {
                 return (server.getProject(getProjectPath(lastRun)).getDetailedHistory(
                             lastRun.getTimestamp(), 
@@ -331,7 +331,7 @@ public class TeamFoundationServerScm extends SCM {
         if ((configuration != null) && configuration.workspaceExists()) {
             LogTaskListener listener = new LogTaskListener(logger, Level.INFO);
             Launcher launcher = node.createLauncher(listener);        
-            Server server = createServer(new TfTool(getDescriptor().getTfExecutable(), launcher, listener, workspace), lastRun);
+            Server server = createServer(launcher, listener, lastRun);
             try {
                 if (new RemoveWorkspaceAction(configuration.getWorkspaceName()).remove(server)) {
                     configuration.setWorkspaceWasRemoved();
@@ -344,8 +344,8 @@ public class TeamFoundationServerScm extends SCM {
         return true;
     }
     
-    protected Server createServer(TfTool tool, Run<?,?> run) throws IOException {
-        return new Server(tool, getServerUrl(run), getUserName(), getUserPassword());
+    protected Server createServer(final Launcher launcher, final TaskListener taskListener, Run<?,?> run) throws IOException {
+        return new Server(launcher, taskListener, getServerUrl(run), getUserName(), getUserPassword());
     }
 
     @Override
@@ -518,8 +518,7 @@ public class TeamFoundationServerScm extends SCM {
             return PollingResult.BUILD_NOW;
         }
         Run<?, ?> build = project.getLastBuild();
-        final TfTool tool = new TfTool(getDescriptor().getTfExecutable(), localLauncher, listener, workspace);
-        final Server server = createServer(tool, build);
+        final Server server = createServer(localLauncher, listener, build);
         final Project tfsProject = server.getProject(projectPath);
         try {
             final ChangeSet latest = tfsProject.getLatestChangeset();

@@ -20,7 +20,7 @@ public class ServerIntegrationTest {
      * otherwise an @link UnsatisfiedLinkError would have been thrown earlier.
      */
     public void canFindTfsSdkNativeLibraries() throws IOException {
-        final Server server = new Server(null, "http://tfs.invalid:8080/tfs", "username", "password");
+        final Server server = new Server(null, null, "http://tfs.invalid:8080/tfs", "username", "password");
         try {
             server.getVersionControlClient();
         } finally {
