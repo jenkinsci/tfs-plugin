@@ -271,7 +271,6 @@ public class FunctionalTest {
         final Jenkins jenkins = j.jenkins;
         final TaskListener taskListener = j.createTaskListener();
         final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
-        final Workspace workspace = tfsRunner.getWorkspace();
         final Server server = tfsRunner.getServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final List<Project> projects = jenkins.getProjects();
@@ -299,17 +298,7 @@ public class FunctionalTest {
         Assert.assertEquals(PollingResult.Change.NONE, secondPoll.change);
 
         // make a change in source control
-        final File todoFile = new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt");
-        //noinspection ResultOfMethodCallIgnored
-        todoFile.createNewFile();
-        workspace.pendAdd(
-                new String[]{todoFile.getAbsolutePath()},
-                false,
-                null,
-                LockLevel.UNCHANGED,
-                GetOptions.NONE,
-                PendChangesOptions.NONE);
-        final int changeSet = tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
+        final int changeSet = checkInEmptyFile(tfsRunner);
         Assert.assertTrue(changeSet >= 0);
 
         // third poll should trigger a build
@@ -365,6 +354,21 @@ public class FunctionalTest {
         Assert.assertFalse(jenkinsWorkspace.exists());
         final Workspace[] workspacesAfterDeletion = vcc.queryWorkspaces(workspaceName, VersionControlConstants.AUTHENTICATED_USER, hostName, WorkspacePermissions.NONE_OR_NOT_SUPPORTED);
         Assert.assertEquals(0, workspacesAfterDeletion.length);
+    }
+
+    public static int checkInEmptyFile(final EndToEndTfs.RunnerImpl tfsRunner) throws IOException {
+        final Workspace workspace = tfsRunner.getWorkspace();
+        final File todoFile = new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt");
+        //noinspection ResultOfMethodCallIgnored
+        todoFile.createNewFile();
+        workspace.pendAdd(
+                new String[]{todoFile.getAbsolutePath()},
+                false,
+                null,
+                LockLevel.UNCHANGED,
+                GetOptions.NONE,
+                PendChangesOptions.NONE);
+        return tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
     }
 
     /**
