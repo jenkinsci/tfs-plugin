@@ -33,7 +33,7 @@ public class NewWorkspaceCommand extends AbstractCallableCommand {
     public Callable<Void> getCallable() {
         return new Callable<Void>() {
             public Void call() {
-                final Server server = getServer();
+                final Server server = createServer();
                 final MockableVersionControlClient vcc = server.getVersionControlClient();
                 final TaskListener listener = server.getListener();
                 final PrintStream logger = listener.getLogger();

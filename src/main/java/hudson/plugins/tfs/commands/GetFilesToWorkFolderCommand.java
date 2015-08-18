@@ -39,7 +39,7 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand impleme
     }
 
     public Void call() throws Exception {
-        final Server server = getServer();
+        final Server server = createServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TaskListener listener = server.getListener();
         logger = listener.getLogger();

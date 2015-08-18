@@ -4,6 +4,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LabelChildOp
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LabelResult;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.VersionControlLabel;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelItemSpec;
+import hudson.plugins.tfs.model.Server;
 import ms.tfs.versioncontrol.clientservices._03._LabelResult;
 import ms.tfs.versioncontrol.clientservices._03._LabelResultStatus;
 import org.junit.Test;
@@ -24,7 +25,12 @@ public class LabelCommandTest extends AbstractCallableCommandTest {
                 Matchers.<LabelItemSpec[]>anyObject(),
                 Matchers.<LabelChildOption>anyObject())).thenReturn(labelResults);
 
-        final LabelCommand command = new LabelCommand(server, "labelName", "hudson-createLabel-TFS2013", "$/project/path");
+        final LabelCommand command = new LabelCommand(server, "labelName", "hudson-createLabel-TFS2013", "$/project/path") {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
         final Callable<Void> callable = command.getCallable();
 
         callable.call();

@@ -1,18 +1,24 @@
 package hudson.plugins.tfs.commands;
 
+import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.Server;
 
 import java.util.concurrent.Callable;
 
 public abstract class AbstractCallableCommand {
 
-    private final Server server;
+    private final ServerConfigurationProvider serverConfig;
 
-    protected AbstractCallableCommand(final Server server) {
-        this.server = server;
+    protected AbstractCallableCommand(final ServerConfigurationProvider server) {
+        this.serverConfig = server;
     }
 
-    public Server getServer() {
+    public Server createServer() {
+        final String url = serverConfig.getUrl();
+        final String userName = serverConfig.getUserName();
+        final String userPassword = serverConfig.getUserPassword();
+        final TaskListener listener = serverConfig.getListener();
+        final Server server = new Server(null, listener, url, userName, userPassword);
         return server;
     }
 

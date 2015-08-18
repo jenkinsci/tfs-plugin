@@ -2,6 +2,7 @@ package hudson.plugins.tfs.commands;
 
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import hudson.plugins.tfs.model.Server;
 import org.junit.Test;
 import org.mockito.Matchers;
 
@@ -20,7 +21,12 @@ public class DeleteWorkspaceCommandTest extends AbstractCallableCommandTest {
         when(server.getUserName()).thenReturn("snd\\user_cp");
         final Workspace[] emptyWorkspaceList = new Workspace[0];
         when(vcc.queryWorkspaces(isA(String.class), Matchers.<String>anyObject(), isA(String.class), isA(WorkspacePermissions.class))).thenReturn(emptyWorkspaceList);
-        final DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(server, "TheWorkspaceName", "computerName");
+        final DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(server, "TheWorkspaceName", "computerName") {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
         final Callable<Void> callable = command.getCallable();
 
         callable.call();

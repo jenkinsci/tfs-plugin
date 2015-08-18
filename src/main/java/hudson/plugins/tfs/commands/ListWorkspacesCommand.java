@@ -41,7 +41,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand {
     public Callable<List<Workspace>> getCallable() {
         return new Callable<List<Workspace>>() {
             public List<Workspace> call() throws Exception {
-                final Server server = getServer();
+                final Server server = createServer();
                 final MockableVersionControlClient vcc = server.getVersionControlClient();
                 final TaskListener listener = server.getListener();
                 final PrintStream logger = listener.getLogger();

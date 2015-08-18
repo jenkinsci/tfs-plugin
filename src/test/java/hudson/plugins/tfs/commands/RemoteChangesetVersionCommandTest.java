@@ -72,7 +72,12 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
                 anyBoolean(),
                 anyBoolean(),
                 anyBoolean())).thenReturn(serverChangesets);
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE);
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE) {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
         command.setUserLookup(userLookup);
         final Callable<ChangeSet> callable = command.getCallable();
 
@@ -100,7 +105,12 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
                 anyBoolean(),
                 anyBoolean(),
                 anyBoolean())).thenReturn(null);
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE);
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE) {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
         final Callable<ChangeSet> callable = command.getCallable();
 
         final ChangeSet result = callable.call();

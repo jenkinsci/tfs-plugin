@@ -3,6 +3,7 @@ package hudson.plugins.tfs.commands;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
+import hudson.plugins.tfs.model.Server;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -23,7 +24,12 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 isA(String.class),
                 isA(WorkspaceLocation.class),
                 isA(WorkspaceOptions.class))).thenReturn(null);
-        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, null);
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, null) {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
         final Callable<Void> callable = command.getCallable();
 
         callable.call();
@@ -44,7 +50,12 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 isA(String.class),
                 isA(WorkspaceLocation.class),
                 isA(WorkspaceOptions.class))).thenReturn(null);
-        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", "/home/jenkins/jobs/stuff/workspace");
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", "/home/jenkins/jobs/stuff/workspace") {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
         final Callable<Void> callable = command.getCallable();
 
         callable.call();
