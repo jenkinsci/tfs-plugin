@@ -46,6 +46,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -228,7 +229,15 @@ public class FunctionalTest {
     }
 
     public void assertBuildSuccess(final AbstractBuild build) throws IOException {
-        Assert.assertEquals(Result.SUCCESS, build.getResult());
+        final Result result = build.getResult();
+        if (!Result.SUCCESS.equals(result)) {
+            final File logFile = build.getLogFile();
+            final Charset charset = build.getCharset();
+            final String headerTemplate = "Build result: %s\n---Log Start---\n";
+            final String header = String.format(headerTemplate, result);
+            final String message = header + hudson.Util.loadFile(logFile, charset) + "---Log End---";
+            Assert.fail(message);
+        }
     }
 
     public static class CreateLabel extends CurrentChangesetInjector {
