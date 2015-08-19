@@ -192,7 +192,7 @@ public class FunctionalTest {
 
     @LocalData
     @EndToEndTfs(CreateLabel.class)
-    @Test public void createLabel() throws ExecutionException, InterruptedException {
+    @Test public void createLabel() throws ExecutionException, InterruptedException, IOException {
         final Jenkins jenkins = j.jenkins;
         final TaskListener taskListener = j.createTaskListener();
         final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
@@ -214,7 +214,7 @@ public class FunctionalTest {
 
         // verify new label created against latestChangesetId
         Assert.assertNotNull(build);
-        Assert.assertEquals(Result.SUCCESS, build.getResult());
+        assertBuildSuccess(build);
         final ChangeLogSet changeSet = build.getChangeSet();
         Assert.assertEquals(0, changeSet.getItems().length);
         final TFSRevisionState revisionState = build.getAction(TFSRevisionState.class);
@@ -225,6 +225,10 @@ public class FunctionalTest {
         Assert.assertEquals(1, labels.length);
         final VersionControlLabel label = labels[0];
         Assert.assertFalse(StringUtils.isEmpty(label.getComment()));
+    }
+
+    public void assertBuildSuccess(final AbstractBuild build) throws IOException {
+        Assert.assertEquals(Result.SUCCESS, build.getResult());
     }
 
     public static class CreateLabel extends CurrentChangesetInjector {
@@ -268,7 +272,7 @@ public class FunctionalTest {
         final AbstractBuild firstBuild = runUserTrigger(project);
 
         Assert.assertNotNull(firstBuild);
-        Assert.assertEquals(Result.SUCCESS, firstBuild.getResult());
+        assertBuildSuccess(firstBuild);
         final String remoteFS = agent.getRemoteFS();
         Assert.assertEquals(null, remoteFS);
     }
@@ -290,7 +294,7 @@ public class FunctionalTest {
         final AbstractBuild firstBuild = runScmPollTrigger(project);
 
         Assert.assertNotNull(firstBuild);
-        Assert.assertEquals(Result.SUCCESS, firstBuild.getResult());
+        assertBuildSuccess(firstBuild);
         final ChangeLogSet firstChangeSet = firstBuild.getChangeSet();
         Assert.assertEquals(true, firstChangeSet.isEmptySet());
         final TFSRevisionState firstRevisionState = firstBuild.getAction(TFSRevisionState.class);
@@ -314,7 +318,7 @@ public class FunctionalTest {
         final AbstractBuild secondBuild = runScmPollTrigger(project);
 
         Assert.assertNotNull(secondBuild);
-        Assert.assertEquals(Result.SUCCESS, secondBuild.getResult());
+        assertBuildSuccess(secondBuild);
         final ChangeLogSet secondChangeSet = secondBuild.getChangeSet();
         Assert.assertEquals(1, secondChangeSet.getItems().length);
         final TFSRevisionState secondRevisionState = secondBuild.getAction(TFSRevisionState.class);
@@ -333,7 +337,7 @@ public class FunctionalTest {
         final AbstractBuild thirdBuild = runUserTrigger(project);
 
         Assert.assertNotNull(thirdBuild);
-        Assert.assertEquals(Result.SUCCESS, thirdBuild.getResult());
+        assertBuildSuccess(thirdBuild);
         final ChangeLogSet thirdChangeSet = thirdBuild.getChangeSet();
         Assert.assertEquals(0, thirdChangeSet.getItems().length);
         final TFSRevisionState thirdRevisionState = thirdBuild.getAction(TFSRevisionState.class);
