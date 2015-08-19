@@ -4,21 +4,24 @@ import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.Server;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.concurrent.Callable;
 
-public abstract class AbstractCallableCommand {
+public abstract class AbstractCallableCommand implements Serializable {
 
-    private final ServerConfigurationProvider serverConfig;
+    private final String url;
+    private final String userName;
+    private final String userPassword;
+    private final TaskListener listener;
 
-    protected AbstractCallableCommand(final ServerConfigurationProvider server) {
-        this.serverConfig = server;
+    protected AbstractCallableCommand(final ServerConfigurationProvider serverConfig) {
+        url = serverConfig.getUrl();
+        userName = serverConfig.getUserName();
+        userPassword = serverConfig.getUserPassword();
+        listener = serverConfig.getListener();
     }
 
     public Server createServer() throws IOException {
-        final String url = serverConfig.getUrl();
-        final String userName = serverConfig.getUserName();
-        final String userPassword = serverConfig.getUserPassword();
-        final TaskListener listener = serverConfig.getListener();
         final Server server = new Server(null, listener, url, userName, userPassword);
         return server;
     }
