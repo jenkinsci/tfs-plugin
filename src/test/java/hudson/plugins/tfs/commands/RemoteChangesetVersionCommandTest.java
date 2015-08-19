@@ -176,33 +176,32 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
     }
 
     @Test public void getVersionSpecificationWhenDateVersionSpec() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, null, fixedPointInTime);
 
-        final String actual = command.getVersionSpecification();
+        final String actual = RemoteChangesetVersionCommand.toString(fixedPointInTime);
 
-        assertEquals("D2013-07-02T15:40:51Z", actual);
+        assertEquals("D2013-07-02T15:40:50Z", actual);
     }
 
     @Test public void getVersionSpecificationWhenChangesetVersionSpec() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, null, new ChangesetVersionSpec(42));
+        final ChangesetVersionSpec versionSpec = new ChangesetVersionSpec(42);
 
-        final String actual = command.getVersionSpecification();
+        final String actual = RemoteChangesetVersionCommand.toString(versionSpec);
 
         assertEquals("C42", actual);
     }
 
     @Test public void getVersionSpecificationWhenLabelVersionSpecWithoutScope() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, null, new LabelVersionSpec(new LabelSpec("Foo", null)));
+        final LabelVersionSpec versionSpec = new LabelVersionSpec(new LabelSpec("Foo", null));
 
-        final String actual = command.getVersionSpecification();
+        final String actual = RemoteChangesetVersionCommand.toString(versionSpec);
 
         assertEquals("LFoo", actual);
     }
 
     @Test public void getVersionSpecificationWhenLabelVersionSpecWithScope() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, null, new LabelVersionSpec(new LabelSpec("Foo", "$/Bar")));
+        final LabelVersionSpec versionSpec = new LabelVersionSpec(new LabelSpec("Foo", "$/Bar"));
 
-        final String actual = command.getVersionSpecification();
+        final String actual = RemoteChangesetVersionCommand.toString(versionSpec);
 
         assertEquals("LFoo@$/Bar", actual);
     }

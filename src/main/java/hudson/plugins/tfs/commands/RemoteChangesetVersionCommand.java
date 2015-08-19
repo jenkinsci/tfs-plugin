@@ -70,7 +70,7 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
 
-        final String specString = getVersionSpecification();
+        final String specString = RemoteChangesetVersionCommand.toString(versionSpec);
         final String queryingMessage = String.format(QueryingTemplate, path, specString);
         logger.println(queryingMessage);
 
@@ -113,28 +113,6 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
         logger.println(resultMessage);
 
         return changeSet;
-    }
-
-    static VersionSpec adjustVersionSpec(final VersionSpec versionSpec) {
-        final VersionSpec adjustedVersionSpec;
-        if (versionSpec instanceof DateVersionSpec) {
-            // The to timestamp is exclusive, ie it will only show history before the to timestamp.
-            // This command should be inclusive.
-            final DateVersionSpec dateVersionSpec = (DateVersionSpec) versionSpec;
-            final Calendar calendar = dateVersionSpec.getDate();
-            final Calendar adjustedCalendar = (Calendar) calendar.clone();
-            adjustedCalendar.add(Calendar.SECOND, 1);
-            adjustedVersionSpec = new DateVersionSpec(adjustedCalendar);
-        }
-        else {
-            adjustedVersionSpec = versionSpec;
-        }
-        return adjustedVersionSpec;
-    }
-
-    String getVersionSpecification() {
-        final VersionSpec adjustedVersionSpec = adjustVersionSpec(versionSpec);
-        return toString(adjustedVersionSpec);
     }
 
     public static String toString(final VersionSpec versionSpec) {
