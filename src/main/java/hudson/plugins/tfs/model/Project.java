@@ -179,9 +179,9 @@ public class Project {
 
     int extractChangesetNumber(final RemoteChangesetVersionCommand command)
             throws IOException, InterruptedException, ParseException {
-        final ChangeSet changeSet = server.execute(command.getCallable());
-        final String changesetString = changeSet.getVersion();
-        return Integer.parseInt(changesetString, 10);
+        final Integer changeSet = server.execute(command.getCallable());
+        final int result = changeSet;
+        return result;
     }
 
     /**

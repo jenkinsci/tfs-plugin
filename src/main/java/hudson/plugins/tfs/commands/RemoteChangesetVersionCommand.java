@@ -6,15 +6,9 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionTyp
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LabelVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
-import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 import hudson.model.TaskListener;
-import hudson.model.User;
-import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
-import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.Server;
-import hudson.plugins.tfs.model.TfsUserLookup;
-import hudson.plugins.tfs.model.UserLookup;
 import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.TextTableParser;
 import hudson.remoting.Callable;
@@ -26,10 +20,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 /**
@@ -38,15 +29,14 @@ import java.util.TimeZone;
  * @author Olivier Dagenais
  *
  */
-public class RemoteChangesetVersionCommand extends AbstractCallableCommand implements Callable<ChangeSet, Exception> {
+public class RemoteChangesetVersionCommand extends AbstractCallableCommand implements Callable<Integer, Exception> {
 
     private static final String QueryingTemplate = "Querying for remote changeset at '%s' as of '%s'...";
-    private static final String ResultTemplate = "Query result is: Changeset #%s by '%s' on '%s'.";
+    private static final String ResultTemplate = "Query result is: Changeset #%d by '%s' on '%s'.";
     private static final String FailedTemplate = "Query returned no result!";
 
     private final VersionSpec versionSpec;
     private final String path;
-    private UserLookup userLookup;
 
     public RemoteChangesetVersionCommand(
             final ServerConfigurationProvider server, final String remotePath, final VersionSpec versionSpec) {
@@ -56,15 +46,11 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
         this.versionSpec = versionSpec;
     }
 
-    void setUserLookup(final UserLookup userLookup) {
-        this.userLookup = userLookup;
-    }
-
-    public Callable<ChangeSet, Exception> getCallable() {
+    public Callable<Integer, Exception> getCallable() {
         return this;
     }
 
-    public ChangeSet call() throws Exception {
+    public Integer call() throws Exception {
         final Server server = createServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TaskListener listener = server.getListener();
@@ -74,11 +60,6 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
         final String queryingMessage = String.format(QueryingTemplate, path, specString);
         logger.println(queryingMessage);
 
-        if (userLookup == null) {
-            final IIdentityManagementService ims = server.createIdentityManagementService();
-            userLookup = new TfsUserLookup(ims);
-        }
-        ChangeSet changeSet = null;
         final Changeset[] serverChangeSets = vcc.queryHistory(
                 path,
                 versionSpec,
@@ -93,26 +74,23 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
                 false /* includeDownloadInfo */,
                 false /* sortAscending */
         );
+        Integer changeSetNumber = null;
+        final String resultMessage;
         if (serverChangeSets != null && serverChangeSets.length >= 1) {
             final Changeset serverChangeset = serverChangeSets[0];
-            changeSet = Project.convertServerChangeset(serverChangeset, userLookup);
-        }
-
-        final String resultMessage;
-        if (changeSet != null) {
-            final String version = changeSet.getVersion();
-            final User author = changeSet.getAuthor();
-            final Date changeSetDate = changeSet.getDate();
+            changeSetNumber = serverChangeset.getChangesetID();
+            final Date changeSetDate = serverChangeset.getDate().getTime();
+            final String author = serverChangeset.getCommitter();
             final SimpleDateFormat simpleDateFormat = DateUtil.TFS_DATETIME_FORMATTER.get();
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             final String changeSetDateIso8601 = simpleDateFormat.format(changeSetDate);
-            resultMessage = String.format(ResultTemplate, version, author.getId(), changeSetDateIso8601);
+            resultMessage = String.format(ResultTemplate, changeSetNumber, author, changeSetDateIso8601);
         } else {
             resultMessage = FailedTemplate;
         }
         logger.println(resultMessage);
 
-        return changeSet;
+        return changeSetNumber;
     }
 
     public static String toString(final VersionSpec versionSpec) {

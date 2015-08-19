@@ -22,7 +22,6 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersion
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.model.User;
 import hudson.plugins.tfs.Util;
-import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.Server;
 
 import java.io.StringReader;
@@ -78,17 +77,16 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
                 return server;
             }
         };
-        command.setUserLookup(userLookup);
-        final Callable<ChangeSet, Exception> callable = command.getCallable();
+        final Callable<Integer, Exception> callable = command.getCallable();
 
-        final ChangeSet actual = callable.call();
+        final Integer actual = callable.call();
 
         Assert.assertNotNull(actual);
+        Assert.assertEquals(1637, (int)actual);
         assertLog(
                 "Querying for remote changeset at '$/RemotePath' as of 'T'...",
                 "Query result is: Changeset #1637 by 'piedefer' on '2013-07-02T15:40:50Z'."
         );
-        Assert.assertEquals(user, actual.getAuthor());
     }
 
     @Test public void assertLoggingWhenNoResult() throws Exception {
@@ -111,9 +109,9 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
                 return server;
             }
         };
-        final Callable<ChangeSet, Exception> callable = command.getCallable();
+        final Callable<Integer, Exception> callable = command.getCallable();
 
-        final ChangeSet result = callable.call();
+        final Integer result = callable.call();
 
         Assert.assertNull(result);
         assertLog(
