@@ -176,7 +176,7 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
     }
 
     @Test public void getVersionSpecificationWhenDateVersionSpec() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, fixedPointInTime);
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, null, fixedPointInTime);
 
         final String actual = command.getVersionSpecification();
 
@@ -184,7 +184,7 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
     }
 
     @Test public void getVersionSpecificationWhenChangesetVersionSpec() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new ChangesetVersionSpec(42));
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, null, new ChangesetVersionSpec(42));
 
         final String actual = command.getVersionSpecification();
 
@@ -192,7 +192,7 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
     }
 
     @Test public void getVersionSpecificationWhenLabelVersionSpecWithoutScope() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new LabelVersionSpec(new LabelSpec("Foo", null)));
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, null, new LabelVersionSpec(new LabelSpec("Foo", null)));
 
         final String actual = command.getVersionSpecification();
 
@@ -200,10 +200,10 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
     }
 
     @Test public void getVersionSpecificationWhenLabelVersionSpecWithScope() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new LabelVersionSpec(new LabelSpec("Foo", "Bar")));
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, null, new LabelVersionSpec(new LabelSpec("Foo", "$/Bar")));
 
         final String actual = command.getVersionSpecification();
 
-        assertEquals("LFoo@Bar", actual);
+        assertEquals("LFoo@$/Bar", actual);
     }
 }
