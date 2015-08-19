@@ -5,12 +5,11 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LabelResult;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.VersionControlLabel;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelItemSpec;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 import ms.tfs.versioncontrol.clientservices._03._LabelResult;
 import ms.tfs.versioncontrol.clientservices._03._LabelResultStatus;
 import org.junit.Test;
 import org.mockito.Matchers;
-
-import java.util.concurrent.Callable;
 
 import static org.mockito.Mockito.when;
 
@@ -31,7 +30,7 @@ public class LabelCommandTest extends AbstractCallableCommandTest {
                 return server;
             }
         };
-        final Callable<Void> callable = command.getCallable();
+        final Callable<Void, Exception> callable = command.getCallable();
 
         callable.call();
 

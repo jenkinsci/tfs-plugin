@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
 
@@ -12,6 +11,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import hudson.remoting.Callable;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

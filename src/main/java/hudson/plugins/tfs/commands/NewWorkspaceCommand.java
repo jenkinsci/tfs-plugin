@@ -7,13 +7,13 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.concurrent.Callable;
 
 
-public class NewWorkspaceCommand extends AbstractCallableCommand implements Callable<Void> {
+public class NewWorkspaceCommand extends AbstractCallableCommand implements Callable<Void, Exception> {
 
     private static final String CreatingTemplate = "Creating workspace '%s' owned by '%s'...";
     private static final String CreatedTemplate = "Created workspace '%s'.";
@@ -31,7 +31,7 @@ public class NewWorkspaceCommand extends AbstractCallableCommand implements Call
         this.localPath = localPath;
     }
 
-    public Callable<Void> getCallable() {
+    public Callable<Void, Exception> getCallable() {
         return this;
     }
 

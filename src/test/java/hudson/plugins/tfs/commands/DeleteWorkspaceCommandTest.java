@@ -3,10 +3,11 @@ package hudson.plugins.tfs.commands;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 import org.junit.Test;
 import org.mockito.Matchers;
 
-import java.util.concurrent.Callable;
+import java.io.IOException;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doNothing;
@@ -27,7 +28,7 @@ public class DeleteWorkspaceCommandTest extends AbstractCallableCommandTest {
                 return server;
             }
         };
-        final Callable<Void> callable = command.getCallable();
+        final Callable<Void, IOException> callable = command.getCallable();
 
         callable.call();
 

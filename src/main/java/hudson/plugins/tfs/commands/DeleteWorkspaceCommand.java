@@ -7,12 +7,12 @@ import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.concurrent.Callable;
 
-public class DeleteWorkspaceCommand extends AbstractCallableCommand implements Callable<Void> {
+public class DeleteWorkspaceCommand extends AbstractCallableCommand implements Callable<Void, IOException> {
 
     private static final String DeletingTemplate = "Deleting workspaces named '%s' from computer '%s'...";
     private static final String DeletedTemplate = "Deleted %d workspace(s) named '%s'.";
@@ -30,7 +30,7 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand implements C
         this.computerName = computerName;
     }
 
-    public Callable<Void> getCallable() {
+    public Callable<Void, IOException> getCallable() {
         return this;
     }
 

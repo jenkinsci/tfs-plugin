@@ -26,9 +26,9 @@ import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.Server;
 
 import java.io.StringReader;
-import java.util.concurrent.Callable;
 
 import hudson.plugins.tfs.model.UserLookup;
+import hudson.remoting.Callable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -79,7 +79,7 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
             }
         };
         command.setUserLookup(userLookup);
-        final Callable<ChangeSet> callable = command.getCallable();
+        final Callable<ChangeSet, Exception> callable = command.getCallable();
 
         final ChangeSet actual = callable.call();
 
@@ -111,7 +111,7 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
                 return server;
             }
         };
-        final Callable<ChangeSet> callable = command.getCallable();
+        final Callable<ChangeSet, Exception> callable = command.getCallable();
 
         final ChangeSet result = callable.call();
 

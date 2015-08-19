@@ -4,9 +4,9 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.concurrent.Callable;
 
 import com.microsoft.tfs.core.clients.versioncontrol.events.GetEvent;
+import hudson.remoting.Callable;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -19,7 +19,7 @@ public class GetFilesToWorkFolderCommandTest extends AbstractCallableCommandTest
                 isA(String.class),
                 isA(String.class))).thenReturn(null);
         final GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, "c:/jenkins/jobs/newJob/workspace", "C618");
-        final Callable<Void> callable = command.getCallable();
+        final Callable<Void, Exception> callable = command.getCallable();
 
         callable.call();
 

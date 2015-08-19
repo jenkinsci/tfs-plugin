@@ -17,6 +17,7 @@ import hudson.plugins.tfs.model.TfsUserLookup;
 import hudson.plugins.tfs.model.UserLookup;
 import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.TextTableParser;
+import hudson.remoting.Callable;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.BufferedReader;
@@ -30,7 +31,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
 
 /**
  * TF command for retrieving the latest remote change set version in effect at the specified time.
@@ -38,7 +38,7 @@ import java.util.concurrent.Callable;
  * @author Olivier Dagenais
  *
  */
-public class RemoteChangesetVersionCommand extends AbstractCallableCommand implements Callable<ChangeSet> {
+public class RemoteChangesetVersionCommand extends AbstractCallableCommand implements Callable<ChangeSet, Exception> {
 
     private static final String QueryingTemplate = "Querying for remote changeset at '%s' as of '%s'...";
     private static final String ResultTemplate = "Query result is: Changeset #%s by '%s' on '%s'.";
@@ -60,7 +60,7 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
         this.userLookup = userLookup;
     }
 
-    public Callable<ChangeSet> getCallable() {
+    public Callable<ChangeSet, Exception> getCallable() {
         return this;
     }
 

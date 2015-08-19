@@ -2,10 +2,10 @@ package hudson.plugins.tfs.commands;
 
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.concurrent.Callable;
 
 public abstract class AbstractCallableCommand implements Serializable {
 
@@ -26,5 +26,5 @@ public abstract class AbstractCallableCommand implements Serializable {
         return server;
     }
 
-    public abstract <T> Callable<T> getCallable();
+    public abstract <V, E extends Throwable> Callable<V, E> getCallable();
 }

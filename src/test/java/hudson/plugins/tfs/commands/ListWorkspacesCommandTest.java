@@ -8,7 +8,6 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
@@ -23,6 +22,7 @@ import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
 
+import hudson.remoting.Callable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -70,7 +70,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                     return server;
                 }
             };
-            final Callable<List<Workspace>> callable = command.getCallable();
+            final Callable<List<Workspace>, Exception> callable = command.getCallable();
 
             callable.call();
 
@@ -117,7 +117,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                     return server;
                 }
             };
-            final Callable<List<Workspace>> callable = command.getCallable();
+            final Callable<List<Workspace>, Exception> callable = command.getCallable();
 
             callable.call();
 

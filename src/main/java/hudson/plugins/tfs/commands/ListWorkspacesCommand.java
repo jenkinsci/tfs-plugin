@@ -7,6 +7,7 @@ import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.util.TextTableParser;
+import hudson.remoting.Callable;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -14,9 +15,8 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
-public class ListWorkspacesCommand extends AbstractCallableCommand implements Callable<List<Workspace>> {
+public class ListWorkspacesCommand extends AbstractCallableCommand implements Callable<List<Workspace>, Exception> {
 
     private static final String ListingWorkspacesTemplate = "Listing workspaces from %s...";
 
@@ -38,7 +38,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
     }
 
     @Override
-    public Callable<List<Workspace>> getCallable() {
+    public Callable<List<Workspace>, Exception> getCallable() {
         return this;
     }
 

@@ -18,7 +18,6 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.httpclient.Credentials;
@@ -27,6 +26,7 @@ import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.util.Closable;
+import hudson.remoting.Callable;
 
 public class Server implements ServerConfigurationProvider, Closable {
     
@@ -99,7 +99,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         return mockableVcc;
     }
 
-    public <T> T execute(final Callable<T> callable) {
+    public <T, E extends Exception> T execute(final Callable<T, E> callable) {
         try {
             return callable.call();
         } catch (final Exception e) {
