@@ -11,6 +11,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVers
 import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.FilePath;
 import hudson.Functions;
+import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Computer;
@@ -44,6 +45,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -231,11 +233,13 @@ public class FunctionalTest {
     public void assertBuildSuccess(final AbstractBuild build) throws IOException {
         final Result result = build.getResult();
         if (!Result.SUCCESS.equals(result)) {
-            final File logFile = build.getLogFile();
-            final Charset charset = build.getCharset();
+            final AnnotatedLargeText logText = build.getLogText();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            logText.writeLogTo(0, baos);
+
             final String headerTemplate = "Build result: %s\n---Log Start---\n";
             final String header = String.format(headerTemplate, result);
-            final String message = header + hudson.Util.loadFile(logFile, charset) + "---Log End---";
+            final String message = header + baos.toString() + "---Log End---\n\n";
             Assert.fail(message);
         }
     }
