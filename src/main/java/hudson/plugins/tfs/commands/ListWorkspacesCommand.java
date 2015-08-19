@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class ListWorkspacesCommand extends AbstractCallableCommand {
+public class ListWorkspacesCommand extends AbstractCallableCommand implements Callable<List<Workspace>> {
 
     private static final String ListingWorkspacesTemplate = "Listing workspaces from %s...";
 
@@ -39,46 +39,46 @@ public class ListWorkspacesCommand extends AbstractCallableCommand {
 
     @Override
     public Callable<List<Workspace>> getCallable() {
-        return new Callable<List<Workspace>>() {
-            public List<Workspace> call() throws Exception {
-                final Server server = createServer();
-                final MockableVersionControlClient vcc = server.getVersionControlClient();
-                final TaskListener listener = server.getListener();
-                final PrintStream logger = listener.getLogger();
-
-                final String listWorkspacesMessage = String.format(ListingWorkspacesTemplate, server.getUrl());
-                logger.println(listWorkspacesMessage);
-
-                final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace[] sdkWorkspaces
-                        = vcc.queryWorkspaces(
-                            null,
-                            null,
-                            Util.fixEmpty(computer),
-                            WorkspacePermissions.NONE_OR_NOT_SUPPORTED
-                );
-
-                final List<Workspace> result = new ArrayList<Workspace>(sdkWorkspaces.length);
-                for (final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace sdkWorkspace : sdkWorkspaces) {
-                    final String name = sdkWorkspace.getName();
-                    final String computer = sdkWorkspace.getComputer();
-                    final String ownerName = sdkWorkspace.getOwnerName();
-                    final String comment = Util.fixNull(sdkWorkspace.getComment());
-
-                    final Workspace workspace = factory.createWorkspace(
-                            name,
-                            computer,
-                            ownerName,
-                            comment);
-                    result.add(workspace);
-                }
-
-                log(result, logger);
-
-                return result;
-            }
-        };
+        return this;
     }
-    
+
+    public List<Workspace> call() throws Exception {
+        final Server server = createServer();
+        final MockableVersionControlClient vcc = server.getVersionControlClient();
+        final TaskListener listener = server.getListener();
+        final PrintStream logger = listener.getLogger();
+
+        final String listWorkspacesMessage = String.format(ListingWorkspacesTemplate, server.getUrl());
+        logger.println(listWorkspacesMessage);
+
+        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace[] sdkWorkspaces
+                = vcc.queryWorkspaces(
+                null,
+                null,
+                Util.fixEmpty(computer),
+                WorkspacePermissions.NONE_OR_NOT_SUPPORTED
+        );
+
+        final List<Workspace> result = new ArrayList<Workspace>(sdkWorkspaces.length);
+        for (final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace sdkWorkspace : sdkWorkspaces) {
+            final String name = sdkWorkspace.getName();
+            final String computer = sdkWorkspace.getComputer();
+            final String ownerName = sdkWorkspace.getOwnerName();
+            final String comment = Util.fixNull(sdkWorkspace.getComment());
+
+            final Workspace workspace = factory.createWorkspace(
+                    name,
+                    computer,
+                    ownerName,
+                    comment);
+            result.add(workspace);
+        }
+
+        log(result, logger);
+
+        return result;
+    }
+
     public List<Workspace> parse(Reader consoleReader) throws IOException {
         List<Workspace> list = new ArrayList<Workspace>();
         

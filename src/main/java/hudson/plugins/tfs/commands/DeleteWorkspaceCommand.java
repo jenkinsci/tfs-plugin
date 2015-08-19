@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.Callable;
 
-public class DeleteWorkspaceCommand extends AbstractCallableCommand {
+public class DeleteWorkspaceCommand extends AbstractCallableCommand implements Callable<Void> {
 
     private static final String DeletingTemplate = "Deleting workspaces named '%s' from computer '%s'...";
     private static final String DeletedTemplate = "Deleted %d workspace(s) named '%s'.";
@@ -31,32 +31,32 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
     }
 
     public Callable<Void> getCallable() {
-        return new Callable<Void>() {
-            public Void call() throws IOException {
-                final Server server = createServer();
-                final MockableVersionControlClient vcc = server.getVersionControlClient();
-                final TaskListener listener = server.getListener();
-                final PrintStream logger = listener.getLogger();
+        return this;
+    }
 
-                final String computerName = (DeleteWorkspaceCommand.this.computerName == null)
-                        ? LocalHost.getShortName()
-                        : DeleteWorkspaceCommand.this.computerName;
-                final String deletingMessage = String.format(DeletingTemplate, workspaceName, computerName);
-                logger.println(deletingMessage);
+    public Void call() throws IOException {
+        final Server server = createServer();
+        final MockableVersionControlClient vcc = server.getVersionControlClient();
+        final TaskListener listener = server.getListener();
+        final PrintStream logger = listener.getLogger();
 
-                final WorkspacePermissions filter = WorkspacePermissions.NONE_OR_NOT_SUPPORTED;
-                final Workspace[] workspaces = vcc.queryWorkspaces(workspaceName, null, computerName, filter);
-                int numDeletions = 0;
-                for (final Workspace innerWorkspace : workspaces) {
-                    vcc.deleteWorkspace(innerWorkspace);
-                    numDeletions++;
-                }
+        final String computerName = (DeleteWorkspaceCommand.this.computerName == null)
+                ? LocalHost.getShortName()
+                : DeleteWorkspaceCommand.this.computerName;
+        final String deletingMessage = String.format(DeletingTemplate, workspaceName, computerName);
+        logger.println(deletingMessage);
 
-                final String deletedMessage = String.format(DeletedTemplate, numDeletions, workspaceName);
-                logger.println(deletedMessage);
+        final WorkspacePermissions filter = WorkspacePermissions.NONE_OR_NOT_SUPPORTED;
+        final Workspace[] workspaces = vcc.queryWorkspaces(workspaceName, null, computerName, filter);
+        int numDeletions = 0;
+        for (final Workspace innerWorkspace : workspaces) {
+            vcc.deleteWorkspace(innerWorkspace);
+            numDeletions++;
+        }
 
-                return null;
-            }
-        };
+        final String deletedMessage = String.format(DeletedTemplate, numDeletions, workspaceName);
+        logger.println(deletedMessage);
+
+        return null;
     }
 }

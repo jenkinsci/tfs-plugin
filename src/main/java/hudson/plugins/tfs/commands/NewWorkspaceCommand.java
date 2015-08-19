@@ -13,7 +13,7 @@ import java.io.PrintStream;
 import java.util.concurrent.Callable;
 
 
-public class NewWorkspaceCommand extends AbstractCallableCommand {
+public class NewWorkspaceCommand extends AbstractCallableCommand implements Callable<Void> {
 
     private static final String CreatingTemplate = "Creating workspace '%s' owned by '%s'...";
     private static final String CreatedTemplate = "Created workspace '%s'.";
@@ -32,42 +32,42 @@ public class NewWorkspaceCommand extends AbstractCallableCommand {
     }
 
     public Callable<Void> getCallable() {
-        return new Callable<Void>() {
-            public Void call() throws IOException {
-                final Server server = createServer();
-                final MockableVersionControlClient vcc = server.getVersionControlClient();
-                final TaskListener listener = server.getListener();
-                final PrintStream logger = listener.getLogger();
-                final String userName = server.getUserName();
+        return this;
+    }
 
-                final String creatingMessage = String.format(CreatingTemplate, workspaceName, userName);
-                logger.println(creatingMessage);
+    public Void call() throws IOException {
+        final Server server = createServer();
+        final MockableVersionControlClient vcc = server.getVersionControlClient();
+        final TaskListener listener = server.getListener();
+        final PrintStream logger = listener.getLogger();
+        final String userName = server.getUserName();
 
-                final Workspace workspace = vcc.createWorkspace(
-                        null,
-                        workspaceName,
-                        VersionControlConstants.AUTHENTICATED_USER,
-                        VersionControlConstants.AUTHENTICATED_USER,
-                        null /* TODO: set comment to something nice/useful */,
-                        WorkspaceLocation.SERVER /* TODO: pull request #33 adds LOCAL support */,
-                        WorkspaceOptions.NONE
-                );
+        final String creatingMessage = String.format(CreatingTemplate, workspaceName, userName);
+        logger.println(creatingMessage);
 
-                final String createdMessage = String.format(CreatedTemplate, workspaceName);
-                logger.println(createdMessage);
+        final Workspace workspace = vcc.createWorkspace(
+                null,
+                workspaceName,
+                VersionControlConstants.AUTHENTICATED_USER,
+                VersionControlConstants.AUTHENTICATED_USER,
+                null /* TODO: set comment to something nice/useful */,
+                WorkspaceLocation.SERVER /* TODO: pull request #33 adds LOCAL support */,
+                WorkspaceOptions.NONE
+        );
 
-                if (serverPath != null && localPath != null) {
-                    final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
-                    logger.println(mappingMessage);
+        final String createdMessage = String.format(CreatedTemplate, workspaceName);
+        logger.println(createdMessage);
 
-                    workspace.map(serverPath, localPath);
+        if (serverPath != null && localPath != null) {
+            final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
+            logger.println(mappingMessage);
 
-                    final String mappedMessage = String.format(MappedTemplate, serverPath, localPath, workspaceName);
-                    logger.println(mappedMessage);
-                }
+            workspace.map(serverPath, localPath);
 
-                return null;
-            }
-        };
+            final String mappedMessage = String.format(MappedTemplate, serverPath, localPath, workspaceName);
+            logger.println(mappedMessage);
+        }
+
+        return null;
     }
 }

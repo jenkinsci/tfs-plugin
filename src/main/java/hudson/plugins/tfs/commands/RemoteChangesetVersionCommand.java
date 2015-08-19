@@ -38,7 +38,7 @@ import java.util.concurrent.Callable;
  * @author Olivier Dagenais
  *
  */
-public class RemoteChangesetVersionCommand extends AbstractCallableCommand {
+public class RemoteChangesetVersionCommand extends AbstractCallableCommand implements Callable<ChangeSet> {
 
     private static final String QueryingTemplate = "Querying for remote changeset at '%s' as of '%s'...";
     private static final String ResultTemplate = "Query result is: Changeset #%s by '%s' on '%s'.";
@@ -61,58 +61,58 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand {
     }
 
     public Callable<ChangeSet> getCallable() {
-        return new Callable<ChangeSet>() {
-            public ChangeSet call() throws Exception {
-                final Server server = createServer();
-                final MockableVersionControlClient vcc = server.getVersionControlClient();
-                final TaskListener listener = server.getListener();
-                final PrintStream logger = listener.getLogger();
+        return this;
+    }
 
-                final String specString = getVersionSpecification();
-                final String queryingMessage = String.format(QueryingTemplate, path, specString);
-                logger.println(queryingMessage);
+    public ChangeSet call() throws Exception {
+        final Server server = createServer();
+        final MockableVersionControlClient vcc = server.getVersionControlClient();
+        final TaskListener listener = server.getListener();
+        final PrintStream logger = listener.getLogger();
 
-                if (userLookup == null) {
-                    final IIdentityManagementService ims = server.createIdentityManagementService();
-                    userLookup = new TfsUserLookup(ims);
-                }
-                ChangeSet changeSet = null;
-                final Changeset[] serverChangeSets = vcc.queryHistory(
-                        path,
-                        versionSpec,
-                        0 /* deletionId */,
-                        RecursionType.FULL,
-                        null /* user */,
-                        null,
-                        null,
-                        1     /* maxCount */,
-                        false /* includeFileDetails */,
-                        true  /* slotMode */,
-                        false /* includeDownloadInfo */,
-                        false /* sortAscending */
-                );
-                if (serverChangeSets != null && serverChangeSets.length >= 1) {
-                    final Changeset serverChangeset = serverChangeSets[0];
-                    changeSet = Project.convertServerChangeset(serverChangeset, userLookup);
-                }
+        final String specString = getVersionSpecification();
+        final String queryingMessage = String.format(QueryingTemplate, path, specString);
+        logger.println(queryingMessage);
 
-                final String resultMessage;
-                if (changeSet != null) {
-                    final String version = changeSet.getVersion();
-                    final User author = changeSet.getAuthor();
-                    final Date changeSetDate = changeSet.getDate();
-                    final SimpleDateFormat simpleDateFormat = DateUtil.TFS_DATETIME_FORMATTER.get();
-                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    final String changeSetDateIso8601 = simpleDateFormat.format(changeSetDate);
-                    resultMessage = String.format(ResultTemplate, version, author.getId(), changeSetDateIso8601);
-                } else {
-                    resultMessage = FailedTemplate;
-                }
-                logger.println(resultMessage);
+        if (userLookup == null) {
+            final IIdentityManagementService ims = server.createIdentityManagementService();
+            userLookup = new TfsUserLookup(ims);
+        }
+        ChangeSet changeSet = null;
+        final Changeset[] serverChangeSets = vcc.queryHistory(
+                path,
+                versionSpec,
+                0 /* deletionId */,
+                RecursionType.FULL,
+                null /* user */,
+                null,
+                null,
+                1     /* maxCount */,
+                false /* includeFileDetails */,
+                true  /* slotMode */,
+                false /* includeDownloadInfo */,
+                false /* sortAscending */
+        );
+        if (serverChangeSets != null && serverChangeSets.length >= 1) {
+            final Changeset serverChangeset = serverChangeSets[0];
+            changeSet = Project.convertServerChangeset(serverChangeset, userLookup);
+        }
 
-                return changeSet;
-            }
-        };
+        final String resultMessage;
+        if (changeSet != null) {
+            final String version = changeSet.getVersion();
+            final User author = changeSet.getAuthor();
+            final Date changeSetDate = changeSet.getDate();
+            final SimpleDateFormat simpleDateFormat = DateUtil.TFS_DATETIME_FORMATTER.get();
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            final String changeSetDateIso8601 = simpleDateFormat.format(changeSetDate);
+            resultMessage = String.format(ResultTemplate, version, author.getId(), changeSetDateIso8601);
+        } else {
+            resultMessage = FailedTemplate;
+        }
+        logger.println(resultMessage);
+
+        return changeSet;
     }
 
     static VersionSpec adjustVersionSpec(final VersionSpec versionSpec) {
