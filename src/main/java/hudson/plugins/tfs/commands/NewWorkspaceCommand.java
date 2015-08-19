@@ -24,7 +24,7 @@ public class NewWorkspaceCommand extends AbstractCallableCommand {
     private final String serverPath;
     private final String localPath;
 
-    public NewWorkspaceCommand(final Server server, final String workspaceName, final String serverPath, final String localPath) {
+    public NewWorkspaceCommand(final ServerConfigurationProvider server, final String workspaceName, final String serverPath, final String localPath) {
         super(server);
         this.workspaceName = workspaceName;
         this.serverPath = serverPath;

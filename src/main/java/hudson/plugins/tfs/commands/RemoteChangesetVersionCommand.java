@@ -49,7 +49,7 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand {
     private UserLookup userLookup;
 
     public RemoteChangesetVersionCommand(
-            final Server server, final String remotePath, final VersionSpec versionSpec) {
+            final ServerConfigurationProvider server, final String remotePath, final VersionSpec versionSpec) {
         super(server);
         this.path = remotePath;
 

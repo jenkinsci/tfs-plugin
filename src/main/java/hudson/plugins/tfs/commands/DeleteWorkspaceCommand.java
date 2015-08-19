@@ -20,11 +20,11 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand {
     private final String workspaceName;
     private final String computerName;
 
-    public DeleteWorkspaceCommand(final Server server, final String workspaceName) {
+    public DeleteWorkspaceCommand(final ServerConfigurationProvider server, final String workspaceName) {
         this(server, workspaceName, null);
     }
 
-    public DeleteWorkspaceCommand(final Server server, final String workspaceName, final String computerName) {
+    public DeleteWorkspaceCommand(final ServerConfigurationProvider server, final String workspaceName, final String computerName) {
         super(server);
         this.workspaceName = workspaceName;
         this.computerName = computerName;

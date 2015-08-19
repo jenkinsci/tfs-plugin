@@ -28,7 +28,7 @@ public class LabelCommand extends AbstractCallableCommand implements Callable<Vo
     private final String workspaceName;
     private final String projectPath;
 
-    public LabelCommand(final Server configurationProvider,
+    public LabelCommand(final ServerConfigurationProvider configurationProvider,
                         final String labelName,
                         final String workspaceName,
                         final String projectPath) {

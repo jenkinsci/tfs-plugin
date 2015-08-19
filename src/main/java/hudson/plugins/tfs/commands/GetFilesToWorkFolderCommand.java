@@ -23,7 +23,7 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand impleme
     private final String versionSpec;
     private PrintStream logger;
 
-    public GetFilesToWorkFolderCommand(final Server server, final String workFolder, final String versionSpec) {
+    public GetFilesToWorkFolderCommand(final ServerConfigurationProvider server, final String workFolder, final String versionSpec) {
         super(server);
         this.workFolder = workFolder;
         this.versionSpec = versionSpec;
