@@ -19,7 +19,7 @@ public class NativeLibraryManager implements NativeLibraryExtractor {
     private static final String TFS_SDK = "TFS_SDK";
     private static final String VERSION = "14.0.1";
     private static final String nativeFolderPropertyName = "com.microsoft.tfs.jni.native.base-directory";
-    private static final File NATIVE = new File("native");
+    private static final String NATIVE = "native";
     private static final Class<NativeLibraryManager> metaClass = NativeLibraryManager.class;
     private static final TreeMap<String, TreeMap<String, List<String>>> NATIVE_LIBRARIES =
             new TreeMap<String, TreeMap<String, List<String>>>();
@@ -218,11 +218,17 @@ public class NativeLibraryManager implements NativeLibraryExtractor {
         }
     }
 
-    static String buildPathToNativeFile(String operatingSystem, String architecture, String fileName) {
-        final File n_os = new File(NATIVE, operatingSystem);
-        final File n_os_arch = architecture == null ? n_os : new File(n_os, architecture);
-        final File n_os_arch_file = new File(n_os_arch, fileName);
-        return n_os_arch_file.getPath();
+    // it is important that this return a string containing forward slashes
+    static String buildPathToNativeFile(final String operatingSystem, final String architecture, final String fileName) {
+        final StringBuilder sb = new StringBuilder(NATIVE.length() + 1 + operatingSystem.length() + 1 + 7 /* max architecture length */ + 1 + fileName.length());
+        sb.append(NATIVE).append('/');
+        sb.append(operatingSystem).append('/');
+        if (architecture != null) {
+            sb.append(architecture).append('/');
+        }
+        sb.append(fileName);
+        final String result = sb.toString();
+        return result;
     }
 
     public static synchronized void initialize() throws IOException {
@@ -236,7 +242,7 @@ public class NativeLibraryManager implements NativeLibraryExtractor {
             manager.extractFiles();
 
             final File storeFile = store.getStoreFile();
-            final File nativeFile = new File(storeFile, NATIVE.getPath());
+            final File nativeFile = new File(storeFile, NATIVE);
             final String absolutePath = nativeFile.getAbsolutePath();
             System.setProperty(nativeFolderPropertyName, absolutePath);
         }

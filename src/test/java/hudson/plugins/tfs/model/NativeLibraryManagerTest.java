@@ -16,6 +16,20 @@ import static org.mockito.Mockito.when;
 
 public class NativeLibraryManagerTest {
 
+    @Test public void buildPathToNativeFile_threeComponents() throws Exception {
+
+        final String actual = NativeLibraryManager.buildPathToNativeFile("win32", "x86", "native_auth.dll");
+
+        Assert.assertEquals("native/win32/x86/native_auth.dll", actual);
+    }
+
+    @Test public void buildPathToNativeFile_twoComponents() throws Exception {
+
+        final String actual = NativeLibraryManager.buildPathToNativeFile("macosx", null, "libnative_auth.jnilib");
+
+        Assert.assertEquals("native/macosx/libnative_auth.jnilib", actual);
+    }
+
     @Test public void extractFile() throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final PersistenceStore store = mock(PersistenceStore.class);
