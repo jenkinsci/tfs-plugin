@@ -8,6 +8,7 @@ import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.Callable;
 
@@ -32,7 +33,7 @@ public class NewWorkspaceCommand extends AbstractCallableCommand {
 
     public Callable<Void> getCallable() {
         return new Callable<Void>() {
-            public Void call() {
+            public Void call() throws IOException {
                 final Server server = createServer();
                 final MockableVersionControlClient vcc = server.getVersionControlClient();
                 final TaskListener listener = server.getListener();

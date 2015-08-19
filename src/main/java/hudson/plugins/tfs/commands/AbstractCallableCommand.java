@@ -3,6 +3,7 @@ package hudson.plugins.tfs.commands;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.Server;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
 public abstract class AbstractCallableCommand {
@@ -13,7 +14,7 @@ public abstract class AbstractCallableCommand {
         this.serverConfig = server;
     }
 
-    public Server createServer() {
+    public Server createServer() throws IOException {
         final String url = serverConfig.getUrl();
         final String userName = serverConfig.getUserName();
         final String userPassword = serverConfig.getUserPassword();
