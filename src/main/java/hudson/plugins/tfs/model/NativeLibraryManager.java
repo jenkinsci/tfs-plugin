@@ -1,6 +1,8 @@
 package hudson.plugins.tfs.model;
 
+import com.microsoft.tfs.core.persistence.FilesystemPersistenceStore;
 import com.microsoft.tfs.core.persistence.PersistenceStore;
+import com.microsoft.tfs.core.persistence.VersionedVendorFilesystemPersistenceStore;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
@@ -13,6 +15,10 @@ import java.util.List;
 import java.util.TreeMap;
 
 public class NativeLibraryManager implements NativeLibraryExtractor {
+    private static final String VENDOR_NAME = "Microsoft";
+    private static final String TFS_SDK = "TFS_SDK";
+    private static final String VERSION = "14.0.1";
+    private static final String nativeFolderPropertyName = "com.microsoft.tfs.jni.native.base-directory";
     private static final File NATIVE = new File("native");
     private static final Class<NativeLibraryManager> metaClass = NativeLibraryManager.class;
     private static final TreeMap<String, TreeMap<String, List<String>>> NATIVE_LIBRARIES =
@@ -178,6 +184,11 @@ public class NativeLibraryManager implements NativeLibraryExtractor {
         this.store = store;
     }
 
+    public void extractFiles() throws IOException {
+        // TODO: it would be great if we detected the current OS and architecture to extract only the needed files
+        extractFiles(this);
+    }
+
     static void extractFiles(final NativeLibraryExtractor extractor) throws IOException {
         for (final String operatingSystem : NATIVE_LIBRARIES.keySet()) {
             final TreeMap<String, List<String>> architecturesToFileNames = NATIVE_LIBRARIES.get(operatingSystem);
@@ -212,6 +223,23 @@ public class NativeLibraryManager implements NativeLibraryExtractor {
         final File n_os_arch = architecture == null ? n_os : new File(n_os, architecture);
         final File n_os_arch_file = new File(n_os_arch, fileName);
         return n_os_arch_file.getPath();
+    }
+
+    public static synchronized void initialize() throws IOException {
+        final String nativeFolder = System.getProperty(nativeFolderPropertyName);
+        if (nativeFolder == null) {
+            final File vendor = new File(VENDOR_NAME);
+            final File vendor_sdk = new File(vendor, TFS_SDK);
+            final File vendor_sdk_version = new File(vendor_sdk, VERSION);
+            final FilesystemPersistenceStore store = new UserHomePersistenceStore(vendor_sdk_version);
+            final NativeLibraryManager manager = new NativeLibraryManager(store);
+            manager.extractFiles();
+
+            final File storeFile = store.getStoreFile();
+            final File nativeFile = new File(storeFile, NATIVE.getPath());
+            final String absolutePath = nativeFile.getAbsolutePath();
+            System.setProperty(nativeFolderPropertyName, absolutePath);
+        }
     }
 
 }
