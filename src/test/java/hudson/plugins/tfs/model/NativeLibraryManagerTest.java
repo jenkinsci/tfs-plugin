@@ -25,4 +25,16 @@ public class NativeLibraryManagerTest {
         Assert.assertEquals(67240, baos.size());
     }
 
+    @Test public void extractFile_noArch() throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final PersistenceStore store = mock(PersistenceStore.class);
+        when(store.containsItem(isA(String.class))).thenReturn(false);
+        when(store.getItemOutputStream(isA(String.class))).thenReturn(baos);
+        final NativeLibraryManager manager = new NativeLibraryManager(store);
+
+        manager.extractFile("macosx", null, "libnative_auth.jnilib");
+
+        Assert.assertEquals(118960, baos.size());
+    }
+
 }

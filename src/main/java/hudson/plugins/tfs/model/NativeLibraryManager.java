@@ -37,7 +37,7 @@ public class NativeLibraryManager {
 
     static String buildPathToNativeFile(String operatingSystem, String architecture, String fileName) {
         final File n_os = new File(NATIVE, operatingSystem);
-        final File n_os_arch = new File(n_os, architecture);
+        final File n_os_arch = architecture == null ? n_os : new File(n_os, architecture);
         final File n_os_arch_file = new File(n_os_arch, fileName);
         return n_os_arch_file.getPath();
     }
