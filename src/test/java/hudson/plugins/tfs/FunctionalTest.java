@@ -286,8 +286,14 @@ public class FunctionalTest {
 
         Assert.assertNotNull(firstBuild);
         assertBuildSuccess(firstBuild);
-        final String remoteFS = agent.getRemoteFS();
-        Assert.assertEquals(null, remoteFS);
+
+        final FilePath workspace = firstBuild.getWorkspace();
+        final FilePath workspaceParent = workspace.getParent();
+        final FilePath assumedRootPath = workspaceParent.getParent();
+        final FilePath agentRootPath = agent.getRootPath();
+        Assert.assertEquals(agentRootPath, assumedRootPath);
+
+        assertEmptyFileIsInWorkspace(workspace);
     }
 
     @LocalData
