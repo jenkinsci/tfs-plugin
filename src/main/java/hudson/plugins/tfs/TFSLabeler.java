@@ -57,13 +57,13 @@ public class TFSLabeler extends Notifier {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        SCM scm = build.getProject().getScm();
+        SCM scm = build.getProject().getRootProject().getScm();
         if (!(scm instanceof TeamFoundationServerScm)) {
             listener.getLogger().println("Labels are only supported for projects using TFS SCM");
             return false;
         }
 
-        FilePath workspace = build.getWorkspace();
+        FilePath workspace = build.getRootBuild().getWorkspace();
 
         TeamFoundationServerScm tfsScm = (TeamFoundationServerScm) scm;
 
@@ -74,11 +74,11 @@ public class TFSLabeler extends Notifier {
 
             final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
             final TfTool tool = new TfTool(tfsScm.getDescriptor().getTfExecutable(), localLauncher, listener, workspace);
-            Server server = new Server(tool, tfsScm.getServerUrl(build), tfsScm.getUserName(), tfsScm.getUserPassword());
+            Server server = new Server(tool, tfsScm.getServerUrl(build.getRootBuild()), tfsScm.getUserName(), tfsScm.getUserPassword());
 
             Computer computer = Computer.currentComputer();
             String normalizedLabelName = computeDynamicValue(build, getLabelName());
-            String tfsWorkspace = tfsScm.getWorkspaceName(build, computer);
+            String tfsWorkspace = tfsScm.getWorkspaceName(build.getRootBuild(), computer);
 
             try {
                 logger.info(String.format("Create label '%s' on workspace '%s'", normalizedLabelName, tfsWorkspace));
