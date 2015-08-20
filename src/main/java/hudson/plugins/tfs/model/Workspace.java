@@ -3,7 +3,9 @@ package hudson.plugins.tfs.model;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-public class Workspace {
+import java.io.Serializable;
+
+public class Workspace implements Serializable{
 
     private final String name;
     private final String computer;
