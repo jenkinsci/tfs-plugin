@@ -1,20 +1,16 @@
 package hudson.plugins.tfs.model;
 
-import java.io.IOException;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 public class Workspace {
 
-    private final Server server;
     private final String name;
     private final String computer;
     private final String owner;
     private final String comment;
 
     public Workspace(Server server, String name, String computer, String owner, String comment) {
-        this.server = server;
         this.name = name;
         this.computer = computer;
         this.owner = owner;
