@@ -16,27 +16,16 @@ import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import hudson.plugins.tfs.IntegrationTestHelper;
 import hudson.plugins.tfs.IntegrationTests;
-import hudson.plugins.tfs.commands.ListWorkspacesCommand.WorkspaceFactory;
 import hudson.plugins.tfs.model.NativeLibraryManager;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
-import hudson.plugins.tfs.model.Workspaces;
 
 import hudson.remoting.Callable;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Bug;
-import org.mockito.Mockito;
 
 public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
-
-    private WorkspaceFactory factory;
-
-    @Before
-    public void initialize() {
-        factory = new Workspaces(server);
-    }
 
     @Category(IntegrationTests.class)
     @Test public void assertLoggingWithComputer() throws Exception {
