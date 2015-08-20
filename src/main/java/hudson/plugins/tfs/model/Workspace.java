@@ -10,15 +10,15 @@ public class Workspace {
     private final String owner;
     private final String comment;
 
-    public Workspace(Server server, String name, String computer, String owner, String comment) {
+    public Workspace(String name, String computer, String owner, String comment) {
         this.name = name;
         this.computer = computer;
         this.owner = owner;
         this.comment = comment;
     }
     
-    public Workspace(Server server, String name) {
-        this(server, name, "", "", "");
+    public Workspace(String name) {
+        this(name, "", "", "");
     }
 
     public String getName() {

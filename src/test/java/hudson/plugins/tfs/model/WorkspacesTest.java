@@ -27,7 +27,7 @@ public class WorkspacesTest {
         MockitoAnnotations.initMocks(this);
         final ListWorkspacesCommand.WorkspaceFactory factory = new ListWorkspacesCommand.WorkspaceFactory() {
             public Workspace createWorkspace(final String name, final String computer, final String owner, final String comment) {
-                return new Workspace(server, name, computer, owner, comment);
+                return new Workspace(name, computer, owner, comment);
             }
         };
         parser = new ListWorkspacesCommand(factory, server);
@@ -74,7 +74,7 @@ public class WorkspacesTest {
                 "name1     SND\\redsolo_cp COMPUTER\n"));
         
         Workspaces workspaces = new Workspaces(server);
-        assertTrue("The workspace was reported as non existant", workspaces.exists(new Workspace(server, "name1")));
+        assertTrue("The workspace was reported as non existant", workspaces.exists(new Workspace("name1")));
     }
 
     @Test
@@ -123,9 +123,9 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(parse(""));
         Workspaces workspaces = new Workspaces(server);
         // Populate the map in test object
-        assertFalse("The workspace was reported as existant", workspaces.exists(new Workspace(server, "name")));
+        assertFalse("The workspace was reported as existant", workspaces.exists(new Workspace("name")));
         Workspace workspace = workspaces.newWorkspace("name", null, null);
-        assertTrue("The workspace was reported as non existant", workspaces.exists(new Workspace(server, "name")));
+        assertTrue("The workspace was reported as non existant", workspaces.exists(new Workspace("name")));
         workspaces.deleteWorkspace(workspace);
         assertFalse("The workspace was reported as existant", workspaces.exists(workspace));
     }
@@ -141,7 +141,7 @@ public class WorkspacesTest {
     public void assertUnknownWorkspaceDoesNotExists() throws Exception {
         when(server.execute(isA(Callable.class))).thenReturn(parse(""));
         Workspaces workspaces = new Workspaces(server);
-        assertFalse("The unknown workspace was reported as existing", workspaces.exists(new Workspace(server, "name1")));
+        assertFalse("The unknown workspace was reported as existing", workspaces.exists(new Workspace("name1")));
     }
     
     @Test

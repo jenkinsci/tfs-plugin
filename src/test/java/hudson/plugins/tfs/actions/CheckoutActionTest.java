@@ -85,7 +85,7 @@ public class CheckoutActionTest {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
         when(project.getProjectPath()).thenReturn("project");
-        when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+        when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
@@ -100,7 +100,7 @@ public class CheckoutActionTest {
     	when(server.getWorkspaces()).thenReturn(workspaces);
     	when(server.getProject("project")).thenReturn(project);
         when(project.getProjectPath()).thenReturn("project");
-    	when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+    	when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
     	when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
     	
     	new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
@@ -244,7 +244,7 @@ public class CheckoutActionTest {
         
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
-        when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+        when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", "tfs-ws", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
@@ -263,7 +263,7 @@ public class CheckoutActionTest {
         
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
-        when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+        when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", "tfs-ws", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
