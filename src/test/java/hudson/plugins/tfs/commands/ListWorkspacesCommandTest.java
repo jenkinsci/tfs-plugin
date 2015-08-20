@@ -270,4 +270,8 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "asterix   redsolo_cp ASTERIX  This is a comment"
         );
     }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        return new ListWorkspacesCommand(null, serverConfig, "computer");
+    }
 }

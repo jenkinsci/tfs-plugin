@@ -42,4 +42,8 @@ public class GetFilesToWorkFolderCommandTest extends AbstractCallableCommandTest
                 pathToFile
         );
     }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        return new GetFilesToWorkFolderCommand(serverConfig, "workFolder", "versionSpec");
+    }
 }

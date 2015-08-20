@@ -39,4 +39,8 @@ public class LabelCommandTest extends AbstractCallableCommandTest {
                 "Created label 'labelName'."
         );
     }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        return new LabelCommand(serverConfig, "labelName", "workspaceName", "$/projectPath");
+    }
 }

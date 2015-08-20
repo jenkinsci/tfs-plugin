@@ -203,4 +203,10 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
 
         assertEquals("LFoo@$/Bar", actual);
     }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        final ChangesetVersionSpec versionSpec = new ChangesetVersionSpec(42);
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(serverConfig, "$/remotePath", versionSpec);
+        return command;
+    }
 }

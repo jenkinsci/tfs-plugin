@@ -37,4 +37,8 @@ public class DeleteWorkspaceCommandTest extends AbstractCallableCommandTest {
                 "Deleted 0 workspace(s) named 'TheWorkspaceName'."
         );
     }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        return new DeleteWorkspaceCommand(serverConfig, "workspaceName", "computerName");
+    }
 }

@@ -66,4 +66,8 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 "Mapped '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName'."
         );
     }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        return new NewWorkspaceCommand(serverConfig, "workspaceName", "$/serverPath", "local/path");
+    }
 }

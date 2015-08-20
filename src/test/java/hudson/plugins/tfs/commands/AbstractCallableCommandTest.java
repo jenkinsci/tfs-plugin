@@ -1,17 +1,21 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 import org.apache.commons.collections.IteratorUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.util.Iterator;
 
@@ -56,4 +60,33 @@ public abstract class AbstractCallableCommandTest {
         }
         Assert.assertFalse("Log contained less lines than expected.", expectedIterator.hasNext());
     }
+
+    protected abstract AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig);
+
+    @Test public void verifySerializable() throws IOException {
+        final ServerConfigurationProvider server = new ServerConfigurationProvider() {
+            public String getUrl() {
+                return null;
+            }
+
+            public String getUserName() {
+                return null;
+            }
+
+            public String getUserPassword() {
+                return null;
+            }
+
+            public TaskListener getListener() {
+                return null;
+            }
+        };
+        final AbstractCallableCommand command = createCommand(server);
+        final Callable<?, Exception> callable = command.getCallable();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ObjectOutputStream oos = new ObjectOutputStream(baos);
+
+        oos.writeObject(callable);
+    }
+
 }

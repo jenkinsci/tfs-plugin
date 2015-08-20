@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import com.google.common.base.Strings;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
@@ -35,7 +36,7 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
     private static final String ResultTemplate = "Query result is: Changeset #%d by '%s' on '%s'.";
     private static final String FailedTemplate = "Query returned no result!";
 
-    private final VersionSpec versionSpec;
+    private final String versionSpecString;
     private final String path;
 
     public RemoteChangesetVersionCommand(
@@ -43,7 +44,7 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
         super(server);
         this.path = remotePath;
 
-        this.versionSpec = versionSpec;
+        this.versionSpecString = toString(versionSpec);
     }
 
     public Callable<Integer, Exception> getCallable() {
@@ -55,6 +56,7 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand imple
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
+        final VersionSpec versionSpec = VersionSpec.parseSingleVersionFromSpec(versionSpecString, VersionControlConstants.AUTHENTICATED_USER);
 
         final String specString = RemoteChangesetVersionCommand.toString(versionSpec);
         final String queryingMessage = String.format(QueryingTemplate, path, specString);
