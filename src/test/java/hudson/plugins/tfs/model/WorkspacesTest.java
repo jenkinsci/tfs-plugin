@@ -25,11 +25,6 @@ public class WorkspacesTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final ListWorkspacesCommand.WorkspaceFactory factory = new ListWorkspacesCommand.WorkspaceFactory() {
-            public Workspace createWorkspace(final String name, final String computer, final String owner, final String comment) {
-                return new Workspace(name, computer, owner, comment);
-            }
-        };
         parser = new ListWorkspacesCommand(server);
     }
 

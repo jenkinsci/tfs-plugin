@@ -186,8 +186,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     @Bug(4666)
     @Test
     public void assertNoIndexOutOfBoundsIsThrown() throws Exception {
-        WorkspaceFactory factory = Mockito.mock(ListWorkspacesCommand.WorkspaceFactory.class);
-        
+
         StringReader reader = new StringReader(
                 "Server: teamserver-01\n" +
                 "Workspace         Owner  Computer    Comment\n" +
@@ -201,8 +200,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     @Bug(4726)
     @Test
     public void assertNoIndexOutOfBoundsIsThrownSecondEdition() throws Exception {
-        WorkspaceFactory factory = Mockito.mock(ListWorkspacesCommand.WorkspaceFactory.class);
-        
+
         StringReader reader = new StringReader(
                 "Server: xxxx-xxxx-010\n" +
                 "Workspace                Owner        Computer      Comment\n" +
