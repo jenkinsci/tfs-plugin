@@ -27,6 +27,7 @@ import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.util.Closable;
 import hudson.remoting.Callable;
+import hudson.remoting.VirtualChannel;
 
 public class Server implements ServerConfigurationProvider, Closable {
     
@@ -101,7 +102,9 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public <T, E extends Exception> T execute(final Callable<T, E> callable) {
         try {
-            return callable.call();
+            final VirtualChannel channel = launcher.getChannel();
+            final T result = channel.call(callable);
+            return result;
         } catch (final Exception e) {
             // convert from checked to unchecked exception
             throw new RuntimeException(e);
