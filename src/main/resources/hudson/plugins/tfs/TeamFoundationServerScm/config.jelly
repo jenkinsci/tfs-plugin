@@ -8,7 +8,7 @@
     </f:entry>
 
     <f:entry field="userName" title="Login name">
-        <f:textbox checkUrl="'${rootURL}/scm/TeamFoundationServerScm/usernameCheck?value='+escape(this.value)"/>
+        <f:textbox />
         <i>(including domain name)</i>
     </f:entry>
     
