@@ -18,6 +18,7 @@ import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import hudson.plugins.tfs.IntegrationTestHelper;
 import hudson.plugins.tfs.IntegrationTests;
 import hudson.plugins.tfs.commands.ListWorkspacesCommand.WorkspaceFactory;
+import hudson.plugins.tfs.model.NativeLibraryManager;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
@@ -42,7 +43,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
         final IntegrationTestHelper helper = new IntegrationTestHelper();
         final String serverUrl = helper.getServerUrl();
         final URI serverUri = URI.create(serverUrl);
-        Server.ensureNativeLibrariesConfigured();
+        NativeLibraryManager.initialize();
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
                 helper.getUserName(), helper.getUserPassword());
         final TFSTeamProjectCollection tpc = new TFSTeamProjectCollection(serverUri, credentials);
@@ -84,7 +85,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
         final IntegrationTestHelper helper = new IntegrationTestHelper();
         final String serverUrl = helper.getServerUrl();
         final URI serverUri = URI.create(serverUrl);
-        Server.ensureNativeLibrariesConfigured();
+        NativeLibraryManager.initialize();
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
                 helper.getUserName(), helper.getUserPassword());
         final TFSTeamProjectCollection tpc = new TFSTeamProjectCollection(serverUri, credentials);

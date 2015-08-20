@@ -7,6 +7,8 @@ import org.junit.Test;
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.exceptions.TECoreException;
 
+import java.io.IOException;
+
 public class ServerIntegrationTest {
 
     @Rule public JenkinsRule j = new JenkinsRule();
@@ -17,7 +19,7 @@ public class ServerIntegrationTest {
      * it means we were able to load the native libraries,
      * otherwise an @link UnsatisfiedLinkError would have been thrown earlier.
      */
-    public void canFindTfsSdkNativeLibraries() {
+    public void canFindTfsSdkNativeLibraries() throws IOException {
         final Server server = new Server(null, "http://tfs.invalid:8080/tfs", "username", "password");
         try {
             server.getVersionControlClient();

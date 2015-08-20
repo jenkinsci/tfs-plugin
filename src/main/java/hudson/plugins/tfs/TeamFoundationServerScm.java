@@ -344,7 +344,7 @@ public class TeamFoundationServerScm extends SCM {
         return true;
     }
     
-    protected Server createServer(TfTool tool, Run<?,?> run) {
+    protected Server createServer(TfTool tool, Run<?,?> run) throws IOException {
         return new Server(tool, getServerUrl(run), getUserName(), getUserPassword());
     }
 
