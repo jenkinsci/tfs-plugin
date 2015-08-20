@@ -341,10 +341,7 @@ public class FunctionalTest {
         final Cause secondCause = secondCauses.get(0);
         Assert.assertTrue(secondCause instanceof SCMTrigger.SCMTriggerCause);
         final FilePath jenkinsWorkspace = secondBuild.getWorkspace();
-        final FilePath[] workspaceFiles = jenkinsWorkspace.list("*.*", "$tf");
-        Assert.assertEquals(1, workspaceFiles.length);
-        final FilePath workspaceFile = workspaceFiles[0];
-        Assert.assertEquals("TODO.txt", workspaceFile.getName());
+        assertEmptyFileIsInWorkspace(jenkinsWorkspace);
 
         // force a build via a manual trigger
         final AbstractBuild thirdBuild = runUserTrigger(project);
@@ -360,10 +357,7 @@ public class FunctionalTest {
         final Cause thirdCause = thirdCauses.get(0);
         Assert.assertTrue(thirdCause instanceof Cause.UserIdCause);
         final FilePath thirdBuildWorkspace = thirdBuild.getWorkspace();
-        final FilePath[] thirdBuildWorkspaceFiles = thirdBuildWorkspace.list("*.*", "$tf");
-        Assert.assertEquals(1, thirdBuildWorkspaceFiles.length);
-        final FilePath thirdBuildWorkspaceFile = thirdBuildWorkspaceFiles[0];
-        Assert.assertEquals("TODO.txt", thirdBuildWorkspaceFile.getName());
+        assertEmptyFileIsInWorkspace(thirdBuildWorkspace);
 
         // finally, delete the project, which should first remove the workspace
         final TeamFoundationServerScm scm = (TeamFoundationServerScm) project.getScm();
@@ -379,6 +373,13 @@ public class FunctionalTest {
         Assert.assertFalse(jenkinsWorkspace.exists());
         final Workspace[] workspacesAfterDeletion = vcc.queryWorkspaces(workspaceName, VersionControlConstants.AUTHENTICATED_USER, hostName, WorkspacePermissions.NONE_OR_NOT_SUPPORTED);
         Assert.assertEquals(0, workspacesAfterDeletion.length);
+    }
+
+    public void assertEmptyFileIsInWorkspace(final FilePath workspace) throws IOException, InterruptedException {
+        final FilePath[] workspaceFiles = workspace.list("*.*", "$tf");
+        Assert.assertEquals(1, workspaceFiles.length);
+        final FilePath workspaceFile = workspaceFiles[0];
+        Assert.assertEquals("TODO.txt", workspaceFile.getName());
     }
 
     public static int checkInEmptyFile(final EndToEndTfs.RunnerImpl tfsRunner) throws IOException {
