@@ -20,7 +20,6 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
 
     private static final String ListingWorkspacesTemplate = "Listing workspaces from %s...";
 
-    private final WorkspaceFactory factory;
     private final String computer;
 
     public interface WorkspaceFactory {
@@ -34,7 +33,6 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
     public ListWorkspacesCommand(final WorkspaceFactory factory, final ServerConfigurationProvider server, final String computer) {
         super(server);
         this.computer = computer;
-        this.factory = factory;
     }
 
     @Override
