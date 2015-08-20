@@ -66,7 +66,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
             final String ownerName = sdkWorkspace.getOwnerName();
             final String comment = Util.fixNull(sdkWorkspace.getComment());
 
-            final Workspace workspace = factory.createWorkspace(
+            final Workspace workspace = new Workspace(
                     name,
                     computer,
                     ownerName,
@@ -84,7 +84,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
         
         TextTableParser parser = new TextTableParser(consoleReader, 1);
         while (parser.nextRow()) {
-            Workspace workspace = factory.createWorkspace(
+            Workspace workspace = new Workspace(
                 parser.getColumn(0), 
                 parser.getColumn(2),
                 parser.getColumn(1),

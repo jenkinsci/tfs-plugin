@@ -141,21 +141,6 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     }
 
     @Test
-    public void assertFactoryIsUsedToCreateWorkspaces() throws Exception {
-        WorkspaceFactory factory = Mockito.mock(ListWorkspacesCommand.WorkspaceFactory.class);
-        
-        StringReader reader = new StringReader(
-                "Server: https://tfs02.codeplex.com/\n" +
-                "Workspace Owner          Computer Comment\n" +
-                "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
-                "\n" +
-                "asterix2  SND\\redsolo_cp ASTERIX\n");
-
-        new ListWorkspacesCommand(factory, mock(Server.class)).parse(reader);
-        Mockito.verify(factory).createWorkspace("asterix2", "ASTERIX", "SND\\redsolo_cp", "");
-    }
-
-    @Test
     public void assertListWithValidOutput() throws Exception {
         StringReader reader = new StringReader(
                 "Server: https://tfs02.codeplex.com/\n" +
@@ -213,7 +198,6 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "W7-DENNIS-1       dennis W7-DENNIS-1\n");
 
         new ListWorkspacesCommand(factory, mock(Server.class)).parse(reader);
-        Mockito.verify(factory).createWorkspace("W7-DENNIS-1", "W7-DENNIS-1", "dennis", "");
     }
 
     @Bug(4726)
@@ -228,7 +212,6 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "Hudson.JOBXXXXXXXXXXXXXX First.LastXX XXXX-XXXX-007\n");
 
         new ListWorkspacesCommand(factory, mock(Server.class)).parse(reader);
-        Mockito.verify(factory).createWorkspace("Hudson.JOBXXXXXXXXXXXXXX", "XXXX-XXXX-007", "First.LastXX", "");
     }
 
     @Test public void logWithNoWorkspaces() throws IOException {
