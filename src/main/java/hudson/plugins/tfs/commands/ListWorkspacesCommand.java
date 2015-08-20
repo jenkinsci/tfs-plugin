@@ -26,11 +26,11 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
         Workspace createWorkspace(String name, String computer, String owner, String comment);
     }
     
-    public ListWorkspacesCommand(final WorkspaceFactory factory, final ServerConfigurationProvider server) {
-        this(factory, server, null);
+    public ListWorkspacesCommand(final ServerConfigurationProvider server) {
+        this(server, null);
     }
 
-    public ListWorkspacesCommand(final WorkspaceFactory factory, final ServerConfigurationProvider server, final String computer) {
+    public ListWorkspacesCommand(final ServerConfigurationProvider server, final String computer) {
         super(server);
         this.computer = computer;
     }

@@ -30,7 +30,7 @@ public class WorkspacesTest {
                 return new Workspace(name, computer, owner, comment);
             }
         };
-        parser = new ListWorkspacesCommand(factory, server);
+        parser = new ListWorkspacesCommand(server);
     }
 
     private List<Workspace> parse(final String s) throws IOException {

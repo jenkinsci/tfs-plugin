@@ -29,7 +29,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @return the list of workspaces at the server
      */
     private List<Workspace> getListFromServer() throws IOException, InterruptedException {
-        ListWorkspacesCommand command = new ListWorkspacesCommand(this, server);
+        ListWorkspacesCommand command = new ListWorkspacesCommand(server);
         final List<Workspace> result = server.execute(command.getCallable());
         return result;
     }
