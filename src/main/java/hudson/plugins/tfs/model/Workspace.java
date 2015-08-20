@@ -25,10 +25,6 @@ public class Workspace {
         this(server, name, "", "", "");
     }
 
-    public boolean exists() throws IOException, InterruptedException {
-        return server.getWorkspaces().exists(this);
-    }
-
     public String getName() {
         return name;
     }

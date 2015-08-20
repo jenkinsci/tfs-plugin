@@ -22,16 +22,4 @@ public class WorkspaceTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
     }
-
-    @Test
-    public void assertExistsUsesWorkspacesClass() throws Exception {
-        Workspaces workspaces = mock(Workspaces.class);
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(workspaces.exists(isA(Workspace.class))).thenReturn(Boolean.TRUE);
-        
-        Workspace workspace = new Workspace(server, "name");
-        assertTrue("The workspace is not reported as existing", workspace.exists());
-        
-        verify(workspaces).exists(new Workspace(server, "name"));
-    }
 }
