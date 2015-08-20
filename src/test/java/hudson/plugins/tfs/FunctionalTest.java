@@ -272,7 +272,7 @@ public class FunctionalTest {
     }
 
     @LocalData
-    @EndToEndTfs(EndToEndTfs.StubRunner.class)
+    @EndToEndTfs(CurrentChangesetInjector.class)
     @Test public void agent() throws Exception {
         final Jenkins jenkins = j.jenkins;
         final List<Project> projects = jenkins.getProjects();
@@ -282,7 +282,7 @@ public class FunctionalTest {
         final LabelAtom label = new LabelAtom("agent");
         final DumbSlave agent = j.createOnlineSlave(label);
 
-        final AbstractBuild firstBuild = runUserTrigger(project);
+        final AbstractBuild firstBuild = runScmPollTrigger(project);
 
         Assert.assertNotNull(firstBuild);
         assertBuildSuccess(firstBuild);
