@@ -22,13 +22,12 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersion
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.model.User;
 import hudson.plugins.tfs.Util;
-import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.Server;
 
 import java.io.StringReader;
-import java.util.concurrent.Callable;
 
 import hudson.plugins.tfs.model.UserLookup;
+import hudson.remoting.Callable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -72,18 +71,22 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
                 anyBoolean(),
                 anyBoolean(),
                 anyBoolean())).thenReturn(serverChangesets);
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE);
-        command.setUserLookup(userLookup);
-        final Callable<ChangeSet> callable = command.getCallable();
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE) {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
+        final Callable<Integer, Exception> callable = command.getCallable();
 
-        final ChangeSet actual = callable.call();
+        final Integer actual = callable.call();
 
         Assert.assertNotNull(actual);
+        Assert.assertEquals(1637, (int)actual);
         assertLog(
                 "Querying for remote changeset at '$/RemotePath' as of 'T'...",
                 "Query result is: Changeset #1637 by 'piedefer' on '2013-07-02T15:40:50Z'."
         );
-        Assert.assertEquals(user, actual.getAuthor());
     }
 
     @Test public void assertLoggingWhenNoResult() throws Exception {
@@ -100,10 +103,15 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
                 anyBoolean(),
                 anyBoolean(),
                 anyBoolean())).thenReturn(null);
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE);
-        final Callable<ChangeSet> callable = command.getCallable();
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, "$/RemotePath", LatestVersionSpec.INSTANCE) {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
+        final Callable<Integer, Exception> callable = command.getCallable();
 
-        final ChangeSet result = callable.call();
+        final Integer result = callable.call();
 
         Assert.assertNull(result);
         assertLog(
@@ -166,34 +174,39 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
     }
 
     @Test public void getVersionSpecificationWhenDateVersionSpec() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, fixedPointInTime);
 
-        final String actual = command.getVersionSpecification();
+        final String actual = RemoteChangesetVersionCommand.toString(fixedPointInTime);
 
-        assertEquals("D2013-07-02T15:40:51Z", actual);
+        assertEquals("D2013-07-02T15:40:50Z", actual);
     }
 
     @Test public void getVersionSpecificationWhenChangesetVersionSpec() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new ChangesetVersionSpec(42));
+        final ChangesetVersionSpec versionSpec = new ChangesetVersionSpec(42);
 
-        final String actual = command.getVersionSpecification();
+        final String actual = RemoteChangesetVersionCommand.toString(versionSpec);
 
         assertEquals("C42", actual);
     }
 
     @Test public void getVersionSpecificationWhenLabelVersionSpecWithoutScope() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new LabelVersionSpec(new LabelSpec("Foo", null)));
+        final LabelVersionSpec versionSpec = new LabelVersionSpec(new LabelSpec("Foo", null));
 
-        final String actual = command.getVersionSpecification();
+        final String actual = RemoteChangesetVersionCommand.toString(versionSpec);
 
         assertEquals("LFoo", actual);
     }
 
     @Test public void getVersionSpecificationWhenLabelVersionSpecWithScope() {
-        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(null, null, new LabelVersionSpec(new LabelSpec("Foo", "Bar")));
+        final LabelVersionSpec versionSpec = new LabelVersionSpec(new LabelSpec("Foo", "$/Bar"));
 
-        final String actual = command.getVersionSpecification();
+        final String actual = RemoteChangesetVersionCommand.toString(versionSpec);
 
-        assertEquals("LFoo@Bar", actual);
+        assertEquals("LFoo@$/Bar", actual);
+    }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        final ChangesetVersionSpec versionSpec = new ChangesetVersionSpec(42);
+        final RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(serverConfig, "$/remotePath", versionSpec);
+        return command;
     }
 }

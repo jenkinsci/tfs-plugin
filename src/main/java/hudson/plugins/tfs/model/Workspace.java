@@ -1,32 +1,26 @@
 package hudson.plugins.tfs.model;
 
-import java.io.IOException;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-public class Workspace {
+import java.io.Serializable;
 
-    private final Server server;
+public class Workspace implements Serializable{
+
     private final String name;
     private final String computer;
     private final String owner;
     private final String comment;
 
-    public Workspace(Server server, String name, String computer, String owner, String comment) {
-        this.server = server;
+    public Workspace(String name, String computer, String owner, String comment) {
         this.name = name;
         this.computer = computer;
         this.owner = owner;
         this.comment = comment;
     }
     
-    public Workspace(Server server, String name) {
-        this(server, name, "", "", "");
-    }
-
-    public boolean exists() throws IOException, InterruptedException {
-        return server.getWorkspaces().exists(this);
+    public Workspace(String name) {
+        this(name, "", "", "");
     }
 
     public String getName() {

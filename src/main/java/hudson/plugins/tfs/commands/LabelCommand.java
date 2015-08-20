@@ -11,15 +11,15 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.WorkspaceVers
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 
 import java.io.PrintStream;
-import java.util.concurrent.Callable;
 
 /**
  * Command to create a label on TFS.
  * @author Rodrigo Lopes (rodrigolopes)
  */
-public class LabelCommand extends AbstractCallableCommand implements Callable<Void> {
+public class LabelCommand extends AbstractCallableCommand implements Callable<Void, Exception> {
 
     private static final String CreatingTemplate = "Creating label '%s' on '%s' as of the current version in workspace '%s'...";
     private static final String CreatedTemplate = "Created label '%s'.";
@@ -28,7 +28,7 @@ public class LabelCommand extends AbstractCallableCommand implements Callable<Vo
     private final String workspaceName;
     private final String projectPath;
 
-    public LabelCommand(final Server configurationProvider,
+    public LabelCommand(final ServerConfigurationProvider configurationProvider,
                         final String labelName,
                         final String workspaceName,
                         final String projectPath) {
@@ -45,12 +45,12 @@ public class LabelCommand extends AbstractCallableCommand implements Callable<Vo
     }
 
     @Override
-    public Callable<Void> getCallable() {
+    public Callable<Void, Exception> getCallable() {
         return this;
     }
 
     public Void call() throws Exception {
-        final Server server = getServer();
+        final Server server = createServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();

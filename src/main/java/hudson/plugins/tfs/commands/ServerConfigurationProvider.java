@@ -1,6 +1,6 @@
 package hudson.plugins.tfs.commands;
 
-import java.io.IOException;
+import hudson.model.TaskListener;
 
 public interface ServerConfigurationProvider {
 
@@ -9,6 +9,6 @@ public interface ServerConfigurationProvider {
     public String getUserName();
 
     public String getUserPassword();
-    
-    public String getLocalHostname() throws IOException, InterruptedException;
+
+    public TaskListener getListener();
 }

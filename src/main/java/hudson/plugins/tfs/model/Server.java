@@ -5,23 +5,19 @@ import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
+import hudson.Launcher;
 import hudson.model.TaskListener;
-import hudson.plugins.tfs.TfTool;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
-import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.httpclient.Credentials;
@@ -30,6 +26,8 @@ import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.util.Closable;
+import hudson.remoting.Callable;
+import hudson.remoting.VirtualChannel;
 
 public class Server implements ServerConfigurationProvider, Closable {
     
@@ -39,12 +37,14 @@ public class Server implements ServerConfigurationProvider, Closable {
     private final String userPassword;
     private Workspaces workspaces;
     private Map<String, Project> projects = new HashMap<String, Project>();
-    private final TfTool tool;
+    private final Launcher launcher;
+    private final TaskListener taskListener;
     private final TFSTeamProjectCollection tpc;
     private MockableVersionControlClient mockableVcc;
 
-    public Server(TfTool tool, String url, String username, String password) throws IOException {
-        this.tool = tool;
+    public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password) throws IOException {
+        this.launcher = launcher;
+        this.taskListener = taskListener;
         this.url = url;
         this.userName = username;
         this.userPassword = password;
@@ -71,7 +71,7 @@ public class Server implements ServerConfigurationProvider, Closable {
     }
 
     Server(String url) throws IOException {
-        this(null, url, null, null);
+        this(null, null, url, null, null);
     }
 
     public Project getProject(String projectPath) {
@@ -100,13 +100,11 @@ public class Server implements ServerConfigurationProvider, Closable {
         return mockableVcc;
     }
 
-    public Reader execute(MaskedArgumentListBuilder arguments) throws IOException, InterruptedException {
-        return tool.execute(arguments.toCommandArray(), arguments.toMaskArray());
-    }
-
-    public <T> T execute(final Callable<T> callable) {
+    public <T, E extends Exception> T execute(final Callable<T, E> callable) {
         try {
-            return callable.call();
+            final VirtualChannel channel = launcher.getChannel();
+            final T result = channel.call(callable);
+            return result;
         } catch (final Exception e) {
             // convert from checked to unchecked exception
             throw new RuntimeException(e);
@@ -125,13 +123,12 @@ public class Server implements ServerConfigurationProvider, Closable {
         return userPassword;
     }
 
-    public String getLocalHostname() throws IOException, InterruptedException {
-        return tool.getHostname();
+    public Launcher getLauncher() {
+        return launcher;
     }
 
     public TaskListener getListener() {
-        // TODO: rip out TfTool and accept the TaskListener in our constructor
-        return tool.getListener();
+        return taskListener;
     }
 
     public synchronized void close() {

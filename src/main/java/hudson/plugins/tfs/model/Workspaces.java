@@ -1,12 +1,9 @@
 package hudson.plugins.tfs.model;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.io.IOUtils;
 
 import hudson.plugins.tfs.commands.DeleteWorkspaceCommand;
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
@@ -32,7 +29,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @return the list of workspaces at the server
      */
     private List<Workspace> getListFromServer() throws IOException, InterruptedException {
-        ListWorkspacesCommand command = new ListWorkspacesCommand(this, server);
+        ListWorkspacesCommand command = new ListWorkspacesCommand(server);
         final List<Workspace> result = server.execute(command.getCallable());
         return result;
     }
@@ -90,7 +87,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     public Workspace newWorkspace(final String workspaceName, final String serverPath, final String localPath) throws IOException, InterruptedException {
         NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, localPath);
         server.execute(command.getCallable());
-        Workspace workspace = new Workspace(server, workspaceName);
+        Workspace workspace = new Workspace(workspaceName);
         workspaces.put(workspaceName, workspace);
         return workspace;
     }
@@ -106,6 +103,6 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     }
 
     public Workspace createWorkspace(String name, String computer, String owner, String comment) {
-        return new Workspace(server, name, computer, owner, comment);
+        return new Workspace(name, computer, owner, comment);
     }
 }

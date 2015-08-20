@@ -3,23 +3,32 @@ package hudson.plugins.tfs;
 import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
+import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.VersionControlLabel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
+import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.FilePath;
+import hudson.Functions;
+import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.Computer;
 import hudson.model.Project;
 import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import hudson.model.labels.LabelAtom;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.XmlHelper;
+import hudson.remoting.VirtualChannel;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.PollingResult;
+import hudson.slaves.DumbSlave;
+import hudson.slaves.SlaveComputer;
 import hudson.triggers.SCMTrigger;
 import hudson.util.Scrambler;
 import hudson.util.Secret;
@@ -36,8 +45,11 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -58,6 +70,49 @@ public class FunctionalTest {
      * stuff it has.
      */
     public class TfsJenkinsRule extends JenkinsRule{
+        /**
+          * https://wiki.jenkins-ci.org/display/JENKINS/Unit+Test+on+Windows#UnitTestonWindows-UnabletodeleteslaveslaveX.log
+          *
+          */
+        private void purgeSlaves() {
+            List<Computer> disconnectingComputers = new ArrayList<Computer>();
+            List<VirtualChannel> closingChannels = new ArrayList<VirtualChannel>();
+            for (Computer computer: jenkins.getComputers()) {
+                if (!(computer instanceof SlaveComputer)) {
+                    continue;
+                }
+                // disconnect slaves.
+                // retrieve the channel before disconnecting.
+                // even a computer gets offline, channel delays to close.
+                if (!computer.isOffline()) {
+                    VirtualChannel ch = computer.getChannel();
+                    computer.disconnect(null);
+                    disconnectingComputers.add(computer);
+                    closingChannels.add(ch);
+                }
+            }
+
+            try {
+                // Wait for all computers disconnected and all channels closed.
+                for (Computer computer: disconnectingComputers) {
+                    computer.waitUntilOffline();
+                }
+                for (VirtualChannel ch: closingChannels) {
+                    ch.join();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void after() {
+            if (Functions.isWindows()) {
+                purgeSlaves();
+            }
+            super.after();
+        }
+
         public EndToEndTfs.RunnerImpl getTfsRunner() {
             EndToEndTfs.RunnerImpl result = null;
             for (final JenkinsRecipe.Runner recipe : recipes) {
@@ -140,7 +195,7 @@ public class FunctionalTest {
 
     @LocalData
     @EndToEndTfs(CreateLabel.class)
-    @Test public void createLabel() throws ExecutionException, InterruptedException {
+    @Test public void createLabel() throws ExecutionException, InterruptedException, IOException {
         final Jenkins jenkins = j.jenkins;
         final TaskListener taskListener = j.createTaskListener();
         final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
@@ -162,7 +217,7 @@ public class FunctionalTest {
 
         // verify new label created against latestChangesetId
         Assert.assertNotNull(build);
-        Assert.assertEquals(Result.SUCCESS, build.getResult());
+        assertBuildSuccess(build);
         final ChangeLogSet changeSet = build.getChangeSet();
         Assert.assertEquals(0, changeSet.getItems().length);
         final TFSRevisionState revisionState = build.getAction(TFSRevisionState.class);
@@ -173,6 +228,20 @@ public class FunctionalTest {
         Assert.assertEquals(1, labels.length);
         final VersionControlLabel label = labels[0];
         Assert.assertFalse(StringUtils.isEmpty(label.getComment()));
+    }
+
+    public void assertBuildSuccess(final AbstractBuild build) throws IOException {
+        final Result result = build.getResult();
+        if (!Result.SUCCESS.equals(result)) {
+            final AnnotatedLargeText logText = build.getLogText();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            logText.writeLogTo(0, baos);
+
+            final String headerTemplate = "Build result: %s\n---Log Start---\n";
+            final String header = String.format(headerTemplate, result);
+            final String message = header + baos.toString() + "---Log End---\n\n";
+            Assert.fail(message);
+        }
     }
 
     public static class CreateLabel extends CurrentChangesetInjector {
@@ -203,12 +272,36 @@ public class FunctionalTest {
     }
 
     @LocalData
+    @EndToEndTfs(CurrentChangesetInjector.class)
+    @Test public void agent() throws Exception {
+        final Jenkins jenkins = j.jenkins;
+        final List<Project> projects = jenkins.getProjects();
+        final Project project = projects.get(0);
+        final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
+        checkInEmptyFile(tfsRunner);
+        final LabelAtom label = new LabelAtom("agent");
+        final DumbSlave agent = j.createOnlineSlave(label);
+
+        final AbstractBuild firstBuild = runScmPollTrigger(project);
+
+        Assert.assertNotNull(firstBuild);
+        assertBuildSuccess(firstBuild);
+
+        final FilePath workspace = firstBuild.getWorkspace();
+        final FilePath workspaceParent = workspace.getParent();
+        final FilePath assumedRootPath = workspaceParent.getParent();
+        final FilePath agentRootPath = agent.getRootPath();
+        Assert.assertEquals(agentRootPath, assumedRootPath);
+
+        assertEmptyFileIsInWorkspace(workspace);
+    }
+
+    @LocalData
     @EndToEndTfs(EndToEndTfs.StubRunner.class)
     @Test public void newJob() throws InterruptedException, ExecutionException, IOException {
         final Jenkins jenkins = j.jenkins;
         final TaskListener taskListener = j.createTaskListener();
         final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
-        final Workspace workspace = tfsRunner.getWorkspace();
         final Server server = tfsRunner.getServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final List<Project> projects = jenkins.getProjects();
@@ -220,7 +313,7 @@ public class FunctionalTest {
         final AbstractBuild firstBuild = runScmPollTrigger(project);
 
         Assert.assertNotNull(firstBuild);
-        Assert.assertEquals(Result.SUCCESS, firstBuild.getResult());
+        assertBuildSuccess(firstBuild);
         final ChangeLogSet firstChangeSet = firstBuild.getChangeSet();
         Assert.assertEquals(true, firstChangeSet.isEmptySet());
         final TFSRevisionState firstRevisionState = firstBuild.getAction(TFSRevisionState.class);
@@ -236,16 +329,7 @@ public class FunctionalTest {
         Assert.assertEquals(PollingResult.Change.NONE, secondPoll.change);
 
         // make a change in source control
-        final File todoFile = new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt");
-        todoFile.createNewFile();
-        workspace.pendAdd(
-                new String[]{todoFile.getAbsolutePath()},
-                false,
-                null,
-                LockLevel.UNCHANGED,
-                GetOptions.NONE,
-                PendChangesOptions.NONE);
-        final int changeSet = tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
+        final int changeSet = checkInEmptyFile(tfsRunner);
         Assert.assertTrue(changeSet >= 0);
 
         // third poll should trigger a build
@@ -253,7 +337,7 @@ public class FunctionalTest {
         final AbstractBuild secondBuild = runScmPollTrigger(project);
 
         Assert.assertNotNull(secondBuild);
-        Assert.assertEquals(Result.SUCCESS, secondBuild.getResult());
+        assertBuildSuccess(secondBuild);
         final ChangeLogSet secondChangeSet = secondBuild.getChangeSet();
         Assert.assertEquals(1, secondChangeSet.getItems().length);
         final TFSRevisionState secondRevisionState = secondBuild.getAction(TFSRevisionState.class);
@@ -263,16 +347,13 @@ public class FunctionalTest {
         final Cause secondCause = secondCauses.get(0);
         Assert.assertTrue(secondCause instanceof SCMTrigger.SCMTriggerCause);
         final FilePath jenkinsWorkspace = secondBuild.getWorkspace();
-        final FilePath[] workspaceFiles = jenkinsWorkspace.list("*.*", "$tf");
-        Assert.assertEquals(1, workspaceFiles.length);
-        final FilePath workspaceFile = workspaceFiles[0];
-        Assert.assertEquals("TODO.txt", workspaceFile.getName());
+        assertEmptyFileIsInWorkspace(jenkinsWorkspace);
 
         // force a build via a manual trigger
         final AbstractBuild thirdBuild = runUserTrigger(project);
 
         Assert.assertNotNull(thirdBuild);
-        Assert.assertEquals(Result.SUCCESS, thirdBuild.getResult());
+        assertBuildSuccess(thirdBuild);
         final ChangeLogSet thirdChangeSet = thirdBuild.getChangeSet();
         Assert.assertEquals(0, thirdChangeSet.getItems().length);
         final TFSRevisionState thirdRevisionState = thirdBuild.getAction(TFSRevisionState.class);
@@ -282,10 +363,44 @@ public class FunctionalTest {
         final Cause thirdCause = thirdCauses.get(0);
         Assert.assertTrue(thirdCause instanceof Cause.UserIdCause);
         final FilePath thirdBuildWorkspace = thirdBuild.getWorkspace();
-        final FilePath[] thirdBuildWorkspaceFiles = thirdBuildWorkspace.list("*.*", "$tf");
-        Assert.assertEquals(1, thirdBuildWorkspaceFiles.length);
-        final FilePath thirdBuildWorkspaceFile = thirdBuildWorkspaceFiles[0];
-        Assert.assertEquals("TODO.txt", thirdBuildWorkspaceFile.getName());
+        assertEmptyFileIsInWorkspace(thirdBuildWorkspace);
+
+        // finally, delete the project, which should first remove the workspace
+        final TeamFoundationServerScm scm = (TeamFoundationServerScm) project.getScm();
+        final Computer computer = Computer.currentComputer();
+        final String workspaceName = scm.getWorkspaceName(thirdBuild, computer);
+        Assert.assertTrue(jenkinsWorkspace.exists());
+        final String hostName = LocalHost.getShortName();
+        final Workspace[] workspacesBeforeDeletion = vcc.queryWorkspaces(workspaceName, VersionControlConstants.AUTHENTICATED_USER, hostName, WorkspacePermissions.NONE_OR_NOT_SUPPORTED);
+        Assert.assertEquals(1, workspacesBeforeDeletion.length);
+
+        project.delete();
+
+        Assert.assertFalse(jenkinsWorkspace.exists());
+        final Workspace[] workspacesAfterDeletion = vcc.queryWorkspaces(workspaceName, VersionControlConstants.AUTHENTICATED_USER, hostName, WorkspacePermissions.NONE_OR_NOT_SUPPORTED);
+        Assert.assertEquals(0, workspacesAfterDeletion.length);
+    }
+
+    public void assertEmptyFileIsInWorkspace(final FilePath workspace) throws IOException, InterruptedException {
+        final FilePath[] workspaceFiles = workspace.list("*.*", "$tf");
+        Assert.assertEquals(1, workspaceFiles.length);
+        final FilePath workspaceFile = workspaceFiles[0];
+        Assert.assertEquals("TODO.txt", workspaceFile.getName());
+    }
+
+    public static int checkInEmptyFile(final EndToEndTfs.RunnerImpl tfsRunner) throws IOException {
+        final Workspace workspace = tfsRunner.getWorkspace();
+        final File todoFile = new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt");
+        //noinspection ResultOfMethodCallIgnored
+        todoFile.createNewFile();
+        workspace.pendAdd(
+                new String[]{todoFile.getAbsolutePath()},
+                false,
+                null,
+                LockLevel.UNCHANGED,
+                GetOptions.NONE,
+                PendChangesOptions.NONE);
+        return tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
     }
 
     /**

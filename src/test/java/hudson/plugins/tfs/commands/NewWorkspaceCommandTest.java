@@ -3,10 +3,10 @@ package hudson.plugins.tfs.commands;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
+import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.concurrent.Callable;
 
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Matchers.isA;
@@ -23,8 +23,13 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 isA(String.class),
                 isA(WorkspaceLocation.class),
                 isA(WorkspaceOptions.class))).thenReturn(null);
-        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, null);
-        final Callable<Void> callable = command.getCallable();
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, null) {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
+        final Callable<Void, Exception> callable = command.getCallable();
 
         callable.call();
 
@@ -44,8 +49,13 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 isA(String.class),
                 isA(WorkspaceLocation.class),
                 isA(WorkspaceOptions.class))).thenReturn(null);
-        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", "/home/jenkins/jobs/stuff/workspace");
-        final Callable<Void> callable = command.getCallable();
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", "/home/jenkins/jobs/stuff/workspace") {
+            @Override
+            public Server createServer() {
+                return server;
+            }
+        };
+        final Callable<Void, Exception> callable = command.getCallable();
 
         callable.call();
 
@@ -55,5 +65,9 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 "Mapping '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName'...",
                 "Mapped '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName'."
         );
+    }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        return new NewWorkspaceCommand(serverConfig, "workspaceName", "$/serverPath", "local/path");
     }
 }

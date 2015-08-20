@@ -1,20 +1,30 @@
 package hudson.plugins.tfs.commands;
 
+import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 
-import java.util.concurrent.Callable;
+import java.io.IOException;
+import java.io.Serializable;
 
-public abstract class AbstractCallableCommand {
+public abstract class AbstractCallableCommand implements Serializable {
 
-    private final Server server;
+    private final String url;
+    private final String userName;
+    private final String userPassword;
+    private final TaskListener listener;
 
-    protected AbstractCallableCommand(final Server server) {
-        this.server = server;
+    protected AbstractCallableCommand(final ServerConfigurationProvider serverConfig) {
+        url = serverConfig.getUrl();
+        userName = serverConfig.getUserName();
+        userPassword = serverConfig.getUserPassword();
+        listener = serverConfig.getListener();
     }
 
-    public Server getServer() {
+    public Server createServer() throws IOException {
+        final Server server = new Server(null, listener, url, userName, userPassword);
         return server;
     }
 
-    public abstract <T> Callable<T> getCallable();
+    public abstract <V, E extends Throwable> Callable<V, E> getCallable();
 }

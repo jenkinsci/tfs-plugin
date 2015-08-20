@@ -85,7 +85,7 @@ public class CheckoutActionTest {
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
         when(project.getProjectPath()).thenReturn("project");
-        when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+        when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
@@ -100,7 +100,7 @@ public class CheckoutActionTest {
     	when(server.getWorkspaces()).thenReturn(workspaces);
     	when(server.getProject("project")).thenReturn(project);
         when(project.getProjectPath()).thenReturn("project");
-    	when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+    	when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
     	when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
     	
     	new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
@@ -116,7 +116,6 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
         new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
@@ -132,7 +131,6 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
         new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
@@ -180,7 +178,6 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
         new CheckoutAction("workspace", "project", ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
@@ -194,7 +191,6 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
         new CheckoutAction("workspace", "project", ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
@@ -209,7 +205,6 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         when(project.getDetailedHistory(isA(String.class))).thenReturn(list);
         
@@ -227,7 +222,6 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
         
@@ -250,7 +244,7 @@ public class CheckoutActionTest {
         
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
-        when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+        when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", "tfs-ws", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
@@ -269,7 +263,7 @@ public class CheckoutActionTest {
         
         when(server.getWorkspaces()).thenReturn(workspaces);
         when(server.getProject("project")).thenReturn(project);
-        when(workspaces.exists(new Workspace(server, "workspace"))).thenReturn(false);
+        when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", "tfs-ws", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
@@ -289,7 +283,6 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
         new CheckoutAction("workspace", "project", "tfs-ws", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
@@ -412,7 +405,6 @@ public class CheckoutActionTest {
         when(server.getProject("project")).thenReturn(project);
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getLocalHostname()).thenReturn("LocalComputer");
         when(workspace.getComputer()).thenReturn("LocalComputer");
         when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
         

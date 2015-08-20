@@ -146,7 +146,7 @@ public @interface EndToEndTfs {
             final File currentFolder = new File("").getAbsoluteFile();
             final File workspaces = new File(currentFolder, "workspaces");
             // TODO: Consider NOT using the Server class
-            server = new Server(new TfTool(null, null, null, null), serverUrl, helper.getUserName(), helper.getUserPassword());
+            server = new Server(null, null, serverUrl, helper.getUserName(), helper.getUserPassword());
 
             final MockableVersionControlClient vcc = server.getVersionControlClient();
 

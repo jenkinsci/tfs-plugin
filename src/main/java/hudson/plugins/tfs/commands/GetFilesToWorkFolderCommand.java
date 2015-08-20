@@ -1,7 +1,6 @@
 package hudson.plugins.tfs.commands;
 
 import java.io.PrintStream;
-import java.util.concurrent.Callable;
 
 import com.microsoft.tfs.core.clients.versioncontrol.GetOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.events.GetEvent;
@@ -13,8 +12,9 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
+import hudson.remoting.Callable;
 
-public class GetFilesToWorkFolderCommand extends AbstractCallableCommand implements Callable<Void>, GetListener {
+public class GetFilesToWorkFolderCommand extends AbstractCallableCommand implements Callable<Void, Exception>, GetListener {
 
     private static final String GettingTemplate = "Getting version '%s' to '%s'...";
     private static final String GotTemplate = "Finished getting version '%s'.";
@@ -23,14 +23,14 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand impleme
     private final String versionSpec;
     private PrintStream logger;
 
-    public GetFilesToWorkFolderCommand(final Server server, final String workFolder, final String versionSpec) {
+    public GetFilesToWorkFolderCommand(final ServerConfigurationProvider server, final String workFolder, final String versionSpec) {
         super(server);
         this.workFolder = workFolder;
         this.versionSpec = versionSpec;
     }
 
     @Override
-    public Callable<Void> getCallable() {
+    public Callable<Void, Exception> getCallable() {
         return this;
     }
 
@@ -39,7 +39,7 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand impleme
     }
 
     public Void call() throws Exception {
-        final Server server = getServer();
+        final Server server = createServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TaskListener listener = server.getListener();
         logger = listener.getLogger();

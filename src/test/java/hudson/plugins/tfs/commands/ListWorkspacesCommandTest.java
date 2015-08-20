@@ -8,7 +8,6 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
@@ -17,26 +16,16 @@ import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import hudson.plugins.tfs.IntegrationTestHelper;
 import hudson.plugins.tfs.IntegrationTests;
-import hudson.plugins.tfs.commands.ListWorkspacesCommand.WorkspaceFactory;
 import hudson.plugins.tfs.model.NativeLibraryManager;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
-import hudson.plugins.tfs.model.Workspaces;
 
-import org.junit.Before;
+import hudson.remoting.Callable;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Bug;
-import org.mockito.Mockito;
 
 public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
-
-    private WorkspaceFactory factory;
-
-    @Before
-    public void initialize() {
-        factory = new Workspaces(server);
-    }
 
     @Category(IntegrationTests.class)
     @Test public void assertLoggingWithComputer() throws Exception {
@@ -64,8 +53,13 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             when(server.getUrl()).thenReturn("http://tfs.invalid:8080/tfs/DefaultCollection/");
             when(this.vcc.queryWorkspaces(null, null, "XXXX-XXXX-007", WorkspacePermissions.NONE_OR_NOT_SUPPORTED))
                     .thenReturn(workspaces);
-            final ListWorkspacesCommand command = new ListWorkspacesCommand(factory, server, "XXXX-XXXX-007");
-            final Callable<List<Workspace>> callable = command.getCallable();
+            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, "XXXX-XXXX-007") {
+                @Override
+                public Server createServer() {
+                    return server;
+                }
+            };
+            final Callable<List<Workspace>, Exception> callable = command.getCallable();
 
             callable.call();
 
@@ -106,8 +100,13 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             when(server.getUrl()).thenReturn("http://tfs.invalid:8080/tfs/DefaultCollection/");
             when(this.vcc.queryWorkspaces(null, null, null, WorkspacePermissions.NONE_OR_NOT_SUPPORTED))
                     .thenReturn(workspaces);
-            final ListWorkspacesCommand command = new ListWorkspacesCommand(factory, server, null);
-            final Callable<List<Workspace>> callable = command.getCallable();
+            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, null) {
+                @Override
+                public Server createServer() {
+                    return server;
+                }
+            };
+            final Callable<List<Workspace>, Exception> callable = command.getCallable();
 
             callable.call();
 
@@ -124,25 +123,10 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
 
     @Test
     public void assertEmptyListWithEmptyOutput() throws Exception {
-        ListWorkspacesCommand command = new ListWorkspacesCommand(null, mock(Server.class));
+        ListWorkspacesCommand command = new ListWorkspacesCommand(mock(Server.class));
         List<Workspace> list = command.parse(new StringReader(""));
         assertNotNull("List can not be null", list);
         assertEquals("Number of workspaces was incorrect", 0, list.size());
-    }
-
-    @Test
-    public void assertFactoryIsUsedToCreateWorkspaces() throws Exception {
-        WorkspaceFactory factory = Mockito.mock(ListWorkspacesCommand.WorkspaceFactory.class);
-        
-        StringReader reader = new StringReader(
-                "Server: https://tfs02.codeplex.com/\n" +
-                "Workspace Owner          Computer Comment\n" +
-                "--------- -------------- -------- ----------------------------------------------------------------------------------------------------------\n" +
-                "\n" +
-                "asterix2  SND\\redsolo_cp ASTERIX\n");
-
-        new ListWorkspacesCommand(factory, mock(Server.class)).parse(reader);
-        Mockito.verify(factory).createWorkspace("asterix2", "ASTERIX", "SND\\redsolo_cp", "");
     }
 
     @Test
@@ -156,7 +140,6 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "astreix   SND\\redsolo_cp ASTERIX  This is a comment\n");
         
         ListWorkspacesCommand command = new ListWorkspacesCommand(
-                new Workspaces(Mockito.mock(Server.class)), 
                 mock(Server.class));
         List<Workspace> list = command.parse(reader);
         assertNotNull("List can not be null", list);
@@ -181,7 +164,6 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "Hudson-node lookup redsolo_cp ASTERIX\n");
         
         ListWorkspacesCommand command = new ListWorkspacesCommand(
-                new Workspaces(Mockito.mock(Server.class)), 
                 mock(Server.class));
         List<Workspace> list = command.parse(reader);
         assertNotNull("List can not be null", list);
@@ -193,8 +175,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     @Bug(4666)
     @Test
     public void assertNoIndexOutOfBoundsIsThrown() throws Exception {
-        WorkspaceFactory factory = Mockito.mock(ListWorkspacesCommand.WorkspaceFactory.class);
-        
+
         StringReader reader = new StringReader(
                 "Server: teamserver-01\n" +
                 "Workspace         Owner  Computer    Comment\n" +
@@ -202,23 +183,20 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "Hudson-Scrumboard dennis W7-DENNIS-1\n" + 
                 "W7-DENNIS-1       dennis W7-DENNIS-1\n");
 
-        new ListWorkspacesCommand(factory, mock(Server.class)).parse(reader);
-        Mockito.verify(factory).createWorkspace("W7-DENNIS-1", "W7-DENNIS-1", "dennis", "");
+        new ListWorkspacesCommand(mock(Server.class)).parse(reader);
     }
 
     @Bug(4726)
     @Test
     public void assertNoIndexOutOfBoundsIsThrownSecondEdition() throws Exception {
-        WorkspaceFactory factory = Mockito.mock(ListWorkspacesCommand.WorkspaceFactory.class);
-        
+
         StringReader reader = new StringReader(
                 "Server: xxxx-xxxx-010\n" +
                 "Workspace                Owner        Computer      Comment\n" +
                 "------------------------ ------------ ------------- ---------------------------\n" +
                 "Hudson.JOBXXXXXXXXXXXXXX First.LastXX XXXX-XXXX-007\n");
 
-        new ListWorkspacesCommand(factory, mock(Server.class)).parse(reader);
-        Mockito.verify(factory).createWorkspace("Hudson.JOBXXXXXXXXXXXXXX", "XXXX-XXXX-007", "First.LastXX", "");
+        new ListWorkspacesCommand(mock(Server.class)).parse(reader);
     }
 
     @Test public void logWithNoWorkspaces() throws IOException {
@@ -234,8 +212,8 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     @Test public void logWithManyWorkspaces() throws IOException {
 
         final ArrayList<Workspace> workspaces = new ArrayList<Workspace>();
-        workspaces.add(new Workspace(null, "Hudson.JOBXXXXXXXXXXXXXX", "XXXX-XXXX-007", "First.LastXX", "This is a comment"));
-        workspaces.add(new Workspace(null, "Hudson-newJob-MASTER", "COMPUTER", "jenkins-tfs-plugin", "Created by the Jenkins tfs-plugin functional tests."));
+        workspaces.add(new Workspace("Hudson.JOBXXXXXXXXXXXXXX", "XXXX-XXXX-007", "First.LastXX", "This is a comment"));
+        workspaces.add(new Workspace("Hudson-newJob-MASTER", "COMPUTER", "jenkins-tfs-plugin", "Created by the Jenkins tfs-plugin functional tests."));
 
         ListWorkspacesCommand.log(workspaces, listener.getLogger());
 
@@ -250,7 +228,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     @Test public void logWithOneWorkspace() throws IOException {
 
         final ArrayList<Workspace> workspaces = new ArrayList<Workspace>(1);
-        workspaces.add(new Workspace(null, "asterix", "ASTERIX", "redsolo_cp", "This is a comment"));
+        workspaces.add(new Workspace("asterix", "ASTERIX", "redsolo_cp", "This is a comment"));
 
         ListWorkspacesCommand.log(workspaces, listener.getLogger());
 
@@ -259,5 +237,9 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "--------- ---------- -------- -----------------",
                 "asterix   redsolo_cp ASTERIX  This is a comment"
         );
+    }
+
+    @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
+        return new ListWorkspacesCommand(serverConfig, "computer");
     }
 }
