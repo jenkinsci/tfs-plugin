@@ -9,7 +9,7 @@
 
     <f:entry field="userName" title="User name">
         <f:textbox />
-        <i>(including domain name)</i>
+        <i>(domain alias, e-mail address or alternate credentials)</i>
     </f:entry>
     
     <f:entry field="password" title="User password">
