@@ -7,7 +7,7 @@
         <f:textbox checkUrl="'${rootURL}/scm/TeamFoundationServerScm/projectPathCheck?value='+escape(this.value)"/>
     </f:entry>
 
-    <f:entry field="userName" title="Login name">
+    <f:entry field="userName" title="User name">
         <f:textbox />
         <i>(including domain name)</i>
     </f:entry>
