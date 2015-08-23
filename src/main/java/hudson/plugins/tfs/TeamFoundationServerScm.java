@@ -408,30 +408,18 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern USER_AT_DOMAIN_REGEX = Pattern.compile("^([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)@([a-z][a-z0-9.-]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern DOMAIN_SLASH_USER_REGEX = Pattern.compile("^([a-z][a-z0-9.-]+)\\\\([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
-        private String tfExecutable;
+        private transient String tfExecutable;
         
         public DescriptorImpl() {
             super(TeamFoundationServerScm.class, TeamFoundationServerRepositoryBrowser.class);
             load();
         }
 
-        public String getTfExecutable() {
-            if (tfExecutable == null) {
-                return "tf";
-            } else {
-                return tfExecutable;
-            }
-        }
-        
         @Override
         public SCM newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             TeamFoundationServerScm scm = (TeamFoundationServerScm) super.newInstance(req, formData);
             scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class,req,formData,"browser");
             return scm;
-        }
-        
-        public FormValidation doExecutableCheck(@QueryParameter final String value) {
-            return FormValidation.validateExecutable(value);
         }
 
         private FormValidation doRegexCheck(final Pattern[] regexArray,
@@ -471,7 +459,6 @@ public class TeamFoundationServerScm extends SCM {
         
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            tfExecutable = Util.fixEmpty(req.getParameter("tfs.tfExecutable").trim());
             save();
             return true;
         }
