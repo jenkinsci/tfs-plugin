@@ -415,23 +415,11 @@ public class TeamFoundationServerScm extends SCM {
             load();
         }
 
-        public String getTfExecutable() {
-            if (tfExecutable == null) {
-                return "tf";
-            } else {
-                return tfExecutable;
-            }
-        }
-        
         @Override
         public SCM newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             TeamFoundationServerScm scm = (TeamFoundationServerScm) super.newInstance(req, formData);
             scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class,req,formData,"browser");
             return scm;
-        }
-        
-        public FormValidation doExecutableCheck(@QueryParameter final String value) {
-            return FormValidation.validateExecutable(value);
         }
 
         private FormValidation doRegexCheck(final Pattern[] regexArray,
