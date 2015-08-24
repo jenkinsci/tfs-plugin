@@ -32,6 +32,7 @@ public class Project {
 
     private final String projectPath;
     private final Server server;
+    private UserLookup userLookup;
 
     public Project(Server server, String projectPath) {
         this.server = server;
@@ -76,8 +77,7 @@ public class Project {
      * @return a list of change sets
      */
     public List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails, int maxCount) {
-        final IIdentityManagementService ims = server.createIdentityManagementService();
-        final UserLookup userLookup = new TfsUserLookup(ims);
+        final UserLookup userLookup = getOrCreateUserLookup();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final Changeset[] serverChangesets = vcc.queryHistory(
                 projectPath,
@@ -101,6 +101,18 @@ public class Project {
             }
         }
         return result;
+    }
+
+    public UserLookup getOrCreateUserLookup() {
+        if (userLookup == null) {
+            synchronized (this) {
+                if (userLookup == null) {
+                    final IIdentityManagementService ims = server.createIdentityManagementService();
+                    userLookup = new TfsUserLookup(ims);
+                }
+            }
+        }
+        return userLookup;
     }
 
     /**
@@ -210,5 +222,13 @@ public class Project {
         EqualsBuilder builder = new EqualsBuilder();
         builder.append(this.projectPath, other.projectPath);
         return builder.isEquals();
+    }
+
+    protected UserLookup getUserLookup() {
+        return userLookup;
+    }
+
+    protected void setUserLookup(final UserLookup userLookup) {
+        this.userLookup = userLookup;
     }
 }
