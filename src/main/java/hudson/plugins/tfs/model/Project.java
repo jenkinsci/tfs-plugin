@@ -127,9 +127,9 @@ public class Project {
         return getVCCHistory(fromVersion, toVersion, true, Integer.MAX_VALUE);
     }
     
-    public List<ChangeSet> getDetailedHistory(String singleVersionSpec) {
+    public List<ChangeSet> getDetailedHistory(final String singleVersionSpec) {
         final VersionSpec toVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
-        return getVCCHistory(null, toVersion, true, Integer.MAX_VALUE);
+        return getVCCHistory(toVersion, toVersion, true, 1);
     }
 
     /**
