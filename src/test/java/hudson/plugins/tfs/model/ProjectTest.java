@@ -4,24 +4,32 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URISyntaxException;
 import java.util.Calendar;
 import java.util.List;
 
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import hudson.model.User;
+import hudson.plugins.tfs.IntegrationTestHelper;
+import hudson.plugins.tfs.IntegrationTests;
 import hudson.plugins.tfs.SwedishLocaleTestCase;
 import hudson.plugins.tfs.Util;
+import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet.Item;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import hudson.tasks.Mailer;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Change;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ChangeType;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.ItemType;
+import org.junit.experimental.categories.Category;
 
 public class ProjectTest extends SwedishLocaleTestCase {
 
@@ -91,5 +99,35 @@ public class ProjectTest extends SwedishLocaleTestCase {
         assertEquals("The item path was incorrect", "$/tfsandbox", item.getPath());
         assertEquals("The item action was incorrect", "add", item.getAction());
 
+    }
+
+    @Category(IntegrationTests.class)
+    @Test public void getDetailedHistory_singleVersionSpec() throws URISyntaxException, IOException {
+        final IntegrationTestHelper helper = new IntegrationTestHelper();
+        final String serverUrl = helper.getServerUrl();
+        final String userName = helper.getUserName();
+        final String userPassword = helper.getUserPassword();
+        final Server server = new Server(null, null, serverUrl, userName, userPassword);
+        try {
+            final Project project = new Project(server, "$/FunctionalTests");
+            final UserLookup userLookup = mock(UserLookup.class);
+            final User fakeUser = mock(User.class);
+            when(userLookup.find(isA(String.class))).thenReturn(fakeUser);
+            project.setUserLookup(userLookup);
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            final int latestChangesetID = vcc.getLatestChangesetID();
+            final ChangesetVersionSpec spec = new ChangesetVersionSpec(latestChangesetID);
+            final String singleVersionSpecString = RemoteChangesetVersionCommand.toString(spec);
+
+            final List<ChangeSet> actual = project.getDetailedHistory(singleVersionSpecString);
+
+            Assert.assertEquals(1, actual.size());
+            final ChangeSet changeSet = actual.get(0);
+            final String latestChangesetString = Integer.toString(latestChangesetID, 10);
+            Assert.assertEquals(latestChangesetString, changeSet.getVersion());
+        }
+        finally {
+            server.close();
+        }
     }
 }
