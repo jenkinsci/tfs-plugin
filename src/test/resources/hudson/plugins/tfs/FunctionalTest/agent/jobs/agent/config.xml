@@ -24,14 +24,7 @@
     </hudson.triggers.SCMTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
-  <builders>
-    <hudson.tasks.BatchFile>
-        <command>@echo off&#xd;
-IF EXIST &quot;TODO.txt&quot; exit /b 0&#xd;
-exit /b 1&#xd;
-</command>
-    </hudson.tasks.BatchFile>
-  </builders>
+  <builders/>
   <publishers/>
   <buildWrappers/>
 </project>
