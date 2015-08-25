@@ -11,8 +11,10 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVers
 import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.FilePath;
 import hudson.Functions;
+import hudson.Launcher;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.Computer;
 import hudson.model.Project;
@@ -40,6 +42,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.JenkinsRecipe;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
 import org.jvnet.hudson.test.recipes.LocalData;
 import org.xml.sax.SAXException;
 
@@ -281,6 +284,16 @@ public class FunctionalTest {
         checkInEmptyFile(tfsRunner);
         final LabelAtom label = new LabelAtom("agent");
         final DumbSlave agent = j.createOnlineSlave(label);
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener)
+                    throws InterruptedException, IOException {
+                final FilePath workspace = build.getWorkspace();
+                final FilePath child = workspace.child("TODO.txt");
+                final boolean result = child.exists();
+                return result;
+            }
+        });
 
         final AbstractBuild firstBuild = runScmPollTrigger(project);
 
