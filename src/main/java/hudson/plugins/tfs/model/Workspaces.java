@@ -82,6 +82,8 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     /**
      * Create workspace on server, map it and return a workspace object with the specified name
      * @param workspaceName the name of the new workspace
+     * @param serverPath the path in TFVC to map
+     * @param localPath the path in the local filesystem to map
      * @return a workspace
      */
     public Workspace newWorkspace(final String workspaceName, final String serverPath, final String localPath) {

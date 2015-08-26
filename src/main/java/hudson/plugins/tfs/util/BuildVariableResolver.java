@@ -75,6 +75,7 @@ public class BuildVariableResolver implements VariableResolver<String> {
      * This constructor should not be called in a method that may be called by
      * {@link AbstractBuild#getEnvVars()}.  
      * @param build used to get the project and the build env vars
+     * @param computer used to retrieve the name of the remote computer or of the account under which Jenkins runs
      *
      * @throws IOException If an I/O error occurs
      * @throws InterruptedException
