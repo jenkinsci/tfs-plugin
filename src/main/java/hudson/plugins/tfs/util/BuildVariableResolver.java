@@ -75,6 +75,10 @@ public class BuildVariableResolver implements VariableResolver<String> {
      * This constructor should not be called in a method that may be called by
      * {@link AbstractBuild#getEnvVars()}.  
      * @param build used to get the project and the build env vars
+     *
+     * @throws IOException If an I/O error occurs
+     * @throws InterruptedException
+     *      If the current thread is interrupted while waiting for the completion.
      */
     public BuildVariableResolver(final AbstractBuild<?, ?> build, final Computer computer)
             throws IOException, InterruptedException {

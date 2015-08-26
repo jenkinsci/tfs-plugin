@@ -17,6 +17,8 @@ public abstract class TeamFoundationServerRepositoryBrowser extends RepositoryBr
      * in the specified revision of {@link ChangeSet.Item} to its previous version.
      *
      * @return null if the browser doesn't have any URL for diff.
+     *
+     * @throws IOException If an I/O error occurs
      */
     public abstract URL getDiffLink(ChangeSet.Item item) throws IOException;
 
@@ -24,6 +26,8 @@ public abstract class TeamFoundationServerRepositoryBrowser extends RepositoryBr
      * Determines the link to a single file under TFS.
      *
      * @return null if the browser doesn't have any suitable URL.
+     *
+     * @throws IOException If an I/O error occurs
      */
     public abstract URL getFileLink(ChangeSet.Item item) throws IOException;
     

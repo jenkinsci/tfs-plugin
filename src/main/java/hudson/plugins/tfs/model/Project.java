@@ -121,7 +121,7 @@ public class Project {
      * @param toTimestamp the timestamp to get history to
      * @return a list of change sets
      */
-    public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
+    public List<ChangeSet> getDetailedHistory(Calendar fromTimestamp, Calendar toTimestamp) {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
         return getVCCHistory(fromVersion, toVersion, true, Integer.MAX_VALUE);
@@ -138,7 +138,7 @@ public class Project {
      * @param toTimestamp the timestamp to get history to
      * @return a list of change sets
      */
-    public List<ChangeSet> getBriefHistory(Calendar fromTimestamp, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
+    public List<ChangeSet> getBriefHistory(Calendar fromTimestamp, Calendar toTimestamp) {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
         return getVCCHistory(fromVersion, toVersion, false, Integer.MAX_VALUE);
@@ -150,7 +150,7 @@ public class Project {
      * @param toTimestamp the timestamp to get history to
      * @return a list of change sets
      */
-    public List<ChangeSet> getBriefHistory(int fromChangeset, Calendar toTimestamp) throws IOException, InterruptedException, ParseException {
+    public List<ChangeSet> getBriefHistory(int fromChangeset, Calendar toTimestamp) {
         final ChangesetVersionSpec fromVersion = new ChangesetVersionSpec(fromChangeset);
         final VersionSpec toVersion = new DateVersionSpec(toTimestamp);
         return getVCCHistory(fromVersion, toVersion, false, Integer.MAX_VALUE);
@@ -160,7 +160,7 @@ public class Project {
      * Returns the latest changeset at the project's path.
      * @return the {@link ChangeSet} instance representing the last entry in the history for the path
      */
-    public ChangeSet getLatestChangeset() throws IOException, InterruptedException, ParseException {
+    public ChangeSet getLatestChangeset() {
         final List<ChangeSet> changeSets = getVCCHistory(LatestVersionSpec.INSTANCE, null, false, 1);
         final ChangeSet result = changeSets.size() > 0 ? changeSets.get(0) : null;
         return result;
@@ -171,7 +171,7 @@ public class Project {
      * @param localPath the local path to get all files into
      * @param versionSpec the version spec to use when getting the files
      */
-    public void getFiles(String localPath, String versionSpec) throws IOException, InterruptedException {
+    public void getFiles(String localPath, String versionSpec) {
         GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec);
         server.execute(command.getCallable());
     }
@@ -183,14 +183,12 @@ public class Project {
      * @param versionSpec a version specification to convert to a changeset number
      * @return changeset version for specified remote path
      */
-    public int getRemoteChangesetVersion(final String remotePath, final VersionSpec versionSpec)
-            throws IOException, InterruptedException, ParseException {
+    public int getRemoteChangesetVersion(final String remotePath, final VersionSpec versionSpec) {
         RemoteChangesetVersionCommand command = new RemoteChangesetVersionCommand(server, remotePath, versionSpec);
         return extractChangesetNumber(command);
     }
 
-    int extractChangesetNumber(final RemoteChangesetVersionCommand command)
-            throws IOException, InterruptedException, ParseException {
+    int extractChangesetNumber(final RemoteChangesetVersionCommand command) {
         final Integer changeSet = server.execute(command.getCallable());
         final int result = changeSet;
         return result;
@@ -202,8 +200,7 @@ public class Project {
      * @param versionSpec a version specification to convert to a changeset number
      * @return changeset version for the project's remote path
      */
-    public int getRemoteChangesetVersion(final VersionSpec versionSpec)
-            throws IOException, InterruptedException, ParseException {
+    public int getRemoteChangesetVersion(final VersionSpec versionSpec) {
         return getRemoteChangesetVersion(projectPath, versionSpec);
     }
 

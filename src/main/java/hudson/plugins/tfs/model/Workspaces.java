@@ -28,7 +28,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * Get the list of workspaces from the server
      * @return the list of workspaces at the server
      */
-    private List<Workspace> getListFromServer() throws IOException, InterruptedException {
+    private List<Workspace> getListFromServer() {
         ListWorkspacesCommand command = new ListWorkspacesCommand(server);
         final List<Workspace> result = server.execute(command.getCallable());
         return result;
@@ -37,7 +37,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     /**
      * Populate the map field with workspaces from the server once.
      */
-    private void populateMapFromServer() throws IOException, InterruptedException {
+    private void populateMapFromServer() {
         if (!mapIsPopulatedFromServer) {
             for (Workspace workspace : getListFromServer()) {
                 workspaces.put(workspace.getName(), workspace);
@@ -51,7 +51,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param workspaceName the name of the workspace name
      * @return the workspace with the specified name; null if it wasnt found
      */
-    public Workspace getWorkspace(String workspaceName) throws IOException, InterruptedException {
+    public Workspace getWorkspace(String workspaceName) {
         if (!workspaces.containsKey(workspaceName)) {
             populateMapFromServer();
         }
@@ -63,7 +63,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param workspaceName the name of the workspace 
      * @return true if the workspace exists on server; false otherwise
      */
-    public boolean exists(String workspaceName) throws IOException, InterruptedException {
+    public boolean exists(String workspaceName) {
         if (!workspaces.containsKey(workspaceName)) {
             populateMapFromServer();
         }
@@ -75,7 +75,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param workspace the workspace 
      * @return true if the workspace exists on server; false otherwise
      */
-    public boolean exists(Workspace workspace) throws IOException, InterruptedException {
+    public boolean exists(Workspace workspace) {
         return exists(workspace.getName());
     }
 
@@ -84,7 +84,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param workspaceName the name of the new workspace
      * @return a workspace
      */
-    public Workspace newWorkspace(final String workspaceName, final String serverPath, final String localPath) throws IOException, InterruptedException {
+    public Workspace newWorkspace(final String workspaceName, final String serverPath, final String localPath) {
         NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, localPath);
         server.execute(command.getCallable());
         Workspace workspace = new Workspace(workspaceName);
@@ -96,7 +96,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * Deletes the workspace from the server
      * @param workspace the workspace to delete
      */
-    public void deleteWorkspace(Workspace workspace) throws IOException, InterruptedException {
+    public void deleteWorkspace(Workspace workspace) {
         DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(server, workspace.getName());
         workspaces.remove(workspace.getName());
         server.execute(command.getCallable());

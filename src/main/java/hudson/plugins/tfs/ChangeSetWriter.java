@@ -24,6 +24,8 @@ public class ChangeSetWriter {
      * Writes the list of change sets to the file
      * @param changeSets list of change sets
      * @param changelogFile file to write change sets to
+     *
+     * @throws IOException If an I/O error occurs
      */
     public void write(List<ChangeSet> changeSets, File changelogFile) throws IOException {
         FileWriter writer = new FileWriter(changelogFile);

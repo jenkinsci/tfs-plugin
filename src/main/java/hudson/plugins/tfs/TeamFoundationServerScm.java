@@ -289,9 +289,6 @@ public class TeamFoundationServerScm extends SCM {
                             lastRun.getTimestamp(), 
                             Calendar.getInstance()
                         ).size() > 0);
-            } catch (ParseException pe) {
-                listener.fatalError(pe.getMessage());
-                throw new AbortException();
             } finally {
                 server.close();
             }
@@ -516,9 +513,6 @@ public class TeamFoundationServerScm extends SCM {
                     ? Change.NONE
                     : Change.SIGNIFICANT;
             return new PollingResult(tfsBaseline, tfsRemote, change);
-        } catch (ParseException pe) {
-            listener.fatalError(pe.getMessage());
-            throw new AbortException();
         } finally {
             server.close();
         }

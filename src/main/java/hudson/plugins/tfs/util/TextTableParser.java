@@ -84,7 +84,7 @@ public class TextTableParser {
      * Returns the number of columns
      * @return the number of columns
      */
-    public int getColumnCount() throws IOException {
+    public int getColumnCount() {
         return columns.size();
     }
 
@@ -93,7 +93,7 @@ public class TextTableParser {
      * @param index the column index
      * @return the value in the specified column; null if there is no value (the column is optional)
      */
-    public String getColumn(int index) throws IOException {
+    public String getColumn(int index) {
         if (currentLine == null) {
             throw new IllegalStateException("There is no active row.");
         }
@@ -113,7 +113,7 @@ public class TextTableParser {
     /**
      * Move to the next row
      * @return true, if there was a next row; false, if there is no next row.
-     * @throws IOException
+     * @throws IOException If an I/O error occurs
      */
     public boolean nextRow() throws IOException {
         do {
