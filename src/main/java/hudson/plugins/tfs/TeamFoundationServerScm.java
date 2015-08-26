@@ -258,19 +258,14 @@ public class TeamFoundationServerScm extends SCM {
             workspaceVersion = new DateVersionSpec(build.getTimestamp());
         }
         int buildChangeset;
-        try {
-            setWorkspaceChangesetVersion(null);
-            buildChangeset = project.getRemoteChangesetVersion(workspaceVersion);
-            setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
+        setWorkspaceChangesetVersion(null);
+        buildChangeset = project.getRemoteChangesetVersion(workspaceVersion);
+        setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
 
-            // by adding this action, we prevent calcRevisionsFromBuild() from being called
-            build.addAction(new TFSRevisionState(buildChangeset, projectPath));
+        // by adding this action, we prevent calcRevisionsFromBuild() from being called
+        build.addAction(new TFSRevisionState(buildChangeset, projectPath));
 
-            return buildChangeset;
-        } catch (ParseException pe) {
-            listener.fatalError(pe.getMessage());
-            throw new AbortException();
-        }
+        return buildChangeset;
     }
 
     void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
