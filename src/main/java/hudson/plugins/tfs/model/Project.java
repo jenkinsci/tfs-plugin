@@ -73,7 +73,8 @@ public class Project {
      * @param fromVersion the version to get the history from
      * @param toVersion the version to get the history to
      * @param includeFileDetails whether or not to include details of modified items
-     * @param maxCount the maximum number of changes to return (pass Integer.MAX_VALUE for all available values). Must be > 0.
+     * @param maxCount the maximum number of changes to return (pass Integer.MAX_VALUE for all available values).
+     *                 {@literal Must be > 0.}
      * @return a list of change sets
      */
     public List<ChangeSet> getVCCHistory(VersionSpec fromVersion, VersionSpec toVersion, boolean includeFileDetails, int maxCount) {
