@@ -1,0 +1,57 @@
+<div>
+  <p>The name of the user that will be connecting to TFS/VSO to query history, checkout files, etc.
+  </p>
+  <h2>Team Foundation Server (on-premises)</h2>
+  <p>For [on-premises] Team Foundation Server, the user name can be specified in two ways:
+    <ol>
+      <li><tt>EXAMPLE-DOMAIN\user</tt></li>
+      <li><tt>user@domain.example.com</tt></li>
+    </ol>
+  </p>
+  <h2>Visual Studio Online (a.k.a. TFS-as-a-service)</h2>
+  <p>For Visual Studio Online, there are also two options:
+    <ol>
+      <li>Personal access tokens (recommended)
+        <ol>
+          <li>
+            Click your name in the top right corner and select <b>My profile</b>.
+          </li>
+          <li>
+            Select the <b>Security</b> hub.
+          </li>
+          <li>
+            In the <em>Personal access tokens</em> area, select <b>Add</b>.
+          </li>
+          <li>
+            Describe the token (use something like "Jenkins server at jenkins.example.com"), select an expiry timeframe, double-check the Visual Studio Online account the token will be valid for and, until the corresponding defect in VSO is fixed, select <b>All scopes</b>.
+          </li>
+          <li>
+            Click <b>[Create Token]</b> and copy the generated personal access token to the clipboard.
+          </li>
+          <li>
+            Back to Jenkins, enter the e-mail address associated with your VSO account as the <em>User name</em> and the generated personal access token as the <em>User password</em>.
+          </li>
+        </ol>
+      </li>
+      <li>Alternate credentials
+        <ol>
+          <li>
+            Click your name in the top right corner and select <b>My profile</b>.
+          </li>
+          <li>
+            Select the <b>Security</b> hub.
+          </li>
+          <li>
+            In the <em>Alternate credentials</em> area, select <b>Enable alternate authentication credentials</b>.
+          </li>
+          <li>
+            Enter a secondary user name and password, then click <b>[Save]</b>.
+          </li>
+          <li>
+            Back to Jenkins, re-enter those credentials in the <em>User name</em> and <em>User password</em> fields.
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </p>
+</div>

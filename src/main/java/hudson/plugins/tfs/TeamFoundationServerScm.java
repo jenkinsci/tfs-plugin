@@ -439,12 +439,7 @@ public class TeamFoundationServerScm extends SCM {
             }
             return FormValidation.error(noMatchText);
         }
-        
-        public FormValidation doUsernameCheck(@QueryParameter final String value) {
-            return doRegexCheck(new Pattern[]{DOMAIN_SLASH_USER_REGEX, USER_AT_DOMAIN_REGEX},
-                    "Login name must contain the name of the domain and user", null, value );
-        }
-        
+
         public FormValidation doProjectPathCheck(@QueryParameter final String value) {
             return doRegexCheck(new Pattern[]{PROJECT_PATH_REGEX},
                     "Project path must begin with '$/'.", 
