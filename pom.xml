@@ -92,13 +92,13 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
+        <version>${maven-javadoc-plugin.version}</version>
         <executions>
           <execution>
             <id>verify-javadoc</id>
             <phase>verify</phase>
             <goals>
-              <goal>jar</goal>
+              <goal>javadoc</goal>
             </goals>
           </execution>
         </executions>
