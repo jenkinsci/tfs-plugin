@@ -98,7 +98,7 @@
             <id>verify-javadoc</id>
             <phase>verify</phase>
             <goals>
-              <goal>jar</goal>
+              <goal>javadoc</goal>
             </goals>
           </execution>
         </executions>
