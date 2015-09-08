@@ -5,7 +5,6 @@ import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
 import hudson.plugins.tfs.model.Server;
 import hudson.remoting.Callable;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.mockito.AdditionalMatchers.aryEq;
@@ -39,7 +38,6 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
         );
     }
 
-    @Ignore("Finish test when we have MockableWorkspace")
     @Test public void assertLoggingWhenAlsoMapping() throws Exception {
         when(server.getUserName()).thenReturn("snd\\user_cp");
         when(vcc.createWorkspace(aryEq((WorkingFolder[]) null),
@@ -61,9 +59,8 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
 
         assertLog(
                 "Creating workspace 'TheWorkspaceName' owned by 'snd\\user_cp'...",
-                "Created workspace 'TheWorkspaceName'.",
                 "Mapping '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName'...",
-                "Mapped '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName'."
+                "Created workspace 'TheWorkspaceName'."
         );
     }
 

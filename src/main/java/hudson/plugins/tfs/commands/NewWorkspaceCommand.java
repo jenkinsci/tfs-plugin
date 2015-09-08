@@ -3,6 +3,7 @@ package hudson.plugins.tfs.commands;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
@@ -11,6 +12,9 @@ import hudson.remoting.Callable;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 
 public class NewWorkspaceCommand extends AbstractCallableCommand implements Callable<Void, Exception> {
@@ -44,9 +48,21 @@ public class NewWorkspaceCommand extends AbstractCallableCommand implements Call
 
         final String creatingMessage = String.format(CreatingTemplate, workspaceName, userName);
         logger.println(creatingMessage);
+        
+        WorkingFolder[] foldersToMap = null;
+        if (serverPath != null && localPath != null) {
+            final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
+            logger.println(mappingMessage);
 
-        final Workspace workspace = vcc.createWorkspace(
-                null,
+            List<WorkingFolder> folderList = new ArrayList<WorkingFolder>();
+
+            folderList.add(new WorkingFolder(serverPath, localPath));
+            
+            foldersToMap = folderList.toArray(new WorkingFolder[0]);
+        }
+
+        vcc.createWorkspace(
+                foldersToMap,
                 workspaceName,
                 VersionControlConstants.AUTHENTICATED_USER,
                 VersionControlConstants.AUTHENTICATED_USER,
@@ -57,16 +73,6 @@ public class NewWorkspaceCommand extends AbstractCallableCommand implements Call
 
         final String createdMessage = String.format(CreatedTemplate, workspaceName);
         logger.println(createdMessage);
-
-        if (serverPath != null && localPath != null) {
-            final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
-            logger.println(mappingMessage);
-
-            workspace.map(serverPath, localPath);
-
-            final String mappedMessage = String.format(MappedTemplate, serverPath, localPath, workspaceName);
-            logger.println(mappedMessage);
-        }
 
         return null;
     }
