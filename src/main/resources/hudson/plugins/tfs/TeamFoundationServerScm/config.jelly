@@ -31,6 +31,10 @@
             <f:textbox default="Hudson-$${JOB_NAME}-$${NODE_NAME}"
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/workspaceNameCheck?value='+escape(this.value)"/>
         </f:entry>
+        
+        <f:entry field="cloakPaths" title="Cloak Paths">
+            <f:textarea checkUrl="'${rootURL}/scm/TeamFoundationServerScm/cloakPathsCheck?value='+escape(this.value)"/>
+        </f:entry>
     </f:advanced>
     
     <t:listScmBrowsers field="browser" />

@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -31,16 +32,22 @@ import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 public class Project {
 
     private final String projectPath;
+    private final Collection<String> cloakPaths;
     private final Server server;
     private UserLookup userLookup;
 
-    public Project(Server server, String projectPath) {
+    public Project(Server server, String projectPath, Collection<String> cloakPaths) {
         this.server = server;
         this.projectPath = projectPath;
+        this.cloakPaths = cloakPaths;
     }
 
     public String getProjectPath() {
         return projectPath;
+    }
+    
+    public Collection<String> getCloakPaths() {
+    	return cloakPaths;
     }
 
     static hudson.plugins.tfs.model.ChangeSet.Item convertServerChange
