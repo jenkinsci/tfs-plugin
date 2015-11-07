@@ -35,6 +35,11 @@
         <f:entry field="cloakPaths" title="Cloak Paths">
             <f:textarea checkUrl="'${rootURL}/scm/TeamFoundationServerScm/cloakPathsCheck?value='+escape(this.value)"/>
         </f:entry>
+
+        <f:entry field="shelveSets" title="Shelvesets">
+            <f:textarea checkUrl="'${rootURL}/scm/TeamFoundationServerScm/shelveSetsCheck?value='+escape(this.value)"/>
+        </f:entry>
+
     </f:advanced>
     
     <t:listScmBrowsers field="browser" />

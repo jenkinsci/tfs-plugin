@@ -26,15 +26,15 @@ public class ServerTest {
     @Test
     public void assertGetProjectWithSameProjectPathReturnsSameInstance() throws IOException {
         Server server = new Server("url");
-        assertNotNull("Project object can not be null", server.getProject("$/projectPath", new ArrayList<String>()));
+        assertNotNull("Project object can not be null", server.getProject("$/projectPath", new ArrayList<String>(), new ArrayList<String>()));
         assertSame("getProject() returned different objects", 
-                server.getProject("$/projectPath", new ArrayList<String>()), server.getProject("$/projectPath", new ArrayList<String>()));
+                server.getProject("$/projectPath", new ArrayList<String>(), new ArrayList<String>()), server.getProject("$/projectPath", new ArrayList<String>(), new ArrayList<String>()));
     }
     
     @Test
     public void assertGetProjectWithDifferentProjectPathReturnsNotSameInstance() throws IOException {
         Server server = new Server("url");
         assertNotSame("getProject() did not return different objects", 
-                server.getProject("$/projectPath", new ArrayList<String>()), server.getProject("$/otherPath", new ArrayList<String>()));
+                server.getProject("$/projectPath", new ArrayList<String>(), new ArrayList<String>()), server.getProject("$/otherPath", new ArrayList<String>(), new ArrayList<String>()));
     }
 }

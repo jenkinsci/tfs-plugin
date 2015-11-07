@@ -75,9 +75,9 @@ public class Server implements ServerConfigurationProvider, Closable {
         this(null, null, url, null, null);
     }
 
-    public Project getProject(String projectPath, Collection<String> cloakPaths) {
+    public Project getProject(String projectPath, Collection<String> cloakPaths, Collection<String> shelveSets) {
         if (! projects.containsKey(projectPath)) {
-            projects.put(projectPath, new Project(this, projectPath, cloakPaths));
+            projects.put(projectPath, new Project(this, projectPath, cloakPaths, shelveSets));
         }
         return projects.get(projectPath);
     }

@@ -43,6 +43,7 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
 
     @Test public void assertLoggingWhenAlsoMapping() throws Exception {
         List<String> cloakPaths = new ArrayList<String>();
+
         cloakPaths.add("$/Stuff/Hide");
 
         when(server.getUserName()).thenReturn("snd\\user_cp");

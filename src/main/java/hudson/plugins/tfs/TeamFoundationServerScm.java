@@ -80,6 +80,7 @@ public class TeamFoundationServerScm extends SCM {
     private final String serverUrl;
     private final String projectPath;
     private final Collection<String> cloakPaths;
+    private final Collection<String> shelveSets;
     private final String localPath;
     private final String workspaceName;
     private @Deprecated String userPassword;
@@ -96,18 +97,19 @@ public class TeamFoundationServerScm extends SCM {
 
     @Deprecated
     public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password) {
-        this(serverUrl, projectPath, null, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
+        this(serverUrl, projectPath, null, null, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
     }
 
-    TeamFoundationServerScm(String serverUrl, String projectPath, String cloakPaths, String localPath, boolean useUpdate, String workspaceName) {
-        this(serverUrl, projectPath, cloakPaths, localPath, useUpdate, workspaceName, null, (Secret)null);
+    TeamFoundationServerScm(String serverUrl, String projectPath, String cloakPaths, String shelveSets, String localPath, boolean useUpdate, String workspaceName) {
+        this(serverUrl, projectPath, cloakPaths, shelveSets, localPath, useUpdate, workspaceName, null, (Secret)null);
     }
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String cloakPaths, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String cloakPaths, String shelveSets, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.cloakPaths = splitCloakPaths(cloakPaths);
+        this.shelveSets = splitCloakPaths(shelveSets);
         this.useUpdate = useUpdate;
         this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
@@ -160,6 +162,12 @@ public class TeamFoundationServerScm extends SCM {
     public String getCloakPaths() {
     	return StringUtils.join(cloakPaths, ";\n");
     }
+
+    public String getShelveSets()
+    {
+        return StringUtils.join(shelveSets, ";\n");
+    }
+
     // Bean properties END
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
@@ -189,6 +197,18 @@ public class TeamFoundationServerScm extends SCM {
     	return paths;
     }
 
+
+    Collection<String> getShelveSets (Run<?,?> run)
+    {
+	List<String> sets = new ArrayList<String>();
+        for (String shelveSet : shelveSets)
+	{
+	    sets.add (Util.replaceMacro (substituteBuildParameter (run, shelveSet), new BuildVariableResolver (run.getParent() )));
+ 	}
+        return sets;
+    }
+
+
     private String substituteBuildParameter(Run<?,?> run, String text) {
         if (run instanceof AbstractBuild<?, ?>){
             AbstractBuild<?,?> build = (AbstractBuild<?, ?>) run;
@@ -213,7 +233,7 @@ public class TeamFoundationServerScm extends SCM {
     public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(launcher, listener, build);
         try {
-            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getCloakPaths(build), getLocalPath());
+            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getCloakPaths(build), getShelveSets(build), getLocalPath());
             
             final AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
             // Check if the configuration has changed
@@ -233,10 +253,11 @@ public class TeamFoundationServerScm extends SCM {
             VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
             String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
             final String projectPath = workspaceConfiguration.getProjectPath();
-            final Project project = server.getProject(projectPath, workspaceConfiguration.getCloakPaths());
+            final Project project = server.getProject(projectPath, workspaceConfiguration.getCloakPaths(), workspaceConfiguration.getShelveSets());
             final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
 
-            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakPaths(), 
+                                                       workspaceConfiguration.getShelveSets(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
             List<ChangeSet> list;
             if (StringUtils.isNotEmpty(singleVersionSpec)) {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
@@ -306,7 +327,7 @@ public class TeamFoundationServerScm extends SCM {
         } else {
             Server server = createServer(launcher, listener, lastRun);
             try {
-                return (server.getProject(getProjectPath(lastRun), getCloakPaths(lastRun)).getDetailedHistory(
+                return (server.getProject(getProjectPath(lastRun), getCloakPaths(lastRun), getShelveSets(lastRun)).getDetailedHistory(
                             lastRun.getTimestamp(), 
                             Calendar.getInstance()
                         ).size() > 0);
@@ -427,6 +448,7 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern DOMAIN_SLASH_USER_REGEX = Pattern.compile("^([a-z][a-z0-9.-]+)\\\\([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         public static final Pattern CLOAK_PATHS_REGEX = Pattern.compile("^\\$[^\\$;]+(\\s*;\\s*\\$[^\\$;]+){0,}$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern SHELVESETS_REGEX = Pattern.compile("(\\s*\\S+:\\S+\\s*;)*\\s*$", Pattern.CASE_INSENSITIVE);
         private transient String tfExecutable;
         
         public DescriptorImpl() {
@@ -475,6 +497,12 @@ public class TeamFoundationServerScm extends SCM {
             return doRegexCheck(new Pattern[]{CLOAK_PATHS_REGEX},
                     "Each cloak path must begin with '$/'. Multiple paths must be delimited with ';'.", 
                     null, value );
+        }
+
+        public FormValidation doShelveSetsCheck (@QueryParameter final String value) {
+            return doRegexCheck (new Pattern[]{SHELVESETS_REGEX},
+                    "Each shelveset must be given in the form of <name>:<owner>. Multiple entries must be delimited with ';'.",
+                    null, value);
         }
         
         @Override
@@ -526,7 +554,7 @@ public class TeamFoundationServerScm extends SCM {
         }
         Run<?, ?> build = project.getLastBuild();
         final Server server = createServer(localLauncher, listener, build);
-        final Project tfsProject = server.getProject(projectPath, cloakPaths);
+        final Project tfsProject = server.getProject(projectPath, cloakPaths, shelveSets);
         try {
             final ChangeSet latest = tfsProject.getLatestChangeset();
             final TFSRevisionState tfsRemote =
