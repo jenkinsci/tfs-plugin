@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.model;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +40,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     private void populateMapFromServer() {
         if (!mapIsPopulatedFromServer) {
             for (Workspace workspace : getListFromServer()) {
-                workspaces.put(workspace.getName(), workspace);
+                workspaces.put(workspace.getName().toLowerCase(), workspace);
             }
             mapIsPopulatedFromServer = true;
         }
@@ -53,6 +52,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @return the workspace with the specified name; null if it wasnt found
      */
     public Workspace getWorkspace(String workspaceName) {
+        workspaceName = workspaceName.toLowerCase();
         if (!workspaces.containsKey(workspaceName)) {
             populateMapFromServer();
         }
@@ -65,6 +65,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @return true if the workspace exists on server; false otherwise
      */
     public boolean exists(String workspaceName) {
+        workspaceName = workspaceName.toLowerCase();
         if (!workspaces.containsKey(workspaceName)) {
             populateMapFromServer();
         }
@@ -92,7 +93,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
         NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, cloakedPaths, localPath);
         server.execute(command.getCallable());
         Workspace workspace = new Workspace(workspaceName);
-        workspaces.put(workspaceName, workspace);
+        workspaces.put(workspaceName.toLowerCase(), workspace);
         return workspace;
     }
 
@@ -102,7 +103,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      */
     public void deleteWorkspace(Workspace workspace) {
         DeleteWorkspaceCommand command = new DeleteWorkspaceCommand(server, workspace.getName());
-        workspaces.remove(workspace.getName());
+        workspaces.remove(workspace.getName().toLowerCase());
         server.execute(command.getCallable());
     }
 
