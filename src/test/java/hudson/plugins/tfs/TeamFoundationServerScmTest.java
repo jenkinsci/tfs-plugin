@@ -163,7 +163,24 @@ public class TeamFoundationServerScmTest {
         assertTrue("Cloak paths regex did not match a valid cloak path", TeamFoundationServerScm.DescriptorImpl.CLOAK_PATHS_REGEX.matcher("$/tfsandbox/path1;$/tfsandbox/path2").matches());
         assertTrue("Cloak paths regex did not match a valid cloak path", TeamFoundationServerScm.DescriptorImpl.CLOAK_PATHS_REGEX.matcher("$/tfsandbox/path1 ; $/tfsandbox/path2 ; $/tfsandbox/path3").matches());
     }
-    
+   
+
+    @Test
+    public void assertDoShelveSetsCheckRegexWorks()
+    {
+      assertTrue ("Shelveset name regex did not match a valid shelveset name", TeamFoundationServerScm.DescriptorImpl.SHELVESETS_REGEX.matcher (" ShelveSetName:AccountName ").matches ());
+      assertTrue ("Shelveset name regex did not match a valid shelveset name", TeamFoundationServerScm.DescriptorImpl.SHELVESETS_REGEX.matcher (" ShelveSetName:DomainName\\AcountName ").matches ());
+      assertTrue ("Shelveset name regex did not match valid shelveset names", TeamFoundationServerScm.DescriptorImpl.SHELVESETS_REGEX.matcher (" ShelveSetName:AccountName ;	ShelveSetName:DomainName\\AccountName").matches ());
+      assertTrue ("Shelveset name regex did not match valid shelveset names", TeamFoundationServerScm.DescriptorImpl.SHELVESETS_REGEX.matcher (" ShelveSetName:AccountName	;	SehlveSetName:AccountName	     ").matches ());
+
+      assertFalse ("Shelveset name regex matches an invalid shelveset name", TeamFoundationServerScm.DescriptorImpl.SHELVESETS_REGEX.matcher (" ShelveSetName").matches ());
+      assertFalse ("Shelveset name regex matches an invalid shelveset name", TeamFoundationServerScm.DescriptorImpl.SHELVESETS_REGEX.matcher (" ShelveSetName : AccountName ").matches ());
+      assertFalse ("Shelveset name regex matches an invalid shelveset name", TeamFoundationServerScm.DescriptorImpl.SHELVESETS_REGEX.matcher (" ShelveSetName ; ShelveSetName:AccountName").matches ());
+      assertFalse ("Shelveset name regex matches an invalid shelveset name", TeamFoundationServerScm.DescriptorImpl.SHELVESETS_REGEX.matcher (" \"ShelveSet Name\":AccountName").matches ());
+
+    }
+
+ 
     @Test
     public void assertDefaultValueIsUsedForEmptyLocalPath() {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", null, null, "", false, "workspace");

@@ -448,7 +448,8 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern DOMAIN_SLASH_USER_REGEX = Pattern.compile("^([a-z][a-z0-9.-]+)\\\\([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         public static final Pattern CLOAK_PATHS_REGEX = Pattern.compile("^\\$[^\\$;]+(\\s*;\\s*\\$[^\\$;]+){0,}$", Pattern.CASE_INSENSITIVE);
-        public static final Pattern SHELVESETS_REGEX = Pattern.compile("(\\s*\\S+:\\S+\\s*;)*\\s*$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern SHELVESETS_REGEX = Pattern.compile("(\\s*\\S+:\\S+\\s*;){0,}(\\s*\\S+:\\S+\\s*){0,}$", Pattern.CASE_INSENSITIVE);
+
         private transient String tfExecutable;
         
         public DescriptorImpl() {

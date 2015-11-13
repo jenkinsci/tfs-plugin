@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import java.io.PrintStream;
+import java.lang.IllegalArgumentException;
 import java.util.Collection;
 
 import com.microsoft.tfs.core.clients.versioncontrol.events.OperationCompletedEvent;
@@ -10,10 +11,14 @@ import com.microsoft.tfs.core.clients.versioncontrol.events.OperationStartedList
 import com.microsoft.tfs.core.clients.versioncontrol.events.VersionControlEventEngine;
 import com.microsoft.tfs.core.clients.versioncontrol.events.UnshelveShelvesetCompletedEvent;
 import com.microsoft.tfs.core.clients.versioncontrol.events.UnshelveShelvesetStartedEvent;
+import com.microsoft.tfs.core.clients.versioncontrol.exceptions.UnshelveException;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Conflict;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Failure;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.PendingChange;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Shelveset;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import com.microsoft.tfs.core.clients.versioncontrol.ProcessType;
+import com.microsoft.tfs.core.clients.versioncontrol.UnshelveResult;
 
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
@@ -23,10 +28,14 @@ import hudson.remoting.Callable;
 
 public class UnshelveToWorkFolderCommand extends AbstractCallableCommand implements Callable<Void, Exception>, OperationCompletedListener, OperationStartedListener 
 {
-    private static final String PendingChangeTemplate = "Unshelving '%s'";
-    private static final String StartTemplate         = "Unshelving shelveset '%s:%s' to workspace '%s'...";
-    private static final String StopTemplate          = "Completed unshelving '%s:%s'.";
-
+    private static final String ConflictTemplate                    = "Conflict found with '%s'.";
+    private static final String FailureTemplate                     = "Failure with '%s' : '%s'.";
+    private static final String FormatTemplate                      = "Wrong format for shelveset '%s'. The correct format is <name>:<user>.";
+    private static final String NoChangesUnshelved                  = "No changes unshelved.";
+    private static final String NoChangesUnshelvedExceptionTemplate = "Unshelve Exception reported for shelveset '%s:%s' : '%s'";
+    private static final String PendingChangeTemplate               = "Unshelved '%s'";
+    private static final String StartTemplate                       = "Unshelving shelveset '%s:%s' to workspace '%s'...";
+    private static final String StopTemplate                        = "Completed unshelving '%s:%s'.";
 
     private final String              workFolder;
     private final Collection<String>  shelveSets;
@@ -71,7 +80,31 @@ public class UnshelveToWorkFolderCommand extends AbstractCallableCommand impleme
         for (String shelveSet : shelveSets)
         {
             String part[] = shelveSet.split(":");
-            workspace.unshelve (part[0], part[1], null);
+            if (part.length != 2)
+                throw new IllegalArgumentException (String.format (FormatTemplate, shelveSet));
+
+            try
+            {
+                UnshelveResult result = workspace.unshelve (part[0], part[1], null, null, null, true, true);
+
+                for (PendingChange change : result.changes()) {
+                    logger.println (String.format (PendingChangeTemplate, change.getServerItem(), change.getLocalItem()));
+                }
+                for (Conflict conflict : result.getConflicts ()) {
+                    logger.println (String.format (ConflictTemplate, conflict.getServerPath()));
+                }
+                for (Failure failure : result.getStatus().getFailures ()) {
+                    logger.println (String.format (FailureTemplate, failure.getLocalItem(), failure.getFormattedMessage()));
+                }
+            }
+            catch (UnshelveException e)
+            {
+                if (e.getMessage().equals (NoChangesUnshelved)) {
+                    logger.println (String.format (NoChangesUnshelvedExceptionTemplate, part[0], part[1], workspace.getName()));
+                } else {
+                    throw new UnshelveException (e);
+                }
+            }
         }
         eventEngine.removeOperationStartedListener(this);
         eventEngine.removeOperationCompletedListener(this);
@@ -84,14 +117,9 @@ public class UnshelveToWorkFolderCommand extends AbstractCallableCommand impleme
     {
         UnshelveShelvesetStartedEvent event = (UnshelveShelvesetStartedEvent) e;
         
-        if (event.getProcessType() == ProcessType.UNSHELVE)
-        {
-            logger.println (String.format (StartTemplate, event.getShelveset().getName(), event.getShelveset().getOwnerDisplayName(), event.getWorkspace().getName()));
-            for (PendingChange change : event.getChanges())
-            {
-                logger.println (String.format (PendingChangeTemplate, change.getServerItem(), change.getLocalItem()));
-            }
-       }
+        if (event.getProcessType() == ProcessType.UNSHELVE) {
+            logger.println (String.format (StartTemplate, event.getShelveset().getName(), event.getShelveset().getOwnerName(), event.getWorkspace().getName()));
+        }
     }
 
 
@@ -99,9 +127,8 @@ public class UnshelveToWorkFolderCommand extends AbstractCallableCommand impleme
     {
         UnshelveShelvesetCompletedEvent event = (UnshelveShelvesetCompletedEvent) e;
 
-        if (event.getProcessType() == ProcessType.UNSHELVE)
-        {
-            logger.println (String.format (StopTemplate, event.getShelveset().getName(), event.getShelveset().getOwnerDisplayName())); 
+        if (event.getProcessType() == ProcessType.UNSHELVE) {
+            logger.println (String.format (StopTemplate, event.getShelveset().getName(), event.getShelveset().getOwnerName())); 
         }
     }
 
