@@ -11,8 +11,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
@@ -166,10 +171,117 @@ public class TeamFoundationServerScmTest {
         assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox/path with space/subpath"));
         assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox/path1;$/tfsandbox/path2"));
         assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox/path1 ; $/tfsandbox/path2 ; $/tfsandbox/path3"));
+        assertTrue(shoudMatch, isCloakedPathValid("$/foo/;$/bar/;$/baz/"));
+        assertTrue(shoudMatch, isCloakedPathValid("$/foo/;\n$/bar/;\n$/baz/"));
+        assertTrue(shoudMatch, isCloakedPathValid("$/foo/\n$/bar/\n$/baz/"));
+        assertTrue(shoudMatch, isCloakedPathValid(" $/foo/ \n $/bar/ \n $/baz/ "));
+        assertTrue(shoudMatch, isCloakedPathValid("\n$/foo/\n\n$/bar/\n\n$/baz/\n"));
     }
 
     private static boolean isCloakedPathValid(final String path) {
         return TeamFoundationServerScm.DescriptorImpl.CLOAKED_PATHS_REGEX.matcher(path).matches();
+    }
+
+    @Test
+    public void serializeCloakedPathCollectionToString_one() {
+        final List<String> cloakedPaths = Collections.singletonList("$/foo");
+
+        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(cloakedPaths);
+
+        Assert.assertEquals("$/foo", actual);
+    }
+
+    @Test
+    public void serializeCloakedPathCollectionToString_two() {
+        final List<String> cloakedPaths = Arrays.asList("$/foo", "$/bar");
+
+        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(cloakedPaths);
+
+        Assert.assertEquals("$/foo\n$/bar", actual);
+    }
+
+    @Test
+    public void serializeCloakedPathCollectionToString_many() {
+        final List<String> cloakedPaths = Arrays.asList("$/foo/", "$/bar/", "$/baz/");
+
+        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(cloakedPaths);
+
+        Assert.assertEquals("$/foo/\n$/bar/\n$/baz/", actual);
+    }
+
+    @Test
+    public void splitCloakedPaths_one() {
+        final String input = "$/foo/";
+
+        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+
+        areEqual(actual, input);
+    }
+
+    @Test
+    public void splitCloakedPaths_semicolonsMany() {
+        final String input = "$/foo/;$/bar/;$/baz/";
+
+        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+
+        areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
+    }
+
+    @Test
+    public void splitCloakedPaths_semicolonsAndNewlines() {
+        final String input = "$/foo/;\n$/bar/;\n$/baz/";
+
+        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+
+        areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
+    }
+
+    @Test
+    public void splitCloakedPaths_newlinesMany() {
+        final String input = "$/foo/\n$/bar/\n$/baz/";
+
+        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+
+        areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
+    }
+
+    @Test
+    public void splitCloakedPaths_newlinesWithLiberalSpacing() {
+        final String input = " $/foo/ \n $/bar/ \n $/baz/ ";
+
+        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+
+        areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
+    }
+
+    @Test
+    public void splitCloakedPaths_newlinesWithBlankLines() {
+        final String input = "\n$/foo/\n\n$/bar/\n\n$/baz/\n";
+
+        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+
+        areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
+    }
+
+    private static <T> void areEqual(final Collection<T> actual, T... expected) {
+        final Iterator<T> ai = actual.iterator();
+        int ei = 0;
+        while (ei < expected.length && ai.hasNext()) {
+            final T expectedItem = expected[ei];
+            final T actualItem = ai.next();
+            Assert.assertEquals(expectedItem, actualItem);
+            ei++;
+        }
+        if (ei == expected.length) {
+            if (ai.hasNext()) {
+                Assert.fail("There were more elements than expected");
+            }
+        }
+        else {
+            if (!ai.hasNext()) {
+                Assert.fail("Some elements were missing from actual.");
+            }
+        }
     }
 
     @Test

@@ -158,9 +158,13 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     public String getCloakedPaths() {
-        return cloakedPaths == null ? StringUtils.EMPTY : StringUtils.join(cloakedPaths, ";\n");
+        return serializeCloakedPathCollectionToString(this.cloakedPaths);
     }
     // Bean properties END
+
+    static String serializeCloakedPathCollectionToString(final Collection<String> cloakedPaths) {
+        return cloakedPaths == null ? StringUtils.EMPTY : StringUtils.join(cloakedPaths, "\n");
+    }
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
         normalizedWorkspaceName = workspaceName;
@@ -206,9 +210,24 @@ public class TeamFoundationServerScm extends SCM {
     
     static Collection<String> splitCloakedPaths(final String cloakedPaths) {
         final List<String> cloakedPathsList = new ArrayList<String>();
-        if (cloakedPaths != null && cloakedPaths.trim().length() > 0) {
-            for (final String cloakedPath : cloakedPaths.split(";")) {
-                cloakedPathsList.add(cloakedPath.trim());
+        if (cloakedPaths != null && cloakedPaths.length() > 0) {
+            final StringBuilder cloakedPath = new StringBuilder(cloakedPaths.length());
+            for (final char character : cloakedPaths.toCharArray()) {
+                switch (character) {
+                    case ';':
+                    case '\n':
+                        if (cloakedPath.length() > 0) {
+                            cloakedPathsList.add(cloakedPath.toString().trim());
+                            cloakedPath.setLength(0);
+                        }
+                        break;
+                    default:
+                        cloakedPath.append(character);
+                        break;
+                }
+            }
+            if (cloakedPath.length() > 0) {
+                cloakedPathsList.add(cloakedPath.toString().trim());
             }
         }
         return cloakedPathsList;
@@ -431,7 +450,7 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern USER_AT_DOMAIN_REGEX = Pattern.compile("^([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)@([a-z][a-z0-9.-]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern DOMAIN_SLASH_USER_REGEX = Pattern.compile("^([a-z][a-z0-9.-]+)\\\\([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
-        public static final Pattern CLOAKED_PATHS_REGEX = Pattern.compile("^\\$[^\\$;]+(\\s*;\\s*\\$[^\\$;]+){0,}$", Pattern.CASE_INSENSITIVE);
+        public static final Pattern CLOAKED_PATHS_REGEX = Pattern.compile("\\s*\\$[^\\$\\n;]+(\\s*[;\\n]\\s*\\$[^\\$\\n;]+){0,}\\s*", Pattern.CASE_INSENSITIVE);
         private transient String tfExecutable;
         
         public DescriptorImpl() {
@@ -478,7 +497,7 @@ public class TeamFoundationServerScm extends SCM {
 
         public FormValidation doCloakedPathsCheck(@QueryParameter final String value) {
             return doRegexCheck(new Pattern[]{CLOAKED_PATHS_REGEX},
-                    "Each cloaked path must begin with '$/'. Multiple paths must be delimited with ';'.",
+                    "Each cloaked path must begin with '$/'. Multiple paths must be separated by blank lines.",
                     null, value );
         }
 
