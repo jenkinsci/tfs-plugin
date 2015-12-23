@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
@@ -20,12 +21,14 @@ public class CheckoutAction {
 
     private final String workspaceName;
     private final String projectPath;
+    private final Collection<String> cloakedPaths;
     private final String localFolder;
     private final boolean useUpdate;
 
-    public CheckoutAction(String workspaceName, String projectPath, String localFolder, boolean useUpdate) {
+    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakedPaths, String localFolder, boolean useUpdate) {
         this.workspaceName = workspaceName;
         this.projectPath = projectPath;
+        this.cloakedPaths = cloakedPaths;
         this.localFolder = localFolder;
         this.useUpdate = useUpdate;
     }
@@ -92,7 +95,7 @@ public class CheckoutAction {
             }
             final String serverPath = project.getProjectPath();
             final String localPath = localFolderPath.getRemote();
-            workspace = workspaces.newWorkspace(workspaceName, serverPath, localPath);
+            workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakedPaths, localPath);
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }

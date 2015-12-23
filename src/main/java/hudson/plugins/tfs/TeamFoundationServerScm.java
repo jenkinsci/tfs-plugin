@@ -5,7 +5,9 @@ import static hudson.Util.fixEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -77,6 +79,7 @@ public class TeamFoundationServerScm extends SCM {
 
     private final String serverUrl;
     private final String projectPath;
+    private final Collection<String> cloakedPaths;
     private final String localPath;
     private final String workspaceName;
     private @Deprecated String userPassword;
@@ -93,17 +96,18 @@ public class TeamFoundationServerScm extends SCM {
 
     @Deprecated
     public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password) {
-        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
+        this(serverUrl, projectPath, null, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
     }
 
-    TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName) {
-        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, null, (Secret)null);
+    TeamFoundationServerScm(String serverUrl, String projectPath, String cloakedPaths, String localPath, boolean useUpdate, String workspaceName) {
+        this(serverUrl, projectPath, cloakedPaths, localPath, useUpdate, workspaceName, null, (Secret)null);
     }
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String cloakedPaths, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
+        this.cloakedPaths = splitCloakedPaths(cloakedPaths);
         this.useUpdate = useUpdate;
         this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
@@ -151,7 +155,11 @@ public class TeamFoundationServerScm extends SCM {
 
     public String getUserName() {
         return userName;
-    }    
+    }
+
+    public String getCloakedPaths() {
+        return cloakedPaths == null ? StringUtils.EMPTY : StringUtils.join(cloakedPaths, ";\n");
+    }
     // Bean properties END
 
     String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
@@ -173,6 +181,19 @@ public class TeamFoundationServerScm extends SCM {
         return Util.replaceMacro(substituteBuildParameter(run, projectPath), new BuildVariableResolver(run.getParent()));
     }
 
+    Collection<String> getCloakedPaths(final Run<?, ?> run) {
+        final List<String> paths = new ArrayList<String>();
+        if (cloakedPaths != null) {
+            final BuildVariableResolver resolver = new BuildVariableResolver(run.getParent());
+            for (final String cloakedPath : cloakedPaths) {
+                final String path = substituteBuildParameter(run, cloakedPath);
+                final String enhancedPath = Util.replaceMacro(path, resolver);
+                paths.add(enhancedPath);
+            }
+        }
+        return paths;
+    }
+
     private String substituteBuildParameter(Run<?,?> run, String text) {
         if (run instanceof AbstractBuild<?, ?>){
             AbstractBuild<?,?> build = (AbstractBuild<?, ?>) run;
@@ -183,11 +204,21 @@ public class TeamFoundationServerScm extends SCM {
         return text;
     }
     
+    static Collection<String> splitCloakedPaths(final String cloakedPaths) {
+        final List<String> cloakedPathsList = new ArrayList<String>();
+        if (cloakedPaths != null && cloakedPaths.trim().length() > 0) {
+            for (final String cloakedPath : cloakedPaths.split(";")) {
+                cloakedPathsList.add(cloakedPath.trim());
+            }
+        }
+        return cloakedPathsList;
+    }
+
     @Override
     public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
         Server server = createServer(launcher, listener, build);
         try {
-            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getLocalPath());
+            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getCloakedPaths(build), getLocalPath());
             
             final AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
             // Check if the configuration has changed
@@ -210,7 +241,7 @@ public class TeamFoundationServerScm extends SCM {
             final Project project = server.getProject(projectPath);
             final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
 
-            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
             List<ChangeSet> list;
             if (StringUtils.isNotEmpty(singleVersionSpec)) {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
@@ -400,6 +431,7 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern USER_AT_DOMAIN_REGEX = Pattern.compile("^([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)@([a-z][a-z0-9.-]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern DOMAIN_SLASH_USER_REGEX = Pattern.compile("^([a-z][a-z0-9.-]+)\\\\([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
+        public static final Pattern CLOAKED_PATHS_REGEX = Pattern.compile("^\\$[^\\$;]+(\\s*;\\s*\\$[^\\$;]+){0,}$", Pattern.CASE_INSENSITIVE);
         private transient String tfExecutable;
         
         public DescriptorImpl() {
@@ -434,7 +466,7 @@ public class TeamFoundationServerScm extends SCM {
 
         public FormValidation doProjectPathCheck(@QueryParameter final String value) {
             return doRegexCheck(new Pattern[]{PROJECT_PATH_REGEX},
-                    "Project path must begin with '$/'.", 
+                    "Project path must begin with '$/'.",
                     "Project path is mandatory.", value );
         }
         
@@ -443,7 +475,13 @@ public class TeamFoundationServerScm extends SCM {
                     "Workspace name cannot end with a space or period, and cannot contain any of the following characters: \"/:<>|*?", 
                     "Workspace name is mandatory", value);
         }
-        
+
+        public FormValidation doCloakedPathsCheck(@QueryParameter final String value) {
+            return doRegexCheck(new Pattern[]{CLOAKED_PATHS_REGEX},
+                    "Each cloaked path must begin with '$/'. Multiple paths must be delimited with ';'.",
+                    null, value );
+        }
+
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             save();

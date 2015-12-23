@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,11 +84,12 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * Create workspace on server, map it and return a workspace object with the specified name
      * @param workspaceName the name of the new workspace
      * @param serverPath the path in TFVC to map
+     * @param cloakedPaths the paths in TFVC to exclude from mapping
      * @param localPath the path in the local filesystem to map
      * @return a workspace
      */
-    public Workspace newWorkspace(final String workspaceName, final String serverPath, final String localPath) {
-        NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, localPath);
+    public Workspace newWorkspace(final String workspaceName, final String serverPath, Collection<String> cloakedPaths, final String localPath) {
+        NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, cloakedPaths, localPath);
         server.execute(command.getCallable());
         Workspace workspace = new Workspace(workspaceName);
         workspaces.put(workspaceName, workspace);

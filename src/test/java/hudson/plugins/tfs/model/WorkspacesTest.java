@@ -3,6 +3,7 @@ package hudson.plugins.tfs.model;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.List;
 
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
@@ -18,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class WorkspacesTest {
+
+    private static final List<String> EMPTY_CLOAKED_PATHS_LIST = Collections.emptyList();
 
     @Mock private Server server;
     private ListWorkspacesCommand parser;
@@ -88,7 +91,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        Workspace workspace = workspaces.newWorkspace("name1", null, null);
+        Workspace workspace = workspaces.newWorkspace("name1", null, EMPTY_CLOAKED_PATHS_LIST, null);
         assertNotNull("The new workspace was null", workspace);
         assertTrue("The workspace was reported as non existant", workspaces.exists(workspace));
     }
@@ -98,7 +101,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        workspaces.newWorkspace("name1", null, null);
+        workspaces.newWorkspace("name1", null, EMPTY_CLOAKED_PATHS_LIST, null);
         assertNotNull("The get new workspace returned null", workspaces.getWorkspace("name1"));
         verify(server, times(1)).execute(isA(Callable.class));
     }
@@ -108,7 +111,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        Workspace workspace = workspaces.newWorkspace("name1", null, null);
+        Workspace workspace = workspaces.newWorkspace("name1", null, EMPTY_CLOAKED_PATHS_LIST, null);
         assertTrue("The get new workspace did not exists", workspaces.exists(workspace));
         verify(server, times(1)).execute(isA(Callable.class));
     }
@@ -119,7 +122,7 @@ public class WorkspacesTest {
         Workspaces workspaces = new Workspaces(server);
         // Populate the map in test object
         assertFalse("The workspace was reported as existant", workspaces.exists(new Workspace("name")));
-        Workspace workspace = workspaces.newWorkspace("name", null, null);
+        Workspace workspace = workspaces.newWorkspace("name", null, EMPTY_CLOAKED_PATHS_LIST, null);
         assertTrue("The workspace was reported as non existant", workspaces.exists(new Workspace("name")));
         workspaces.deleteWorkspace(workspace);
         assertFalse("The workspace was reported as existant", workspaces.exists(workspace));

@@ -11,8 +11,13 @@ import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.List;
+
 public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
-    
+
+    private static final List<String> EMPTY_CLOAKED_PATHS = Collections.emptyList();
+
     @Test public void assertLogging() throws Exception {
         when(server.getUserName()).thenReturn("snd\\user_cp");
         when(vcc.createWorkspace(aryEq((WorkingFolder[]) null),
@@ -22,7 +27,7 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 isA(String.class),
                 isA(WorkspaceLocation.class),
                 isA(WorkspaceOptions.class))).thenReturn(null);
-        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, null) {
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, EMPTY_CLOAKED_PATHS, null) {
             @Override
             public Server createServer() {
                 return server;
@@ -39,6 +44,8 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
     }
 
     @Test public void assertLoggingWhenAlsoMapping() throws Exception {
+        final List<String> cloakedPaths = Collections.singletonList("$/Stuff/Hide");
+
         when(server.getUserName()).thenReturn("snd\\user_cp");
         when(vcc.createWorkspace(aryEq((WorkingFolder[]) null),
                 isA(String.class),
@@ -47,7 +54,7 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 isA(String.class),
                 isA(WorkspaceLocation.class),
                 isA(WorkspaceOptions.class))).thenReturn(null);
-        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", "/home/jenkins/jobs/stuff/workspace") {
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", cloakedPaths, "/home/jenkins/jobs/stuff/workspace") {
             @Override
             public Server createServer() {
                 return server;
@@ -60,11 +67,12 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
         assertLog(
                 "Creating workspace 'TheWorkspaceName' owned by 'snd\\user_cp'...",
                 "Mapping '$/Stuff' to local folder '/home/jenkins/jobs/stuff/workspace' in workspace 'TheWorkspaceName'...",
+                "Cloaking '$/Stuff/Hide' in workspace 'TheWorkspaceName'...",
                 "Created workspace 'TheWorkspaceName'."
         );
     }
 
     @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
-        return new NewWorkspaceCommand(serverConfig, "workspaceName", "$/serverPath", "local/path");
+        return new NewWorkspaceCommand(serverConfig, "workspaceName", "$/serverPath", EMPTY_CLOAKED_PATHS, "local/path");
     }
 }
