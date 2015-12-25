@@ -28,8 +28,8 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * Get the list of workspaces from the server
      * @return the list of workspaces at the server
      */
-    private List<Workspace> getListFromServer() {
-        ListWorkspacesCommand command = new ListWorkspacesCommand(server);
+    private List<Workspace> getListFromServer(boolean showWorkspaces) {
+        ListWorkspacesCommand command = new ListWorkspacesCommand(server, showWorkspaces);
         final List<Workspace> result = server.execute(command.getCallable());
         return result;
     }
@@ -37,9 +37,9 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     /**
      * Populate the map field with workspaces from the server once.
      */
-    private void populateMapFromServer() {
+    private void populateMapFromServer(boolean showWorkspaces) {
         if (!mapIsPopulatedFromServer) {
-            for (Workspace workspace : getListFromServer()) {
+            for (Workspace workspace : getListFromServer(showWorkspaces)) {
                 workspaces.put(workspace.getName(), workspace);
             }
             mapIsPopulatedFromServer = true;
@@ -51,9 +51,9 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param workspaceName the name of the workspace name
      * @return the workspace with the specified name; null if it wasnt found
      */
-    public Workspace getWorkspace(String workspaceName) {
+    public Workspace getWorkspace(String workspaceName, boolean showWorkspaces) {
         if (!workspaces.containsKey(workspaceName)) {
-            populateMapFromServer();
+            populateMapFromServer(showWorkspaces);
         }
         return workspaces.get(workspaceName);
     }
@@ -63,9 +63,9 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param workspaceName the name of the workspace 
      * @return true if the workspace exists on server; false otherwise
      */
-    public boolean exists(String workspaceName) {
+    public boolean exists(String workspaceName, boolean showWorkspaces) {
         if (!workspaces.containsKey(workspaceName)) {
-            populateMapFromServer();
+            populateMapFromServer(showWorkspaces);
         }
         return workspaces.containsKey(workspaceName);
     }
@@ -75,8 +75,8 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param workspace the workspace 
      * @return true if the workspace exists on server; false otherwise
      */
-    public boolean exists(Workspace workspace) {
-        return exists(workspace.getName());
+    public boolean exists(Workspace workspace, boolean showWorkspaces) {
+        return exists(workspace.getName(), showWorkspaces);
     }
 
     /**

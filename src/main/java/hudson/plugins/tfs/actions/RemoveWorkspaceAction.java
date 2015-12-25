@@ -19,10 +19,10 @@ public class RemoveWorkspaceAction {
         this.workspaceName = workspaceName;
     }
 
-    public boolean remove(Server server) throws IOException, InterruptedException {
+    public boolean remove(Server server, boolean showWorkspaces) throws IOException, InterruptedException {
         Workspaces workspaces = server.getWorkspaces(); 
-        if (workspaces.exists(workspaceName)) {
-            Workspace workspace = workspaces.getWorkspace(workspaceName);
+        if (workspaces.exists(workspaceName, showWorkspaces)) {
+            Workspace workspace = workspaces.getWorkspace(workspaceName, showWorkspaces);
             workspaces.deleteWorkspace(workspace);
             return true;
         }
