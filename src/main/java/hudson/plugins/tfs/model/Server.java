@@ -5,6 +5,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
+import com.microsoft.tfs.core.httpclient.ProxyHost;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
@@ -78,7 +79,10 @@ public class Server implements ServerConfigurationProvider, Closable {
                 final ProxyConfiguration proxyConfiguration = determineProxyConfiguration(channel);
                 this.webProxySettings = new WebProxySettings(proxyConfiguration);
             }
-            this.tpc = new TFSTeamProjectCollection(uri, credentials);
+            final String host = uri.getHost();
+            final ProxyHost proxyHost = this.webProxySettings.toProxyHost(host);
+            final ModernConnectionAdvisor advisor = new ModernConnectionAdvisor(proxyHost);
+            this.tpc = new TFSTeamProjectCollection(uri, credentials, advisor);
         }
         else {
             this.webProxySettings = null;
