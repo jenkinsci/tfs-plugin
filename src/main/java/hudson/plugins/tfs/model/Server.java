@@ -5,6 +5,9 @@ import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
+import com.microsoft.tfs.core.config.ConnectionAdvisor;
+import com.microsoft.tfs.core.config.DefaultConnectionAdvisor;
+
 import hudson.Launcher;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
@@ -17,7 +20,9 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.httpclient.Credentials;
@@ -26,6 +31,7 @@ import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.util.Closable;
+
 import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
 
@@ -63,7 +69,8 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
 
         if (credentials != null) {
-            this.tpc = new TFSTeamProjectCollection(uri, credentials);
+
+            this.tpc = new TFSTeamProjectCollection(uri, credentials, new ModernConnectionAdvisor(Locale.getDefault(), TimeZone.getDefault()) );
         }
         else {
             this.tpc = null;
