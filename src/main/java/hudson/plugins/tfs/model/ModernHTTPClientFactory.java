@@ -71,7 +71,7 @@ public class ModernHTTPClientFactory extends DefaultHTTPClientFactory implements
 
 	private static boolean hasProxy() {
 		init();
-		return !sProxyHost.isEmpty() && iProxyPort > 0;
+		return !"".equals(sProxyHost) && iProxyPort > 0;
 	}
 
 }
