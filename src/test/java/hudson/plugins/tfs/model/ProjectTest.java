@@ -145,8 +145,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
 
     private static ChangeSet createChangeSet(final int version, final String... itemPaths) {
         final String stringVersion = Integer.toString(version);
-        final Calendar.Builder builder = new Calendar.Builder();
-        final Calendar calendar = builder.setDate(2016, 1, 5).setTimeOfDay(10, version, 0).build();
+        final Calendar calendar = Util.getCalendar(2016, 1, 5, 10, version, 0);
         final Date date = calendar.getTime();
         final ChangeSet result = new ChangeSet(stringVersion, date, "ljenkins", "synthetic for testing");
 
