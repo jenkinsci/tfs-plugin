@@ -5,6 +5,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.VersionControlLabel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
@@ -35,6 +36,7 @@ import hudson.triggers.SCMTrigger;
 import hudson.util.Scrambler;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -51,10 +53,11 @@ import javax.xml.xpath.XPathExpressionException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -414,6 +417,159 @@ public class FunctionalTest {
                 GetOptions.NONE,
                 PendChangesOptions.NONE);
         return tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
+    }
+
+    @LocalData
+    @EndToEndTfs(CloakedPaths.class)
+    @Test public void cloakedPaths() throws Exception {
+        final Jenkins jenkins = j.jenkins;
+        final TaskListener taskListener = j.createTaskListener();
+        final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
+        final Server server = tfsRunner.getServer();
+        final String testCaseName = tfsRunner.getTestCaseName();
+        final Workspace workspace = tfsRunner.getWorkspace();
+        final List<Project> projects = jenkins.getProjects();
+        final Project jenkinsProject = projects.get(0);
+        int latestChangesetID;
+
+        // arrange: create structure
+        final File root = tfsRunner.getLocalBaseFolderFile();
+        final String[] paths = {
+                createWorkspaceFile(root, "root.txt"),
+                createWorkspaceFile(root, "A/A.txt"),
+                createWorkspaceFile(root, "A/1/A1.txt"),
+                createWorkspaceFile(root, "A/2/A2.txt"),
+                createWorkspaceFile(root, "B/B.txt"),
+                createWorkspaceFile(root, "C/C.txt"),
+        };
+        workspace.pendAdd(
+                paths,
+                false,
+                null,
+                LockLevel.UNCHANGED,
+                GetOptions.NONE,
+                PendChangesOptions.NONE);
+        final int structureChangeSet = tfsRunner.checkIn(testCaseName + " Create structure.");
+        Assert.assertTrue(structureChangeSet >= 0);
+
+        // act: poll trigger
+        final AbstractBuild firstBuild = runScmPollTrigger(jenkinsProject);
+
+        // assert
+        Assert.assertNotNull("First poll should queue a build", firstBuild);
+        assertBuildSuccess(firstBuild);
+        assertCloakedPathsWorkspaceContents(firstBuild.getWorkspace());
+
+        // arrange: make a change in a non-cloaked path (fully uncloaked)
+        final File aOne = new File(root, "A/1/A1.txt");
+        FileUtils.writeStringToFile(aOne, "Now with content!", "UTF-8");
+        workspace.pendEdit(
+                new String[]{aOne.getAbsolutePath()},
+                RecursionType.NONE,
+                LockLevel.UNCHANGED,
+                null,
+                GetOptions.NONE,
+                PendChangesOptions.NONE);
+        latestChangesetID = tfsRunner.checkIn(testCaseName + " Add content to A1.txt");
+
+        // act: poll trigger
+        final AbstractBuild secondBuild = runScmPollTrigger(jenkinsProject);
+
+        // assert
+        Assert.assertNotNull("Second poll should queue a build", secondBuild);
+        assertCloakedPathsWorkspaceContents(secondBuild.getWorkspace());
+
+        // arrange: make a changeset that has an item in a cloaked path
+        final File aTwo = new File(root, "A/2/A2.txt");
+        FileUtils.writeStringToFile(aOne, "Now with content!", "UTF-8");
+        workspace.pendEdit(
+                new String[]{aTwo.getAbsolutePath()},
+                RecursionType.NONE,
+                LockLevel.UNCHANGED,
+                null,
+                GetOptions.NONE,
+                PendChangesOptions.NONE);
+        latestChangesetID = tfsRunner.checkIn(testCaseName + " Add content to A2.txt");
+
+        // act: poll (no need to poll trigger)
+        final PollingResult thirdPoll = jenkinsProject.poll(taskListener);
+
+        // assert
+        Assert.assertEquals("Third poll should NOT find any significant changes", PollingResult.Change.NONE, thirdPoll.change);
+
+        // arrange: create a changeset that has changes in both cloaked and uncloaked paths
+        final File a = new File(root, "A/A.txt");
+        FileUtils.writeStringToFile(a, "Now with content!", "UTF-8");
+        final File b = new File(root, "B/B.txt");
+        FileUtils.writeStringToFile(b, "Now with content!", "UTF-8");
+        workspace.pendEdit(
+                new String[]{
+                        a.getAbsolutePath(),
+                        b.getAbsolutePath(),
+                },
+                RecursionType.NONE,
+                LockLevel.UNCHANGED,
+                null,
+                GetOptions.NONE,
+                PendChangesOptions.NONE);
+        latestChangesetID = tfsRunner.checkIn(testCaseName + " Add content to A.txt and B.txt");
+
+        // act: poll trigger
+        final AbstractBuild thirdBuild = runScmPollTrigger(jenkinsProject);
+
+        // assert
+        Assert.assertNotNull("Fourth poll should queue a build", thirdBuild);
+        assertCloakedPathsWorkspaceContents(thirdBuild.getWorkspace());
+    }
+
+    /** workspace should only contain:
+root.txt
+A/A.txt
+A/1/A1.txt
+C/C.txt
+    */
+    private static void assertCloakedPathsWorkspaceContents(final FilePath workspace) throws Exception {
+        final FilePath[] workspaceFiles = workspace.list("*.*", "$tf");
+        final HashSet<String> expectedFileNames = new HashSet<String>(Arrays.asList("root.txt", "A.txt", "A1.txt", "C.txt"));
+        for (final FilePath workspaceFile : workspaceFiles) {
+            final String actualFileName = workspaceFile.getName();
+            if (expectedFileNames.contains(actualFileName)) {
+                expectedFileNames.remove(actualFileName);
+            }
+            else {
+                final String message = "Did not expect to find " + actualFileName + " in the workspace.";
+                Assert.fail(message);
+            }
+        }
+    }
+
+    static String createWorkspaceFile(final File root, final String relFilePath) throws IOException {
+        final File file = new File(root, relFilePath);
+        final File folder = file.getParentFile();
+        //noinspection ResultOfMethodCallIgnored
+        folder.mkdirs();
+        //noinspection ResultOfMethodCallIgnored
+        file.createNewFile();
+        return file.getAbsolutePath();
+    }
+
+    public static class CloakedPaths extends CurrentChangesetInjector {
+
+        @Override public void decorateHome(final JenkinsRule jenkinsRule, final File home)
+                throws Exception {
+            super.decorateHome(jenkinsRule, home);
+
+            final EndToEndTfs.RunnerImpl parent = getParent();
+            final String jobFolder = parent.getJobFolder();
+            final String configXmlPath = jobFolder + "config.xml";
+            final File configXmlFile = new File(home, configXmlPath);
+
+            final String projectPath = parent.getPathInTfvc();
+            final String cloakedPaths =
+                    projectPath + "/A/2" + "\n" +
+                    projectPath + "/B";
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/cloakedPaths", cloakedPaths);
+        }
     }
 
     /**
