@@ -3,6 +3,8 @@ package hudson.plugins.tfs.commands;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
+import com.microsoft.tfs.core.clients.versioncontrol.path.LocalPath;
+import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolderType;
 import hudson.model.TaskListener;
@@ -59,7 +61,7 @@ public class NewWorkspaceCommand extends AbstractCallableCommand implements Call
 
             final List<WorkingFolder> folderList = new ArrayList<WorkingFolder>();
 
-            folderList.add(new WorkingFolder(serverPath, localPath));
+            folderList.add(new WorkingFolder(serverPath, LocalPath.canonicalize(localPath), WorkingFolderType.MAP, RecursionType.FULL));
 
 
             for (final String cloakedPath : cloakedPaths) {
