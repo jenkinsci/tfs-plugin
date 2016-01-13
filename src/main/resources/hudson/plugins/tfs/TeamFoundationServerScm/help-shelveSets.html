@@ -1,0 +1,15 @@
+<div>
+  <p>
+    A list of TFS shelvesets to be pulled into the local workspace. Shelvesets are applied to the workspace after getting files. 
+  </p>
+  <p>
+    Every entry must carry the name of the shelveset and the name of its owner separated by a colon (':'), i.e. it must be of the form <tt>&lt;name&gt;:&lt;owner&gt;</tt>.
+    The owner might be of the simple form or be denoted by <tt>domain\name</tt>. 
+    For examples <tt>FeatureNotComplete:Harry</tt> or <tt>just_for_testing:eudomain\mary</tt>. Currently there is no support for spaces in the name or owner.
+    Multiple entries must be delimited by semicolon characters (';'). Entries can be placed onto separate lines, but still require the delimiter.
+  </p>
+  <p>
+    During unshelving multiple shelvesets, conflicts might be reported in the output. For instance, if two shelvesets address the same file in the workspace. 
+    Technically a merge is tried but conflicts are not automatically resolved.
+  </p>
+</div>

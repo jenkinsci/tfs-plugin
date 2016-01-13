@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import hudson.model.InvisibleAction;
 
@@ -18,13 +19,17 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
     private final String projectPath;
     private final String serverUrl;
     private boolean workspaceExists;
+    private Collection<String> cloakPaths;
+    private Collection<String> shelveSets;
 
-    public WorkspaceConfiguration(String serverUrl, String workspaceName, String projectPath, String workfolder) {
+    public WorkspaceConfiguration(String serverUrl, String workspaceName, String projectPath, Collection<String> cloakPaths, Collection<String> shelveSets, String workfolder) {
         this.workspaceName = workspaceName;
         this.workfolder = workfolder;
         this.projectPath = projectPath;
         this.serverUrl = serverUrl;
         this.workspaceExists = true;
+        this.cloakPaths = cloakPaths;
+        this.shelveSets = shelveSets;
     }
 
     public WorkspaceConfiguration(WorkspaceConfiguration configuration) {
@@ -33,6 +38,8 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
         this.projectPath = configuration.projectPath;
         this.serverUrl = configuration.serverUrl;
         this.workspaceExists = configuration.workspaceExists;
+        this.cloakPaths = configuration.cloakPaths;
+        this.shelveSets = configuration.shelveSets;
     }
 
     public String getWorkspaceName() {
@@ -58,6 +65,14 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
     public void setWorkspaceWasRemoved() {
         this.workspaceExists = false;
     }
+    
+    public Collection<String> getCloakPaths() {
+    	return cloakPaths;
+    }
+
+    public Collection<String> getShelveSets() {
+    	return shelveSets;
+    }
 
     @Override
     public int hashCode() {
@@ -68,6 +83,8 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
         result = prime * result + ((workfolder == null) ? 0 : workfolder.hashCode());
         result = prime * result + (workspaceExists ? 1231 : 1237);
         result = prime * result + ((workspaceName == null) ? 0 : workspaceName.hashCode());
+        result = prime * result + ((cloakPaths == null) ? 0 : cloakPaths.hashCode());
+        result = prime * result + ((shelveSets == null) ? 0 : shelveSets.hashCode());
         return result;
     }
 
@@ -102,6 +119,28 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
                 return false;
         } else if (!workspaceName.equals(other.workspaceName))
             return false;
+        if (cloakPaths == null) {
+        	if (other.cloakPaths != null)
+        		return false;
+        } else if (other.cloakPaths == null)
+        	return false;
+        else if (cloakPaths.size() != other.cloakPaths.size())
+        	return false;
+        else if (!cloakPaths.containsAll(other.cloakPaths))
+        	return false;
+
+        if (shelveSets == null)
+        {
+	     if (other.shelveSets != null)
+		return false;
+        } 
+        else if (other.shelveSets == null)
+		return false;
+        else if (shelveSets.size () != other.shelveSets.size())
+                return false;
+        else if (!shelveSets.containsAll (other.shelveSets))
+ 		return false;
+
         return true;
     }
 

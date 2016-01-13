@@ -3,6 +3,7 @@ package hudson.plugins.tfs.model;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
@@ -88,7 +89,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        Workspace workspace = workspaces.newWorkspace("name1", null, null);
+        Workspace workspace = workspaces.newWorkspace("name1", null, new ArrayList<String>(), null);
         assertNotNull("The new workspace was null", workspace);
         assertTrue("The workspace was reported as non existant", workspaces.exists(workspace));
     }
@@ -98,7 +99,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        workspaces.newWorkspace("name1", null, null);
+        workspaces.newWorkspace("name1", null, new ArrayList<String>(), null);
         assertNotNull("The get new workspace returned null", workspaces.getWorkspace("name1"));
         verify(server, times(1)).execute(isA(Callable.class));
     }
@@ -108,7 +109,7 @@ public class WorkspacesTest {
         when(server.execute(isA(Callable.class))).thenReturn(null);
         
         Workspaces workspaces = new Workspaces(server);
-        Workspace workspace = workspaces.newWorkspace("name1", null, null);
+        Workspace workspace = workspaces.newWorkspace("name1", null, new ArrayList<String>(), null);
         assertTrue("The get new workspace did not exists", workspaces.exists(workspace));
         verify(server, times(1)).execute(isA(Callable.class));
     }
@@ -119,7 +120,7 @@ public class WorkspacesTest {
         Workspaces workspaces = new Workspaces(server);
         // Populate the map in test object
         assertFalse("The workspace was reported as existant", workspaces.exists(new Workspace("name")));
-        Workspace workspace = workspaces.newWorkspace("name", null, null);
+        Workspace workspace = workspaces.newWorkspace("name", null, new ArrayList<String>(), null);
         assertTrue("The workspace was reported as non existant", workspaces.exists(new Workspace("name")));
         workspaces.deleteWorkspace(workspace);
         assertFalse("The workspace was reported as existant", workspaces.exists(workspace));

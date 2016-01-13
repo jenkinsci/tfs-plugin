@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,9 +75,9 @@ public class Server implements ServerConfigurationProvider, Closable {
         this(null, null, url, null, null);
     }
 
-    public Project getProject(String projectPath) {
+    public Project getProject(String projectPath, Collection<String> cloakPaths, Collection<String> shelveSets) {
         if (! projects.containsKey(projectPath)) {
-            projects.put(projectPath, new Project(this, projectPath));
+            projects.put(projectPath, new Project(this, projectPath, cloakPaths, shelveSets));
         }
         return projects.get(projectPath);
     }

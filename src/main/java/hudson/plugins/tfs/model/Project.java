@@ -3,6 +3,7 @@ package hudson.plugins.tfs.model;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
 import hudson.model.User;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
+import hudson.plugins.tfs.commands.UnshelveToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet.Item;
 
@@ -11,6 +12,7 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -31,16 +33,28 @@ import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 public class Project {
 
     private final String projectPath;
+    private final Collection<String> cloakPaths;
+    private final Collection<String> shelveSets;
     private final Server server;
     private UserLookup userLookup;
 
-    public Project(Server server, String projectPath) {
+    public Project(Server server, String projectPath, Collection<String> cloakPaths, Collection<String> shelveSets) {
         this.server = server;
         this.projectPath = projectPath;
+        this.cloakPaths = cloakPaths;
+        this.shelveSets = shelveSets;
     }
 
     public String getProjectPath() {
         return projectPath;
+    }
+    
+    public Collection<String> getCloakPaths() {
+    	return cloakPaths;
+    }
+
+    public Collection<String> getShelveSets () {
+	return shelveSets;
     }
 
     static hudson.plugins.tfs.model.ChangeSet.Item convertServerChange
@@ -175,6 +189,17 @@ public class Project {
     public void getFiles(String localPath, String versionSpec) {
         GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec);
         server.execute(command.getCallable());
+    }
+
+    /**
+     * Unshelve the defined ShelveSets into Workspace
+     * @param localPath the local path to unshelve into
+     * @param shelveSets the Shelvesets to unshelve
+     */
+    public void unshelveShelveSets (String localPath, Collection<String> shelveSets)
+    {
+        UnshelveToWorkFolderCommand command = new UnshelveToWorkFolderCommand (server, localPath, shelveSets);
+	server.execute (command.getCallable());
     }
 
     /**

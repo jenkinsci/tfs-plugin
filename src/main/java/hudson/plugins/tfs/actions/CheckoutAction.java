@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
@@ -20,12 +21,16 @@ public class CheckoutAction {
 
     private final String workspaceName;
     private final String projectPath;
+    private final Collection<String> cloakPaths;
+    private final Collection<String> shelveSets;
     private final String localFolder;
     private final boolean useUpdate;
 
-    public CheckoutAction(String workspaceName, String projectPath, String localFolder, boolean useUpdate) {
+    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakPaths, Collection<String> shelveSets, String localFolder, boolean useUpdate) {
         this.workspaceName = workspaceName;
         this.projectPath = projectPath;
+        this.cloakPaths = cloakPaths;
+        this.shelveSets = shelveSets;
         this.localFolder = localFolder;
         this.useUpdate = useUpdate;
     }
@@ -52,6 +57,7 @@ public class CheckoutAction {
         final String versionSpecString = RemoteChangesetVersionCommand.toString(currentBuildVersionSpec);
         final String normalizedFolder = determineCheckoutPath(workspacePath, localFolder);
         project.getFiles(normalizedFolder, versionSpecString);
+        project.unshelveShelveSets (normalizedFolder, shelveSets);
 
         if (lastBuildVersionSpec != null) {
             return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true, Integer.MAX_VALUE);
@@ -64,6 +70,7 @@ public class CheckoutAction {
         Project project = getProject(server, workspacePath);
         final String normalizedFolder = determineCheckoutPath(workspacePath, localFolder);
         project.getFiles(normalizedFolder, singleVersionSpec);
+        project.unshelveShelveSets (normalizedFolder, shelveSets);
 
         return project.getDetailedHistory(singleVersionSpec);
     }
@@ -74,10 +81,10 @@ public class CheckoutAction {
         return result;
     }
 
-    private Project getProject(Server server, FilePath workspacePath)
-			throws IOException, InterruptedException {
-		Workspaces workspaces = server.getWorkspaces();
-        Project project = server.getProject(projectPath);
+    private Project getProject(Server server, FilePath workspacePath) throws IOException, InterruptedException
+    {
+	Workspaces workspaces = server.getWorkspaces();
+        Project project = server.getProject(projectPath, cloakPaths, shelveSets);
         
         if (workspaces.exists(workspaceName) && !useUpdate) {
             Workspace workspace = workspaces.getWorkspace(workspaceName);
@@ -92,11 +99,13 @@ public class CheckoutAction {
             }
             final String serverPath = project.getProjectPath();
             final String localPath = localFolderPath.getRemote();
-            workspace = workspaces.newWorkspace(workspaceName, serverPath, localPath);
+            workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakPaths, localPath);
+
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }
-		return project;
-	}
+
+        return project;
+    }
 
 }
