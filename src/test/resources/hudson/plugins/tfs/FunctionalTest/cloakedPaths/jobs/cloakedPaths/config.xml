@@ -11,7 +11,10 @@
     <workspaceName>Hudson-${JOB_NAME}-${COMPUTERNAME}</workspaceName>
     <password>pmJe5VYJg6gr2BdipI1sMGJScFwmT+pZbz7B2jISBrw=</password>
     <userName>jenkins-tfs-plugin</userName>
-    <cloakedPaths></cloakedPaths>
+    <cloakedPaths class="list">
+      <string></string>
+      <string></string>
+    </cloakedPaths>
     <useUpdate>false</useUpdate>
   </scm>
   <assignedNode>master</assignedNode>

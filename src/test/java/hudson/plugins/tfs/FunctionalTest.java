@@ -30,6 +30,7 @@ import hudson.plugins.tfs.util.XmlHelper;
 import hudson.remoting.VirtualChannel;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.PollingResult;
+import hudson.scm.SCM;
 import hudson.slaves.DumbSlave;
 import hudson.slaves.SlaveComputer;
 import hudson.triggers.SCMTrigger;
@@ -430,6 +431,8 @@ public class FunctionalTest {
         final Workspace workspace = tfsRunner.getWorkspace();
         final List<Project> projects = jenkins.getProjects();
         final Project jenkinsProject = projects.get(0);
+        final TeamFoundationServerScm tfsScm = (TeamFoundationServerScm) jenkinsProject.getScm();
+        Assert.assertNotEquals(StringUtils.EMPTY, tfsScm.getCloakedPaths());
         int latestChangesetID;
 
         // arrange: create structure
@@ -529,7 +532,7 @@ A/1/A1.txt
 C/C.txt
     */
     private static void assertCloakedPathsWorkspaceContents(final FilePath workspace) throws Exception {
-        final FilePath[] workspaceFiles = workspace.list("*.*", "$tf");
+        final FilePath[] workspaceFiles = workspace.list("**", "$tf");
         final HashSet<String> expectedFileNames = new HashSet<String>(Arrays.asList("root.txt", "A.txt", "A1.txt", "C.txt"));
         for (final FilePath workspaceFile : workspaceFiles) {
             final String actualFileName = workspaceFile.getName();
@@ -541,6 +544,7 @@ C/C.txt
                 Assert.fail(message);
             }
         }
+        Assert.assertEquals("All expected files should have been found in the workspace", 0, expectedFileNames.size());
     }
 
     static String createWorkspaceFile(final File root, final String relFilePath) throws IOException {
@@ -565,10 +569,8 @@ C/C.txt
             final File configXmlFile = new File(home, configXmlPath);
 
             final String projectPath = parent.getPathInTfvc();
-            final String cloakedPaths =
-                    projectPath + "/A/2" + "\n" +
-                    projectPath + "/B";
-            XmlHelper.pokeValue(configXmlFile, "/project/scm/cloakedPaths", cloakedPaths);
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/cloakedPaths/string[1]", projectPath + "/A/2");
+            XmlHelper.pokeValue(configXmlFile, "/project/scm/cloakedPaths/string[2]", projectPath + "/B");
         }
     }
 
