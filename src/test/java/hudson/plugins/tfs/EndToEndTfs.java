@@ -5,6 +5,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.PendChangesOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
+import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.LockLevel;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.PendingChange;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.PendingSet;
@@ -267,8 +268,8 @@ public @interface EndToEndTfs {
         }
 
         static void deleteWorkspace(final MockableVersionControlClient vcc, final String workspaceName) {
-            final Workspace workspace = vcc.getLocalWorkspace(workspaceName, VersionControlConstants.AUTHENTICATED_USER);
-            if (workspace != null) {
+            final Workspace[] workspaces = vcc.queryWorkspaces(workspaceName, null, /* TODO: computer */null, WorkspacePermissions.NONE_OR_NOT_SUPPORTED);
+            for (final Workspace workspace : workspaces) {
                 for (WorkingFolder workingFolder : workspace.getFolders()) {
                     final String localItem = workingFolder.getLocalItem();
                     if (localItem != null) {
