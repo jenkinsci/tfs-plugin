@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -109,7 +110,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final String userPassword = helper.getUserPassword();
         final Server server = new Server(null, null, serverUrl, userName, userPassword);
         try {
-            final Project project = new Project(server, "$/FunctionalTests");
+            final Project project = new Project(server, "$/FunctionalTests", new ArrayList<String>());
             final UserLookup userLookup = mock(UserLookup.class);
             final User fakeUser = mock(User.class);
             when(userLookup.find(isA(String.class))).thenReturn(fakeUser);

@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -31,16 +32,22 @@ import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 public class Project {
 
     private final String projectPath;
+    private final Collection<String> cloakPaths;
     private final Server server;
     private UserLookup userLookup;
 
-    public Project(Server server, String projectPath) {
+    public Project(Server server, String projectPath, Collection<String> cloakPaths) {
         this.server = server;
         this.projectPath = projectPath;
+        this.cloakPaths = cloakPaths;
     }
 
     public String getProjectPath() {
         return projectPath;
+    }
+    
+    public Collection<String> getCloakPaths() {
+    	return cloakPaths;
     }
 
     static hudson.plugins.tfs.model.ChangeSet.Item convertServerChange
@@ -165,6 +172,62 @@ public class Project {
         final List<ChangeSet> changeSets = getVCCHistory(LatestVersionSpec.INSTANCE, null, false, 1);
         final ChangeSet result = changeSets.size() > 0 ? changeSets.get(0) : null;
         return result;
+    }
+
+    /**
+     * Gets the latest changeset that isn't in a cloaked path.
+     * @param CloakedPaths the list of cloaked paths in the project
+     * @return the {@link ChangeSet} instance representing the last entry in the history for the path
+     */
+
+    public ChangeSet getLatestUncloakedChangeset(Collection<String> CloakedPaths) {
+        final List<ChangeSet> changeSets = getVCCHistory(LatestVersionSpec.INSTANCE, null, true, 1);
+        ArrayList<ChangeSet> uncloakedChangesets = new ArrayList<ChangeSet>();
+        for (ChangeSet s : changeSets) {
+            Collection<String> changes = s.getAffectedPaths();
+            ArrayList<Item> items = (ArrayList<Item>) s.getItems();
+
+            boolean matches = getIfInCloakedPath(changes, CloakedPaths);
+            if (!matches) {
+                uncloakedChangesets.add(s);
+            }
+        }
+        final ChangeSet result = uncloakedChangesets.size() > 0 ? uncloakedChangesets.get(0) : null;
+        return result;
+    }
+
+    /**
+     * Returns a list of changesets without any changesets that are in cloaked paths
+     * @param fromTimestamp
+     * @param toTimestamp
+     * @param CloakedPaths
+     * @return
+     */
+    public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(Calendar fromTimestamp, Calendar toTimestamp, Collection<String> CloakedPaths) {
+        final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
+        final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
+        List<ChangeSet> changeSets = getVCCHistory(toVersion, toVersion, true, 1);
+        ArrayList<ChangeSet> changeSetNoCloaked = new ArrayList<ChangeSet>();
+        for (ChangeSet changeset : changeSets) {
+            Collection<String> affectedPaths = changeset.getAffectedPaths();
+            boolean matches = getIfInCloakedPath(affectedPaths, CloakedPaths);
+            if (!matches) {
+                changeSetNoCloaked.add(changeset);
+            }
+        }
+        return changeSetNoCloaked;
+    }
+
+
+    private boolean getIfInCloakedPath(Collection<String> changesetPaths, Collection<String> cloakedPaths) {
+        for (String tfsPath : changesetPaths) {
+            for(String cloakedPath : cloakedPaths) {
+                if (!tfsPath.startsWith(cloakedPath)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
