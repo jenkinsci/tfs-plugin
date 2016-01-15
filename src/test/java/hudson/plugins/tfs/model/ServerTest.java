@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ServerTest {
 
@@ -25,15 +26,15 @@ public class ServerTest {
     @Test
     public void assertGetProjectWithSameProjectPathReturnsSameInstance() throws IOException {
         Server server = new Server("url");
-        assertNotNull("Project object can not be null", server.getProject("$/projectPath"));
+        assertNotNull("Project object can not be null", server.getProject("$/projectPath", new ArrayList<String>()));
         assertSame("getProject() returned different objects", 
-                server.getProject("$/projectPath"), server.getProject("$/projectPath"));
+                server.getProject("$/projectPath", new ArrayList<String>()), server.getProject("$/projectPath", new ArrayList<String>()));
     }
     
     @Test
     public void assertGetProjectWithDifferentProjectPathReturnsNotSameInstance() throws IOException {
         Server server = new Server("url");
         assertNotSame("getProject() did not return different objects", 
-                server.getProject("$/projectPath"), server.getProject("$/otherPath"));
+                server.getProject("$/projectPath", new ArrayList<String>()), server.getProject("$/otherPath", new ArrayList<String>()));
     }
 }
