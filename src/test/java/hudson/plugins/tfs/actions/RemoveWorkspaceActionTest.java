@@ -25,13 +25,13 @@ public class RemoveWorkspaceActionTest {
     @Test
     public void assertNoSuchWorkspaceNameDoesNothing() throws Exception {
         when(server.getWorkspaces()).thenReturn(workspaces);
-        when(workspaces.exists(anyString())).thenReturn(false);
+        when(workspaces.exists(anyString(), anyBoolean())).thenReturn(false);
         
         RemoveWorkspaceAction action = new RemoveWorkspaceAction("workspace");
-        assertThat(action.remove(server), is(false));
+        assertThat(action.remove(server, true), is(false));
 
         verify(server).getWorkspaces();
-        verify(workspaces).exists("workspace");
+        verify(workspaces).exists("workspace", true);
         verifyNoMoreInteractions(workspace);
         verifyNoMoreInteractions(workspaces);
         verifyNoMoreInteractions(server);
@@ -40,15 +40,15 @@ public class RemoveWorkspaceActionTest {
     @Test
     public void assertWorkspaceIsDeleted() throws Exception  {
         when(server.getWorkspaces()).thenReturn(workspaces);
-        when(workspaces.exists(anyString())).thenReturn(true);
-        when(workspaces.getWorkspace(anyString())).thenReturn(workspace);
+        when(workspaces.exists(anyString(), anyBoolean())).thenReturn(true);
+        when(workspaces.getWorkspace(anyString(), anyBoolean())).thenReturn(workspace);
         
         RemoveWorkspaceAction action = new RemoveWorkspaceAction("workspace");
-        assertThat(action.remove(server), is(true));
+        assertThat(action.remove(server, true), is(true));
 
         verify(server).getWorkspaces();
-        verify(workspaces).exists("workspace");
-        verify(workspaces).getWorkspace("workspace");
+        verify(workspaces).exists("workspace", true);
+        verify(workspaces).getWorkspace("workspace", true);
         verify(workspaces).deleteWorkspace(workspace);
         verifyNoMoreInteractions(workspace);
         verifyNoMoreInteractions(workspaces);

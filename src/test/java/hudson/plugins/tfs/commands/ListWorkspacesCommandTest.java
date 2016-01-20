@@ -53,7 +53,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             when(server.getUrl()).thenReturn("http://tfs.invalid:8080/tfs/DefaultCollection/");
             when(this.vcc.queryWorkspaces(null, null, "XXXX-XXXX-007", WorkspacePermissions.NONE_OR_NOT_SUPPORTED))
                     .thenReturn(workspaces);
-            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, "XXXX-XXXX-007") {
+            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, "XXXX-XXXX-007", true) {
                 @Override
                 public Server createServer() {
                     return server;
@@ -100,7 +100,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             when(server.getUrl()).thenReturn("http://tfs.invalid:8080/tfs/DefaultCollection/");
             when(this.vcc.queryWorkspaces(null, null, null, WorkspacePermissions.NONE_OR_NOT_SUPPORTED))
                     .thenReturn(workspaces);
-            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, null) {
+            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, null, true) {
                 @Override
                 public Server createServer() {
                     return server;
@@ -123,7 +123,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
 
     @Test
     public void assertEmptyListWithEmptyOutput() throws Exception {
-        ListWorkspacesCommand command = new ListWorkspacesCommand(mock(Server.class));
+        ListWorkspacesCommand command = new ListWorkspacesCommand(mock(Server.class), true);
         List<Workspace> list = command.parse(new StringReader(""));
         assertNotNull("List can not be null", list);
         assertEquals("Number of workspaces was incorrect", 0, list.size());
@@ -140,7 +140,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "astreix   SND\\redsolo_cp ASTERIX  This is a comment\n");
         
         ListWorkspacesCommand command = new ListWorkspacesCommand(
-                mock(Server.class));
+                mock(Server.class), true);
         List<Workspace> list = command.parse(reader);
         assertNotNull("List can not be null", list);
         assertEquals("Number of workspaces was incorrect", 2, list.size());
@@ -164,7 +164,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "Hudson-node lookup redsolo_cp ASTERIX\n");
         
         ListWorkspacesCommand command = new ListWorkspacesCommand(
-                mock(Server.class));
+                mock(Server.class), true);
         List<Workspace> list = command.parse(reader);
         assertNotNull("List can not be null", list);
         assertEquals("Number of workspaces was incorrect", 1, list.size());
@@ -183,7 +183,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "Hudson-Scrumboard dennis W7-DENNIS-1\n" + 
                 "W7-DENNIS-1       dennis W7-DENNIS-1\n");
 
-        new ListWorkspacesCommand(mock(Server.class)).parse(reader);
+        new ListWorkspacesCommand(mock(Server.class), true).parse(reader);
     }
 
     @Bug(4726)
@@ -196,7 +196,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                 "------------------------ ------------ ------------- ---------------------------\n" +
                 "Hudson.JOBXXXXXXXXXXXXXX First.LastXX XXXX-XXXX-007\n");
 
-        new ListWorkspacesCommand(mock(Server.class)).parse(reader);
+        new ListWorkspacesCommand(mock(Server.class), true).parse(reader);
     }
 
     @Test public void logWithNoWorkspaces() throws IOException {
@@ -240,6 +240,6 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     }
 
     @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
-        return new ListWorkspacesCommand(serverConfig, "computer");
+        return new ListWorkspacesCommand(serverConfig, "computer", true);
     }
 }

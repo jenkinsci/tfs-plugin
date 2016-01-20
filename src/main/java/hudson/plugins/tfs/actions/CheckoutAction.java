@@ -22,12 +22,14 @@ public class CheckoutAction {
     private final String projectPath;
     private final String localFolder;
     private final boolean useUpdate;
+    private final boolean showWorkspaces;
 
-    public CheckoutAction(String workspaceName, String projectPath, String localFolder, boolean useUpdate) {
+    public CheckoutAction(String workspaceName, String projectPath, String localFolder, boolean useUpdate, boolean showWorkspaces) {
         this.workspaceName = workspaceName;
         this.projectPath = projectPath;
         this.localFolder = localFolder;
         this.useUpdate = useUpdate;
+        this.showWorkspaces = showWorkspaces;
     }
 
     public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp, Calendar currentBuildTimestamp) throws IOException, InterruptedException, ParseException {
@@ -79,13 +81,13 @@ public class CheckoutAction {
 		Workspaces workspaces = server.getWorkspaces();
         Project project = server.getProject(projectPath);
         
-        if (workspaces.exists(workspaceName) && !useUpdate) {
-            Workspace workspace = workspaces.getWorkspace(workspaceName);
+        if (workspaces.exists(workspaceName, showWorkspaces) && !useUpdate) {
+            Workspace workspace = workspaces.getWorkspace(workspaceName, showWorkspaces);
             workspaces.deleteWorkspace(workspace);
         }
         
         Workspace workspace;
-        if (! workspaces.exists(workspaceName)) {
+        if (! workspaces.exists(workspaceName, showWorkspaces)) {
             FilePath localFolderPath = workspacePath.child(localFolder);
             if (!useUpdate && localFolderPath.exists()) {
                 localFolderPath.deleteContents();
@@ -94,7 +96,7 @@ public class CheckoutAction {
             final String localPath = localFolderPath.getRemote();
             workspace = workspaces.newWorkspace(workspaceName, serverPath, localPath);
         } else {
-            workspace = workspaces.getWorkspace(workspaceName);
+            workspace = workspaces.getWorkspace(workspaceName, showWorkspaces);
         }
 		return project;
 	}
