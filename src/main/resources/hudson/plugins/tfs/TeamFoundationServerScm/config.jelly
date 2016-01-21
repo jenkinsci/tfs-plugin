@@ -33,5 +33,5 @@
         </f:entry>
     </f:advanced>
     
-    <t:listScmBrowsers field="browser" />
+    <t:listScmBrowsers name="tfs.browser" />
 </j:jelly>
