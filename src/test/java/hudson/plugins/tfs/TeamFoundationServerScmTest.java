@@ -165,14 +165,14 @@ public class TeamFoundationServerScmTest {
         assertFalse(shouldNotMatch, isCloakedPathValid("tfsandbox"));
         assertFalse(shouldNotMatch, isCloakedPathValid("tfsandbox/with/sub/pathes"));
         assertFalse(shouldNotMatch, isCloakedPathValid("tfsandbox$/with/sub/pathes"));
+        assertFalse(shouldNotMatch, isCloakedPathValid("$/tfsandbox/path1;$/tfsandbox/path2"));
+        assertFalse(shouldNotMatch, isCloakedPathValid("$/tfsandbox/path1 ; $/tfsandbox/path2 ; $/tfsandbox/path3"));
+        assertFalse(shouldNotMatch, isCloakedPathValid("$/foo/;$/bar/;$/baz/"));
+        assertFalse(shouldNotMatch, isCloakedPathValid("$/foo/;\n$/bar/;\n$/baz/"));
 
         final String shoudMatch = "Cloaked paths regex did not match a valid cloaked path";
         assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox"));
         assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox/path with space/subpath"));
-        assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox/path1;$/tfsandbox/path2"));
-        assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox/path1 ; $/tfsandbox/path2 ; $/tfsandbox/path3"));
-        assertTrue(shoudMatch, isCloakedPathValid("$/foo/;$/bar/;$/baz/"));
-        assertTrue(shoudMatch, isCloakedPathValid("$/foo/;\n$/bar/;\n$/baz/"));
         assertTrue(shoudMatch, isCloakedPathValid("$/foo/\n$/bar/\n$/baz/"));
         assertTrue(shoudMatch, isCloakedPathValid(" $/foo/ \n $/bar/ \n $/baz/ "));
         assertTrue(shoudMatch, isCloakedPathValid("\n$/foo/\n\n$/bar/\n\n$/baz/\n"));
@@ -216,24 +216,6 @@ public class TeamFoundationServerScmTest {
         final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
 
         areEqual(actual, input);
-    }
-
-    @Test
-    public void splitCloakedPaths_semicolonsMany() {
-        final String input = "$/foo/;$/bar/;$/baz/";
-
-        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
-
-        areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
-    }
-
-    @Test
-    public void splitCloakedPaths_semicolonsAndNewlines() {
-        final String input = "$/foo/;\n$/bar/;\n$/baz/";
-
-        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
-
-        areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
     }
 
     @Test
