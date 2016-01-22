@@ -32,7 +32,7 @@
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/workspaceNameCheck?value='+escape(this.value)"/>
         </f:entry>
 
-        <f:entry field="cloakedPaths" title="Cloaked paths">
+        <f:entry field="cloakedPaths" title="Cloaked paths" description="A collection of server paths to cloak to prevent their inclusion in the workspace.  Multiple entries must be placed onto separate lines.">
             <f:textarea checkUrl="'${rootURL}/scm/TeamFoundationServerScm/cloakedPathsCheck?value='+escape(this.value)"/>
         </f:entry>
     </f:advanced>
