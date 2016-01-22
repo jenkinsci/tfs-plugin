@@ -2,6 +2,10 @@
   <p>
     Paths that are cloaked will not be pulled into the local workspace during a GET
     from TFS or VSTS.
+    <br />
+    Check-ins that contain files only in cloaked folders (in other words, fully cloaked)
+    will not trigger a build,
+    whereas a check-in containing any path that isn't cloaked will trigger a build.
   </p>
   <p>
     For example, suppose the <b>Project path</b> is <tt>$/Example/project/path</tt>,
@@ -24,12 +28,10 @@
       $/Example/project/path/A/1 <br />
       $/Example/project/path/C <br />
     </blockquote>
-    ...and check-ins that contain files only in cloaked folders (in other words, fully cloaked)
-    will not trigger a build,
-  whereas a check-in containing any path that isn't cloaked will trigger a build.
   </p>
   <p>
-    For example, the following check-in <em>will not</em> trigger a build,
+    To continue with the example,
+    the following check-in <em>will not</em> trigger a build,
     because it only contains changes under cloaked paths:
     <blockquote>
       $/Example/project/path/A/2/alpha.txt <br />
