@@ -173,6 +173,7 @@ public class TeamFoundationServerScmTest {
         final String shoudMatch = "Cloaked paths regex did not match a valid cloaked path";
         assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox"));
         assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox/path with space/subpath"));
+        assertTrue(shoudMatch, isCloakedPathValid("$/tfsandbox/with/${parameter}/path"));
         assertTrue(shoudMatch, isCloakedPathValid("$/foo/\n$/bar/\n$/baz/"));
         assertTrue(shoudMatch, isCloakedPathValid(" $/foo/ \n $/bar/ \n $/baz/ "));
         assertTrue(shoudMatch, isCloakedPathValid("\n$/foo/\n\n$/bar/\n\n$/baz/\n"));
