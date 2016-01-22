@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -165,6 +166,84 @@ public class Project {
         final List<ChangeSet> changeSets = getVCCHistory(LatestVersionSpec.INSTANCE, null, false, 1);
         final ChangeSet result = changeSets.size() > 0 ? changeSets.get(0) : null;
         return result;
+    }
+
+    /**
+     * Gets the latest changeset that isn't in a cloaked path.
+     * @param fromChangeset the changeset that was last seen, as a point of reference
+     * @param cloakedPaths the list of cloaked paths in the project
+     * @return the {@link ChangeSet} instance representing the last entry in the history for the path
+     */
+    public ChangeSet getLatestUncloakedChangeset(final int fromChangeset, final Collection<String> cloakedPaths) {
+        final ChangesetVersionSpec fromVersion = new ChangesetVersionSpec(fromChangeset);
+        final List<ChangeSet> changeSets = getVCCHistory(fromVersion, LatestVersionSpec.INSTANCE, true, Integer.MAX_VALUE);
+        final ChangeSet result = findLatestUncloakedChangeset(cloakedPaths, changeSets);
+        return result;
+    }
+
+    static ChangeSet findLatestUncloakedChangeset(final Collection<String> cloakedPaths, final List<ChangeSet> changeSets) {
+        ChangeSet result = null;
+
+        // We need to search from latest to earliest, otherwise an incorrect result is produced
+        int lastChangeSetNumber = Integer.MAX_VALUE;
+        for (final ChangeSet s : changeSets) {
+            final String stringVersion = s.getVersion();
+            final int changeSetNumber = Integer.parseInt(stringVersion, 10);
+            if (changeSetNumber >= lastChangeSetNumber) {
+                throw new IllegalArgumentException("The changeset numbers must be strictly decreasing.");
+            }
+            lastChangeSetNumber = changeSetNumber;
+            final Collection<String> changes = s.getAffectedPaths();
+
+            final boolean fullyCloaked = isChangesetFullyCloaked(changes, cloakedPaths);
+            if (!fullyCloaked) {
+                result = s;
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns a list of changesets without any changesets that are in cloaked paths
+     * @param fromTimestamp the timestamp to get history from
+     * @param toTimestamp the timestamp to get history to
+     * @param cloakedPaths the list of "cloaked" paths that would exclude
+     *                     changesets that are fully covered by one or more of these paths
+     * @return a list of change sets
+     */
+    public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final Calendar fromTimestamp, final Calendar toTimestamp, final Collection<String> cloakedPaths) {
+        final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
+        final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
+        final List<ChangeSet> changeSets = getVCCHistory(fromVersion, toVersion, true, Integer.MAX_VALUE);
+        final ArrayList<ChangeSet> changeSetNoCloaked = new ArrayList<ChangeSet>();
+        for (final ChangeSet changeset : changeSets) {
+            final Collection<String> affectedPaths = changeset.getAffectedPaths();
+            final boolean fullyCloaked = isChangesetFullyCloaked(affectedPaths, cloakedPaths);
+            if (!fullyCloaked) {
+                changeSetNoCloaked.add(changeset);
+            }
+        }
+        return changeSetNoCloaked;
+    }
+
+    static boolean isChangesetFullyCloaked(final Collection<String> changesetPaths, final Collection<String> cloakedPaths) {
+        if (cloakedPaths == null) {
+            return false;
+        }
+        for (final String tfsPath : changesetPaths) {
+            boolean isPathCloaked = false;
+            for (final String cloakedPath : cloakedPaths) {
+                if (tfsPath.startsWith(cloakedPath)) {
+                    isPathCloaked = true;
+                    break;
+                }
+            }
+            if (!isPathCloaked) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

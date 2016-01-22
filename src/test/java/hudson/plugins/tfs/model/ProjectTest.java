@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
@@ -99,6 +102,128 @@ public class ProjectTest extends SwedishLocaleTestCase {
         assertEquals("The item path was incorrect", "$/tfsandbox", item.getPath());
         assertEquals("The item action was incorrect", "add", item.getAction());
 
+    }
+
+    @Test
+    public void findLatestUncloakedChangeset_latestIsUncloaked() {
+        final List<String> cloakedPaths = Arrays.asList("$/MyProject/A/2", "$/MyProject/B");
+        final ChangeSet changeSet42 = createChangeSet(42, "$/MyProject/A/foo", "$/MyProject/A/bar");
+        final ChangeSet changeSet43 = createChangeSet(43, "$/MyProject/A/bar");
+        final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/foo");
+        final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
+
+        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, changeSets);
+
+        Assert.assertEquals("44", actual.getVersion());
+    }
+
+    @Test
+    public void findLatestUncloakedChangeset_latestIsCloaked() {
+        final List<String> cloakedPaths = Arrays.asList("$/MyProject/A/2", "$/MyProject/B");
+        final ChangeSet changeSet42 = createChangeSet(42, "$/MyProject/A/foo", "$/MyProject/A/bar");
+        final ChangeSet changeSet43 = createChangeSet(43, "$/MyProject/A/bar");
+        final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/2/foo");
+        final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
+
+        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, changeSets);
+
+        Assert.assertEquals("43", actual.getVersion());
+    }
+
+    @Test
+    public void findLatestUncloakedChangeset_everythingIsCloaked() {
+        final List<String> cloakedPaths = Arrays.asList("$/MyProject/A/2", "$/MyProject/B");
+        final ChangeSet changeSet42 = createChangeSet(42, "$/MyProject/A/2/foo", "$/MyProject/B/bar");
+        final ChangeSet changeSet43 = createChangeSet(43, "$/MyProject/B/bar");
+        final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/2/foo");
+        final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
+
+        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, changeSets);
+
+        Assert.assertEquals(null, actual);
+    }
+
+    private static ChangeSet createChangeSet(final int version, final String... itemPaths) {
+        final String stringVersion = Integer.toString(version);
+        final Calendar calendar = Util.getCalendar(2016, 1, 5, 10, version, 0);
+        final Date date = calendar.getTime();
+        final ChangeSet result = new ChangeSet(stringVersion, date, "ljenkins", "synthetic for testing");
+
+        for (final String itemPath : itemPaths) {
+            final Item item = new Item(itemPath, "edit");
+            result.add(item);
+        }
+
+        return result;
+    }
+
+    @Test
+    public void isChangesetFullyCloaked_nullCloakedPaths() {
+        final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
+
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, null);
+
+        Assert.assertEquals(false, actual);
+    }
+
+    @Test
+    public void isChangesetFullyCloaked_independentCloakedPaths() {
+        final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
+        final List<String> cloakedPaths = Arrays.asList("$/fizz", "$/fizz/FizzBuzz.java");
+
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
+
+        Assert.assertEquals(false, actual);
+    }
+
+    @Test
+    public void isChangesetFullyCloaked_cloakingChild() {
+        final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
+        final List<String> cloakedPaths = Collections.singletonList("$/foo/bar.baz");
+
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
+
+        Assert.assertEquals(false, actual);
+    }
+
+    @Test
+    public void isChangesetFullyCloaked_partiallyCloakedPaths() {
+        final List<String> changesetPaths = Arrays.asList("$/foo", "$/bar");
+        final List<String> cloakedPaths = Collections.singletonList("$/foo");
+
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
+
+        Assert.assertEquals(false, actual);
+    }
+
+    @Test
+    public void isChangesetFullyCloaked_fullyCloakedPath() {
+        final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
+        final List<String> cloakedPaths = Collections.singletonList("$/foo");
+
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
+
+        Assert.assertEquals(true, actual);
+    }
+
+    @Test
+    public void isChangesetFullyCloaked_fullyCloakedPaths() {
+        final List<String> changesetPaths = Collections.singletonList("$/foo/bar.baz");
+        final List<String> cloakedPaths = Arrays.asList("$/foo", "$/bar");
+
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
+
+        Assert.assertEquals(true, actual);
+    }
+
+    @Test
+    public void isChangesetFullyCloaked_manyToMany() {
+        final List<String> changesetPaths = Arrays.asList("$/foo/bar.baz", "$/bar/foo.baz");
+        final List<String> cloakedPaths = Arrays.asList("$/foo", "$/bar");
+
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
+
+        Assert.assertEquals(true, actual);
     }
 
     @Category(IntegrationTests.class)
