@@ -84,6 +84,7 @@ Field | Description
 `Use update` | If this option is checked, then the workspace and work folder will not be removed at the end of build. This makes the build faster, but artifacts remain between builds. If it is not checked, the plugin will create a workspace and map it to a local folder at the start of the build, and then delete the workspace at the end of the build.
 `Local workfolder` | The name of the local work folder. The specified folder will contain the files retrieved from the repository. Default is `.`, ie the files will be downloaded into the Hudson workspace folder.
 `Workspace name` | The name of the workspace that Jenkins should use when creating and deleting workspaces on the server. The workspace name supports three macros; `${JOB_NAME}` is replaced by the job name, `${USER_NAME}` is replaced by the user name Jenkins is running as and `${NODE_NAME}` is replaced by the name of the node. Default workspace name is `Hudson-${JOB_NAME}-${NODE_NAME}`.
+`Cloaked paths` | A collection of server paths to cloak to exclude from the workspace and from the build trigger. Multiple entries must be placed onto separate lines.
 `Repository browser` | If the Team Foundation Server has any web access to the files, this can be configured here. By adding a repository browser, the plugin will create links in the Changes page to the repository browser. Currently the plugin supports Team System Web Access.
 
 ### User name and password
