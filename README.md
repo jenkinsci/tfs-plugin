@@ -12,6 +12,16 @@ This plugin integrates [Team Foundation Version Control], also known as TFVC, to
 * Issues are tracked by the [Jenkins JIRA]
 * Download the latest release [from the Jenkins CDN](http://updates.jenkins-ci.org/latest/tfs.hpi) or [from the GitHub Releases page](https://github.com/jenkinsci/tfs-plugin/releases)
 
+## What can you do with it?
+
+Allows you to use TFS and VSTS as an SCM in Jenkins jobs. At the moment, this plugin supports:
+* Retrieving read-only copies of files and folders from TFS/VSTS.
+* Polling TFS/VSTS to automatically start builds when there are changes.
+* Links from the Jenkins change sets to the TFS/VSTS web interface. _(Also known as a repository browser)_
+* Creating a label in TFS
+
+The plugin will automatically create a workspace in TFS/VSTS and map a work folder (in the Jenkins workspace) to it.
+
 [wiki]: http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin
 [MIT Licence]: http://opensource.org/licenses/MIT
 [CloudBees]: https://www.cloudbees.com/
