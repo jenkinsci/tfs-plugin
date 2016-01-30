@@ -168,6 +168,28 @@ To fix this, do the following:
 * Change the locale by Windows Regional Settings to United States and English on the server and all hudson nodes. After that tf.exe should output dates in english, which can be parsed properly.
 * Start Hudson using the UnitedStates, English locale. Either set it using `-Duser.language=en -Duser.country=US` on the command line or check the documentation for the container that Hudson is running within.
 
+# Timeline
+
+## Future
+
+The best way to get an idea of what will be coming in future releases is to look at the [list of open pull requests](https://github.com/jenkinsci/tfs-plugin/pulls).
+
+## Present
+
+The next upcoming release will be 4.1.0.  See what's been committed [since 4.0.0](https://github.com/jenkinsci/tfs-plugin/compare/tfs-4.0.0...master).
+
+* Major:
+    * Add workspace cloaking. Thanks to Aaron Alexander (@ajalexander) and Luke Watson (@watsonlu) who helped implement [JENKINS-4709](https://issues.jenkins-ci.org/browse/JENKINS-4709). Made possible through the following pull requests: #28, #60, #64 and #68.
+* Minor:
+    * Fix VSTS workspace management by upgrading to TFS SDK to 14.0.2 and better detection of existing workspaces. (pull request #67)
+    * Fix repository browser URL persistence. Thanks to Manfred Moser (@mahsoud) who fixed [JENKINS-30703](https://issues.jenkins-ci.org/browse/JENKINS-30703) with pull request #69.
+* Planned:
+    * Support connecting through a proxy. Thanks to @ytterx for fixing [JENKINS-6933](https://issues.jenkins-ci.org/browse/JENKINS-6933) with pull request #66.
+
+## Past
+
+Details about previous releases can be found on the [Releases page](https://github.com/jenkinsci/tfs-plugin/releases).
+
 [wiki]: http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin
 [MIT Licence]: http://opensource.org/licenses/MIT
 [CloudBees]: https://www.cloudbees.com/
