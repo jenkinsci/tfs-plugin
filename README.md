@@ -147,6 +147,27 @@ The plugin will set the following environment variables for the build, after a c
 * **TFS_USERNAME** \- The user name that is used to connect to the Team Foundation Server.
 * **TFS_CHANGESET** \- The change set number that is checked out in the workspace
 
+
+# FAQ
+
+### How should I set up the plugin for my CodePlex project?
+
+* Find out the TFS server for your project, which is displayed in the source code page for your project at codeplex.com.
+* The user name must be suffixed with `_cp` and the domain is `snd`. If your user name is redsolo, then enter "`snd\redsolo_cp`" as the user name in the plugin configuration.
+* Note that the user must be a member of the project to be able to create a workspace on the Team foundation server.
+
+That's all you need to start retrieving files from your project at codeplex.com.
+
+### The plugin is having problems parsing the dates that TF outputs, what can I do?
+
+> :information_source: If you can upgrade to version 4 and up, then you can avoid a whole class of TF output parsing difficulties, otherwise, read on. :information_source:
+
+The TF command line outputs date according to the locale and Microsofts own specification. Sometimes the outputed date can not be parsed by any of the default locale dependent parsers that the JDK includes (_for some more details, see_ _[JENKINS-4184]_ _and_ _[JENKINS-4021]_). This will throw an exception in the change set parsing and fail the build.
+
+To fix this, do the following:
+* Change the locale by Windows Regional Settings to United States and English on the server and all hudson nodes. After that tf.exe should output dates in english, which can be parsed properly.
+* Start Hudson using the UnitedStates, English locale. Either set it using `-Duser.language=en -Duser.country=US` on the command line or check the documentation for the container that Hudson is running within.
+
 [wiki]: http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin
 [MIT Licence]: http://opensource.org/licenses/MIT
 [CloudBees]: https://www.cloudbees.com/
@@ -155,3 +176,5 @@ The plugin will set the following environment variables for the build, after a c
 [Visual Studio Team Services]: https://www.visualstudio.com/products/visual-studio-team-services-vs
 [TFS SDK for Java]: http://blogs.msdn.com/b/bharry/archive/2011/05/16/announcing-a-java-sdk-for-tfs.aspx
 [Microsoft Team Explorer Everywhere]: http://www.microsoft.com/en-us/download/details.aspx?id=40785
+[JENKINS-4021]: https://issues.jenkins-ci.org/browse/JENKINS-4021
+[JENKINS-4184]: https://issues.jenkins-ci.org/browse/JENKINS-4184
