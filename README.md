@@ -57,9 +57,101 @@ Ubuntu Linux | Server 14.04 LTS
 
 The plugin is built against Jenkins version **1.448** and that's the version integration tests are run against.
 
+# Configuration
+
+## Requirements
+
+### 4.0.0 and later (New!)
+
+Ever since release 4.0.0, a command-line client or tool is no longer necessary as all the interaction with the TFS or VSTS server is done using the [TFS SDK for Java].  The native libraries needed by the SDK are automatically copied to a sub-directory under the agent user's home folder.
+
+### 3.2.0 and earlier
+
+Versions 3.2.0 and earlier of the plugin required a TFS command line tool to be installed on the build agents that will be retrieving source code from TFS.
+
+1. Install either Microsoft Visual Studio or [Microsoft Team Explorer Everywhere] Command-Line Client (CLC) on the build agents
+2. Add `tf.exe` (Visual Studio) OR one of `tf.cmd` or `tf` (TEE CLC) to the `PATH` of the build agents' user(s).
+
+## Job configuration
+
+![SCM configuration](tfs-job-config4.png)
+
+Field | Description
+----- | -----------
+`Server URL` | The URL to the Team Project Collection. Examples: `https://tfs02.codeplex.com`, `https://example.visualstudio.com/DefaultCollection`, `http://tfs:8080/tfs/DefaultCollection`
+`Project path` | The Team Project and path to retrieve from the server. The project path must start with `$/`, and contain any sub path that exists in the project repository. Example: `$/project/trunk/src`.
+`User name` | The name of the user that will be connecting to TFS/VSTS to query history, checkout files, etc. See _User name and password_ below for a full description.
+`User password` | The password, alternate password or personal access token associated with the user. See _User name and password_ below for more details.
+`Use update` | If this option is checked, then the workspace and work folder will not be removed at the end of build. This makes the build faster, but artifacts remain between builds. If it is not checked, the plugin will create a workspace and map it to a local folder at the start of the build, and then delete the workspace at the end of the build.
+`Local workfolder` | The name of the local work folder. The specified folder will contain the files retrieved from the repository. Default is `.`, ie the files will be downloaded into the Hudson workspace folder.
+`Workspace name` | The name of the workspace that Jenkins should use when creating and deleting workspaces on the server. The workspace name supports three macros; `${JOB_NAME}` is replaced by the job name, `${USER_NAME}` is replaced by the user name Jenkins is running as and `${NODE_NAME}` is replaced by the name of the node. Default workspace name is `Hudson-${JOB_NAME}-${NODE_NAME}`.
+`Repository browser` | If the Team Foundation Server has any web access to the files, this can be configured here. By adding a repository browser, the plugin will create links in the Changes page to the repository browser. Currently the plugin supports Team System Web Access.
+
+### User name and password
+
+#### Team Foundation Server (on-premises)
+
+For \[on-premises\] Team Foundation Server, the _User name_ can be specified in two ways:
+
+1. `EXAMPLE-DOMAIN\user`
+2. `user@domain.example.com`
+
+#### Visual Studio Team Services (VSTS, a.k.a. TFS in the cloud, previously known as Visual Studio Online)
+
+For VSTS, there are also two options:
+
+1. Personal access tokens (recommended)
+    1. In VSTS, click your name in the top right corner and select **My profile**.
+    2. Select the **Security** hub.
+    3. In the _Personal access tokens_ area, select **Add**.
+    4. Describe the token (use something like "Jenkins server at jenkins.example.com"), select an expiry timeframe, double-check the VSTS account the token will be valid for and, until the corresponding defect in VSTS is fixed, select **All scopes**.
+    5. Click **\[Create Token\]** and copy the generated personal access token to the clipboard.
+    6. Back to Jenkins, enter the e-mail address associated with your VSTS account as the _User name_ and the generated personal access token as the _User password_.
+2.  Alternate credentials
+    1. In VSTS, click your name in the top right corner and select **My profile**.
+    2. Select the **Security** hub.
+    3. In the _Alternate credentials_ area, select **Enable alternate authentication credentials**.
+    4. Enter a secondary user name and password, then click **\[Save\]**.
+    5. Back to Jenkins, re-enter those credentials in the _User name_ and _User password_ fields.
+
+
+## Checkout by label (New since version 3.2.0)
+
+The plugin now supports checking out from a specific label.  Here's how to configure a job to do that:
+
+> :information_source: Polling the server doesn't make sense when you want to build for a specific label because polling is not \[currently\] label-aware and could queue a build **every polling interval**. :information_source:
+
+1. Turn **off** SCM polling by making sure the **Poll SCM** checkbox is _cleared_ (unchecked).
+2. Tick the **This build is parameterised** checkbox
+    1. Add a **String Parameter**
+    2. Set its _Name_ to **VERSION_SPEC**
+    3. Set its _Description_ to the following:
+    ```
+    Enter a valid version spec to use when checking out.
+    Labels are prefixed with "L" and can optionally be scoped by appending "@" with a scope name
+    (see the documentation on the Label Command at https://msdn.microsoft.com/en-us/library/9ew32kd1.aspx).
+    Example: "LFoo"
+    ```
+3. **Save** the job.
+
+Now, the next time you want to queue a build, you will need to provide a value for the **VERSION_SPEC** parameter.  The build will then perform a checkout of the source as of the specified **VERSION_SPEC**.
+
+## Build environment variables
+
+The plugin will set the following environment variables for the build, after a checkout:
+
+* **TFS_WORKSPACE** \- The name of the workspace.
+* **TFS_WORKFOLDER** \- The full path to the working folder.
+* **TFS_PROJECTPATH** \- The project path that is mapped to the workspace.
+* **TFS_SERVERURL** \- The URL to the Team Foundation Server.
+* **TFS_USERNAME** \- The user name that is used to connect to the Team Foundation Server.
+* **TFS_CHANGESET** \- The change set number that is checked out in the workspace
+
 [wiki]: http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin
 [MIT Licence]: http://opensource.org/licenses/MIT
 [CloudBees]: https://www.cloudbees.com/
 [Jenkins JIRA]: http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?mode=hide&reset=true&jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27tfs-plugin%27
 [Team Foundation Version Control]: https://msdn.microsoft.com/en-us/library/ms181237.aspx
 [Visual Studio Team Services]: https://www.visualstudio.com/products/visual-studio-team-services-vs
+[TFS SDK for Java]: http://blogs.msdn.com/b/bharry/archive/2011/05/16/announcing-a-java-sdk-for-tfs.aspx
+[Microsoft Team Explorer Everywhere]: http://www.microsoft.com/en-us/download/details.aspx?id=40785
