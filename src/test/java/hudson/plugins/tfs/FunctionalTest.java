@@ -113,7 +113,7 @@ public class FunctionalTest {
         }
 
         @Override
-        protected void after() {
+        protected void after() throws Exception {
             if (Functions.isWindows()) {
                 purgeSlaves();
             }

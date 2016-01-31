@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.448</version>
+    <version>1.520</version>
   </parent>
 
   <artifactId>tfs</artifactId>
@@ -118,25 +118,25 @@
         </configuration>
       </plugin>
       <plugin>
-	<groupId>org.codehaus.mojo</groupId>
-	<artifactId>animal-sniffer-maven-plugin</artifactId>
-	<version>1.7</version>
-	<configuration>
-	  <signature>
-	    <groupId>org.codehaus.mojo.signature</groupId>
-	    <artifactId>java15</artifactId>
-	    <version>1.0</version>
-	  </signature>
-	</configuration>
-	<executions>
-	  <execution>
-	    <id>java.1.5.check</id>
-	    <phase>verify</phase>
-	    <goals>
-	      <goal>check</goal>
-	    </goals>
-	  </execution>
-	</executions>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>animal-sniffer-maven-plugin</artifactId>
+        <version>1.7</version>
+        <configuration>
+        <signature>
+            <groupId>org.codehaus.mojo.signature</groupId>
+            <artifactId>java16</artifactId>
+            <version>1.0</version>
+          </signature>
+        </configuration>
+        <executions>
+          <execution>
+            <id>java.1.6.check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
     </plugins>
@@ -193,26 +193,26 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>jenkins-war</artifactId>
-      <version>1.448</version>
+      <version>1.520</version>
       <type>war</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>jenkins-core</artifactId>
-      <version>1.448</version>
+      <version>1.520</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>jenkins-test-harness</artifactId>
-      <version>1.448</version>
+      <version>1.520</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>ui-samples-plugin</artifactId>
-      <version>1.448</version>
+      <version>1.520</version>
       <scope>test</scope>
     </dependency>
 
@@ -240,6 +240,12 @@
         <artifactId>mockito-core</artifactId>
         <version>1.7</version> 
         <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>mailer</artifactId>
+      <version>1.5</version>
+      <type>jar</type>
     </dependency>
   </dependencies>
 

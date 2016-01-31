@@ -34,14 +34,19 @@ import hudson.plugins.tfs.model.Project;
 import hudson.util.Secret;
 import hudson.util.SecretOverride;
 import hudson.util.XStream2;
+import jenkins.model.Jenkins;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
 
 @SuppressWarnings("unchecked")
 public class TeamFoundationServerScmTest {
 
+    @Rule public JenkinsRule j = new JenkinsRule();
+        
     private FilePath workspace;
 
     @After public void tearDown() throws Exception {
@@ -57,46 +62,41 @@ public class TeamFoundationServerScmTest {
      This test makes sure a job can be upgraded without loss of the password.
      */
     @Test public void upgradeFromScrambledPassword() {
+        final String xmlString =
+                "<scm class='hudson.plugins.tfs.TeamFoundationServerScm' plugin='tfs@3.1.1'>\n" +
+                "    <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
+                "    <projectPath>$/example/path</projectPath>\n" +
+                "    <localPath>.</localPath>\n" +
+                "    <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
+                "    <userPassword>ZXhhbXBsZVBhc3N3b3Jk</userPassword>\n" +
+                "    <userName>example\\tfsbuilder</userName>\n" +
+                "    <useUpdate>false</useUpdate>\n" +
+                "</scm>";
+        final XStream serializer = new XStream2();
+
+        final TeamFoundationServerScm tfsScmObject = (TeamFoundationServerScm) serializer.fromXML(xmlString);
+
+        final String actual = tfsScmObject.getUserPassword();
+        assertEquals("examplePassword", actual);
+        assertEquals("examplePassword", Secret.toString(tfsScmObject.getPassword()));
+
+        final String upgradedXml = serializer.toXML(tfsScmObject);
+
+        final TeamFoundationServerScm tfsScmObject2 = (TeamFoundationServerScm) serializer.fromXML(upgradedXml);
+        final String actual2 = tfsScmObject2.getUserPassword();
+        assertEquals("examplePassword", actual2);
+        assertEquals("examplePassword", Secret.toString(tfsScmObject.getPassword()));
+    }
+    
+    // jenkins changed implementation of hudson.util.Secret in a9aff088f327278a8873aef47fa8f80d3c5932fd
+    @Test public void decryptPasswordFromPre1498() {
         SecretOverride secretOverride = null;
         try {
             secretOverride = new SecretOverride();
-            final String xmlString =
-                    "<scm class='hudson.plugins.tfs.TeamFoundationServerScm' plugin='tfs@3.1.1'>\n" +
-                    "    <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
-                    "    <projectPath>$/example/path</projectPath>\n" +
-                    "    <localPath>.</localPath>\n" +
-                    "    <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
-                    "    <userPassword>ZXhhbXBsZVBhc3N3b3Jk</userPassword>\n" +
-                    "    <userName>example\\tfsbuilder</userName>\n" +
-                    "    <useUpdate>false</useUpdate>\n" +
-                    "</scm>";
-            final XStream serializer = new XStream2();
-
-            final TeamFoundationServerScm tfsScmObject = (TeamFoundationServerScm) serializer.fromXML(xmlString);
-
-            final String actual = tfsScmObject.getUserPassword();
+            
+            Secret secret = Secret.decrypt( "zs+99bxCGlcSxR3Umnj0q0OjYXVSiB+qLzS0ZjuHz2M=" );
+            String actual = secret.getPlainText();
             assertEquals("examplePassword", actual);
-            assertEquals("examplePassword", Secret.toString(tfsScmObject.getPassword()));
-
-            final String expectedUpgradedXml =
-                    "<hudson.plugins.tfs.TeamFoundationServerScm>\n" +
-                            "  <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
-                            "  <projectPath>$/example/path</projectPath>\n" +
-                            "  <localPath>.</localPath>\n" +
-                            "  <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
-                            "  <password>zs+99bxCGlcSxR3Umnj0q0OjYXVSiB+qLzS0ZjuHz2M=</password>\n" +
-                            "  <userName>example\\tfsbuilder</userName>\n" +
-                            "  <useUpdate>false</useUpdate>\n" +
-                            "</hudson.plugins.tfs.TeamFoundationServerScm>";
-
-            final String actualUpgradedXml = serializer.toXML(tfsScmObject);
-
-            assertEquals(expectedUpgradedXml, actualUpgradedXml);
-
-            final TeamFoundationServerScm tfsScmObject2 = (TeamFoundationServerScm) serializer.fromXML(actualUpgradedXml);
-            final String actual2 = tfsScmObject2.getUserPassword();
-            assertEquals("examplePassword", actual2);
-            assertEquals("examplePassword", Secret.toString(tfsScmObject.getPassword()));
         }
         finally {
             if (secretOverride != null) {
