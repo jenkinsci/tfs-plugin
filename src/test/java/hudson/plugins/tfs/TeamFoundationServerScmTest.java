@@ -22,13 +22,12 @@ import java.util.Map;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import com.thoughtworks.xstream.XStream;
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Computer;
 import hudson.model.Node;
-import hudson.model.ParametersAction;
 
 import hudson.plugins.tfs.model.Project;
 import hudson.util.Secret;
@@ -108,18 +107,7 @@ public class TeamFoundationServerScmTest {
             }
         }
     }
-
-    @Test
-    public void assertWorkspaceNameReplacesJobName() {
-        AbstractBuild build = mock(AbstractBuild.class);
-        AbstractProject project = mock(AbstractProject.class);
-        when(build.getProject()).thenReturn(project);
-        when(project.getName()).thenReturn("ThisIsAJob");
-
-        TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, null, ".", false, "erik_${JOB_NAME}");
-        assertEquals("Workspace name was incorrect", "erik_ThisIsAJob", scm.getWorkspaceName(build, mock(Computer.class)));
-    }
-    
+  
     @Test 
     public void assertDoUsernameCheckRegexWorks() {
         assertFalse(TeamFoundationServerScm.DescriptorImpl.DOMAIN_SLASH_USER_REGEX.matcher("redsolo").matches());
@@ -304,10 +292,9 @@ public class TeamFoundationServerScmTest {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(AbstractProject.class);
         when(build.getProject()).thenReturn(project);
-        scm.getWorkspaceName(build, mock(Computer.class));
         
         Map<String, String> env = new HashMap<String, String>();
-        scm.buildEnvVars(build, env );        
+        scm.buildEnvVars(build, env);
         assertEquals("The workspace name was incorrect", "WORKSPACE_SAMPLE", env.get(TeamFoundationServerScm.WORKSPACE_ENV_STR));
     }
     
@@ -412,8 +399,9 @@ public class TeamFoundationServerScmTest {
      */
     @Test
     public void assertWorkspaceNameReplacesInvalidChars() {
+        EnvVars env = new EnvVars();
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, null, ".", false, "A\"B/C:D<E>F|G*H?I");
-        assertEquals("Workspace name contained invalid chars", "A_B_C_D_E_F_G_H_I", scm.getWorkspaceName(null, null));
+        assertEquals("Workspace name contained invalid chars", "A_B_C_D_E_F_G_H_I", scm.getWorkspaceName(env));
     }
     
     /**
@@ -421,8 +409,9 @@ public class TeamFoundationServerScmTest {
      */
     @Test
     public void assertWorkspaceNameReplacesEndingPeriod() {
+        EnvVars env = new EnvVars();
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, null, ".", false, "Workspace.Name.");
-        assertEquals("Workspace name ends with period", "Workspace.Name_", scm.getWorkspaceName(null, null));
+        assertEquals("Workspace name ends with period", "Workspace.Name_", scm.getWorkspaceName(env));
     }
     
     /**
@@ -430,38 +419,30 @@ public class TeamFoundationServerScmTest {
      */
     @Test
     public void assertWorkspaceNameReplacesEndingSpace() {
+        EnvVars env = new EnvVars();
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, null, ".", false, "Workspace Name ");
-        assertEquals("Workspace name ends with space", "Workspace Name_", scm.getWorkspaceName(null, null));
+        assertEquals("Workspace name ends with space", "Workspace Name_", scm.getWorkspaceName(env));
     }    
     
     @Test public void assertServerUrlResolvesBuildVariables() {
-        ParametersAction action = mock(ParametersAction.class);
-        when(action.substitute(isA(AbstractBuild.class), isA(String.class))).thenReturn("https://RESOLVED.com");
-        AbstractBuild build = mock(AbstractBuild.class);
-        when(build.getAction(ParametersAction.class)).thenReturn(action);
-
+        EnvVars env = new EnvVars();
+        env.put("PARAM", "RESOLVED");
         TeamFoundationServerScm scm = new TeamFoundationServerScm("https://${PARAM}.com", null, null, ".", false, "");
-        assertEquals("The server url wasnt resolved", "https://RESOLVED.com", scm.getServerUrl(build));
+        assertEquals("The server url wasnt resolved", "https://RESOLVED.com", scm.getServerUrl(env));
     }    
     
     @Test public void assertProjectPathResolvesBuildVariables() {
-        ParametersAction action = mock(ParametersAction.class);
-        when(action.substitute(isA(AbstractBuild.class), isA(String.class))).thenReturn("$/RESOLVED/path");
-        AbstractBuild build = mock(AbstractBuild.class);
-        when(build.getAction(ParametersAction.class)).thenReturn(action);
-
+        EnvVars env = new EnvVars();
+        env.put("PARAM", "RESOLVED");
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, "$/$PARAM/path", null, ".", false, "");
-        assertEquals("The project path wasnt resolved", "$/RESOLVED/path", scm.getProjectPath(build));
+        assertEquals("The project path wasnt resolved", "$/RESOLVED/path", scm.getProjectPath(env));
     }    
     
     @Test public void assertWorkspaceNameResolvesBuildVariables() {
-        ParametersAction action = mock(ParametersAction.class);
-        when(action.substitute(isA(AbstractBuild.class), isA(String.class))).thenReturn("WS-RESOLVED");
-        AbstractBuild build = mock(AbstractBuild.class);
-        when(build.getAction(ParametersAction.class)).thenReturn(action);
-
+        EnvVars env = new EnvVars();
+        env.put("PARAM", "RESOLVED");
         TeamFoundationServerScm scm = new TeamFoundationServerScm(null, null, null, ".", false, "WS-${PARAM}");
-        assertEquals("The workspace name wasnt resolved", "WS-RESOLVED", scm.getWorkspaceName(build, mock(Computer.class)));
+        assertEquals("The workspace name wasnt resolved", "WS-RESOLVED", scm.getWorkspaceName(env));
     }
     
     @Test public void assertTfsWorkspaceIsntRemovedIfThereIsNoBuildWhenProcessWorkspaceBeforeDeletion() throws Exception {
