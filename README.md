@@ -42,7 +42,6 @@ The plugin has been tested against [Visual Studio Team Services], as well as the
 > Microsoft Visual Studio Team System 2008 Team Foundation Server | [2013/04/09](https://support.microsoft.com/en-us/lifecycle?p1=13083)
 > Microsoft Visual Studio 2005 Team Foundation Server | [2011/07/12](https://support.microsoft.com/en-us/lifecycle?p1=10449)
 
-
 ## Operating Systems
 
 The plugin has been tested against the following operating systems and versions, with the latest updates as of 2015/08/27.
@@ -156,7 +155,7 @@ The plugin will set the following environment variables for the build, after a c
 * The user name must be suffixed with `_cp` and the domain is `snd`. If your user name is redsolo, then enter "`snd\redsolo_cp`" as the user name in the plugin configuration.
 * Note that the user must be a member of the project to be able to create a workspace on the Team foundation server.
 
-That's all you need to start retrieving files from your project at codeplex.com.
+That's all you need to do to start retrieving files from your project at codeplex.com.
 
 ### The plugin is having problems parsing the dates that TF outputs, what can I do?
 
@@ -182,7 +181,7 @@ The next upcoming release will be 4.1.0.  See what's been committed [since 4.0.0
     * Add workspace cloaking. Thanks to Aaron Alexander (@ajalexander) and Luke Watson (@watsonlu) who helped implement [JENKINS-4709](https://issues.jenkins-ci.org/browse/JENKINS-4709). Made possible through the following pull requests: #28, #60, #64 and #68.
 * Minor:
     * Fix VSTS workspace management by upgrading to TFS SDK to 14.0.2 and better detection of existing workspaces. (pull request #67)
-    * Fix repository browser URL persistence. Thanks to Manfred Moser (@mahsoud) who fixed [JENKINS-30703](https://issues.jenkins-ci.org/browse/JENKINS-30703) with pull request #69.
+    * Fix repository browser URL persistence. Thanks to Manfred Moser (@mosabua) who fixed [JENKINS-30703](https://issues.jenkins-ci.org/browse/JENKINS-30703) with pull request #69.
 * Planned:
     * Support connecting through a proxy. Thanks to @ytterx for fixing [JENKINS-6933](https://issues.jenkins-ci.org/browse/JENKINS-6933) with pull request #66.
 
