@@ -24,13 +24,23 @@ public class IntegrationTestHelper {
     private final String userPassword;
 
     public IntegrationTestHelper() throws URISyntaxException {
-        this(propertyOrFail("tfs_server_name"));
+        this(
+                propertyOrFail("tfs_server_name"),
+                propertyOrNull("tfs_user_name"),
+                propertyOrNull("tfs_user_password")
+        );
     }
 
     public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
+        this(
+                tfsServerName,
+                null,
+                null
+        );
+    }
+
+    public IntegrationTestHelper(final String tfsServerName, final String tfsUserName, final String tfsUserPassword) throws URISyntaxException {
         final URI serverUri;
-        final String tfsUserName = propertyOrNull("tfs_user_name");
-        final String tfsUserPassword = propertyOrNull("tfs_user_password");
         if (tfsServerName.endsWith(".visualstudio.com")) {
             serverUri = URIUtils.createURI("https", tfsServerName, 443, "DefaultCollection", null, null);
             this.userName = tfsUserName;
