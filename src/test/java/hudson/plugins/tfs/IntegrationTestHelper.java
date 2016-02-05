@@ -29,8 +29,8 @@ public class IntegrationTestHelper {
 
     public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
         final URI serverUri;
-        final String tfsUserName = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_name"));
-        final String tfsUserPassword = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_password"));
+        final String tfsUserName = propertyOrNull("tfs_user_name");
+        final String tfsUserPassword = propertyOrNull("tfs_user_password");
         if (tfsServerName.endsWith(".visualstudio.com")) {
             serverUri = URIUtils.createURI("https", tfsServerName, 443, "DefaultCollection", null, null);
             this.userName = tfsUserName;
@@ -41,6 +41,11 @@ public class IntegrationTestHelper {
             this.userPassword = (tfsUserPassword != null) ? tfsUserPassword : "for-test-only";
         }
         serverUrl = serverUri.toString();
+    }
+
+    static String propertyOrNull(final String propertyName) {
+        final String value = System.getProperty(propertyName);
+        return hudson.Util.fixEmptyAndTrim(value);
     }
 
     /**
@@ -59,7 +64,7 @@ public class IntegrationTestHelper {
     }
 
     public static String getTfsServerName() {
-        final String result = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
+        final String result = propertyOrNull("tfs_server_name");
         Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", result);
         return result;
     }
