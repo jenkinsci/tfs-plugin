@@ -24,7 +24,7 @@ public class IntegrationTestHelper {
     private final String userPassword;
 
     public IntegrationTestHelper() throws URISyntaxException {
-        this(getTfsServerName());
+        this(propertyOrFail("tfs_server_name"));
     }
 
     public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
@@ -48,6 +48,14 @@ public class IntegrationTestHelper {
         return hudson.Util.fixEmptyAndTrim(value);
     }
 
+    static String propertyOrFail(final String propertyName) {
+        final String result = propertyOrNull(propertyName);
+        if (result == null) {
+            Assert.fail("The '" + propertyName + "' property MUST be provided a [non-empty] value.");
+        }
+        return result;
+    }
+
     /**
      * A string representing the URL to a VSO account or a default TFS server installation.
      */
@@ -61,12 +69,6 @@ public class IntegrationTestHelper {
 
     public String getUserPassword() {
         return userPassword;
-    }
-
-    public static String getTfsServerName() {
-        final String result = propertyOrNull("tfs_server_name");
-        Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", result);
-        return result;
     }
 
     /**
