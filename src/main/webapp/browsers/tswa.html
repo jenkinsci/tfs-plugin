@@ -1,12 +1,11 @@
 <div>
   <p>
-	Enter the URL to the TSWA server. Examples:<tt>http://tswasrv</tt> or <tt>http://TFSMachine:8080/</tt>.
-	The plugin will strip the last path (if any) of the URL when building URLs for change set pages and other pages. 
+	Enter the base URL to use for browsing changesets, files and diffs.  Examples: <tt>http://tfs:8080/tfs/DefaultCollection/teamproject/</tt> or <tt>https://vsts.example.com/DefaultCollection/teamproject/</tt>
   </p>	 
   <p>
-    If the field is empty then the plugin will try to build up a valid URL using the server URL.
-    For instance if the server URL is <tt>https://server:8090</tt> then the plugin will
-    creates links such as <tt>https://server:8090/cs.aspx?cs=99</tt>, which is identical if the user entered 
-    <tt>https://server:8090</tt> into this field.  
+    If the field is empty then the plugin will build URLs using the server URL.
+  </p>
+  <p>
+    One reason for providing a value here is if Jenkins connects to the TFS server on the LAN using the short host name and the Jenkins instance is also accessible through the internet and so links to TFS should use the Fully-Qualified Domain Name (FQDN) of the TFS server.
   </p>
 </div>
