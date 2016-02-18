@@ -406,18 +406,34 @@ public class FunctionalTest {
     }
 
     public static int checkInEmptyFile(final EndToEndTfs.RunnerImpl tfsRunner) throws IOException {
+        return checkInFile(tfsRunner, "Add a file.", null);
+    }
+
+    public static int checkInFile(final EndToEndTfs.RunnerImpl tfsRunner, final String changeMessage, final String fileContents) throws IOException {
         final Workspace workspace = tfsRunner.getWorkspace();
         final File todoFile = new File(tfsRunner.getLocalBaseFolderFile(), "TODO.txt");
-        //noinspection ResultOfMethodCallIgnored
-        todoFile.createNewFile();
-        workspace.pendAdd(
-                new String[]{todoFile.getAbsolutePath()},
-                false,
-                null,
-                LockLevel.UNCHANGED,
-                GetOptions.NONE,
-                PendChangesOptions.NONE);
-        return tfsRunner.checkIn(tfsRunner.getTestCaseName() + " Add a file.");
+        final boolean alreadyExisted = todoFile.isFile();
+        FileUtils.writeStringToFile(todoFile, fileContents, "UTF-8");
+        final String[] paths = {todoFile.getAbsolutePath()};
+        if (alreadyExisted) {
+            workspace.pendEdit(
+                    paths,
+                    RecursionType.NONE,
+                    LockLevel.UNCHANGED,
+                    null,
+                    GetOptions.NONE,
+                    PendChangesOptions.NONE);
+        }
+        else {
+            workspace.pendAdd(
+                    paths,
+                    false,
+                    null,
+                    LockLevel.UNCHANGED,
+                    GetOptions.NONE,
+                    PendChangesOptions.NONE);
+        }
+        return tfsRunner.checkIn(tfsRunner.getTestCaseName() + " " + changeMessage);
     }
 
     @LocalData
