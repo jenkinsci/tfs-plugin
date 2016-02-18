@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.plugins.tfs.TeamFoundationServerScm" plugin="tfs@3.2.0">
+    <serverUrl></serverUrl>
+    <projectPath></projectPath>
+    <localPath>.</localPath>
+    <workspaceName>Hudson-${JOB_NAME}-${COMPUTERNAME}</workspaceName>
+    <password>pmJe5VYJg6gr2BdipI1sMGJScFwmT+pZbz7B2jISBrw=</password>
+    <userName>jenkins-tfs-plugin</userName>
+    <useUpdate>false</useUpdate>
+  </scm>
+  <assignedNode>master</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.SCMTrigger>
+      <spec></spec>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders/>
+  <publishers/>
+  <buildWrappers/>
+</project>

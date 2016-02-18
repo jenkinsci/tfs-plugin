@@ -13,6 +13,7 @@ import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.FilePath;
 import hudson.Functions;
 import hudson.Launcher;
+import hudson.ProxyConfiguration;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -47,6 +48,8 @@ import org.jvnet.hudson.test.JenkinsRecipe;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 import org.jvnet.hudson.test.recipes.LocalData;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,6 +57,7 @@ import javax.xml.xpath.XPathExpressionException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -690,6 +694,104 @@ C/C.txt
             final String configXmlPath = jobFolder + "config.xml";
             final File configXmlFile = new File(home, configXmlPath);
             XmlHelper.pokeValue(configXmlFile, "/project/scm/userPassword", scrambledPassword);
+        }
+    }
+
+    /**
+     * Verifies that we can still poll and GET from a server when going through a proxy server.
+     */
+    @LocalData
+    @EndToEndTfs(UseWebProxyServer.class)
+    @Test public void useWebProxyServer() throws Exception {
+        final Jenkins jenkins = j.jenkins;
+
+        // double-check proxy configuration was loaded and is available
+        final ProxyConfiguration proxyConfiguration = jenkins.proxy;
+        Assert.assertNotNull(proxyConfiguration);
+        final String proxyServerSetting = hudson.Util.fixEmpty(proxyConfiguration.name);
+        Assert.assertNotNull(proxyServerSetting);
+
+        final TaskListener taskListener = j.createTaskListener();
+        final EndToEndTfs.RunnerImpl tfsRunner = j.getTfsRunner();
+        final UseWebProxyServer innerRunner = tfsRunner.getInnerRunner(UseWebProxyServer.class);
+        final List<Project> projects = jenkins.getProjects();
+        final Project project = projects.get(0);
+
+        final HttpProxyServer proxyServer = innerRunner.getServer();
+        final LoggingFiltersSourceAdapter adapter = innerRunner.getAdapter();
+        try {
+            Assert.assertFalse(adapter.proxyWasUsed());
+
+            // first poll should report no changes since last build
+            final PollingResult firstPoll = project.poll(taskListener);
+
+            Assert.assertEquals(PollingResult.Change.NONE, firstPoll.change);
+            Assert.assertTrue(adapter.proxyWasUsed());
+
+            adapter.reset();
+            // make a change in source control
+            final int changeSet = checkInEmptyFile(tfsRunner);
+            Assert.assertTrue(changeSet >= 0);
+            Assert.assertFalse(adapter.proxyWasUsed());
+
+            // second poll should queue a build
+            final AbstractBuild firstBuild = runScmPollTrigger(project);
+
+            Assert.assertNotNull(firstBuild);
+            assertBuildSuccess(firstBuild);
+            Assert.assertTrue(adapter.proxyWasUsed());
+        }
+        finally {
+            proxyServer.stop();
+        }
+
+        // make a change in source control
+        final int changeSet = checkInFile(tfsRunner, "Now with content.", "1. Pick up vegetables.");
+        Assert.assertTrue(changeSet >= 0);
+        adapter.reset();
+
+        // third poll should claim "no changes" due to being unable to reach the proxy server
+        final InterceptingTaskListener itl = new InterceptingTaskListener(taskListener);
+        // TODO: this takes over 70 seconds to execute, because there's a retry with backoff
+        // We might be able to inject an interception that turns off the retry for this operation
+        final PollingResult thirdPoll = project.poll(itl);
+        Assert.assertEquals("Error during polling => NO_CHANGES", PollingResult.NO_CHANGES, thirdPoll);
+        final List<String> fatalErrors = itl.getFatalErrors();
+        Assert.assertEquals(1, fatalErrors.size());
+        Assert.assertFalse(adapter.proxyWasUsed());
+    }
+
+    public static class UseWebProxyServer extends CurrentChangesetInjector {
+
+        private final LoggingFiltersSourceAdapter adapter;
+        private final HttpProxyServer server;
+
+        public UseWebProxyServer() {
+            adapter = new LoggingFiltersSourceAdapter();
+            server =
+                DefaultHttpProxyServer
+                    .bootstrap()
+                    .withPort(0 /* "...let the system pick up an ephemeral port in a bind operation." */)
+                    .withFiltersSource(adapter)
+                    .start();
+
+        }
+
+        @Override public void decorateHome(final JenkinsRule jenkinsRule, final File home) throws Exception {
+            super.decorateHome(jenkinsRule, home);
+            final InetSocketAddress proxyAddress = server.getListenAddress();
+
+            final File proxyXmlFile = new File(home, "proxy.xml");
+            XmlHelper.pokeValue(proxyXmlFile, "/proxy/name", proxyAddress.getHostName());
+            XmlHelper.pokeValue(proxyXmlFile, "/proxy/port", Integer.toString(proxyAddress.getPort(), 10));
+        }
+
+        public HttpProxyServer getServer() {
+            return server;
+        }
+
+        public LoggingFiltersSourceAdapter getAdapter() {
+            return adapter;
         }
     }
 
