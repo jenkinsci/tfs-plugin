@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
@@ -71,6 +72,11 @@ public class MockableVersionControlClient implements Closable {
     public void deleteWorkspace(final Workspace workspace) {
         makeSureNotClosed();
         vcc.deleteWorkspace(workspace);
+    }
+
+    public TFSTeamProjectCollection getConnection() {
+        makeSureNotClosed();
+        return vcc.getConnection();
     }
 
     public VersionControlEventEngine getEventEngine() {
