@@ -40,9 +40,14 @@ public class Server implements ServerConfigurationProvider, Closable {
     private final Launcher launcher;
     private final TaskListener taskListener;
     private final TFSTeamProjectCollection tpc;
+    private final WebProxySettings webProxySettings;
     private MockableVersionControlClient mockableVcc;
 
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password) throws IOException {
+        this(launcher, taskListener, url, username, password, null);
+    }
+
+    public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, final WebProxySettings webProxySettings) throws IOException {
         this.launcher = launcher;
         this.taskListener = taskListener;
         this.url = url;
@@ -63,9 +68,12 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
 
         if (credentials != null) {
+            // TODO: if webProxySettings is null, retrieve from Jenkins
+            this.webProxySettings = webProxySettings;
             this.tpc = new TFSTeamProjectCollection(uri, credentials);
         }
         else {
+            this.webProxySettings = null;
             this.tpc = null;
         }
     }
@@ -125,6 +133,10 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public Launcher getLauncher() {
         return launcher;
+    }
+
+    public WebProxySettings getWebProxySettings() {
+        return webProxySettings;
     }
 
     public TaskListener getListener() {
