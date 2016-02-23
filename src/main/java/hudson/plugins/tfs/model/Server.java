@@ -74,7 +74,8 @@ public class Server implements ServerConfigurationProvider, Closable {
                 this.webProxySettings = webProxySettings;
             }
             else {
-                final ProxyConfiguration proxyConfiguration = determineProxyConfiguration();
+                final VirtualChannel channel = launcher != null ? launcher.getChannel() : null;
+                final ProxyConfiguration proxyConfiguration = determineProxyConfiguration(channel);
                 this.webProxySettings = new WebProxySettings(proxyConfiguration);
             }
             this.tpc = new TFSTeamProjectCollection(uri, credentials);
@@ -89,10 +90,30 @@ public class Server implements ServerConfigurationProvider, Closable {
         this(null, null, url, null, null);
     }
 
-    static ProxyConfiguration determineProxyConfiguration() {
+    static ProxyConfiguration determineProxyConfiguration(final VirtualChannel channel) {
         final Jenkins jenkins = Jenkins.getInstance();
         final ProxyConfiguration proxyConfiguration;
-        proxyConfiguration = jenkins.proxy;
+        if (jenkins == null) {
+            if (channel != null) {
+                try {
+                    proxyConfiguration = channel.call(new Callable<ProxyConfiguration, Throwable>() {
+                        public ProxyConfiguration call() throws Throwable {
+                            final Jenkins jenkins = Jenkins.getInstance();
+                            final ProxyConfiguration result = jenkins != null ? jenkins.proxy : null;
+                            return result;
+                        }
+                    });
+                } catch (final Throwable throwable) {
+                    throw new Error(throwable);
+                }
+            }
+            else {
+                proxyConfiguration = null;
+            }
+        }
+        else {
+            proxyConfiguration = jenkins.proxy;
+        }
         return proxyConfiguration;
     }
 
