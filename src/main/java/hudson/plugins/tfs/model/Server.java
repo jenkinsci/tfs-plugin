@@ -6,6 +6,7 @@ import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
 import hudson.Launcher;
+import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 
@@ -28,6 +29,7 @@ import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.util.Closable;
 import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
+import jenkins.model.Jenkins;
 
 public class Server implements ServerConfigurationProvider, Closable {
     
@@ -68,8 +70,13 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
 
         if (credentials != null) {
-            // TODO: if webProxySettings is null, retrieve from Jenkins
-            this.webProxySettings = webProxySettings;
+            if (webProxySettings != null) {
+                this.webProxySettings = webProxySettings;
+            }
+            else {
+                final ProxyConfiguration proxyConfiguration = determineProxyConfiguration();
+                this.webProxySettings = new WebProxySettings(proxyConfiguration);
+            }
             this.tpc = new TFSTeamProjectCollection(uri, credentials);
         }
         else {
@@ -80,6 +87,13 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     Server(String url) throws IOException {
         this(null, null, url, null, null);
+    }
+
+    static ProxyConfiguration determineProxyConfiguration() {
+        final Jenkins jenkins = Jenkins.getInstance();
+        final ProxyConfiguration proxyConfiguration;
+        proxyConfiguration = jenkins.proxy;
+        return proxyConfiguration;
     }
 
     public Project getProject(String projectPath) {
