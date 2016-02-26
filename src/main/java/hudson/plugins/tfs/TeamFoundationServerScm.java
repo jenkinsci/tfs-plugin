@@ -565,6 +565,9 @@ public class TeamFoundationServerScm extends SCM {
                     ? Change.NONE
                     : Change.SIGNIFICANT;
             return new PollingResult(tfsBaseline, tfsRemote, change);
+        } catch (final Exception e) {
+            e.printStackTrace(listener.fatalError(e.getMessage()));
+            return PollingResult.NO_CHANGES;
         } finally {
             server.close();
         }

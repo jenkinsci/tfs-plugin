@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.model.WebProxySettings;
 
 public interface ServerConfigurationProvider {
 
@@ -11,4 +12,6 @@ public interface ServerConfigurationProvider {
     public String getUserPassword();
 
     public TaskListener getListener();
+
+    public WebProxySettings getWebProxySettings();
 }

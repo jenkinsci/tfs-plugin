@@ -24,13 +24,23 @@ public class IntegrationTestHelper {
     private final String userPassword;
 
     public IntegrationTestHelper() throws URISyntaxException {
-        this(getTfsServerName());
+        this(
+                propertyOrFail("tfs_server_name"),
+                propertyOrNull("tfs_user_name"),
+                propertyOrNull("tfs_user_password")
+        );
     }
 
     public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
+        this(
+                tfsServerName,
+                null,
+                null
+        );
+    }
+
+    public IntegrationTestHelper(final String tfsServerName, final String tfsUserName, final String tfsUserPassword) throws URISyntaxException {
         final URI serverUri;
-        final String tfsUserName = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_name"));
-        final String tfsUserPassword = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_user_password"));
         if (tfsServerName.endsWith(".visualstudio.com")) {
             serverUri = URIUtils.createURI("https", tfsServerName, 443, "DefaultCollection", null, null);
             this.userName = tfsUserName;
@@ -41,6 +51,19 @@ public class IntegrationTestHelper {
             this.userPassword = (tfsUserPassword != null) ? tfsUserPassword : "for-test-only";
         }
         serverUrl = serverUri.toString();
+    }
+
+    static String propertyOrNull(final String propertyName) {
+        final String value = System.getProperty(propertyName);
+        return hudson.Util.fixEmptyAndTrim(value);
+    }
+
+    static String propertyOrFail(final String propertyName) {
+        final String result = propertyOrNull(propertyName);
+        if (result == null) {
+            Assert.fail("The '" + propertyName + "' property MUST be provided a [non-empty] value.");
+        }
+        return result;
     }
 
     /**
@@ -56,12 +79,6 @@ public class IntegrationTestHelper {
 
     public String getUserPassword() {
         return userPassword;
-    }
-
-    public static String getTfsServerName() {
-        final String result = hudson.Util.fixEmptyAndTrim(System.getProperty("tfs_server_name"));
-        Assert.assertNotNull("The 'tfs_server_name' property was not provided a [non-empty] value.", result);
-        return result;
     }
 
     /**

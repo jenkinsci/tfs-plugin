@@ -5,7 +5,9 @@ import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementException;
 import com.microsoft.tfs.core.clients.webservices.IdentityManagementService;
+import com.microsoft.tfs.core.httpclient.ProxyHost;
 import hudson.Launcher;
+import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 
@@ -28,6 +30,7 @@ import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.util.Closable;
 import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
+import jenkins.model.Jenkins;
 
 public class Server implements ServerConfigurationProvider, Closable {
     
@@ -40,9 +43,14 @@ public class Server implements ServerConfigurationProvider, Closable {
     private final Launcher launcher;
     private final TaskListener taskListener;
     private final TFSTeamProjectCollection tpc;
+    private final WebProxySettings webProxySettings;
     private MockableVersionControlClient mockableVcc;
 
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password) throws IOException {
+        this(launcher, taskListener, url, username, password, null);
+    }
+
+    public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, final WebProxySettings webProxySettings) throws IOException {
         this.launcher = launcher;
         this.taskListener = taskListener;
         this.url = url;
@@ -63,15 +71,54 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
 
         if (credentials != null) {
-            this.tpc = new TFSTeamProjectCollection(uri, credentials);
+            if (webProxySettings != null) {
+                this.webProxySettings = webProxySettings;
+            }
+            else {
+                final VirtualChannel channel = launcher != null ? launcher.getChannel() : null;
+                final ProxyConfiguration proxyConfiguration = determineProxyConfiguration(channel);
+                this.webProxySettings = new WebProxySettings(proxyConfiguration);
+            }
+            final String host = uri.getHost();
+            final ProxyHost proxyHost = this.webProxySettings.toProxyHost(host);
+            final ModernConnectionAdvisor advisor = new ModernConnectionAdvisor(proxyHost);
+            this.tpc = new TFSTeamProjectCollection(uri, credentials, advisor);
         }
         else {
+            this.webProxySettings = null;
             this.tpc = null;
         }
     }
 
     Server(String url) throws IOException {
         this(null, null, url, null, null);
+    }
+
+    static ProxyConfiguration determineProxyConfiguration(final VirtualChannel channel) {
+        final Jenkins jenkins = Jenkins.getInstance();
+        final ProxyConfiguration proxyConfiguration;
+        if (jenkins == null) {
+            if (channel != null) {
+                try {
+                    proxyConfiguration = channel.call(new Callable<ProxyConfiguration, Throwable>() {
+                        public ProxyConfiguration call() throws Throwable {
+                            final Jenkins jenkins = Jenkins.getInstance();
+                            final ProxyConfiguration result = jenkins != null ? jenkins.proxy : null;
+                            return result;
+                        }
+                    });
+                } catch (final Throwable throwable) {
+                    throw new Error(throwable);
+                }
+            }
+            else {
+                proxyConfiguration = null;
+            }
+        }
+        else {
+            proxyConfiguration = jenkins.proxy;
+        }
+        return proxyConfiguration;
     }
 
     public Project getProject(String projectPath) {
@@ -125,6 +172,10 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public Launcher getLauncher() {
         return launcher;
+    }
+
+    public WebProxySettings getWebProxySettings() {
+        return webProxySettings;
     }
 
     public TaskListener getListener() {

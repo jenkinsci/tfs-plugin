@@ -4,7 +4,10 @@ import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVers
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
+import hudson.plugins.tfs.model.WebProxySettings;
 import hudson.remoting.Callable;
+import hudson.util.Secret;
+import hudson.util.SecretOverride;
 import org.apache.commons.collections.IteratorUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +20,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -79,6 +85,26 @@ public abstract class AbstractCallableCommandTest {
 
             public TaskListener getListener() {
                 return null;
+            }
+
+            public WebProxySettings getWebProxySettings() {
+                final List<Pattern> patterns = Arrays.asList(
+                        Pattern.compile(".+\\.com"),
+                        Pattern.compile(".+\\.org")
+                );
+                final Secret secret;
+                final SecretOverride secretOverride = new SecretOverride();
+                try {
+                    secret = Secret.fromString("password");
+                }
+                finally {
+                    try {
+                        secretOverride.close();
+                    }
+                    catch (final IOException ignored) {
+                    }
+                }
+                return new WebProxySettings("localhost", 8080, patterns, "user", secret);
             }
         };
         final AbstractCallableCommand command = createCommand(server);
