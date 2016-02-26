@@ -162,14 +162,4 @@ public class TeamSystemWebAccessBrowserTest {
         changeSet.add(item);
         assertNull("The diff link should be null for new files", browser.getDiffLink(item));
     }
-    
-    @Test public void assertDescriptorBaseUrlRemovesName() throws Exception {
-        String expected = TeamSystemWebAccessBrowser.DescriptorImpl.getBaseUrl("http://server:80/UI/Pages/Scc/ViewChangeset.aspx?changeset=62643");
-        assertEquals("The base url was incorrect", "http://server:80/UI/Pages/Scc/", expected);
-    }
-    
-    @Test public void assertDescriptorBaseUrlDoesNotRemoveLastPath() throws Exception {
-        String expected = TeamSystemWebAccessBrowser.DescriptorImpl.getBaseUrl("http://server:80/UI/Pages/Scc/");
-        assertEquals("The base url was incorrect", "http://server:80/UI/Pages/Scc/", expected);
-    }
 }

@@ -106,10 +106,5 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         public String getDisplayName() {
             return "Team System Web Access";
         }
-        
-        public static String getBaseUrl(String urlExample) throws MalformedURLException {
-        	URL url = new URL(urlExample);
-        	return new URL(url.getProtocol(), url.getHost(), url.getPort(), String.format("/%s", FilenameUtils.getPath(url.getPath()))).toString();
-        }
     }
 }
