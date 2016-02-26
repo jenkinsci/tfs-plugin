@@ -48,7 +48,8 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         if (url != null) {
             baseUrl = url;
         } else {
-            baseUrl = getServerConfiguration(changeSet);
+            String scmUrl = getServerConfiguration(changeSet);
+            baseUrl = normalizeToEndWithSlash(new URL(scmUrl)).toString();
         }
         return baseUrl;
     }

@@ -8,6 +8,7 @@ import hudson.model.AbstractProject;
 import hudson.plugins.tfs.TeamFoundationServerScm;
 import hudson.plugins.tfs.model.ChangeLogSet;
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.model.ChangeSet.Item;
 
 import java.net.URL;
 
@@ -47,13 +48,61 @@ public class TeamSystemWebAccessBrowserTest {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject<?,?> project = mock(AbstractProject.class);
         when(build.getProject()).thenReturn(project);
-        when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80", null, null, null, false, null, null, (Secret) null));
+        when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80/tfs/collection/", "$/project/folder/folder/branch", null, null, false, null, null, (Secret) null));
         
         ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
         new ChangeLogSet(build, new ChangeSet[]{ changeset});        
-        TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser("");
+        TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser(""); // configured but no URL specified
+
         URL actual = browser.getChangeSetLink(changeset);
-        assertEquals("The change set link was incorrect", "http://server:80/_versionControl/changeset?id=62643", actual.toString());
+        assertEquals("The change set link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset?id=62643", actual.toString());
+    }
+
+    @Test public void assertChangeSetLinkUsesScmConfigurationNoSlash() throws Exception {
+      AbstractBuild build = mock(AbstractBuild.class);
+      AbstractProject<?,?> project = mock(AbstractProject.class);
+      when(build.getProject()).thenReturn(project);
+      // the server URL has not trailing slash...
+      when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80/tfs/collection", "$/project/folder/folder/branch", null, null, false, null, null, (Secret) null));
+
+      ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
+      new ChangeLogSet(build, new ChangeSet[]{ changeset});
+      TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser(""); // configured but no URL specified
+
+      URL actual = browser.getChangeSetLink(changeset);
+      assertEquals("The change set link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset/62643", actual.toString());
+    }
+
+    @Test public void assertFileLinkUsesScmConfiguration() throws Exception {
+      AbstractBuild build = mock(AbstractBuild.class);
+      AbstractProject<?,?> project = mock(AbstractProject.class);
+      when(build.getProject()).thenReturn(project);
+      when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80/tfs/collection", "$/project/folder/folder/branch", null, null, false, null, null, (Secret) null));
+
+      ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
+      ChangeSet.Item item = new Item("$/project/folder/folder/branch/some/path/to/some/file.txt", "action");
+      changeset.add(item);
+      new ChangeLogSet(build, new ChangeSet[]{ changeset});
+      TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser(""); // configured but no URL specified
+
+      URL actual = browser.getFileLink(item);
+      assertEquals("The file link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset/62643#path=%24%2Fproject%2Ffolder%2Ffolder%2Fbranch%2Fsome%2Fpath%2Fto%2Fsome%2Ffile.txt&_a=contents", actual.toString());
+    }
+
+    @Test public void assertDiffLinkUsesScmConfiguration() throws Exception {
+      AbstractBuild build = mock(AbstractBuild.class);
+      AbstractProject<?,?> project = mock(AbstractProject.class);
+      when(build.getProject()).thenReturn(project);
+      when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80/tfs/collection", "$/project/folder/folder/branch", null, null, false, null, null, (Secret) null));
+
+      ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
+      new ChangeLogSet(build, new ChangeSet[]{ changeset});
+      ChangeSet.Item item = new Item("$/project/folder/folder/branch/some/path/to/some/file.txt", "action");
+      changeset.add(item);
+
+      TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser(""); // configured but no URL specified
+      URL actual = browser.getDiffLink(item);
+      assertEquals("The diff link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset/62643#path=%24%2Fproject%2Ffolder%2Ffolder%2Fbranch%2Fsome%2Fpath%2Fto%2Fsome%2Ffile.txt&_a=compare", actual.toString());
     }
 
     @Test public void assertFileLink() throws Exception {
@@ -62,7 +111,7 @@ public class TeamSystemWebAccessBrowserTest {
         ChangeSet.Item item = new ChangeSet.Item("$/Project/Folder/file.cs", "add");
         changeSet.add(item);
         URL actual = browser.getFileLink(item);
-        assertEquals("The change set link was incorrect", "http://tfs:8080/_versionControl/changeset?id=99#path=%24%2FProject%2FFolder%2Ffile.cs&_a=contents", actual.toString());
+        assertEquals("The file link was incorrect", "http://tfs:8080/_versionControl/changeset?id=99#path=%24%2FProject%2FFolder%2Ffile.cs&_a=contents", actual.toString());
     }
 
     @Test public void assertDiffLink() throws Exception {
@@ -71,7 +120,7 @@ public class TeamSystemWebAccessBrowserTest {
         ChangeSet.Item item = new ChangeSet.Item("$/Project/Folder/file.cs", "edit");
         changeSet.add(item);
         URL actual = browser.getDiffLink(item);
-        assertEquals("The change set link was incorrect", "http://tfs:8080/_versionControl/changeset?id=99#path=%24%2FProject%2FFolder%2Ffile.cs&_a=compare", actual.toString());
+        assertEquals("The diff link was incorrect", "http://tfs:8080/_versionControl/changeset?id=99#path=%24%2FProject%2FFolder%2Ffile.cs&_a=compare", actual.toString());
     }
 
     @Test public void assertNullDiffLinkForAddedFile() throws Exception {
