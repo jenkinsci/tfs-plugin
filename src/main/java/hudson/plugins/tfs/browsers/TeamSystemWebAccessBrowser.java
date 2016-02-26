@@ -90,10 +90,6 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         }
         return createChangeSetItemLink(item, "compare");
     }
-    
-    private String getPreviousChangeSetVersion(ChangeSet changeset) throws NumberFormatException {
-        return Integer.toString(Integer.parseInt(changeset.getVersion()) - 1);
-    }
 
     @Extension
     public static final class DescriptorImpl extends Descriptor<RepositoryBrowser<?>> {
