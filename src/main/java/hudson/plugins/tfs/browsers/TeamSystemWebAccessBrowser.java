@@ -44,13 +44,11 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
     }
 
     private String getBaseUrlString(ChangeSet changeSet) throws MalformedURLException {
-        String baseUrl;
-        if (url != null) {
-            baseUrl = normalizeToEndWithSlash(new URL(url)).toString();
-        } else {
-            String scmUrl = getServerConfiguration(changeSet);
-            baseUrl = normalizeToEndWithSlash(new URL(scmUrl)).toString();
+        String baseUrl = url;
+        if (baseUrl == null) {
+            baseUrl = getServerConfiguration(changeSet);
         }
+        baseUrl = normalizeToEndWithSlash(new URL(baseUrl)).toString();
         return baseUrl;
     }
 
