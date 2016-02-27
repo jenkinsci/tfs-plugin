@@ -26,6 +26,20 @@ public class TeamSystemWebAccessBrowserTest {
         assertEquals("The change set link was incorrect", "http://tfs:8080/_versionControl/changeset?id=99", actual.toString());
     }
 
+    @Test public void assertChangeSetLinkWithRealisticServerUrlWithPort() throws Exception {
+        TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser("http://tfs:8080/tfs/coll");
+        ChangeSet changeSet = new ChangeSet("99", null, "user", "comment");
+        URL actual = browser.getChangeSetLink(changeSet);
+        assertEquals("The change set link was incorrect", "http://tfs:8080/tfs/coll/_versionControl/changeset?id=99", actual.toString());
+    }
+
+    @Test public void assertChangeSetLinkWithRealisticServerUrl() throws Exception {
+        TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser("http://tfs/tfs/coll");
+        ChangeSet changeSet = new ChangeSet("99", null, "user", "comment");
+        URL actual = browser.getChangeSetLink(changeSet);
+        assertEquals("The change set link was incorrect", "http://tfs/tfs/coll/_versionControl/changeset?id=99", actual.toString());
+    }
+
 	@Bug(7394)
 	@Test
 	public void assertChangeSetLinkWithOnlyServerUrl() throws Exception {
@@ -70,7 +84,7 @@ public class TeamSystemWebAccessBrowserTest {
       TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser(""); // configured but no URL specified
 
       URL actual = browser.getChangeSetLink(changeset);
-      assertEquals("The change set link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset/62643", actual.toString());
+      assertEquals("The change set link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset?id=62643", actual.toString());
     }
 
     @Test public void assertFileLinkUsesScmConfiguration() throws Exception {
@@ -86,7 +100,7 @@ public class TeamSystemWebAccessBrowserTest {
       TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser(""); // configured but no URL specified
 
       URL actual = browser.getFileLink(item);
-      assertEquals("The file link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset/62643#path=%24%2Fproject%2Ffolder%2Ffolder%2Fbranch%2Fsome%2Fpath%2Fto%2Fsome%2Ffile.txt&_a=contents", actual.toString());
+      assertEquals("The file link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset?id=62643#path=%24%2Fproject%2Ffolder%2Ffolder%2Fbranch%2Fsome%2Fpath%2Fto%2Fsome%2Ffile.txt&_a=contents", actual.toString());
     }
 
     @Test public void assertDiffLinkUsesScmConfiguration() throws Exception {
@@ -102,7 +116,7 @@ public class TeamSystemWebAccessBrowserTest {
 
       TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser(""); // configured but no URL specified
       URL actual = browser.getDiffLink(item);
-      assertEquals("The diff link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset/62643#path=%24%2Fproject%2Ffolder%2Ffolder%2Fbranch%2Fsome%2Fpath%2Fto%2Fsome%2Ffile.txt&_a=compare", actual.toString());
+      assertEquals("The diff link was incorrect", "http://server:80/tfs/collection/_versionControl/changeset?id=62643#path=%24%2Fproject%2Ffolder%2Ffolder%2Fbranch%2Fsome%2Fpath%2Fto%2Fsome%2Ffile.txt&_a=compare", actual.toString());
     }
 
     @Test public void assertFileLink() throws Exception {
@@ -114,6 +128,15 @@ public class TeamSystemWebAccessBrowserTest {
         assertEquals("The file link was incorrect", "http://tfs:8080/_versionControl/changeset?id=99#path=%24%2FProject%2FFolder%2Ffile.cs&_a=contents", actual.toString());
     }
 
+    @Test public void assertFileLinkWithRealisticServerUrl() throws Exception {
+        TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser("http://tfs:8080/tfs/coll");
+        ChangeSet changeSet = new ChangeSet("99", null, "user", "comment");
+        ChangeSet.Item item = new ChangeSet.Item("$/Project/Folder/file.cs", "add");
+        changeSet.add(item);
+        URL actual = browser.getFileLink(item);
+        assertEquals("The file link was incorrect", "http://tfs:8080/tfs/coll/_versionControl/changeset?id=99#path=%24%2FProject%2FFolder%2Ffile.cs&_a=contents", actual.toString());
+    }
+
     @Test public void assertDiffLink() throws Exception {
         TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser("http://tfs:8080/");
         ChangeSet changeSet = new ChangeSet("99", null, "user", "comment");
@@ -121,6 +144,15 @@ public class TeamSystemWebAccessBrowserTest {
         changeSet.add(item);
         URL actual = browser.getDiffLink(item);
         assertEquals("The diff link was incorrect", "http://tfs:8080/_versionControl/changeset?id=99#path=%24%2FProject%2FFolder%2Ffile.cs&_a=compare", actual.toString());
+    }
+
+    @Test public void assertDiffLinkWithRealisticServerUrl() throws Exception {
+        TeamSystemWebAccessBrowser browser = new TeamSystemWebAccessBrowser("http://tfs:8080/tfs/coll");
+        ChangeSet changeSet = new ChangeSet("99", null, "user", "comment");
+        ChangeSet.Item item = new ChangeSet.Item("$/Project/Folder/file.cs", "edit");
+        changeSet.add(item);
+        URL actual = browser.getDiffLink(item);
+        assertEquals("The diff link was incorrect", "http://tfs:8080/tfs/coll/_versionControl/changeset?id=99#path=%24%2FProject%2FFolder%2Ffile.cs&_a=compare", actual.toString());
     }
 
     @Test public void assertNullDiffLinkForAddedFile() throws Exception {
