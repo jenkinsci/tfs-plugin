@@ -719,6 +719,7 @@ C/C.txt
 
         final HttpProxyServer proxyServer = innerRunner.getServer();
         final LoggingFiltersSourceAdapter adapter = innerRunner.getAdapter();
+        final int previousChangeSet;
         try {
             Assert.assertFalse(adapter.proxyWasUsed());
 
@@ -730,8 +731,8 @@ C/C.txt
 
             adapter.reset();
             // make a change in source control
-            final int changeSet = checkInEmptyFile(tfsRunner);
-            Assert.assertTrue(changeSet >= 0);
+            previousChangeSet = checkInEmptyFile(tfsRunner);
+            Assert.assertTrue(previousChangeSet >= 0);
             Assert.assertFalse(adapter.proxyWasUsed());
 
             // second poll should queue a build
@@ -746,7 +747,7 @@ C/C.txt
         }
 
         // make a change in source control
-        final String fileContents = "1. Pick up vegetables.";
+        final String fileContents = "1. Pick up vegetables.\nPrevious changeset:" + previousChangeSet;
         final int changeSet = checkInFile(tfsRunner, "Now with content.", fileContents);
         Assert.assertTrue(changeSet >= 0);
         adapter.reset();
