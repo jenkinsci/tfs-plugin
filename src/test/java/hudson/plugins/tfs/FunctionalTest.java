@@ -746,7 +746,8 @@ C/C.txt
         }
 
         // make a change in source control
-        final int changeSet = checkInFile(tfsRunner, "Now with content.", "1. Pick up vegetables.");
+        final String fileContents = "1. Pick up vegetables.";
+        final int changeSet = checkInFile(tfsRunner, "Now with content.", fileContents);
         Assert.assertTrue(changeSet >= 0);
         adapter.reset();
 
