@@ -6,6 +6,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.plugins.tfs.TeamFoundationServerScm;
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.util.QueryString;
 import hudson.scm.EditType;
 import hudson.scm.RepositoryBrowser;
 import hudson.scm.SCM;
@@ -43,52 +44,52 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
     }
 
     private String getBaseUrlString(ChangeSet changeSet) throws MalformedURLException {
-        String baseUrl;
-        if (url != null) {
-            baseUrl = DescriptorImpl.getBaseUrl(url);
-        } else {
-            baseUrl = String.format("%s/", getServerConfiguration(changeSet)); 
+        String baseUrl = url;
+        if (baseUrl == null) {
+            baseUrl = getServerConfiguration(changeSet);
         }
+        baseUrl = normalizeToEndWithSlash(new URL(baseUrl)).toString();
         return baseUrl;
     }
 
-    /*
-     * http://tswaserver:8090/cs.aspx?cs=99
+    /**
+     * Gets the link to a specific change set.
      */
     @Override
-    public URL getChangeSetLink(ChangeSet changeSet) throws IOException {
-        return new URL(String.format("%scs.aspx?cs=%s", getBaseUrlString(changeSet), changeSet.getVersion()));
+    public URL getChangeSetLink(final ChangeSet changeSet) throws IOException {
+        final String baseUrlString = getBaseUrlString(changeSet);
+        final URL baseUrl = new URL(baseUrlString);
+        final QueryString qs = new QueryString();
+        qs.put("id", changeSet.getVersion());
+        final URL changeSetUrl = new URL(baseUrl, "_versionControl/changeset?" + qs.toString());
+        return changeSetUrl;
     }
 
-    /*
-     * http://tswaserver:8090/view.aspx?path=$/Project/Folder/file.cs&cs=99
-     */
-    public URL getFileLink(ChangeSet.Item item) throws IOException {
-        return new URL(String.format("%sview.aspx?path=%s&cs=%s", getBaseUrlString(item.getParent()), item.getPath(), item.getParent().getVersion()));
+    URL createChangeSetItemLink(final ChangeSet.Item item, final String action) throws IOException {
+        final ChangeSet changeSet = item.getParent();
+        final URL changeSetUrl = getChangeSetLink(changeSet);
+        final QueryString qs = new QueryString();
+        qs.put("path", item.getPath());
+        qs.put("version", changeSet.getVersion());
+        qs.put("_a", action);
+        return new URL(changeSetUrl, "#" + qs.toString());
     }
 
-    /*
-     * http://tswaserver:8090/diff.aspx?opath=$/Project/Folder/file.cs&ocs=99&mpath=$/Project/Folder/file.cs&mcs=98
+    /**
+     * Gets the link for a specific file in a change set.
      */
-    public URL getDiffLink(ChangeSet.Item item) throws IOException {
-        ChangeSet parent = item.getParent();
+    public URL getFileLink(final ChangeSet.Item item) throws IOException {
+        return createChangeSetItemLink(item, "contents");
+    }
+
+    /**
+     * Gets the link to compare a specific file in a change set.
+     */
+    public URL getDiffLink(final ChangeSet.Item item) throws IOException {
         if (item.getEditType() != EditType.EDIT) {
             return null;
         }
-        try {
-            return new URL(String.format("%sdiff.aspx?opath=%s&ocs=%s&mpath=%s&mcs=%s", 
-                    getBaseUrlString(parent), 
-                    item.getPath(),
-                    getPreviousChangeSetVersion(parent), 
-                    item.getPath(),
-                    parent.getVersion()));
-        } catch (NumberFormatException nfe) {
-            return null;
-        }
-    }
-    
-    private String getPreviousChangeSetVersion(ChangeSet changeset) throws NumberFormatException {
-        return Integer.toString(Integer.parseInt(changeset.getVersion()) - 1);
+        return createChangeSetItemLink(item, "compare");
     }
 
     @Extension
@@ -101,11 +102,6 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         @Override
         public String getDisplayName() {
             return "Team System Web Access";
-        }
-        
-        public static String getBaseUrl(String urlExample) throws MalformedURLException {
-        	URL url = new URL(urlExample);
-        	return new URL(url.getProtocol(), url.getHost(), url.getPort(), String.format("/%s", FilenameUtils.getPath(url.getPath()))).toString();
         }
     }
 }
