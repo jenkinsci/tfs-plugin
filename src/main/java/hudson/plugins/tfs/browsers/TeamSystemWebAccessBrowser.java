@@ -70,6 +70,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         final URL changeSetUrl = getChangeSetLink(changeSet);
         final QueryString qs = new QueryString();
         qs.put("path", item.getPath());
+        qs.put("version", changeSet.getVersion());
         qs.put("_a", action);
         return new URL(changeSetUrl, "#" + qs.toString());
     }
