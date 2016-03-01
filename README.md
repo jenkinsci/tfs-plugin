@@ -28,19 +28,17 @@ The following sub-sections list the various versions of software that were teste
 
 ## Team Foundation Server (TFS) / Visual Studio Team Services (VSTS)
 
-The plugin has been tested against [Visual Studio Team Services], as well as the following versions of Team Foundation Server:
+The following table indicates compatibility and support for versions of TFS and VSTS.
 
-* 2012 RTM
-* 2013 RTM
-* 2015 RTM
-
-> :warning:  The following versions of TFS are **no longer supported** and may only _partially work_ with the plugin: :warning:
-
-> Product | Mainstream Support End Date
-> ------- | ---------------------------
-> Microsoft Visual Studio Team Foundation Server 2010 | [2015/07/14](https://support.microsoft.com/en-us/lifecycle?p1=15011)
-> Microsoft Visual Studio Team System 2008 Team Foundation Server | [2013/04/09](https://support.microsoft.com/en-us/lifecycle?p1=13083)
-> Microsoft Visual Studio 2005 Team Foundation Server | [2011/07/12](https://support.microsoft.com/en-us/lifecycle?p1=10449)
+> Version | Supported by the TFS plugin? | Mainstream Support End Date
+> ------- | ------ | ---------------------------
+> [Visual Studio Team Services] | :white_check_mark: | n/a
+> Visual Studio Team Foundation Server 2015 | :white_check_mark: | [2020/10/13](https://support.microsoft.com/en-us/lifecycle?p1=18576)
+> Microsoft Visual Studio Team Foundation Server 2013 | :white_check_mark: | [2019/04/09](https://support.microsoft.com/en-us/lifecycle?p1=17358)
+> Microsoft Visual Studio Team Foundation Server 2012 | :white_check_mark: | [2018/01/09](https://support.microsoft.com/en-us/lifecycle?p1=16804)
+> Microsoft Visual Studio Team Foundation Server 2010 | :x: | :warning: [2015/07/14](https://support.microsoft.com/en-us/lifecycle?p1=15011)
+> Microsoft Visual Studio Team System 2008 Team Foundation Server | :x: | :warning: [2013/04/09](https://support.microsoft.com/en-us/lifecycle?p1=13083)
+> Microsoft Visual Studio 2005 Team Foundation Server | :x: | :warning: [2011/07/12](https://support.microsoft.com/en-us/lifecycle?p1=10449)
 
 ## Operating Systems
 
