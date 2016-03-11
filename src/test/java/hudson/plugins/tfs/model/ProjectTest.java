@@ -59,10 +59,16 @@ public class ProjectTest extends SwedishLocaleTestCase {
     private UserLookup createMockUserLookup(String accountName, String displayName, String emailAddress) {
         UserLookup userLookup = mock(UserLookup.class);
         User user = mock(User.class);
-        // this portion stolen from User.get()
-        final String id = accountName.replace('\\', '_').replace('/', '_').replace('<','_')
-                .replace('>','_');  // 4 replace() still faster than regex
-        // end stolen portion
+
+        //should put this in a utility/getter function somewhere
+        String id;
+        String[] split = accountName.split("\\\\");
+        if (split.length == 2) {
+            id = split[1];
+        } else {
+            id = accountName;
+        }
+
         when(user.getId()).thenReturn(id);
         when(user.getDisplayName()).thenReturn(displayName);
         when(user.getProperty(Mailer.UserProperty.class)).thenReturn(new Mailer.UserProperty(emailAddress));
@@ -91,7 +97,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
 
         final User author = actual.getAuthor();
         assertEquals("The version was incorrect", "12472", actual.getVersion());
-        assertEquals("The author's user ID was incorrect", "EXAMPLE_ljenkins", author.getId());
+        assertEquals("The author's user ID was incorrect", "ljenkins", author.getId());
         assertEquals("The author's display name was incorrect", userDisplayName, author.getDisplayName());
         final String actualEmailAddress = author.getProperty(Mailer.UserProperty.class).getAddress();
         assertEquals("The author's e-mail address was incorrect", userEmailAddress, actualEmailAddress);

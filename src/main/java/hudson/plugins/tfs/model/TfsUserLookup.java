@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
@@ -26,13 +27,24 @@ public class TfsUserLookup implements UserLookup {
      * @param accountName Windows NT account name: domain\alias.
      */
     public User find(String accountName) {
-        LOGGER.fine("Looking up Jenkins user for TFS account '%s'.");
-        final User jenkinsUser = User.get(accountName);
+
+        // split username from domain
+        String accountNameWithoutDomain;
+        String[] split = accountName.split("\\\\");
+        if (split.length == 2) {
+            accountNameWithoutDomain = split[1];
+        } else {
+            accountNameWithoutDomain = accountName;
+        }
+
+        LOGGER.log(Level.FINE, "Looking up Jenkins user for TFS account '%s'.", accountName);
+        final User jenkinsUser = User.get(accountNameWithoutDomain);
         Mailer.UserProperty mailerProperty = jenkinsUser.getProperty(Mailer.UserProperty.class);
         if (mailerProperty == null || mailerProperty.getAddress() == null || mailerProperty.getAddress().length() == 0) {
+            LOGGER.log(Level.FINE, "No Mailer.UserProperty defined for '%s', looking in TFS", accountName);
             final TeamFoundationIdentity tfsUser = ims.readIdentity(
                 IdentitySearchFactor.ACCOUNT_NAME,
-                accountName,
+                accountName, //name WITH domain for TFS
                 MembershipQuery.NONE,
                 ReadIdentityOptions.NONE
             );
@@ -41,6 +53,7 @@ public class TfsUserLookup implements UserLookup {
                 jenkinsUser.setFullName(displayName);
                 final String emailAddress = (String) tfsUser.getProperty("Mail");
                 if (emailAddress != null) {
+                    LOGGER.log(Level.FINE, "Retrieved email '%s' from TFS", emailAddress);
                     mailerProperty = new Mailer.UserProperty(emailAddress);
                     try {
                         jenkinsUser.addProperty(mailerProperty);
