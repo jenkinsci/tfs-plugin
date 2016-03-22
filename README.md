@@ -83,7 +83,7 @@ Field | Description
 `Local workfolder` | The name of the local work folder. The specified folder will contain the files retrieved from the repository. Default is `.`, ie the files will be downloaded into the Hudson workspace folder.
 `Workspace name` | The name of the workspace that Jenkins should use when creating and deleting workspaces on the server. The workspace name supports three macros; `${JOB_NAME}` is replaced by the job name, `${USER_NAME}` is replaced by the user name Jenkins is running as and `${NODE_NAME}` is replaced by the name of the node. Default workspace name is `Hudson-${JOB_NAME}-${NODE_NAME}`.
 `Cloaked paths` | A collection of server paths to cloak to exclude from the workspace and from the build trigger. Multiple entries must be placed onto separate lines.
-`Repository browser` | Select `Team System Web Access` to turn on links inside Jenkins jobs (in the **Changes** page) back to TFS / VSTS, for easier traceability.  If the TFS server is reached by users through a different URL than that provided in `Server URL`, such as the Fully-Qualified Domain Name (FQDN), provide a value for the `URL` sub-field. 
+`Repository browser` | Select `Microsoft Team Foundation Server/Visual Studio Team Services` to turn on links inside Jenkins jobs (in the **Changes** page) back to TFS / VSTS, for easier traceability.  If the TFS server is reached by users through a different URL than that provided in `Server URL`, such as the Fully-Qualified Domain Name (FQDN), provide a value for the `URL` sub-field. 
 
 ### User name and password
 
