@@ -77,11 +77,12 @@ public class TFSLabeler extends Notifier {
 
             Computer computer = Computer.currentComputer();
             String normalizedLabelName = computeDynamicValue(build, getLabelName());
-            String tfsWorkspace = computeDynamicValue(build, tfsScm.getWorkspaceName(build, computer));
-
+            String tfsWorkspace = tfsScm.getWorkspaceName(build, computer);
+            String tfsProjectPath = computeDynamicValue(build, tfsScm.getProjectPath());
+            
             try {
-                logger.info(String.format("Create label '%s' on workspace '%s'", normalizedLabelName, tfsWorkspace));
-                LabelCommand labelCommand = new LabelCommand(server, normalizedLabelName, tfsWorkspace, tfsScm.getProjectPath());
+                logger.info(String.format("Create label '%s' on workspace '%s' with project path '%s' ", normalizedLabelName, tfsWorkspace, tfsProjectPath));
+                LabelCommand labelCommand = new LabelCommand(server, normalizedLabelName, tfsWorkspace, tfsProjectPath);
                 server.execute(labelCommand.getCallable());
             } finally {
                 server.close();
