@@ -101,7 +101,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
 
         @Override
         public String getDisplayName() {
-            return "Team System Web Access";
+            return "Microsoft Team Foundation Server/Visual Studio Team Services";
         }
     }
 }
