@@ -84,6 +84,11 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     }
 
     @Exported
+    public String getCommitId() {
+        return version;
+    }
+
+    @Exported
     public String getDomain() {
         return domain;
     }
