@@ -83,6 +83,17 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
         this.version = version;
     }
 
+    /**
+     * Returns a human readable display name of the changeset number.
+     *
+     * <p>
+     * This method is primarily intended for visualization of the data.
+     */
+    @Exported
+    public String getCommitId() {
+        return version;
+    }
+
     @Exported
     public String getDomain() {
         return domain;
