@@ -57,6 +57,11 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     }
 
     @Override
+    public Collection<? extends hudson.scm.ChangeLogSet.AffectedFile> getAffectedFiles() {
+        return items;
+    }
+
+    @Override
     public ChangeLogSet getParent() {
         return (ChangeLogSet)super.getParent();
     }
@@ -175,7 +180,7 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     }
     
     @ExportedBean(defaultVisibility=999)
-    public static class Item {
+    public static class Item implements hudson.scm.ChangeLogSet.AffectedFile {
         private String path;
         private String action;
         private ChangeSet parent;
