@@ -183,7 +183,7 @@ The best way to get an idea of what will be coming in future releases is to look
 
 ## Present
 
-The next release will be 4.1.0.  See what's been committed [since 4.0.0](https://github.com/jenkinsci/tfs-plugin/compare/tfs-4.0.0...master) and the upcoming [ReleaseNotes.md].
+The next release will be 4.2.0.  See what's been committed [since 4.1.0](https://github.com/jenkinsci/tfs-plugin/compare/tfs-4.1.0...master) and the upcoming [ReleaseNotes.md](ReleaseNotes.md).
 
 ## Past
 
