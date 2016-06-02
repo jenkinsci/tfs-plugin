@@ -234,7 +234,7 @@ public class Project {
         for (final String tfsPath : changesetPaths) {
             boolean isPathCloaked = false;
             for (final String cloakedPath : cloakedPaths) {
-                if (tfsPath.startsWith(cloakedPath)) {
+                if (tfsPath.regionMatches(true, 0, cloakedPath, 0, cloakedPath.length())) {
                     isPathCloaked = true;
                     break;
                 }

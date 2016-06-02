@@ -166,6 +166,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         Assert.assertEquals(false, actual);
     }
 
+
     @Test
     public void isChangesetFullyCloaked_independentCloakedPaths() {
         final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
@@ -174,6 +175,16 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
 
         Assert.assertEquals(false, actual);
+    }
+
+    @Test
+    public void isChangesetFullyCloaked_caseInsensitiveCloakedPaths() {
+        final List<String> changesetPaths = Arrays.asList("$/foo/bar/test.baz");
+        final List<String> cloakedPaths = Arrays.asList("$/fOo/bAr/");
+
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
+
+        Assert.assertEquals(true, actual);
     }
 
     @Test
