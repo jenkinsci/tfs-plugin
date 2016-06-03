@@ -185,6 +185,11 @@ The best way to get an idea of what will be coming in future releases is to look
 
 The next release will be 4.2.0.  See what's been committed [since 4.1.0](https://github.com/jenkinsci/tfs-plugin/compare/tfs-4.1.0...master) and the upcoming [ReleaseNotes.md](ReleaseNotes.md).
 
+Also planned for release 4.2.0 are the following:
+* [JENKINS-3033: TFS plug-in 4.0.0 lists all workspaces on server](https://issues.jenkins-ci.org/browse/JENKINS-30330)
+* #33: Local workspaces are supported
+* #35: overwrite flag
+
 ## Past
 
 Details about previous releases can be found on the [Releases page](https://github.com/jenkinsci/tfs-plugin/releases).
