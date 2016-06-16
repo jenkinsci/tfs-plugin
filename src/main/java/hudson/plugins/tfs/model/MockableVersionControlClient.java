@@ -5,6 +5,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
+import com.microsoft.tfs.core.clients.versioncontrol.Workstation;
 import com.microsoft.tfs.core.clients.versioncontrol.events.VersionControlEventEngine;
 import com.microsoft.tfs.core.clients.versioncontrol.exceptions.ItemNotMappedException;
 import com.microsoft.tfs.core.clients.versioncontrol.exceptions.ServerPathFormatException;
@@ -12,6 +13,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.*;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.LabelItemSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
+import com.microsoft.tfs.core.clients.versioncontrol.workspacecache.WorkspaceInfo;
 import com.microsoft.tfs.util.Closable;
 
 import javax.annotation.Nonnull;
@@ -159,5 +161,15 @@ public class MockableVersionControlClient implements Closable {
             @Nonnull final WorkspacePermissions permissionsFilter) {
         makeSureNotClosed();
         return vcc.queryWorkspaces(workspaceName, workspaceOwner, computer, permissionsFilter);
+    }
+
+    /**
+     * Removes a cached workspace that matches the given name and owner and this
+     * client's server's GUID from the {@link Workstation}'s cache. The caller
+     * is responsible for saving the {@link Workstation} cache.
+     */
+    public WorkspaceInfo removeCachedWorkspace(final String workspaceName, String workspaceOwner) {
+        makeSureNotClosed();
+        return vcc.removeCachedWorkspace(workspaceName, workspaceOwner);
     }
 }

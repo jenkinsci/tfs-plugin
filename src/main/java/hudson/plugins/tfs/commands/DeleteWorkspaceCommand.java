@@ -1,8 +1,12 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
+import com.microsoft.tfs.core.clients.versioncontrol.Workstation;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import com.microsoft.tfs.core.clients.versioncontrol.workspacecache.WorkspaceInfo;
+import com.microsoft.tfs.core.config.persistence.PersistenceStoreProvider;
 import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
@@ -51,6 +55,17 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand implements C
         int numDeletions = 0;
         for (final Workspace innerWorkspace : workspaces) {
             vcc.deleteWorkspace(innerWorkspace);
+
+            // work around a defect in the TFS SDK for Java
+            // TODO: check if this workaround is still necessary after upgrading
+            final WorkspaceInfo workspaceInfo = vcc.removeCachedWorkspace(workspaceName, VersionControlConstants.AUTHENTICATED_USER);
+            if (workspaceInfo != null) {
+                final TFSTeamProjectCollection tpc = vcc.getConnection();
+                final PersistenceStoreProvider provider = tpc.getPersistenceStoreProvider();
+                final Workstation currentWorkstation = Workstation.getCurrent(provider);
+                currentWorkstation.saveConfigIfDirty();
+            }
+
             numDeletions++;
         }
 
