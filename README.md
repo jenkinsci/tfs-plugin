@@ -115,7 +115,7 @@ For VSTS, there are also two options:
 
 ## Checkout by label (New since version 3.2.0)
 
-The plugin now supports checking out from a specific label.  Here's how to configure a job to do that:
+The plugin now supports checking out from a specific label or any valid [versionspec](https://www.visualstudio.com/docs/tfvc/use-team-foundation-version-control-commands#use-a-versionspec-argument-to-specify-affected-versions-of-items).  Here's how to configure a job to do that:
 
 > :information_source: Polling the server doesn't make sense when you want to build for a specific label because polling is not \[currently\] label-aware and could queue a build **every polling interval**. :information_source:
 
@@ -126,9 +126,9 @@ The plugin now supports checking out from a specific label.  Here's how to confi
     3. Set its _Description_ to the following:
     ```
     Enter a valid version spec to use when checking out.
-    Labels are prefixed with "L" and can optionally be scoped by appending "@" with a scope name
-    (see the documentation on the Label Command at https://msdn.microsoft.com/en-us/library/9ew32kd1.aspx).
-    Example: "LFoo"
+    Labels are prefixed with "L" and changesets are prefixed with "C".
+    See the following for a versionspec reference: https://www.visualstudio.com/docs/tfvc/use-team-foundation-version-control-commands#use-a-versionspec-argument-to-specify-affected-versions-of-items
+    Examples: "LFoo", "C42"
     ```
 3. **Save** the job.
 
