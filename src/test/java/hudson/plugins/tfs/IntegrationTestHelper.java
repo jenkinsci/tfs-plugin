@@ -2,7 +2,6 @@ package hudson.plugins.tfs;
 
 import hudson.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.wagon.providers.http.httpclient.client.utils.URIUtils;
 import org.junit.Assert;
 import org.junit.runner.Description;
 
@@ -42,11 +41,11 @@ public class IntegrationTestHelper {
     public IntegrationTestHelper(final String tfsServerName, final String tfsUserName, final String tfsUserPassword) throws URISyntaxException {
         final URI serverUri;
         if (tfsServerName.endsWith(".visualstudio.com")) {
-            serverUri = URIUtils.createURI("https", tfsServerName, 443, "DefaultCollection", null, null);
+            serverUri = new URI("https", null, tfsServerName, 443, "/DefaultCollection", null, null);
             this.userName = tfsUserName;
             this.userPassword = tfsUserPassword;
         } else {
-            serverUri = URIUtils.createURI("http", tfsServerName, 8080, "tfs/" + "jenkins-tfs-plugin", null, null);
+            serverUri = new URI("http", null, tfsServerName, 8080, "/tfs/" + "jenkins-tfs-plugin", null, null);
             this.userName = (tfsUserName != null) ? tfsUserName : "jenkins-tfs-plugin";
             this.userPassword = (tfsUserPassword != null) ? tfsUserPassword : "for-test-only";
         }
