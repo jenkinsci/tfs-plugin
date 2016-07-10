@@ -58,11 +58,22 @@ public class TeamSystemWebAccessBrowserTest {
 		assertEquals("The change set link was incorrect","http://tfs/_versionControl/changeset?id=99", actual.toString());
 	}
     
+    private static TeamFoundationServerScm createTestScm(String serverUrl) {
+        serverUrl = serverUrl != null ? serverUrl : "http://server:80/tfs/collection/";
+        final String projectPath = "$/project/folder/folder/branch";
+        final Secret password = null;
+        final String userName = null;
+        final TeamFoundationServerScm result = new TeamFoundationServerScm(serverUrl, projectPath, null, null, false, null, userName, password);
+
+        return result;
+    }
+
     @Test public void assertChangeSetLinkUsesScmConfiguration() throws Exception {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject<?,?> project = mock(AbstractProject.class);
         when(build.getProject()).thenReturn(project);
-        when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80/tfs/collection/", "$/project/folder/folder/branch", null, null, false, null, null, (Secret) null));
+        final TeamFoundationServerScm testScm = createTestScm(null);
+        when(project.getScm()).thenReturn(testScm);
         
         ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
         new ChangeLogSet(build, new ChangeSet[]{ changeset});        
@@ -77,7 +88,8 @@ public class TeamSystemWebAccessBrowserTest {
       AbstractProject<?,?> project = mock(AbstractProject.class);
       when(build.getProject()).thenReturn(project);
       // the server URL has not trailing slash...
-      when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80/tfs/collection", "$/project/folder/folder/branch", null, null, false, null, null, (Secret) null));
+      final TeamFoundationServerScm testScm = createTestScm("http://server:80/tfs/collection");
+      when(project.getScm()).thenReturn(testScm);
 
       ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
       new ChangeLogSet(build, new ChangeSet[]{ changeset});
@@ -91,7 +103,8 @@ public class TeamSystemWebAccessBrowserTest {
       AbstractBuild build = mock(AbstractBuild.class);
       AbstractProject<?,?> project = mock(AbstractProject.class);
       when(build.getProject()).thenReturn(project);
-      when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80/tfs/collection", "$/project/folder/folder/branch", null, null, false, null, null, (Secret) null));
+      final TeamFoundationServerScm testScm = createTestScm(null);
+      when(project.getScm()).thenReturn(testScm);
 
       ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
       ChangeSet.Item item = new Item("$/project/folder/folder/branch/some/path/to/some/file.txt", "action");
@@ -107,7 +120,8 @@ public class TeamSystemWebAccessBrowserTest {
       AbstractBuild build = mock(AbstractBuild.class);
       AbstractProject<?,?> project = mock(AbstractProject.class);
       when(build.getProject()).thenReturn(project);
-      when(project.getScm()).thenReturn(new TeamFoundationServerScm("http://server:80/tfs/collection", "$/project/folder/folder/branch", null, null, false, null, null, (Secret) null));
+      final TeamFoundationServerScm testScm = createTestScm(null);
+      when(project.getScm()).thenReturn(testScm);
 
       ChangeSet changeset = new ChangeSet("62643", null, "user", "comment");
       new ChangeLogSet(build, new ChangeSet[]{ changeset});
