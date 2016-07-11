@@ -65,6 +65,9 @@ public class TeamSystemWebAccessBrowserTest {
         final String userName = null;
         final TeamFoundationServerScm result = new TeamFoundationServerScm(serverUrl, projectPath, null, null, false, null, userName, password);
 
+        final TeamFoundationServerRepositoryBrowser repositoryBrowser = mock(TeamFoundationServerRepositoryBrowser.class);
+        result.setRepositoryBrowser(repositoryBrowser);
+
         return result;
     }
 

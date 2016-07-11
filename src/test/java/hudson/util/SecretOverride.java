@@ -1,5 +1,8 @@
 package hudson.util;
 
+import jenkins.security.ConfidentialStore;
+import jenkins.security.ConfidentialStoreOverride;
+
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -10,8 +13,21 @@ import java.io.IOException;
  */
 public class SecretOverride implements Closeable {
 
+    private static ConfidentialStoreOverride confidentialStoreOverride = null;
+
     public static void set(final String secretKey) {
         Secret.SECRET = secretKey;
+        if (confidentialStoreOverride != null) {
+            try {
+                confidentialStoreOverride.close();
+            }
+            catch (final IOException ignored) {
+            }
+            confidentialStoreOverride = null;
+        }
+        if (secretKey != null) {
+            confidentialStoreOverride = new ConfidentialStoreOverride();
+        }
     }
 
     public SecretOverride() {
