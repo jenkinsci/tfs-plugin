@@ -415,6 +415,11 @@ public class TeamFoundationServerScm extends SCM {
         return repositoryBrowser;
     }
 
+    // Convenience method for tests.
+    public void setRepositoryBrowser(final TeamFoundationServerRepositoryBrowser repositoryBrowser) {
+        this.repositoryBrowser = repositoryBrowser;
+    }
+
     @Override
     public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
         super.buildEnvVars(build, env);

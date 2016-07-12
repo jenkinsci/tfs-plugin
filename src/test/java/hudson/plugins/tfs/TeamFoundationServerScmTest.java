@@ -84,7 +84,7 @@ public class TeamFoundationServerScmTest {
                             "  <projectPath>$/example/path</projectPath>\n" +
                             "  <localPath>.</localPath>\n" +
                             "  <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
-                            "  <password>zs+99bxCGlcSxR3Umnj0q0OjYXVSiB+qLzS0ZjuHz2M=</password>\n" +
+                            "  <password>GZ3wK9L4iJXsMwXnJ4NieiVpOlxj0AVrthfe7MIr9w0=</password>\n" +
                             "  <userName>example\\tfsbuilder</userName>\n" +
                             "  <useUpdate>false</useUpdate>\n" +
                             "</hudson.plugins.tfs.TeamFoundationServerScm>";
