@@ -1,5 +1,7 @@
 package hudson.plugins.tfs;
 
+import hudson.plugins.tfs.model.GitCodePushedEventArgs;
+
 /**
  * Represent the different types of notifications that VSTS can POST to Jenkins.
  */
@@ -19,7 +21,11 @@ public enum VstsHookEventName {
     /**
      * The GIT_CODE_PUSHED event is raised when a user pushes to a Git repository.
      */
-    GIT_CODE_PUSHED,
+    GIT_CODE_PUSHED {
+        @Override public Object parse(final String body) {
+            return GitCodePushedEventArgs.fromJsonString(body);
+        }
+    },
     /**
      * The TFVC_CODE_CHECKED_IN event is raised when a user checks in to a TFVC repository.
      */
