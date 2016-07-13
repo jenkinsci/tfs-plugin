@@ -7,7 +7,11 @@ public enum VstsHookEventName {
     /**
      * The PING event is raised when testing the connection from VSTS to Jenkins.
      */
-    PING,
+    PING {
+        @Override public Object parse(final String body) {
+            return body;
+        }
+    },
     /**
      * The BUILD_COMPLETED event is raised when a VSTS build completes.
      */
@@ -29,4 +33,9 @@ public enum VstsHookEventName {
     // TODO: clarify the following events
     DEPLOYMENT_COMPLETED,
     RELEASE_CREATED,
+    ;
+
+    public Object parse(final String body) {
+        return new IllegalStateException("Not implemented");
+    }
 }
