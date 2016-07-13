@@ -421,9 +421,8 @@ public class TeamFoundationServerScm extends SCM {
     
     @Override
     public @CheckForNull RepositoryBrowser<?> guessBrowser() {
-      return new TeamSystemWebAccessBrowser( serverUrl + projectPath );
+      return new TeamSystemWebAccessBrowser(serverUrl);
     }
-    
 
     // Convenience method for tests.
     public void setRepositoryBrowser(final TeamFoundationServerRepositoryBrowser repositoryBrowser) {
