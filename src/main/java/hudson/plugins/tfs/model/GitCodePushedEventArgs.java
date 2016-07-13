@@ -5,8 +5,10 @@ import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.JSONUtils;
 import net.sf.json.util.JavaIdentifierTransformer;
+import org.eclipse.jgit.transport.URIish;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,5 +51,15 @@ public class GitCodePushedEventArgs {
         }
 
         return result;
+    }
+
+    public URIish getRepoURIish() {
+        final String repoUriString = repoUri.toString();
+        try {
+            return new URIish(repoUriString);
+        } catch (final URISyntaxException e) {
+            // shouldn't happen
+            throw new Error(e);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package hudson.plugins.tfs;
 
 import hudson.plugins.git.RevisionParameterAction;
+import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 
 /**
  * Used as a build parameter to record information about the associated project and
@@ -8,8 +9,15 @@ import hudson.plugins.git.RevisionParameterAction;
  */
 public class CommitParameterAction extends RevisionParameterAction {
 
-    public CommitParameterAction(final String commit) {
-        super(commit);
+    private final GitCodePushedEventArgs gitCodePushedEventArgs;
+
+    public CommitParameterAction(final GitCodePushedEventArgs e) {
+        super(e.commit, e.getRepoURIish());
+
+        this.gitCodePushedEventArgs = e;
     }
 
+    public GitCodePushedEventArgs getGitCodePushedEventArgs() {
+        return gitCodePushedEventArgs;
+    }
 }
