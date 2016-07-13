@@ -7,16 +7,19 @@ import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.queue.QueueTaskFuture;
+import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.StreamTaskListener;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
+import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URI;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,9 +38,9 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
     public VstsPushTrigger() {
     }
 
-    public void execute(final String pushedBy) {
+    public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs) {
         // TODO: Consider executing the poll + queue asynchronously
-        final Runner runner = new Runner(pushedBy);
+        final Runner runner = new Runner(gitCodePushedEventArgs);
         runner.run();
     }
 
@@ -48,10 +51,10 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
     // TODO: This was inspired by SCMTrigger.Runner; it would be worth extracting something for re-use
     public class Runner implements Runnable {
 
-        private final String pushedBy;
+        private final GitCodePushedEventArgs gitCodePushedEventArgs;
 
-        public Runner(final String pushedBy) {
-            this.pushedBy = pushedBy;
+        public Runner(final GitCodePushedEventArgs gitCodePushedEventArgs) {
+            this.gitCodePushedEventArgs = gitCodePushedEventArgs;
         }
 
         private SCMTriggerItem job() {
@@ -105,6 +108,7 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
                 final String changesDetected = "SCM changes detected in " + job.getFullDisplayName() + ".";
                 final SCMTriggerItem p = job();
                 final String name = " #" + p.getNextBuildNumber();
+                final String pushedBy = gitCodePushedEventArgs.pushedBy;
                 VstsPushCause cause;
                 try {
                     cause = new VstsPushCause(getLogFile(), pushedBy);
@@ -113,9 +117,10 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
                     LOGGER.log(Level.WARNING, "Failed to parse the polling log", e);
                     cause = new VstsPushCause(pushedBy);
                 }
-                final CauseAction causeAction = new CauseAction(cause);
                 final int quietPeriod = p.getQuietPeriod();
-                final QueueTaskFuture<?> queueTaskFuture = p.scheduleBuild2(quietPeriod, causeAction);
+                final CauseAction causeAction = new CauseAction(cause);
+                final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
+                final QueueTaskFuture<?> queueTaskFuture = p.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
                 if (queueTaskFuture != null) {
                     LOGGER.info(changesDetected + " Triggering " + name);
                 }
@@ -170,6 +175,7 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public String getUrlName() {
+            // TODO: This is the destination link on the left
             return "VstsPollLog";
         }
 
