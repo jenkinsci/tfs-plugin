@@ -14,6 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import javax.annotation.CheckForNull;
+
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
@@ -40,6 +42,7 @@ import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
 import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
+import hudson.plugins.tfs.browsers.TeamSystemWebAccessBrowser;
 import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.WorkspaceConfiguration;
 import hudson.plugins.tfs.model.Server;
@@ -50,6 +53,7 @@ import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspa
 import hudson.scm.ChangeLogParser;
 import hudson.scm.PollingResult;
 import hudson.scm.PollingResult.Change;
+import hudson.scm.RepositoryBrowser;
 import hudson.scm.RepositoryBrowsers;
 import hudson.scm.SCMRevisionState;
 import hudson.scm.SCM;
@@ -413,6 +417,16 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public TeamFoundationServerRepositoryBrowser getBrowser() {
         return repositoryBrowser;
+    }
+    
+    /**
+     *
+     * @return a new TeamSystemWebAccessBrowser even if no repository browser (value in UI is Auto) is 
+     * configured since its the only implementation that exists anyway
+     */
+    @Override
+    public @CheckForNull RepositoryBrowser<?> guessBrowser() {
+        return new TeamSystemWebAccessBrowser(serverUrl);
     }
 
     // Convenience method for tests.
