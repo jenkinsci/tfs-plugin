@@ -419,9 +419,14 @@ public class TeamFoundationServerScm extends SCM {
         return repositoryBrowser;
     }
     
+    /**
+     *
+     * @return a new TeamSystemWebAccessBrowser even if no repository browser (value in UI is Auto) is 
+     * configured since its the only implementation that exists anyway
+     */
     @Override
     public @CheckForNull RepositoryBrowser<?> guessBrowser() {
-      return new TeamSystemWebAccessBrowser(serverUrl);
+        return new TeamSystemWebAccessBrowser(serverUrl);
     }
 
     // Convenience method for tests.
