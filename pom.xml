@@ -228,6 +228,12 @@
       <artifactId>mailer</artifactId>
       <version>1.16</version>
     </dependency>
+    <dependency>
+      <!-- Used for configuring collections globally -->
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>credentials</artifactId>
+      <version>1.22</version>
+    </dependency>
 
     <dependency>
       <groupId>com.microsoft.tfs.sdk</groupId>
