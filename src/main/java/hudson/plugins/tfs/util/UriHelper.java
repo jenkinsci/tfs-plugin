@@ -23,6 +23,35 @@ public class UriHelper {
         }
     }
 
+    public static URI join(final String collectionUrl, final Object... components) {
+        final StringBuilder sb = new StringBuilder(collectionUrl);
+        final boolean baseEndedWithSlash = endsWithSlash(sb);
+
+        boolean first = true;
+        for (final Object component : components) {
+            boolean hasSlash = false;
+            if (first) {
+                first = false;
+                hasSlash = baseEndedWithSlash;
+            }
+            if (component instanceof String) {
+                final String pathComponent = (String) component;
+                if (!hasSlash) {
+                    sb.append('/');
+                }
+                sb.append(pathComponent);
+            }
+        }
+
+        final String uriString = sb.toString();
+        return URI.create(uriString);
+    }
+
+    static boolean endsWithSlash(final StringBuilder stringBuilder) {
+        final int length = stringBuilder.length();
+        return length > 0 && stringBuilder.charAt(length - 1) == '/';
+    }
+
     public static String serializeParameters(final Map<String, String> parameters) {
         try {
             final StringBuilder sb = new StringBuilder();
