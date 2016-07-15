@@ -18,4 +18,12 @@ public class UriHelperTest {
         Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_home/About"), actual);
     }
 
+    @Test public void join_withSlash_pathComponents() throws Exception {
+        final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com/";
+
+        final URI actual = UriHelper.join(collectionUrl, "_home", "About");
+
+        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_home/About"), actual);
+    }
+
 }
