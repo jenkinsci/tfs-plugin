@@ -84,17 +84,23 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
                 return new ListBoxModel();
             }
 
-            final HostnameRequirement requirement = new HostnameRequirement(hostName);
-            final List<StandardUsernamePasswordCredentials> matches =
-                CredentialsProvider.lookupCredentials(
-                    StandardUsernamePasswordCredentials.class,
-                    jenkins,
-                    ACL.SYSTEM,
-                    requirement
-                );
+            final List<StandardUsernamePasswordCredentials> matches = findCredentials(hostName);
             return new StandardListBoxModel()
                     .withEmptySelection()
                     .withAll(matches);
         }
+    }
+
+    static List<StandardUsernamePasswordCredentials> findCredentials(final String hostName) {
+        final Jenkins jenkins = Jenkins.getInstance();
+        final HostnameRequirement requirement = new HostnameRequirement(hostName);
+        final List<StandardUsernamePasswordCredentials> matches =
+                CredentialsProvider.lookupCredentials(
+                        StandardUsernamePasswordCredentials.class,
+                        jenkins,
+                        ACL.SYSTEM,
+                        requirement
+                );
+        return matches;
     }
 }
