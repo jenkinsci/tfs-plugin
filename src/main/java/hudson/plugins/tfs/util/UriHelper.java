@@ -30,16 +30,29 @@ public class UriHelper {
         boolean first = true;
         for (final Object component : components) {
             boolean hasSlash = false;
-            if (first) {
-                first = false;
-                hasSlash = baseEndedWithSlash;
+            if (component instanceof QueryString) {
+                final QueryString queryString = (QueryString) component;
+                if (first) {
+                    if (!baseEndedWithSlash) {
+                        sb.append('/');
+                    }
+                }
+                sb.append("?");
+                sb.append(queryString.toString());
+                // a QueryString must be the last of the components
+                break;
             }
-            if (component instanceof String) {
-                final String pathComponent = (String) component;
-                if (!hasSlash) {
+            else {
+                if (first) {
+                    first = false;
+                    if (!baseEndedWithSlash) {
+                        sb.append('/');
+                    }
+                }
+                else {
                     sb.append('/');
                 }
-                sb.append(pathComponent);
+                sb.append(component);
             }
         }
 
