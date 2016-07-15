@@ -67,4 +67,13 @@ public class UriHelperTest {
         Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_home/About?answer=42"), actual);
     }
 
+    @Test public void join_sampleApiCall() throws Exception {
+        final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com/";
+        final QueryString qs = new QueryString("api-version", "2.0");
+
+        final URI actual = UriHelper.join(collectionUrl, "DefaultCollection", "_apis", "projects", qs);
+
+        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/_apis/projects?api-version=2.0"), actual);
+    }
+
 }
