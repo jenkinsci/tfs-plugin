@@ -51,4 +51,20 @@ public class UriHelperTest {
         Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/?answer=42"), actual);
     }
 
+    @Test public void join_noSlash_pathAndQueryString() throws Exception {
+        final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com/";
+
+        final URI actual = UriHelper.join(collectionUrl, "_home", "About", lifeUniverseEverything);
+
+        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_home/About?answer=42"), actual);
+    }
+
+    @Test public void join_withSlash_pathAndQueryString() throws Exception {
+        final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com/";
+
+        final URI actual = UriHelper.join(collectionUrl, "_home", "About", lifeUniverseEverything);
+
+        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_home/About?answer=42"), actual);
+    }
+
 }
