@@ -145,4 +145,16 @@ public class VstsRestClient {
         return sb.toString();
     }
 
+    public String ping() throws IOException {
+        final URI requestUri;
+        if (isHosted) {
+            requestUri = UriHelper.join(collectionUri, "_apis", "connectiondata");
+        }
+        else {
+            requestUri = UriHelper.join(collectionUri, "_home", "About");
+        }
+
+        return request(String.class, HttpMethod.GET, requestUri, null);
+    }
+
 }
