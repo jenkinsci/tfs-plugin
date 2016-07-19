@@ -26,4 +26,15 @@ public class StringHelper {
         return haystack.regionMatches(true, toffset, needle, 0, nl);
     }
 
+    public static String determineContentTypeWithoutCharset(final String contentType) {
+        if (contentType == null) {
+            return null;
+        }
+        final int indexOfSemicolon = contentType.indexOf(';');
+        if (indexOfSemicolon != -1) {
+            final String beforeCharset = contentType.substring(0, indexOfSemicolon);
+            return beforeCharset.trim();
+        }
+        return contentType;
+    }
 }
