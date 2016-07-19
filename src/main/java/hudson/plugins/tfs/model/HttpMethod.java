@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import hudson.plugins.tfs.util.MediaType;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public enum HttpMethod {
 
         if (body != null) {
             final byte[] bytes = body.getBytes(UTF8);
-            connection.setRequestProperty("Content-Type", "application/json; charset=UTF8");
+            connection.setRequestProperty("Content-Type", MediaType.APPLICATION_JSON_UTF_8);
             connection.setRequestProperty("Content-Length", Integer.toString(bytes.length, 10));
             connection.setDoInput(true);
             connection.setDoOutput(true);

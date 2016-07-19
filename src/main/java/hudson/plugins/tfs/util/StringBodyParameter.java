@@ -36,7 +36,7 @@ public @interface StringBodyParameter {
 
             final String contentType = request.getContentType();
 
-            if ("application/json".equals(contentType)) {
+            if (MediaType.APPLICATION_JSON.equals(contentType)) {
                 try {
                     return IOUtils.toString(request.getInputStream(), Charsets.UTF_8);
                 }
@@ -44,11 +44,12 @@ public @interface StringBodyParameter {
                     LOGGER.log(Level.SEVERE, "Unable to obtain request body: {}", e.getMessage());
                 }
             }
-            else if ("application/x-www-form-urlencoded".equals(contentType)) {
+            else if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
                 return request.getParameter(parameterName);
             }
 
             return null;
         }
+
     }
 }

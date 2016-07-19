@@ -3,6 +3,7 @@ package hudson.plugins.tfs;
 import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitStatus;
+import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.tfs.util.StringBodyParameter;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
@@ -83,7 +84,7 @@ public class VstsWebHook implements UnprotectedRootAction {
                 public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node)
                         throws IOException, ServletException {
                     rsp.setStatus(SC_OK);
-                    rsp.setContentType("text/plain");
+                    rsp.setContentType(MediaType.TEXT_PLAIN);
                     for (GitStatus.ResponseContributor c : finalContributors) {
                         c.addHeaders(req, rsp);
                     }
