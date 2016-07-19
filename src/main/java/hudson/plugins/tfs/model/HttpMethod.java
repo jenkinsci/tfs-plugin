@@ -30,8 +30,6 @@ public enum HttpMethod {
     TRACE,
     ;
 
-    private static final Charset UTF8 = Charset.forName("UTF-8");
-
     public void sendRequest(final HttpURLConnection connection, final String body) throws IOException {
         // https://www.visualstudio.com/en-us/docs/integrate/get-started/rest/basics#http-method-override
         try {
@@ -44,7 +42,7 @@ public enum HttpMethod {
         connection.setRequestProperty("X-HTTP-Method-Override", this.name());
 
         if (body != null) {
-            final byte[] bytes = body.getBytes(UTF8);
+            final byte[] bytes = body.getBytes(MediaType.UTF_8);
             connection.setRequestProperty("Content-Type", MediaType.APPLICATION_JSON_UTF_8);
             connection.setRequestProperty("Content-Length", Integer.toString(bytes.length, 10));
             connection.setDoInput(true);

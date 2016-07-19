@@ -31,8 +31,6 @@ import java.util.List;
 
 public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCollectionConfiguration> {
 
-    private static final Charset ASCII = Charset.forName("ASCII");
-
     private final String collectionUrl;
     private final String credentialsId;
 
