@@ -30,7 +30,9 @@ public enum VstsHookEventName {
      * push of the corresponding branch.
      */
     PULL_REQUEST_MERGE_COMMIT_CREATED,
-    // TODO: clarify the following events
+    /**
+     * The DEPLOYMENT_COMPLETED event is raised when one of the release's deployments have completed.
+     */
     DEPLOYMENT_COMPLETED,
     RELEASE_CREATED,
     ;
