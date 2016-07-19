@@ -73,8 +73,6 @@ public class VstsWebHook implements UnprotectedRootAction {
                 break;
             case DEPLOYMENT_COMPLETED:
                 break;
-            case RELEASE_CREATED:
-                break;
         }
         if (contributors == null) {
             return HttpResponses.error(SC_BAD_REQUEST, "Not implemented");

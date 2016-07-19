@@ -34,7 +34,6 @@ public enum VstsHookEventName {
      * The DEPLOYMENT_COMPLETED event is raised when one of the release's deployments have completed.
      */
     DEPLOYMENT_COMPLETED,
-    RELEASE_CREATED,
     ;
 
     public Object parse(final String body) {
