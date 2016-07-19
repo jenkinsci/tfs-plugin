@@ -2,24 +2,29 @@ package hudson.plugins.tfs;
 
 import hudson.Extension;
 import hudson.Util;
+import hudson.console.AnnotatedLargeText;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
+import hudson.plugins.tfs.util.MediaType;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.StreamTaskListener;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
+import org.apache.commons.jelly.XMLOutput;
 import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,7 +69,7 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
         private boolean runPolling() {
             final String failedToRecord = "Failed to record SCM polling for " + job;
             try {
-                final StreamTaskListener listener = new StreamTaskListener(getLogFile());
+                final StreamTaskListener listener = new StreamTaskListener(getLogFile(), MediaType.UTF_8);
 
                 try {
                     final PrintStream logger = listener.getLogger();
@@ -175,10 +180,29 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public String getUrlName() {
-            // TODO: This is the destination link on the left
             return "VstsPollLog";
         }
 
-        // TODO: what else do we need?
+        // the following methods are called from VstsPushTrigger/VstsPollingAction/index.jelly
+
+        @SuppressWarnings("unused")
+        public Job<?, ?> getOwner() {
+            return job;
+        }
+
+        @SuppressWarnings("unused")
+        public String getLog() throws IOException {
+            return Util.loadFile(getLogFile());
+        }
+
+        @SuppressWarnings("unused")
+        public void writeLogTo(XMLOutput out) throws IOException {
+            final File logFile = getLogFile();
+            final AnnotatedLargeText<VstsPollingAction> text =
+                    new AnnotatedLargeText<VstsPollingAction>(logFile, MediaType.UTF_8, true, this);
+            final Writer writer = out.asWriter();
+            text.writeHtmlTo(0, writer);
+        }
+
     }
 }
