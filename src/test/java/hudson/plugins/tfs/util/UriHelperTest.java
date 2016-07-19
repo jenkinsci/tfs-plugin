@@ -19,6 +19,14 @@ public class UriHelperTest {
     }
 
 
+    @Test public void join_uriNoSlash_pathComponents() throws Exception {
+        final URI collectionUri = URI.create("https://fabrikam-fiber-inc.visualstudio.com");
+
+        final URI actual = UriHelper.join(collectionUri, "_home", "About");
+
+        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_home/About"), actual);
+    }
+
     @Test public void join_noSlash_pathComponents() throws Exception {
         final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com";
 

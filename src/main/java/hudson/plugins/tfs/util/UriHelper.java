@@ -23,6 +23,10 @@ public class UriHelper {
         }
     }
 
+    public static URI join(final URI collectionUri, final Object... components) {
+        return join(collectionUri.toString(), components);
+    }
+
     public static URI join(final String collectionUrl, final Object... components) {
         final StringBuilder sb = new StringBuilder(collectionUrl);
         final boolean baseEndedWithSlash = endsWithSlash(sb);
