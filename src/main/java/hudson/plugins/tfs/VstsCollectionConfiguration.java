@@ -11,6 +11,7 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.plugins.tfs.util.StringHelper;
 import hudson.plugins.tfs.util.UriHelper;
+import hudson.plugins.tfs.util.VstsRestClient;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -101,11 +102,8 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
                         return FormValidation.error(errorTemplate, "VSTS accounts need credentials, preferably a Personal Access Token");
                     }
                 }
-                final int code = testConnection(collectionUrl, hostName, credential);
-
-                if (code >= HttpURLConnection.HTTP_BAD_REQUEST) {
-                    return FormValidation.error(errorTemplate, "HTTP code " + code);
-                }
+                final URI collectionUri = URI.create(collectionUrl);
+                testConnection(collectionUri, credential);
             }
             catch (final IOException e) {
                 return FormValidation.error(e, errorTemplate, e.getMessage());
@@ -139,35 +137,10 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
         }
     }
 
-    static int testConnection(final String collectionUrl, final String hostName, final StandardUsernamePasswordCredentials credentials) throws IOException {
+    static void testConnection(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {
 
-        final URI testUri;
-        if (StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com")) {
-            testUri = UriHelper.join(collectionUrl, "_apis", "connectiondata");
-        }
-        else {
-            // for on-prem, we can hit this page since TFS 2012
-            testUri = UriHelper.join(collectionUrl, "_home", "About");
-        }
-        final URL testUrl = testUri.toURL();
-        // TODO: configure this connection so it also works through a proxy server
-        final HttpURLConnection connection = (HttpURLConnection) testUrl.openConnection();
-        // TODO: set user-agent
-        if (credentials != null) {
-            final String username = credentials.getUsername();
-            final Secret secretPassword = credentials.getPassword();
-            final String password = secretPassword.getPlainText();
-            final String credPair = username + ":" + password;
-            final byte[] credBytes = credPair.getBytes(ASCII);
-            final String base64enc = DatatypeConverter.printBase64Binary(credBytes);
-
-            connection.setRequestProperty("Authorization", "Basic" + " " + base64enc);
-        }
-
-        // TODO: extract the version from _home/About's <p class="version">Version 11.0.50727.1</p>
-        final int responseCode = connection.getResponseCode();
-
-        return responseCode;
+        final VstsRestClient client = new VstsRestClient(collectionUri, credentials);
+        client.ping();
     }
 
     static StandardUsernamePasswordCredentials findCredential(final String hostName, final String credentialsId) {
