@@ -34,11 +34,13 @@ public @interface StringBodyParameter {
         @Override
         public Object parse(final StaplerRequest request, final StringBodyParameter a, final Class type, final String parameterName) throws ServletException {
 
-            final String contentType = request.getContentType();
+            final String rawContentType = request.getContentType();
+            final String contentType = StringHelper.determineContentTypeWithoutCharset(rawContentType);
 
             if (MediaType.APPLICATION_JSON.equals(contentType)) {
+                final String characterEncoding = request.getCharacterEncoding();
                 try {
-                    return IOUtils.toString(request.getInputStream(), Charsets.UTF_8);
+                    return IOUtils.toString(request.getInputStream(), characterEncoding);
                 }
                 catch (final IOException e) {
                     LOGGER.log(Level.SEVERE, "Unable to obtain request body: {}", e.getMessage());

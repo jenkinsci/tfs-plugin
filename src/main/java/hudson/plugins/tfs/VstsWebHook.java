@@ -88,6 +88,7 @@ public class VstsWebHook implements UnprotectedRootAction {
                     for (GitStatus.ResponseContributor c : finalContributors) {
                         c.addHeaders(req, rsp);
                     }
+                    rsp.setCharacterEncoding(MediaType.UTF_8.name());
                     PrintWriter w = rsp.getWriter();
                     for (GitStatus.ResponseContributor c : finalContributors) {
                         c.writeBody(req, rsp, w);
