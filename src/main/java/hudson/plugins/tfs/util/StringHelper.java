@@ -26,6 +26,28 @@ public class StringHelper {
         return haystack.regionMatches(true, toffset, needle, 0, nl);
     }
 
+    public static boolean equal(final String a, final String b) {
+        return innerEqual(a, b, false);
+    }
+
+    public static boolean equalIgnoringCase(final String a, final String b) {
+        return innerEqual(a, b, true);
+    }
+
+    static boolean innerEqual(final String a, final String b, final boolean ignoreCase) {
+        if (a == null) {
+            return b == null;
+        }
+        if (b == null) {
+            return false;
+        }
+        final int length = a.length();
+        if (length != b.length()) {
+            return false;
+        }
+        return a.regionMatches(ignoreCase, 0, b, 0, length);
+    }
+
     public static String determineContentTypeWithoutCharset(final String contentType) {
         if (contentType == null) {
             return null;
