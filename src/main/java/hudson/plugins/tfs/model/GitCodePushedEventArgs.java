@@ -3,14 +3,14 @@ package hudson.plugins.tfs.model;
 import net.sf.ezmorph.MorpherRegistry;
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
-import net.sf.json.processors.PropertyNameProcessor;
 import net.sf.json.util.JSONUtils;
 import net.sf.json.util.JavaIdentifierTransformer;
+import org.eclipse.jgit.transport.URIish;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class GitCodePushedEventArgs {
     public URI collectionUri;
@@ -51,5 +51,15 @@ public class GitCodePushedEventArgs {
         }
 
         return result;
+    }
+
+    public URIish getRepoURIish() {
+        final String repoUriString = repoUri.toString();
+        try {
+            return new URIish(repoUriString);
+        } catch (final URISyntaxException e) {
+            // shouldn't happen
+            throw new Error(e);
+        }
     }
 }
