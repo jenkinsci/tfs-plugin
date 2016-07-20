@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
@@ -27,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 
 public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCollectionConfiguration> {
@@ -159,5 +161,38 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
                         requirement
                 );
         return matches;
+    }
+
+    static StandardUsernamePasswordCredentials findCredentialsById(final String credentialsId) {
+        final Jenkins jenkins = Jenkins.getInstance();
+        final List<StandardUsernamePasswordCredentials> matches =
+                CredentialsProvider.lookupCredentials(
+                        StandardUsernamePasswordCredentials.class,
+                        jenkins,
+                        ACL.SYSTEM,
+                        Collections.<DomainRequirement>emptyList()
+                );
+        final CredentialsMatcher matcher = CredentialsMatchers.withId(credentialsId);
+        final StandardUsernamePasswordCredentials result = CredentialsMatchers.firstOrNull(matches, matcher);
+        return result;
+    }
+
+    // TODO: we'll probably also want findCredentialsForGitRepo, where we match part of the URL path
+    public static StandardUsernamePasswordCredentials findCredentialsForCollection(final URI collectionUri) {
+        final VstsPluginGlobalConfig config = VstsPluginGlobalConfig.get();
+        // TODO: consider using a different data structure to speed up this look-up
+        final List<VstsCollectionConfiguration> pairs = config.getCollectionConfigurations();
+        for (final VstsCollectionConfiguration pair : pairs) {
+            final String candidateCollectionUrlString = pair.getCollectionUrl();
+            final URI candidateCollectionUri = URI.create(candidateCollectionUrlString);
+            if (UriHelper.areSame(candidateCollectionUri, collectionUri)) {
+                final String credentialsId = pair.credentialsId;
+                if (credentialsId != null) {
+                    return findCredentialsById(credentialsId);
+                }
+                return null;
+            }
+        }
+        return null;
     }
 }
