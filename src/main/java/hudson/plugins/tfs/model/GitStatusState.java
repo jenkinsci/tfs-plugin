@@ -1,5 +1,9 @@
 package hudson.plugins.tfs.model;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
+
 public enum GitStatusState {
 
     NotSet(0),
@@ -8,6 +12,26 @@ public enum GitStatusState {
     Failed(3),
     Error(4),
     ;
+
+    public static final Map<String, GitStatusState> CASE_INSENSITIVE_LOOKUP;
+
+    static {
+        final Map<String, GitStatusState> map = new TreeMap<String, GitStatusState>(String.CASE_INSENSITIVE_ORDER);
+        for (final GitStatusState value : GitStatusState.values()) {
+            map.put(value.name(), value);
+        }
+        CASE_INSENSITIVE_LOOKUP = Collections.unmodifiableMap(map);
+    }
+
+    public static GitStatusState caseInsensitiveValueOf(final String name) {
+        if (name == null) {
+            throw new NullPointerException("Name is null");
+        }
+        if (!CASE_INSENSITIVE_LOOKUP.containsKey(name)) {
+            throw new IllegalArgumentException("No enum constant " + name);
+        }
+        return CASE_INSENSITIVE_LOOKUP.get(name);
+    }
 
     private final int value;
 
