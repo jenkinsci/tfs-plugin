@@ -32,8 +32,14 @@ public class VstsGitStatus {
     public static VstsGitStatus fromRun(@Nonnull final Run<?, ?> run) {
         final VstsGitStatus status = new VstsGitStatus();
         final Result result = run.getResult();
-        status.state = RESULT_TO_STATE.get(result);
-        status.description = result.toString();
+        if (result == null) {
+            status.state = GitStatusState.Pending;
+            status.description = status.state.toString();
+        }
+        else {
+            status.state = RESULT_TO_STATE.get(result);
+            status.description = result.toString();
+        }
         status.targetUrl = run.getAbsoluteUrl();
         final Job<?, ?> project = run.getParent();
         final String runDisplayName = run.getDisplayName();

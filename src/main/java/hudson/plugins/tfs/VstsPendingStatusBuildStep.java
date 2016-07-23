@@ -6,6 +6,7 @@ import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.util.VstsStatus;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
@@ -31,7 +32,12 @@ public class VstsPendingStatusBuildStep extends Builder implements SimpleBuildSt
             @Nonnull final Launcher launcher,
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
-        // TODO: implement
+        try {
+            VstsStatus.createFromRun(run);
+        }
+        catch (final Exception e) {
+            e.printStackTrace(listener.error("Error while trying to update pending status in VSTS"));
+        }
     }
 
     @Extension
