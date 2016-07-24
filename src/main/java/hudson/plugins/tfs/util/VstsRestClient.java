@@ -4,6 +4,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.GitStatusStateMorpher;
 import hudson.plugins.tfs.model.HttpMethod;
+import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.VstsGitStatus;
 import hudson.util.Secret;
 import net.sf.ezmorph.MorpherRegistry;
@@ -169,6 +170,28 @@ public class VstsRestClient {
             "_apis", "git",
             "repositories", args.repoId,
             "commits", args.commit,
+            "statuses",
+            qs);
+
+        final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
+        registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
+        try {
+            return request(VstsGitStatus.class, HttpMethod.POST, requestUri, status);
+        }
+        finally {
+            registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);
+        }
+    }
+
+    public VstsGitStatus addPullRequestIterationStatus(final PullRequestMergeCommitCreatedEventArgs args, final VstsGitStatus status) throws IOException {
+
+        final QueryString qs = new QueryString(API_VERSION, "3.0-preview.1");
+        final URI requestUri = UriHelper.join(
+            collectionUri, args.projectId,
+            "_apis", "git",
+            "repositories", args.repoId,
+            "pullRequests", args.pullRequestId,
+            "iterations", args.iterationId,
             "statuses",
             qs);
 
