@@ -203,7 +203,7 @@ public class VstsWebHook implements UnprotectedRootAction {
                                 if (!triggered) {
                                     final VstsPushTrigger pushTrigger = findTrigger(job, VstsPushTrigger.class);
                                     if (pushTrigger != null) {
-                                        pushTrigger.execute(gitCodePushedEventArgs);
+                                        pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction);
                                         result.add(new PollingScheduledResponseContributor(project));
                                         triggered = true;
                                     }
