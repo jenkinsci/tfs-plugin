@@ -2,6 +2,7 @@ package hudson.plugins.tfs;
 
 import hudson.Extension;
 import hudson.model.AbstractProject;
+import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -187,8 +188,8 @@ public class VstsWebHook implements UnprotectedRootAction {
                                     if (scmTrigger != null && !scmTrigger.isIgnorePostCommitHooks()) {
                                         // queue build without first polling
                                         final int quietPeriod = scmTriggerItem.getQuietPeriod();
-                                        final GitStatus.CommitHookCause commitHookCause = new GitStatus.CommitHookCause(commit);
-                                        final CauseAction causeAction = new CauseAction(commitHookCause);
+                                        final Cause cause = new VstsHookCause(commit);
+                                        final CauseAction causeAction = new CauseAction(cause);
                                         final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
                                         scmTriggerItem.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
                                         result.add(new ScheduledResponseContributor(project));
