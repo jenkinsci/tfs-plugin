@@ -1,6 +1,7 @@
 package hudson.plugins.tfs;
 
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
+import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 
 /**
  * Represent the different types of notifications that VSTS can POST to Jenkins.
@@ -35,7 +36,11 @@ public enum VstsHookEventName {
      * for a pull request has been successfully created, usually as a result of a
      * push of the corresponding branch.
      */
-    PULL_REQUEST_MERGE_COMMIT_CREATED,
+    PULL_REQUEST_MERGE_COMMIT_CREATED {
+        @Override public Object parse(final String body) {
+            return PullRequestMergeCommitCreatedEventArgs.fromJsonString(body);
+        }
+    },
     /**
      * The DEPLOYMENT_COMPLETED event is raised when one of the release's deployments have completed.
      */

@@ -8,8 +8,8 @@ import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
+import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.util.MediaType;
-import hudson.plugins.git.RevisionParameterAction;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.util.StringBodyParameter;
@@ -93,6 +93,8 @@ public class VstsWebHook implements UnprotectedRootAction {
             case TFVC_CODE_CHECKED_IN:
                 break;
             case PULL_REQUEST_MERGE_COMMIT_CREATED:
+                final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs = (PullRequestMergeCommitCreatedEventArgs) parsedBody;
+                contributors = pullRequestMergeCommitCreated(pullRequestMergeCommitCreatedEventArgs);
                 break;
             case DEPLOYMENT_COMPLETED:
                 break;
@@ -119,6 +121,11 @@ public class VstsWebHook implements UnprotectedRootAction {
             };
 
         }
+    }
+
+    public List<GitStatus.ResponseContributor> pullRequestMergeCommitCreated(final PullRequestMergeCommitCreatedEventArgs args) {
+        // TODO: implement
+        return null;
     }
 
     public List<GitStatus.ResponseContributor> gitCodePushed(final GitCodePushedEventArgs gitCodePushedEventArgs) {
