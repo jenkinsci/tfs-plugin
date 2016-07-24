@@ -125,8 +125,10 @@ public class VstsWebHook implements UnprotectedRootAction {
     }
 
     public List<GitStatus.ResponseContributor> pullRequestMergeCommitCreated(final PullRequestMergeCommitCreatedEventArgs args) {
-        // TODO: implement
-        return null;
+        final PullRequestParameterAction action = new PullRequestParameterAction(args);
+        // TODO: add extension point for this event, then extract current implementation as extension(s)
+
+        return pollOrQueueFromEvent(args, action);
     }
 
     public List<GitStatus.ResponseContributor> gitCodePushed(final GitCodePushedEventArgs gitCodePushedEventArgs) {
