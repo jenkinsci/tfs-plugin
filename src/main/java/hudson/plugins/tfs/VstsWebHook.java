@@ -133,6 +133,10 @@ public class VstsWebHook implements UnprotectedRootAction {
         final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
         // TODO: add extension point for this event, then extract current implementation as extension(s)
 
+        return pollOrQueueFromEvent(gitCodePushedEventArgs, commitParameterAction);
+    }
+
+    List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
         final String commit = gitCodePushedEventArgs.commit;
         final URIish uri = gitCodePushedEventArgs.getRepoURIish();
