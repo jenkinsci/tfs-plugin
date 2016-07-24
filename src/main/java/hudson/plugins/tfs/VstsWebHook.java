@@ -130,6 +130,7 @@ public class VstsWebHook implements UnprotectedRootAction {
     }
 
     public List<GitStatus.ResponseContributor> gitCodePushed(final GitCodePushedEventArgs gitCodePushedEventArgs) {
+        final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
         // TODO: add extension point for this event, then extract current implementation as extension(s)
 
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
@@ -190,7 +191,6 @@ public class VstsWebHook implements UnprotectedRootAction {
                                         final int quietPeriod = scmTriggerItem.getQuietPeriod();
                                         final Cause cause = new VstsHookCause(commit);
                                         final CauseAction causeAction = new CauseAction(cause);
-                                        final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
                                         scmTriggerItem.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
                                         result.add(new ScheduledResponseContributor(project));
                                         triggered = true;
