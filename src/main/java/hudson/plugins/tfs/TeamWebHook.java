@@ -47,7 +47,7 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 /**
- * The endpoint that VSTS will POST to on push, pull request, etc.
+ * The endpoint that TFS/Team Services will POST to on Git code push, pull request merge commit creation, etc.
  */
 @Extension
 public class TeamWebHook implements UnprotectedRootAction {

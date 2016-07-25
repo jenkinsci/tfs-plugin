@@ -30,7 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Triggers a build when we receive a VSTS post-push web hook.
+ * Triggers a build when we receive a TFS/Team Services Git code push event.
  */
 public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 

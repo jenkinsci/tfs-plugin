@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Indicates that a build was queued because of a VSTS push hook.
+ * Indicates that a build was queued because of a TFS/Team Services Git code push event.
  */
 public class TeamPushCause extends SCMTriggerCause {
 

@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
- * A _Post-Build Action_ that reports the completion status of an associated build to VSTS.
+ * A _Post-Build Action_ that reports the completion status of an associated build to TFS/Team Services.
  */
 public class TeamCompletedStatusPostBuildAction extends Notifier implements SimpleBuildStep {
 

@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
- * A _Build Step_ that reports the status of an associated build as "Pending" to VSTS.
+ * A _Build Step_ that reports the status of an associated build as "Pending" to TFS/Team Services.
  */
 public class TeamPendingStatusBuildStep extends Builder implements SimpleBuildStep {
 

@@ -4,11 +4,11 @@ import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 
 /**
- * Represent the different types of notifications that VSTS can POST to Jenkins.
+ * Represent the different types of notifications that TFS/Team Services can POST to Jenkins.
  */
 public enum TeamHookEventName {
     /**
-     * The PING event is raised when testing the connection from VSTS to Jenkins.
+     * The PING event is raised when testing the connection from TFS/Team Services to Jenkins.
      */
     PING {
         @Override public Object parse(final String body) {
@@ -16,7 +16,7 @@ public enum TeamHookEventName {
         }
     },
     /**
-     * The BUILD_COMPLETED event is raised when a VSTS build completes.
+     * The BUILD_COMPLETED event is raised when a TFS/Team Services build completes.
      */
     BUILD_COMPLETED,
     /**
