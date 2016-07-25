@@ -29,7 +29,7 @@ public class VstsPushCause extends SCMTriggerCause {
 
     @Override
     public String getShortDescription() {
-        final String template = "Started by VSTS push by %s";
+        final String template = "Started by TFS/Team Services push by %s";
         final String message = String.format(template, StringUtils.trimToEmpty(pushedBy));
         return message;
     }

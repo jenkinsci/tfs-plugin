@@ -39,7 +39,9 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         if (scm instanceof TeamFoundationServerScm) {
             return ((TeamFoundationServerScm) scm).getServerUrl(changeset.getParent().build);
         } else {
-            throw new IllegalStateException("TFS repository browser used on a non TFS SCM");
+            final DescriptorImpl descriptor = (DescriptorImpl) getDescriptor();
+            final String displayName = descriptor.getDisplayName();
+            throw new IllegalStateException("'" + displayName + "' repository browser can only be used with the 'Team Foundation Server' SCM");
         }
     }
 

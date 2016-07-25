@@ -36,7 +36,7 @@ public class VstsPendingStatusBuildStep extends Builder implements SimpleBuildSt
             VstsStatus.createFromRun(run);
         }
         catch (final Exception e) {
-            e.printStackTrace(listener.error("Error while trying to update pending status in VSTS"));
+            e.printStackTrace(listener.error("Error while trying to update pending status in TFS/Team Services"));
         }
     }
 
@@ -50,7 +50,7 @@ public class VstsPendingStatusBuildStep extends Builder implements SimpleBuildSt
 
         @Override
         public String getDisplayName() {
-            return "Set pending status for VSTS commit or pull request";
+            return "Set pending status for TFS/Team Services commit or pull request";
         }
     }
 }

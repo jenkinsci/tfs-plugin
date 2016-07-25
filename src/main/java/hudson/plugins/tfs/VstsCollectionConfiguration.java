@@ -71,7 +71,7 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
                 new URL(value);
             }
             catch (MalformedURLException e) {
-                return FormValidation.error("Malformed VSTS/TFS collection URL (%s)", e.getMessage());
+                return FormValidation.error("Malformed TFS/Team Services collection URL (%s)", e.getMessage());
             }
 
             // TODO: check that it's not a deep URL to a repository, work item, API endpoint, etc.
@@ -99,7 +99,7 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
                 final StandardUsernamePasswordCredentials credential = findCredential(hostName, credentialsId);
                 if (StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com")) {
                     if (credential == null) {
-                        return FormValidation.error(errorTemplate, "VSTS accounts need credentials, preferably a Personal Access Token");
+                        return FormValidation.error(errorTemplate, "Team Services accounts need credentials, preferably a Personal Access Token");
                     }
                 }
                 final URI collectionUri = URI.create(collectionUrl);

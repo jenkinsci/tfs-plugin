@@ -10,6 +10,6 @@ public class VstsHookCause extends GitStatus.CommitHookCause {
 
     @Override
     public String getShortDescription() {
-        return "Started by VSTS web hook for commit " + sha1;
+        return "Started by TFS/Team Services web hook for commit " + sha1;
     }
 }

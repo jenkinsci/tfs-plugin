@@ -26,7 +26,7 @@ public class TfsUserLookup implements UserLookup {
      * @param accountName Windows NT account name: domain\alias.
      */
     public User find(String accountName) {
-        LOGGER.fine("Looking up Jenkins user for TFS account '%s'.");
+        LOGGER.fine("Looking up Jenkins user for account '%s'.");
         final User jenkinsUser = User.get(accountName);
         Mailer.UserProperty mailerProperty = jenkinsUser.getProperty(Mailer.UserProperty.class);
         if (mailerProperty == null || mailerProperty.getAddress() == null || mailerProperty.getAddress().length() == 0) {
@@ -45,15 +45,15 @@ public class TfsUserLookup implements UserLookup {
                     try {
                         jenkinsUser.addProperty(mailerProperty);
                     } catch (IOException e) {
-                        LOGGER.warning(String.format("Unable to save Jenkins account for TFS user '%s'.", accountName));
+                        LOGGER.warning(String.format("Unable to save Jenkins account for  user '%s'.", accountName));
                     }
                 }
                 else {
-                    LOGGER.info(String.format("TFS user '%s' did not have an e-mail address configured.", accountName));
+                    LOGGER.info(String.format("User '%s' did not have an e-mail address configured.", accountName));
                 }
             }
             else {
-                LOGGER.warning(String.format("Unable to find TFS user '%s'.", accountName));
+                LOGGER.warning(String.format("Unable to find user '%s'.", accountName));
             }
         }
         return jenkinsUser;

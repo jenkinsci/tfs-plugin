@@ -56,7 +56,7 @@ public class VstsPluginGlobalConfig extends GlobalConfiguration {
             final String message = "Configuration error: " + e.getMessage();
             LOGGER.log(Level.WARNING, message, e);
             LOGGER.log(Level.FINE, "Form data: {}", json.toString());
-            throw new FormException(message, e, "vsts-configuration");
+            throw new FormException(message, e, "team-configuration");
         }
         save();
         return true;
@@ -64,6 +64,6 @@ public class VstsPluginGlobalConfig extends GlobalConfiguration {
 
     @Override
     public String getDisplayName() {
-        return "Visual Studio Team Services and Team Foundation Server";
+        return "TFS/Team Services";
     }
 }

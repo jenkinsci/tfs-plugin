@@ -47,7 +47,7 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
     }
 
     public File getLogFile() {
-        return new File(job.getRootDir(), "vsts-polling.log");
+        return new File(job.getRootDir(), "team-polling.log");
     }
 
     // TODO: This was inspired by SCMTrigger.Runner; it would be worth extracting something for re-use
@@ -151,7 +151,7 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public String getDisplayName() {
-            return "Build when a change is pushed to VSTS";
+            return "Build when a change is pushed to TFS/Team Services";
         }
     }
 
@@ -173,12 +173,12 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public String getDisplayName() {
-            return "VSTS hook log";
+            return "TFS/Team Services hook log";
         }
 
         @Override
         public String getUrlName() {
-            return "VstsPollLog";
+            return "TeamPollLog";
         }
 
         // the following methods are called from VstsPushTrigger/VstsPollingAction/index.jelly

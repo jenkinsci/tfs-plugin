@@ -38,7 +38,7 @@ public class VstsCompletedStatusPostBuildAction extends Notifier implements Simp
             VstsStatus.createFromRun(run);
         }
         catch (final Exception e) {
-            e.printStackTrace(listener.error("Error while trying to update completion status in VSTS"));
+            e.printStackTrace(listener.error("Error while trying to update completion status in TFS/Team Services"));
         }
     }
 
@@ -58,7 +58,7 @@ public class VstsCompletedStatusPostBuildAction extends Notifier implements Simp
 
         @Override
         public String getDisplayName() {
-            return "Set completion status for VSTS commit or pull request";
+            return "Set completion status for TFS/Team Services commit or pull request";
         }
     }
 }

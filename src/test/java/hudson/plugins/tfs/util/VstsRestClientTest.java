@@ -36,7 +36,7 @@ public class VstsRestClientTest {
         final String personalAccessToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         final StandardUsernamePasswordCredentials creds = new UsernamePasswordCredentialsImpl(
             CredentialsScope.SYSTEM,
-            "vstsBuildAccount",
+            "buildAccount",
             null,
             "PAT",
             personalAccessToken);
@@ -53,7 +53,7 @@ public class VstsRestClientTest {
         final URI collectionUri = new URI(helper.getServerUrl());
         final StandardUsernamePasswordCredentials creds = new UsernamePasswordCredentialsImpl(
                 CredentialsScope.SYSTEM,
-                "vstsBuildAccount",
+                "buildAccount",
                 null,
                 helper.getUserName(),
                 helper.getUserPassword());

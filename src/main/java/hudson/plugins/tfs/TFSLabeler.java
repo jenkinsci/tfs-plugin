@@ -40,7 +40,7 @@ public class TFSLabeler extends Notifier {
 
         @Override
         public String getDisplayName() {
-            return "Create a label in TFS";
+            return "Create a label in TFVC";
         }
 
         @Override
@@ -59,7 +59,7 @@ public class TFSLabeler extends Notifier {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         SCM scm = build.getProject().getScm();
         if (!(scm instanceof TeamFoundationServerScm)) {
-            listener.getLogger().println("Labels are only supported for projects using TFS SCM");
+            listener.getLogger().println("Labels are only supported for projects using the 'Team Foundation Server' SCM");
             return false;
         }
 
