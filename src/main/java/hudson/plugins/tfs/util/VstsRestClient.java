@@ -1,10 +1,15 @@
 package hudson.plugins.tfs.util;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import hudson.plugins.tfs.model.GitCodePushedEventArgs;
+import hudson.plugins.tfs.model.GitStatusStateMorpher;
 import hudson.plugins.tfs.model.HttpMethod;
+import hudson.plugins.tfs.model.VstsGitStatus;
 import hudson.util.Secret;
+import net.sf.ezmorph.MorpherRegistry;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONTokener;
+import net.sf.json.util.JSONUtils;
 import org.apache.commons.io.IOUtils;
 
 import javax.xml.bind.DatatypeConverter;
@@ -16,11 +21,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.Charset;
 
 public class VstsRestClient {
 
     private static final String AUTHORIZATION = "Authorization";
+    private static final String API_VERSION = "api-version";
     private static final String NEW_LINE = System.getProperty("line.separator");
 
     private final URI collectionUri;
@@ -156,4 +161,24 @@ public class VstsRestClient {
         return request(String.class, HttpMethod.GET, requestUri, null);
     }
 
+    public VstsGitStatus addCommitStatus(final GitCodePushedEventArgs args, final VstsGitStatus status) throws IOException {
+
+        final QueryString qs = new QueryString(API_VERSION, "2.1");
+        final URI requestUri = UriHelper.join(
+            collectionUri, args.projectId,
+            "_apis", "git",
+            "repositories", args.repoId,
+            "commits", args.commit,
+            "statuses",
+            qs);
+
+        final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
+        registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
+        try {
+            return request(VstsGitStatus.class, HttpMethod.POST, requestUri, status);
+        }
+        finally {
+            registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);
+        }
+    }
 }

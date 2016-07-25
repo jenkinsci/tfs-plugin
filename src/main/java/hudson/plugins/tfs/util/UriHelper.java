@@ -7,11 +7,104 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class UriHelper {
+
+    private static final Map<String, Integer> SCHEMES_TO_DEFAULT_PORTS;
     public static final String UTF_8 = "UTF-8";
+
+    static {
+        final Map<String, Integer> defaultPorts =
+                new TreeMap<String, Integer>(String.CASE_INSENSITIVE_ORDER);
+        defaultPorts.put("ftp", 21);
+        defaultPorts.put("ssh", 22);
+        defaultPorts.put("http", 80);
+        defaultPorts.put("https", 443);
+        SCHEMES_TO_DEFAULT_PORTS = Collections.unmodifiableMap(defaultPorts);
+    }
+
+    /**
+     * Compares two {@link URI} instances to determine if they are equivalent.
+     * For example,
+     * {@code HTTP://WWW.EXAMPLE.COM:80/}
+     * and
+     * {@code http://www.example.com}
+     * are considered equivalent.
+     * This method handles a few more cases than {@link URI#equals(Object)}, such that the scheme's
+     * default port number will be considered, as will the default path for hosts.
+     *
+     * @param a the first URI
+     * @param b the second URI
+     * @return {@code true} if a and b represent the same resource; {@code false} otherwise.
+     */
+    public static boolean areSame(final URI a, final URI b) {
+        if (a == null) {
+            return b == null;
+        }
+        if (b == null) {
+            return false;
+        }
+
+        if (!StringHelper.equalIgnoringCase(a.getScheme(), b.getScheme())) {
+            return false;
+        }
+
+        if (!StringHelper.equalIgnoringCase(a.getHost(), b.getHost())) {
+            return false;
+        }
+
+        final int aPort = normalizePort(a);
+        final int bPort = normalizePort(b);
+        if (aPort != bPort) {
+            return false;
+        }
+
+        final String aPath = normalizePath(a);
+        final String bPath = normalizePath(b);
+        if (!StringHelper.equal(aPath, bPath)) {
+            return false;
+        }
+
+        if (!StringHelper.equal(a.getQuery(), b.getQuery())) {
+            return false;
+        }
+
+        if (!StringHelper.equal(a.getFragment(), b.getFragment())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    static int normalizePort(final URI uri) {
+        int port = uri.getPort();
+        if (port == -1) {
+            final String scheme = uri.getScheme();
+            if (scheme != null) {
+                if (SCHEMES_TO_DEFAULT_PORTS.containsKey(scheme)) {
+                    port = SCHEMES_TO_DEFAULT_PORTS.get(scheme);
+                }
+            }
+        }
+        return port;
+    }
+
+    static String normalizePath(final URI uri) {
+        String path = uri.getPath();
+        if (path == null) {
+            path = "/";
+        }
+        else {
+            if (!path.endsWith("/")) {
+                path = path + "/";
+            }
+        }
+        return path;
+    }
 
     public static boolean isWellFormedUriString(final String uriString) {
         try {
