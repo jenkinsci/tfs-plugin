@@ -58,7 +58,7 @@ public class VstsCompletedStatusPostBuildAction extends Notifier implements Simp
 
         @Override
         public String getDisplayName() {
-            return "Set completion status for TFS/Team Services commit or pull request";
+            return "Set build completion status in TFS/Team Services";
         }
     }
 }

@@ -50,7 +50,7 @@ public class VstsPendingStatusBuildStep extends Builder implements SimpleBuildSt
 
         @Override
         public String getDisplayName() {
-            return "Set pending status for TFS/Team Services commit or pull request";
+            return "Set build pending status in TFS/Team Services";
         }
     }
 }
