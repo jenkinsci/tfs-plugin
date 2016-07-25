@@ -81,7 +81,7 @@ public class VstsWebHook implements UnprotectedRootAction {
         List<? extends GitStatus.ResponseContributor> contributors = null;
         switch (event) {
             case PING:
-                final String message = "Pong from the Jenkins TFS plugin! Here's your body:\n" + parsedBody;
+                final String message = "Pong from the TFS plugin for Jenkins! Here's your body:\n" + parsedBody;
                 final GitStatus.MessageResponseContributor contributor;
                 contributor = new GitStatus.MessageResponseContributor(message);
                 contributors = Collections.singletonList(contributor);

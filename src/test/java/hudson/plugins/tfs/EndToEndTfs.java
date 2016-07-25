@@ -118,7 +118,7 @@ public @interface EndToEndTfs {
 
     class RunnerImpl extends JenkinsRecipe.Runner<EndToEndTfs>  {
 
-        private static final String workspaceComment = "Created by the Jenkins tfs-plugin functional tests.";
+        private static final String workspaceComment = "Created by the TFS plugin for Jenkins functional tests.";
 
         private final IntegrationTestHelper helper;
         private final String serverUrl;
