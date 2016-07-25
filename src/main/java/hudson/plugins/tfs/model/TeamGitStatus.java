@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VstsGitStatus {
+public class TeamGitStatus {
 
     private static final Map<Result, GitStatusState> RESULT_TO_STATE;
 
@@ -29,8 +29,8 @@ public class VstsGitStatus {
     public String targetUrl;
     public GitStatusContext context;
 
-    public static VstsGitStatus fromRun(@Nonnull final Run<?, ?> run) {
-        final VstsGitStatus status = new VstsGitStatus();
+    public static TeamGitStatus fromRun(@Nonnull final Run<?, ?> run) {
+        final TeamGitStatus status = new TeamGitStatus();
         final Result result = run.getResult();
         if (result == null) {
             status.state = GitStatusState.Pending;

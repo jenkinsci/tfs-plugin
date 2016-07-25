@@ -6,7 +6,7 @@ import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.tfs.util.VstsStatus;
+import hudson.plugins.tfs.util.TeamStatus;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -20,10 +20,10 @@ import java.io.IOException;
 /**
  * A _Post-Build Action_ that reports the completion status of an associated build to VSTS.
  */
-public class VstsCompletedStatusPostBuildAction extends Notifier implements SimpleBuildStep {
+public class TeamCompletedStatusPostBuildAction extends Notifier implements SimpleBuildStep {
 
     @DataBoundConstructor
-    public VstsCompletedStatusPostBuildAction() {
+    public TeamCompletedStatusPostBuildAction() {
 
     }
 
@@ -35,7 +35,7 @@ public class VstsCompletedStatusPostBuildAction extends Notifier implements Simp
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
         try {
-            VstsStatus.createFromRun(run);
+            TeamStatus.createFromRun(run);
         }
         catch (final Exception e) {
             e.printStackTrace(listener.error("Error while trying to update completion status in TFS/Team Services"));

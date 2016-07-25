@@ -50,11 +50,11 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
  * The endpoint that VSTS will POST to on push, pull request, etc.
  */
 @Extension
-public class VstsWebHook implements UnprotectedRootAction {
+public class TeamWebHook implements UnprotectedRootAction {
 
-    private static final Logger LOGGER = Logger.getLogger(VstsWebHook.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(TeamWebHook.class.getName());
 
-    public static final String URL_NAME = "vsts-hook";
+    public static final String URL_NAME = "team-events";
 
     @Override
     public String getIconFileName() {
@@ -74,7 +74,7 @@ public class VstsWebHook implements UnprotectedRootAction {
     @RequirePOST
     public HttpResponse doIndex(
             final HttpServletRequest request,
-            @QueryParameter(required = true) @Nonnull final VstsHookEventName event,
+            @QueryParameter(required = true) @Nonnull final TeamHookEventName event,
             @StringBodyParameter @Nonnull final String body) {
         LOGGER.log(Level.FINER, "{}/?event={}\n{}", new String[]{URL_NAME, event.name(), body});
         final Object parsedBody = event.parse(body);
@@ -152,7 +152,7 @@ public class VstsWebHook implements UnprotectedRootAction {
             boolean scmFound = false;
             final Jenkins jenkins = Jenkins.getInstance();
             if (jenkins == null) {
-                LOGGER.severe("Jenkins.getInstance() is null in VstsWebHook.gitCodePushed");
+                LOGGER.severe("Jenkins.getInstance() is null");
                 return result;
             }
             for (final Item project : Jenkins.getInstance().getAllItems()) {
@@ -195,7 +195,7 @@ public class VstsWebHook implements UnprotectedRootAction {
                                     if (scmTrigger != null && !scmTrigger.isIgnorePostCommitHooks()) {
                                         // queue build without first polling
                                         final int quietPeriod = scmTriggerItem.getQuietPeriod();
-                                        final Cause cause = new VstsHookCause(commit);
+                                        final Cause cause = new TeamHookCause(commit);
                                         final CauseAction causeAction = new CauseAction(cause);
                                         scmTriggerItem.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
                                         result.add(new ScheduledResponseContributor(project));
@@ -203,7 +203,7 @@ public class VstsWebHook implements UnprotectedRootAction {
                                     }
                                 }
                                 if (!triggered) {
-                                    final VstsPushTrigger pushTrigger = findTrigger(job, VstsPushTrigger.class);
+                                    final TeamPushTrigger pushTrigger = findTrigger(job, TeamPushTrigger.class);
                                     if (pushTrigger != null) {
                                         pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction);
                                         result.add(new PollingScheduledResponseContributor(project));

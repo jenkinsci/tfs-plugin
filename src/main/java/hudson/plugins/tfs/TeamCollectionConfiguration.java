@@ -12,32 +12,28 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.plugins.tfs.util.StringHelper;
 import hudson.plugins.tfs.util.UriHelper;
-import hudson.plugins.tfs.util.VstsRestClient;
+import hudson.plugins.tfs.util.TeamRestClient;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
-public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCollectionConfiguration> {
+public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCollectionConfiguration> {
 
     private final String collectionUrl;
     private final String credentialsId;
 
     @DataBoundConstructor
-    public VstsCollectionConfiguration(final String collectionUrl, final String credentialsId) {
+    public TeamCollectionConfiguration(final String collectionUrl, final String credentialsId) {
         this.collectionUrl = collectionUrl;
         this.credentialsId = credentialsId;
     }
@@ -56,7 +52,7 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
     }
 
     @Extension
-    public static class DescriptorImpl extends Descriptor<VstsCollectionConfiguration> {
+    public static class DescriptorImpl extends Descriptor<TeamCollectionConfiguration> {
 
         @Override
         public String getDisplayName() {
@@ -139,7 +135,7 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
 
     static void testConnection(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {
 
-        final VstsRestClient client = new VstsRestClient(collectionUri, credentials);
+        final TeamRestClient client = new TeamRestClient(collectionUri, credentials);
         client.ping();
     }
 
@@ -179,10 +175,10 @@ public class VstsCollectionConfiguration extends AbstractDescribableImpl<VstsCol
 
     // TODO: we'll probably also want findCredentialsForGitRepo, where we match part of the URL path
     public static StandardUsernamePasswordCredentials findCredentialsForCollection(final URI collectionUri) {
-        final VstsPluginGlobalConfig config = VstsPluginGlobalConfig.get();
+        final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
         // TODO: consider using a different data structure to speed up this look-up
-        final List<VstsCollectionConfiguration> pairs = config.getCollectionConfigurations();
-        for (final VstsCollectionConfiguration pair : pairs) {
+        final List<TeamCollectionConfiguration> pairs = config.getCollectionConfigurations();
+        for (final TeamCollectionConfiguration pair : pairs) {
             final String candidateCollectionUrlString = pair.getCollectionUrl();
             final URI candidateCollectionUri = URI.create(candidateCollectionUrlString);
             if (UriHelper.areSame(candidateCollectionUri, collectionUri)) {

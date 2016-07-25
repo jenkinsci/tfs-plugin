@@ -6,7 +6,7 @@ import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 /**
  * Represent the different types of notifications that VSTS can POST to Jenkins.
  */
-public enum VstsHookEventName {
+public enum TeamHookEventName {
     /**
      * The PING event is raised when testing the connection from VSTS to Jenkins.
      */

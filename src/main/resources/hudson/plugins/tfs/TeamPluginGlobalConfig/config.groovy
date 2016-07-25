@@ -1,4 +1,4 @@
-package hudson.plugins.tfs.VstsPluginGlobalConfig;
+package hudson.plugins.tfs.TeamPluginGlobalConfig;
 
 def f = namespace(lib.FormTagLib);
 

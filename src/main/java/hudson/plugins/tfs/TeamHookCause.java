@@ -2,9 +2,9 @@ package hudson.plugins.tfs;
 
 import hudson.plugins.git.GitStatus;
 
-public class VstsHookCause extends GitStatus.CommitHookCause {
+public class TeamHookCause extends GitStatus.CommitHookCause {
 
-    public VstsHookCause(final String sha1) {
+    public TeamHookCause(final String sha1) {
         super(sha1);
     }
 

@@ -32,12 +32,12 @@ import java.util.logging.Logger;
 /**
  * Triggers a build when we receive a VSTS post-push web hook.
  */
-public class VstsPushTrigger extends Trigger<Job<?, ?>> {
+public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
-    private static final Logger LOGGER = Logger.getLogger(VstsPushTrigger.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(TeamPushTrigger.class.getName());
 
     @DataBoundConstructor
-    public VstsPushTrigger() {
+    public TeamPushTrigger() {
     }
 
     public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
@@ -113,13 +113,13 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
                 final SCMTriggerItem p = job();
                 final String name = " #" + p.getNextBuildNumber();
                 final String pushedBy = gitCodePushedEventArgs.pushedBy;
-                VstsPushCause cause;
+                TeamPushCause cause;
                 try {
-                    cause = new VstsPushCause(getLogFile(), pushedBy);
+                    cause = new TeamPushCause(getLogFile(), pushedBy);
                 }
                 catch (IOException e) {
                     LOGGER.log(Level.WARNING, "Failed to parse the polling log", e);
-                    cause = new VstsPushCause(pushedBy);
+                    cause = new TeamPushCause(pushedBy);
                 }
                 final int quietPeriod = p.getQuietPeriod();
                 final CauseAction causeAction = new CauseAction(cause);
@@ -161,10 +161,10 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
             return Collections.emptyList();
         }
 
-        return Collections.singleton(new VstsPollingAction());
+        return Collections.singleton(new TeamPollingAction());
     }
 
-    public final class VstsPollingAction implements Action {
+    public final class TeamPollingAction implements Action {
 
         @Override
         public String getIconFileName() {
@@ -181,7 +181,7 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
             return "TeamPollLog";
         }
 
-        // the following methods are called from VstsPushTrigger/VstsPollingAction/index.jelly
+        // the following methods are called from TeamPushTrigger/TeamPollingAction/index.jelly
 
         @SuppressWarnings("unused")
         public Job<?, ?> getOwner() {
@@ -196,8 +196,8 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
         @SuppressWarnings("unused")
         public void writeLogTo(XMLOutput out) throws IOException {
             final File logFile = getLogFile();
-            final AnnotatedLargeText<VstsPollingAction> text =
-                    new AnnotatedLargeText<VstsPollingAction>(logFile, MediaType.UTF_8, true, this);
+            final AnnotatedLargeText<TeamPollingAction> text =
+                    new AnnotatedLargeText<TeamPollingAction>(logFile, MediaType.UTF_8, true, this);
             final Writer writer = out.asWriter();
             text.writeHtmlTo(0, writer);
         }

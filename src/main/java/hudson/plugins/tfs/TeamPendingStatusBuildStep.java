@@ -6,7 +6,7 @@ import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.tfs.util.VstsStatus;
+import hudson.plugins.tfs.util.TeamStatus;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
@@ -18,10 +18,10 @@ import java.io.IOException;
 /**
  * A _Build Step_ that reports the status of an associated build as "Pending" to VSTS.
  */
-public class VstsPendingStatusBuildStep extends Builder implements SimpleBuildStep {
+public class TeamPendingStatusBuildStep extends Builder implements SimpleBuildStep {
 
     @DataBoundConstructor
-    public VstsPendingStatusBuildStep() {
+    public TeamPendingStatusBuildStep() {
 
     }
 
@@ -33,7 +33,7 @@ public class VstsPendingStatusBuildStep extends Builder implements SimpleBuildSt
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
         try {
-            VstsStatus.createFromRun(run);
+            TeamStatus.createFromRun(run);
         }
         catch (final Exception e) {
             e.printStackTrace(listener.error("Error while trying to update pending status in TFS/Team Services"));
