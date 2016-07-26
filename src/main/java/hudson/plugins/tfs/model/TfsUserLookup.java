@@ -11,6 +11,7 @@ import com.microsoft.tfs.core.clients.webservices.TeamFoundationIdentity;
 
 import hudson.model.User;
 import hudson.tasks.Mailer;
+import java.util.logging.Level;
 
 public class TfsUserLookup implements UserLookup {
 
@@ -26,10 +27,11 @@ public class TfsUserLookup implements UserLookup {
      * @param accountName Windows NT account name: domain\alias.
      */
     public User find(String accountName) {
-        LOGGER.fine("Looking up Jenkins user for TFS account '%s'.");
+        LOGGER.log(Level.FINE, "Looking up Jenkins user for TFS account '%s'.", accountName);
         final User jenkinsUser = User.get(accountName);
         Mailer.UserProperty mailerProperty = jenkinsUser.getProperty(Mailer.UserProperty.class);
         if (mailerProperty == null || mailerProperty.getAddress() == null || mailerProperty.getAddress().length() == 0) {
+            LOGGER.log(Level.FINE, "No Mailer.UserProperty defined for '%s', looking in TFS", accountName);
             final TeamFoundationIdentity tfsUser = ims.readIdentity(
                 IdentitySearchFactor.ACCOUNT_NAME,
                 accountName,
