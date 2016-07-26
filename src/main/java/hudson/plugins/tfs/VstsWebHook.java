@@ -2,14 +2,15 @@ package hudson.plugins.tfs;
 
 import hudson.Extension;
 import hudson.model.AbstractProject;
+import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
+import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.util.MediaType;
-import hudson.plugins.git.RevisionParameterAction;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.util.StringBodyParameter;
@@ -93,6 +94,8 @@ public class VstsWebHook implements UnprotectedRootAction {
             case TFVC_CODE_CHECKED_IN:
                 break;
             case PULL_REQUEST_MERGE_COMMIT_CREATED:
+                final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs = (PullRequestMergeCommitCreatedEventArgs) parsedBody;
+                contributors = pullRequestMergeCommitCreated(pullRequestMergeCommitCreatedEventArgs);
                 break;
             case DEPLOYMENT_COMPLETED:
                 break;
@@ -121,9 +124,21 @@ public class VstsWebHook implements UnprotectedRootAction {
         }
     }
 
-    public List<GitStatus.ResponseContributor> gitCodePushed(final GitCodePushedEventArgs gitCodePushedEventArgs) {
+    public List<GitStatus.ResponseContributor> pullRequestMergeCommitCreated(final PullRequestMergeCommitCreatedEventArgs args) {
+        final PullRequestParameterAction action = new PullRequestParameterAction(args);
         // TODO: add extension point for this event, then extract current implementation as extension(s)
 
+        return pollOrQueueFromEvent(args, action);
+    }
+
+    public List<GitStatus.ResponseContributor> gitCodePushed(final GitCodePushedEventArgs gitCodePushedEventArgs) {
+        final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
+        // TODO: add extension point for this event, then extract current implementation as extension(s)
+
+        return pollOrQueueFromEvent(gitCodePushedEventArgs, commitParameterAction);
+    }
+
+    List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
         final String commit = gitCodePushedEventArgs.commit;
         final URIish uri = gitCodePushedEventArgs.getRepoURIish();
@@ -180,9 +195,8 @@ public class VstsWebHook implements UnprotectedRootAction {
                                     if (scmTrigger != null && !scmTrigger.isIgnorePostCommitHooks()) {
                                         // queue build without first polling
                                         final int quietPeriod = scmTriggerItem.getQuietPeriod();
-                                        final GitStatus.CommitHookCause commitHookCause = new GitStatus.CommitHookCause(commit);
-                                        final CauseAction causeAction = new CauseAction(commitHookCause);
-                                        final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
+                                        final Cause cause = new VstsHookCause(commit);
+                                        final CauseAction causeAction = new CauseAction(cause);
                                         scmTriggerItem.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
                                         result.add(new ScheduledResponseContributor(project));
                                         triggered = true;
@@ -191,7 +205,7 @@ public class VstsWebHook implements UnprotectedRootAction {
                                 if (!triggered) {
                                     final VstsPushTrigger pushTrigger = findTrigger(job, VstsPushTrigger.class);
                                     if (pushTrigger != null) {
-                                        pushTrigger.execute(gitCodePushedEventArgs);
+                                        pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction);
                                         result.add(new PollingScheduledResponseContributor(project));
                                         triggered = true;
                                     }

@@ -16,15 +16,12 @@ import hudson.util.StreamTaskListener;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import org.apache.commons.jelly.XMLOutput;
-import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.net.URI;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,9 +40,9 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
     public VstsPushTrigger() {
     }
 
-    public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs) {
+    public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
         // TODO: Consider executing the poll + queue asynchronously
-        final Runner runner = new Runner(gitCodePushedEventArgs);
+        final Runner runner = new Runner(gitCodePushedEventArgs, commitParameterAction);
         runner.run();
     }
 
@@ -57,9 +54,11 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
     public class Runner implements Runnable {
 
         private final GitCodePushedEventArgs gitCodePushedEventArgs;
+        private final CommitParameterAction commitParameterAction;
 
-        public Runner(final GitCodePushedEventArgs gitCodePushedEventArgs) {
+        public Runner(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
             this.gitCodePushedEventArgs = gitCodePushedEventArgs;
+            this.commitParameterAction = commitParameterAction;
         }
 
         private SCMTriggerItem job() {
@@ -124,7 +123,6 @@ public class VstsPushTrigger extends Trigger<Job<?, ?>> {
                 }
                 final int quietPeriod = p.getQuietPeriod();
                 final CauseAction causeAction = new CauseAction(cause);
-                final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
                 final QueueTaskFuture<?> queueTaskFuture = p.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
                 if (queueTaskFuture != null) {
                     LOGGER.info(changesDetected + " Triggering " + name);
