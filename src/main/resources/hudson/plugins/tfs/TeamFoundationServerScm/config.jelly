@@ -3,7 +3,7 @@
         <f:textbox clazz="required" checkMessage="${%Collection URL is mandatory.}"/>
     </f:entry>
     
-    <f:entry field="projectPath" title="Project path">
+    <f:entry field="projectPath" title="Project path" description="The path to the TFVC project must start with '$/'">
         <f:textbox checkUrl="'${rootURL}/scm/TeamFoundationServerScm/projectPathCheck?value='+escape(this.value)"/>
     </f:entry>
 
