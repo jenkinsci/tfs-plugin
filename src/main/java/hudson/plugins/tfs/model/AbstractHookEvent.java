@@ -2,12 +2,7 @@ package hudson.plugins.tfs.model;
 
 import net.sf.json.JSONObject;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public abstract class AbstractHookEvent implements Runnable {
-
-    private static final Logger LOGGER = Logger.getLogger(AbstractHookEvent.class.getName());
 
     protected JSONObject requestPayload;
     private JSONObject response;
@@ -35,13 +30,6 @@ public abstract class AbstractHookEvent implements Runnable {
     public abstract JSONObject perform(final JSONObject requestPayload);
 
     public void run() {
-        try {
-            response = perform(requestPayload);
-        }
-        catch (final Exception e) {
-            LOGGER.log(Level.SEVERE, "Error while performing reaction to event.", e);
-            // TODO: serialize it to JSON and set as the response
-            //response = toJSON(e);
-        }
+        response = perform(requestPayload);
     }
 }
