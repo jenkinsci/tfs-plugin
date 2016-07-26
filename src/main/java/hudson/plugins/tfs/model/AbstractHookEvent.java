@@ -16,6 +16,10 @@ public abstract class AbstractHookEvent implements Runnable {
         this.requestPayload = requestPayload;
     }
 
+    public interface Factory {
+        AbstractHookEvent create(final JSONObject requestPayload);
+    }
+
     public JSONObject getResponse() {
         return response;
     }
