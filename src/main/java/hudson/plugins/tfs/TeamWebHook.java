@@ -69,10 +69,8 @@ public class TeamWebHook implements UnprotectedRootAction {
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
     }
 
-    static final String EVENT_NAME = "eventName";
-    static final String REQUEST_PAYLOAD = "requestPayload";
-
     public static final String URL_NAME = "team-events";
+    static final String URL_PREFIX = "/" + URL_NAME + "/";
 
     @Override
     public String getIconFileName() {
@@ -89,30 +87,37 @@ public class TeamWebHook implements UnprotectedRootAction {
         return URL_NAME;
     }
 
-    @RequirePOST
-    public HttpResponse doIndex(
-            final HttpServletRequest request,
-            @StringBodyParameter @Nonnull final String body) {
-        final JSONObject eventAndPayload = JSONObject.fromObject(body);
-        final String eventName = eventAndPayload.getString(EVENT_NAME);
+    public HttpResponse doIndex(final HttpServletRequest request) {
+        return HttpResponses.plainText("TODO: return documentation");
+    }
+
+    static String pathInfoToEventName(final String pathInfo) {
+        if (pathInfo.startsWith(URL_PREFIX)) {
+            final String restOfPath = pathInfo.substring(URL_PREFIX.length());
+            final int firstSlash = restOfPath.indexOf('/');
+            final String eventName;
+            if (firstSlash != -1) {
+                eventName = restOfPath.substring(0, firstSlash);
+            }
+            else {
+                eventName = restOfPath;
+            }
+            return eventName;
+        }
+        return null;
+    }
+
+    HttpResponse dispatch(final HttpServletRequest request, final String body) {
+        final String pathInfo = request.getPathInfo();
+        final String eventName = pathInfoToEventName(pathInfo);
+        if (StringUtils.isBlank(eventName) || !HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
+            return HttpResponses.error(SC_BAD_REQUEST, "Invalid event");
+        }
+        final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
         try {
-            if (StringUtils.isBlank(eventName)) {
-                throw new IllegalArgumentException("eventName is missing");
-            }
-            LOGGER.log(Level.FINER, "{}\n{}", new String[]{URL_NAME, body});
-            if (!HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
-                final String template = "Event '%s' is not implemented";
-                final String message = String.format(template, eventName);
-                throw new IllegalArgumentException(message);
-            }
-            if (!eventAndPayload.containsKey(REQUEST_PAYLOAD)) {
-                throw new IllegalArgumentException("requestPayload is missing");
-            }
-            final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
-            final JSONObject requestPayload = eventAndPayload.getJSONObject(REQUEST_PAYLOAD);
-            final AbstractHookEvent hookEvent = factory.create(requestPayload);
-            hookEvent.run();
-            final JSONObject response = hookEvent.getResponse();
+            final JSONObject requestBody = JSONObject.fromObject(body);
+            final AbstractHookEvent hookEvent = factory.create(requestBody);
+            final JSONObject response = hookEvent.perform(requestBody);
             return new HttpResponse() {
                 public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node)
                         throws IOException, ServletException {
@@ -131,10 +136,19 @@ public class TeamWebHook implements UnprotectedRootAction {
             return HttpResponses.error(SC_BAD_REQUEST, e.getMessage());
         }
         catch (final Exception e) {
-            LOGGER.log(Level.SEVERE, "Error while performing reaction to event.", e);
+            final String template = "Error while performing reaction to '%s' event.";
+            final String message = String.format(template, eventName);
+            LOGGER.log(Level.SEVERE, message, e);
             // TODO: serialize it to JSON and set as the response
-            return HttpResponses.error(SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            return HttpResponses.error(SC_INTERNAL_SERVER_ERROR, e);
         }
+    }
+
+    @RequirePOST
+    public HttpResponse doPing(
+            final HttpServletRequest request,
+            @StringBodyParameter @Nonnull final String body) {
+        return dispatch(request, body);
     }
 
     public List<GitStatus.ResponseContributor> pullRequestMergeCommitCreated(final PullRequestMergeCommitCreatedEventArgs args) {
