@@ -17,7 +17,7 @@
 
     <f:advanced>
 
-		<f:entry field="useUpdate" title="Use update" description="If checked, Hudson will not delete the workspace at end of each build, making the build faster. But this causes the artifacts from the previous build to remain when a new build starts.">
+		<f:entry field="useUpdate" title="Use update" description="If checked, the workspace will not be deleted and re-created at the start of each build, making the build faster, but this causes the artifacts from the previous build to remain when a new build starts.">
 			<f:checkbox default="true"/>
 		</f:entry>
     
