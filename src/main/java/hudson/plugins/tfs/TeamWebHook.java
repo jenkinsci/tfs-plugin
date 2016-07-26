@@ -9,6 +9,8 @@ import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
+import hudson.plugins.tfs.model.AbstractHookEvent;
+import hudson.plugins.tfs.model.PingHookEvent;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
@@ -21,8 +23,10 @@ import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
+import net.sf.json.JSONObject;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.HttpResponse;
@@ -40,10 +44,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 /**
@@ -53,6 +60,17 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 public class TeamWebHook implements UnprotectedRootAction {
 
     private static final Logger LOGGER = Logger.getLogger(TeamWebHook.class.getName());
+    private static final Map<String, AbstractHookEvent.Factory> HOOK_EVENT_FACTORIES_BY_NAME;
+
+    static {
+        final Map<String, AbstractHookEvent.Factory> eventMap =
+                new TreeMap<String, AbstractHookEvent.Factory>(String.CASE_INSENSITIVE_ORDER);
+        eventMap.put("ping", new PingHookEvent.Factory());
+        HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
+    }
+
+    static final String EVENT_NAME = "eventName";
+    static final String REQUEST_PAYLOAD = "requestPayload";
 
     public static final String URL_NAME = "team-events";
 
@@ -74,53 +92,48 @@ public class TeamWebHook implements UnprotectedRootAction {
     @RequirePOST
     public HttpResponse doIndex(
             final HttpServletRequest request,
-            @QueryParameter(required = true) @Nonnull final TeamHookEventName event,
             @StringBodyParameter @Nonnull final String body) {
-        LOGGER.log(Level.FINER, "{}/?event={}\n{}", new String[]{URL_NAME, event.name(), body});
-        final Object parsedBody = event.parse(body);
-        List<? extends GitStatus.ResponseContributor> contributors = null;
-        switch (event) {
-            case PING:
-                final String message = "Pong from the TFS plugin for Jenkins! Here's your body:\n" + parsedBody;
-                final GitStatus.MessageResponseContributor contributor;
-                contributor = new GitStatus.MessageResponseContributor(message);
-                contributors = Collections.singletonList(contributor);
-            case BUILD_COMPLETED:
-                break;
-            case GIT_CODE_PUSHED:
-                final GitCodePushedEventArgs gitCodePushedEventArgs = (GitCodePushedEventArgs) parsedBody;
-                contributors = gitCodePushed(gitCodePushedEventArgs);
-                break;
-            case TFVC_CODE_CHECKED_IN:
-                break;
-            case PULL_REQUEST_MERGE_COMMIT_CREATED:
-                final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs = (PullRequestMergeCommitCreatedEventArgs) parsedBody;
-                contributors = pullRequestMergeCommitCreated(pullRequestMergeCommitCreatedEventArgs);
-                break;
-            case DEPLOYMENT_COMPLETED:
-                break;
-        }
-        if (contributors == null) {
-            return HttpResponses.error(SC_BAD_REQUEST, "Not implemented");
-        }
-        else {
-            final List<? extends GitStatus.ResponseContributor> finalContributors = contributors;
+        final JSONObject eventAndPayload = JSONObject.fromObject(body);
+        final String eventName = eventAndPayload.getString(EVENT_NAME);
+        try {
+            if (StringUtils.isBlank(eventName)) {
+                throw new IllegalArgumentException("eventName is missing");
+            }
+            LOGGER.log(Level.FINER, "{}\n{}", new String[]{URL_NAME, body});
+            if (!HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
+                final String template = "Event '%s' is not implemented";
+                final String message = String.format(template, eventName);
+                throw new IllegalArgumentException(message);
+            }
+            if (!eventAndPayload.containsKey(REQUEST_PAYLOAD)) {
+                throw new IllegalArgumentException("requestPayload is missing");
+            }
+            final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
+            final JSONObject requestPayload = eventAndPayload.getJSONObject(REQUEST_PAYLOAD);
+            final AbstractHookEvent hookEvent = factory.create(requestPayload);
+            hookEvent.run();
+            final JSONObject response = hookEvent.getResponse();
             return new HttpResponse() {
                 public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node)
                         throws IOException, ServletException {
                     rsp.setStatus(SC_OK);
-                    rsp.setContentType(MediaType.TEXT_PLAIN);
-                    for (GitStatus.ResponseContributor c : finalContributors) {
-                        c.addHeaders(req, rsp);
-                    }
-                    rsp.setCharacterEncoding(MediaType.UTF_8.name());
-                    PrintWriter w = rsp.getWriter();
-                    for (GitStatus.ResponseContributor c : finalContributors) {
-                        c.writeBody(req, rsp, w);
-                    }
+                    rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
+                    final PrintWriter w = rsp.getWriter();
+                    final String responseJsonString = response.toString();
+                    w.print(responseJsonString);
+                    w.println();
                 }
             };
-
+        }
+        catch (final IllegalArgumentException e) {
+            LOGGER.log(Level.WARNING, "IllegalArgumentException", e);
+            // TODO: serialize it to JSON and set as the response
+            return HttpResponses.error(SC_BAD_REQUEST, e.getMessage());
+        }
+        catch (final Exception e) {
+            LOGGER.log(Level.SEVERE, "Error while performing reaction to event.", e);
+            // TODO: serialize it to JSON and set as the response
+            return HttpResponses.error(SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
