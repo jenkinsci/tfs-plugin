@@ -2,7 +2,7 @@ package hudson.plugins.tfs.model;
 
 import net.sf.json.JSONObject;
 
-public abstract class AbstractHookEvent implements Runnable {
+public abstract class AbstractHookEvent {
 
     protected JSONObject requestPayload;
     private JSONObject response;
@@ -29,7 +29,4 @@ public abstract class AbstractHookEvent implements Runnable {
      */
     public abstract JSONObject perform(final JSONObject requestPayload);
 
-    public void run() {
-        response = perform(requestPayload);
-    }
 }
