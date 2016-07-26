@@ -5,7 +5,7 @@ import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.GitStatusStateMorpher;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
-import hudson.plugins.tfs.model.VstsGitStatus;
+import hudson.plugins.tfs.model.TeamGitStatus;
 import hudson.util.Secret;
 import net.sf.ezmorph.MorpherRegistry;
 import net.sf.json.JSONObject;
@@ -23,7 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
-public class VstsRestClient {
+public class TeamRestClient {
 
     private static final String AUTHORIZATION = "Authorization";
     private static final String API_VERSION = "api-version";
@@ -33,7 +33,7 @@ public class VstsRestClient {
     private final boolean isHosted;
     private final String authorization;
 
-    public VstsRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) {
+    public TeamRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) {
         this.collectionUri = collectionUri;
         final String hostName = collectionUri.getHost();
         isHosted = StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
@@ -162,7 +162,7 @@ public class VstsRestClient {
         return request(String.class, HttpMethod.GET, requestUri, null);
     }
 
-    public VstsGitStatus addCommitStatus(final GitCodePushedEventArgs args, final VstsGitStatus status) throws IOException {
+    public TeamGitStatus addCommitStatus(final GitCodePushedEventArgs args, final TeamGitStatus status) throws IOException {
 
         final QueryString qs = new QueryString(API_VERSION, "2.1");
         final URI requestUri = UriHelper.join(
@@ -176,14 +176,14 @@ public class VstsRestClient {
         final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
         registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
         try {
-            return request(VstsGitStatus.class, HttpMethod.POST, requestUri, status);
+            return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
         }
         finally {
             registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);
         }
     }
 
-    public VstsGitStatus addPullRequestIterationStatus(final PullRequestMergeCommitCreatedEventArgs args, final VstsGitStatus status) throws IOException {
+    public TeamGitStatus addPullRequestIterationStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
 
         final QueryString qs = new QueryString(API_VERSION, "3.0-preview.1");
         final URI requestUri = UriHelper.join(
@@ -198,7 +198,7 @@ public class VstsRestClient {
         final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
         registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
         try {
-            return request(VstsGitStatus.class, HttpMethod.POST, requestUri, status);
+            return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
         }
         finally {
             registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);

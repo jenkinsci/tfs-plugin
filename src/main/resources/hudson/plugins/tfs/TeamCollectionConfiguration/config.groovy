@@ -1,4 +1,4 @@
-package hudson.plugins.tfs.VstsCollectionConfiguration;
+package hudson.plugins.tfs.TeamCollectionConfiguration;
 
 def f = namespace(lib.FormTagLib);
 def c = namespace(lib.CredentialsTagLib);

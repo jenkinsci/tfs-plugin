@@ -8,12 +8,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * A class to test {@link VstsGitStatus}.
+ * A class to test {@link TeamGitStatus}.
  */
-public class VstsGitStatusTest {
+public class TeamGitStatusTest {
 
     @Test public void toJson_typical() {
-        final VstsGitStatus cut = new VstsGitStatus();
+        final TeamGitStatus cut = new TeamGitStatus();
         cut.state = GitStatusState.Pending;
         cut.description = "The build is in progress";
         cut.targetUrl = "https://ci.fabrikam.com/my-project/build/124";
@@ -35,7 +35,7 @@ public class VstsGitStatusTest {
         Assert.assertEquals(expected, actual);
     }
 
-    @Test public void fromJsonString_vsts() throws Exception {
+    @Test public void fromJsonString_server() throws Exception {
         final String input =
             "{" +
                 "\"state\":\"succeeded\"," +
@@ -52,9 +52,9 @@ public class VstsGitStatusTest {
         final JSONObject jsonObject = JSONObject.fromObject(tokener);
         final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
         registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
-        final VstsGitStatus actual;
+        final TeamGitStatus actual;
         try {
-            actual = (VstsGitStatus) jsonObject.toBean(VstsGitStatus.class);
+            actual = (TeamGitStatus) jsonObject.toBean(TeamGitStatus.class);
         }
         finally {
             registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);

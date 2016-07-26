@@ -8,14 +8,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * A class to test {@link VstsHookEventName}.
+ * A class to test {@link TeamHookEventName}.
  */
-public class VstsHookEventNameTest {
+public class TeamHookEventNameTest {
 
     @Test public void gitCodePushed() throws Exception {
         final String input = GitCodePushedEventArgsTest.FORMATTED_INPUT;
 
-        final Object actual = VstsHookEventName.GIT_CODE_PUSHED.parse(input);
+        final Object actual = TeamHookEventName.GIT_CODE_PUSHED.parse(input);
 
         Assert.assertTrue(actual instanceof GitCodePushedEventArgs);
     }
@@ -23,7 +23,7 @@ public class VstsHookEventNameTest {
     @Test public void pullRequestMergeCommitCreated() throws Exception {
         final String input = PullRequestMergeCommitCreatedEventArgsTest.FORMATTED_INPUT;
 
-        final Object actual = VstsHookEventName.PULL_REQUEST_MERGE_COMMIT_CREATED.parse(input);
+        final Object actual = TeamHookEventName.PULL_REQUEST_MERGE_COMMIT_CREATED.parse(input);
 
         Assert.assertTrue(actual instanceof PullRequestMergeCommitCreatedEventArgs);
     }

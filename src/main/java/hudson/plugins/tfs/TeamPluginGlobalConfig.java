@@ -16,34 +16,34 @@ import java.util.logging.Logger;
  * All the settings that apply globally.
  */
 @Extension
-public class VstsPluginGlobalConfig extends GlobalConfiguration {
+public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
-    private static final Logger LOGGER = Logger.getLogger(VstsPluginGlobalConfig.class.getName());
-    private static final VstsPluginGlobalConfig DEFAULT_CONFIG = new VstsPluginGlobalConfig();
+    private static final Logger LOGGER = Logger.getLogger(TeamPluginGlobalConfig.class.getName());
+    private static final TeamPluginGlobalConfig DEFAULT_CONFIG = new TeamPluginGlobalConfig();
 
-    private List<VstsCollectionConfiguration> collectionConfigurations = new ArrayList<VstsCollectionConfiguration>();
+    private List<TeamCollectionConfiguration> collectionConfigurations = new ArrayList<TeamCollectionConfiguration>();
 
 
-    public VstsPluginGlobalConfig() {
+    public TeamPluginGlobalConfig() {
         load();
     }
 
-    public VstsPluginGlobalConfig(final List<VstsCollectionConfiguration> collectionConfigurations) {
+    public TeamPluginGlobalConfig(final List<TeamCollectionConfiguration> collectionConfigurations) {
         this.collectionConfigurations = collectionConfigurations;
     }
 
-    public static VstsPluginGlobalConfig get() {
+    public static TeamPluginGlobalConfig get() {
         final ExtensionList<GlobalConfiguration> configurationExtensions = all();
-        final VstsPluginGlobalConfig config = configurationExtensions.get(VstsPluginGlobalConfig.class);
-        final VstsPluginGlobalConfig result = ObjectUtils.defaultIfNull(config, DEFAULT_CONFIG);
+        final TeamPluginGlobalConfig config = configurationExtensions.get(TeamPluginGlobalConfig.class);
+        final TeamPluginGlobalConfig result = ObjectUtils.defaultIfNull(config, DEFAULT_CONFIG);
         return result;
     }
 
-    public List<VstsCollectionConfiguration> getCollectionConfigurations() {
+    public List<TeamCollectionConfiguration> getCollectionConfigurations() {
         return collectionConfigurations;
     }
 
-    public void setCollectionConfigurations(final List<VstsCollectionConfiguration> collectionConfigurations) {
+    public void setCollectionConfigurations(final List<TeamCollectionConfiguration> collectionConfigurations) {
         this.collectionConfigurations = collectionConfigurations;
     }
 
@@ -56,7 +56,7 @@ public class VstsPluginGlobalConfig extends GlobalConfiguration {
             final String message = "Configuration error: " + e.getMessage();
             LOGGER.log(Level.WARNING, message, e);
             LOGGER.log(Level.FINE, "Form data: {}", json.toString());
-            throw new FormException(message, e, "vsts-configuration");
+            throw new FormException(message, e, "team-configuration");
         }
         save();
         return true;
@@ -64,6 +64,6 @@ public class VstsPluginGlobalConfig extends GlobalConfiguration {
 
     @Override
     public String getDisplayName() {
-        return "Visual Studio Team Services and Team Foundation Server";
+        return "TFS/Team Services";
     }
 }

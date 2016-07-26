@@ -7,29 +7,29 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Indicates that a build was queued because of a VSTS push hook.
+ * Indicates that a build was queued because of a TFS/Team Services Git code push event.
  */
-public class VstsPushCause extends SCMTriggerCause {
+public class TeamPushCause extends SCMTriggerCause {
 
     private final String pushedBy;
 
-    public VstsPushCause(final String pushedBy) {
+    public TeamPushCause(final String pushedBy) {
         this("", pushedBy);
     }
 
-    public VstsPushCause(final File logFile, final String pushedBy) throws IOException {
+    public TeamPushCause(final File logFile, final String pushedBy) throws IOException {
         super(logFile);
         this.pushedBy = pushedBy;
     }
 
-    public VstsPushCause(final String pollingLog, final String pushedBy) {
+    public TeamPushCause(final String pollingLog, final String pushedBy) {
         super(pollingLog);
         this.pushedBy = pushedBy;
     }
 
     @Override
     public String getShortDescription() {
-        final String template = "Started by VSTS push by %s";
+        final String template = "Started by TFS/Team Services push by %s";
         final String message = String.format(template, StringUtils.trimToEmpty(pushedBy));
         return message;
     }

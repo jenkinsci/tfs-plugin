@@ -4,16 +4,16 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import hudson.model.Run;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
-import hudson.plugins.tfs.VstsCollectionConfiguration;
+import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
-import hudson.plugins.tfs.model.VstsGitStatus;
+import hudson.plugins.tfs.model.TeamGitStatus;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
 
-public class VstsStatus {
+public class TeamStatus {
     public static void createFromRun(@Nonnull final Run<?, ?> run) throws IOException {
         // TODO: also add support for a build triggered from a pull request
         final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
@@ -36,10 +36,10 @@ public class VstsStatus {
 
         final URI collectionUri = gitCodePushedEventArgs.collectionUri;
         final StandardUsernamePasswordCredentials credentials =
-                VstsCollectionConfiguration.findCredentialsForCollection(collectionUri);
-        final VstsRestClient client = new VstsRestClient(collectionUri, credentials);
+                TeamCollectionConfiguration.findCredentialsForCollection(collectionUri);
+        final TeamRestClient client = new TeamRestClient(collectionUri, credentials);
 
-        final VstsGitStatus status = VstsGitStatus.fromRun(run);
+        final TeamGitStatus status = TeamGitStatus.fromRun(run);
         // TODO: when code is pushed and polling happens, are we sure we built against the requested commit?
         if (pullRequestMergeCommitCreatedEventArgs != null) {
             client.addPullRequestIterationStatus(pullRequestMergeCommitCreatedEventArgs, status);

@@ -16,9 +16,9 @@ import org.junit.experimental.categories.Category;
 import java.net.URI;
 
 /**
- * A class to test {@link VstsRestClient}.
+ * A class to test {@link TeamRestClient}.
  */
-public class VstsRestClientTest {
+public class TeamRestClientTest {
 
     private SecretOverride secretOverride = null;
 
@@ -36,12 +36,12 @@ public class VstsRestClientTest {
         final String personalAccessToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         final StandardUsernamePasswordCredentials creds = new UsernamePasswordCredentialsImpl(
             CredentialsScope.SYSTEM,
-            "vstsBuildAccount",
+            "buildAccount",
             null,
             "PAT",
             personalAccessToken);
 
-        final String actual = VstsRestClient.createAuthorization(creds);
+        final String actual = TeamRestClient.createAuthorization(creds);
 
         Assert.assertEquals("Basic UEFUOmFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=", actual);
     }
@@ -53,11 +53,11 @@ public class VstsRestClientTest {
         final URI collectionUri = new URI(helper.getServerUrl());
         final StandardUsernamePasswordCredentials creds = new UsernamePasswordCredentialsImpl(
                 CredentialsScope.SYSTEM,
-                "vstsBuildAccount",
+                "buildAccount",
                 null,
                 helper.getUserName(),
                 helper.getUserPassword());
-        final VstsRestClient cut = new VstsRestClient(collectionUri, creds);
+        final TeamRestClient cut = new TeamRestClient(collectionUri, creds);
 
         cut.ping();
     }

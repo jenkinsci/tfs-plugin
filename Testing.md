@@ -1,6 +1,6 @@
 Functional Tests
 ================
-There's only so much testing you can do with test friends such as mocks and network replayers.  To enable more comprehensive and realistic testing, some automated tests were written to talk to live TFS servers.  Some manual, one-time set-up is required to facilitate the process.
+There's only so much testing you can do with test friends such as mocks and network replayers.  To enable more comprehensive and realistic testing, some automated tests were written to talk to live servers.  Some manual, one-time set-up is required to facilitate the process.
 
 How to configure your TFS server
 --------------------------------
@@ -31,14 +31,14 @@ You'll need to be (or involve) an administrator.  It is assumed your TFS server 
     4. Confirm you can browse to the **FunctionalTests** team project.
 
 
-How to configure your VSO account
----------------------------------
-TODO: write this when Visual Studio Online is supported.
+How to configure your Team Services account
+-------------------------------------------
+TODO: write this when Visual Studio Team Services is supported.
 
 
 How to configure your development environment
 ---------------------------------------------
-Tests that need to connect to a TFS server will only run during the `verify` phase *if* the `tfs_server_name` property was provided to Maven.  The value of this property is the *fully-qualified DNS name (FQDN)* of the TFS server, because a non-qualified host name appears to trigger NTLM authentication attempts.
+Tests that need to connect to a server will only run during the `verify` phase *if* the `tfs_server_name` property was provided to Maven.  The value of this property is the *fully-qualified DNS name (FQDN)* of the server, because a non-qualified host name appears to trigger NTLM authentication attempts.
 
 Example:
 

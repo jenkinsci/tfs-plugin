@@ -1,13 +1,13 @@
 <div>
   <p>
 	The name of the Workspace under which the source should be retrieved. This workspace is 
-	created at the start of a download, and deleted at the end. You can normally 
+	created as needed. You can normally
 	omit the property unless you want to name a workspace to avoid conflicts 
 	on the server (i.e. when you have multiple projects on one server talking 
-	to a Team Foundation Server)
+	to TFS/Team Services)
   </p>
   <p>
-    The default value is to create a workspace named <tt>Hudson-${JOB_NAME}</tt>. The TFS plugin
+    The default value is to create a workspace named <tt>Hudson-${JOB_NAME}</tt>. The TFS plugin for Jenkins
     supports the following macros that are replaced in the workspace name:
     <ul>
 	    <li><tt>${JOB_NAME}</tt> - The name of the job.</li>
