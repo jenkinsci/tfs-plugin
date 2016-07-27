@@ -256,7 +256,7 @@ public class TeamWebHook implements UnprotectedRootAction {
         }
     }
 
-    private static <T extends Trigger> T findTrigger(final Job<?, ?> job, final Class<T> tClass) {
+    public static <T extends Trigger> T findTrigger(final Job<?, ?> job, final Class<T> tClass) {
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             final ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
             for (final Trigger trigger : pJob.getTriggers().values()) {
@@ -273,7 +273,7 @@ public class TeamWebHook implements UnprotectedRootAction {
      *
      * @since 1.4.1
      */
-    private static class PollingScheduledResponseContributor extends GitStatus.ResponseContributor {
+    public static class PollingScheduledResponseContributor extends GitStatus.ResponseContributor {
         /**
          * The project
          */
@@ -305,7 +305,7 @@ public class TeamWebHook implements UnprotectedRootAction {
         }
     }
 
-    private static class ScheduledResponseContributor extends GitStatus.ResponseContributor {
+    public static class ScheduledResponseContributor extends GitStatus.ResponseContributor {
         /**
          * The project
          */
