@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
+import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.Util;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
@@ -30,7 +31,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
         this(server, null);
     }
 
-    public ListWorkspacesCommand(final ServerConfigurationProvider server, final String computer) {
+    ListWorkspacesCommand(final ServerConfigurationProvider server, final String computer) {
         super(server);
         this.computer = computer;
     }
@@ -45,6 +46,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
+        final String computerName = (computer != null) ? computer : LocalHost.getShortName();
 
         final String listWorkspacesMessage = String.format(ListingWorkspacesTemplate, server.getUrl());
         logger.println(listWorkspacesMessage);
@@ -53,7 +55,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
                 = vcc.queryWorkspaces(
                 null,
                 null,
-                Util.fixEmpty(computer),
+                computerName,
                 WorkspacePermissions.NONE_OR_NOT_SUPPORTED
         );
 

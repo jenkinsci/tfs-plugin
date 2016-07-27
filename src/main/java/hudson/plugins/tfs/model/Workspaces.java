@@ -1,14 +1,13 @@
 package hudson.plugins.tfs.model;
 
-import java.io.IOException;
+import hudson.plugins.tfs.commands.DeleteWorkspaceCommand;
+import hudson.plugins.tfs.commands.ListWorkspacesCommand;
+import hudson.plugins.tfs.commands.NewWorkspaceCommand;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import hudson.plugins.tfs.commands.DeleteWorkspaceCommand;
-import hudson.plugins.tfs.commands.ListWorkspacesCommand;
-import hudson.plugins.tfs.commands.NewWorkspaceCommand;
 
 /**
  * Class that creates, deletes and gets workspaces from a TeamFoundationServer.
@@ -20,7 +19,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     private Map<String,Workspace> workspaces = new HashMap<String,Workspace>();
     private Server server;
     private boolean mapIsPopulatedFromServer;
-    
+
     public Workspaces(Server server) {
         this.server = server;
     }
@@ -30,6 +29,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @return the list of workspaces at the server
      */
     private List<Workspace> getListFromServer() {
+        // the 2nd arg must NOT be provided, to force computerName resolution on the agent & not the master
         ListWorkspacesCommand command = new ListWorkspacesCommand(server);
         final List<Workspace> result = server.execute(command.getCallable());
         return result;
