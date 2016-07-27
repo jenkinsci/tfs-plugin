@@ -1,15 +1,14 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:entry field="serverUrl" title="Server URL">
-        <f:textbox clazz="required" checkMessage="${%Server URL is mandatory.}"/>
+    <f:entry field="serverUrl" title="Collection URL" description="The URL to the team project collection">
+        <f:textbox clazz="required" checkMessage="${%Collection URL is mandatory.}"/>
     </f:entry>
     
-    <f:entry field="projectPath" title="Project path">
+    <f:entry field="projectPath" title="Project path" description="The path to the TFVC project must start with '$/'">
         <f:textbox checkUrl="'${rootURL}/scm/TeamFoundationServerScm/projectPathCheck?value='+escape(this.value)"/>
     </f:entry>
 
-    <f:entry field="userName" title="User name">
+    <f:entry field="userName" title="User name" description="(domain alias, e-mail address or alternate credentials)">
         <f:textbox />
-        <i>(domain alias, e-mail address or alternate credentials)</i>
     </f:entry>
     
     <f:entry field="password" title="User password">
@@ -18,7 +17,7 @@
 
     <f:advanced>
 
-		<f:entry field="useUpdate" title="Use update" description="If checked, Hudson will not delete the workspace at end of each build, making the build faster. But this causes the artifacts from the previous build to remain when a new build starts.">
+		<f:entry field="useUpdate" title="Use update" description="If checked, the workspace will not be deleted and re-created at the start of each build, making the build faster, but this causes the artifacts from the previous build to remain when a new build starts.">
 			<f:checkbox default="true"/>
 		</f:entry>
     

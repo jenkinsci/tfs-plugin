@@ -528,7 +528,7 @@ public class TeamFoundationServerScm extends SCM {
 
         @Override
         public String getDisplayName() {
-            return "Team Foundation Server";
+            return "Team Foundation Version Control (TFVC)";
         }
     }
 
