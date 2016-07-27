@@ -143,7 +143,14 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
                                     final TeamPushTrigger pushTrigger = TeamWebHook.findTrigger(job, TeamPushTrigger.class);
                                     if (pushTrigger != null) {
                                         pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction, bypassPolling);
-                                        result.add(new TeamWebHook.PollingScheduledResponseContributor(project));
+                                        final GitStatus.ResponseContributor response;
+                                        if (bypassPolling) {
+                                            response = new TeamWebHook.ScheduledResponseContributor(project);
+                                        }
+                                        else {
+                                            response = new TeamWebHook.PollingScheduledResponseContributor(project);
+                                        }
+                                        result.add(response);
                                         triggered = true;
                                     }
                                 }
