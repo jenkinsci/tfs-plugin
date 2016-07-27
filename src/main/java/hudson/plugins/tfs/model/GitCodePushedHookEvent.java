@@ -50,7 +50,7 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
     public JSONObject perform(final JSONObject requestPayload) {
         final GitCodePushedEventArgs args = GitCodePushedEventArgs.fromJsonObject(requestPayload);
         final CommitParameterAction parameterAction = new CommitParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction);
+        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
     }
@@ -76,7 +76,7 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
     }
 
     // TODO: it would be easiest if pollOrQueueFromEvent built a JSONObject directly
-    List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
+    List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction, final boolean bypassPolling) {
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
         final String commit = gitCodePushedEventArgs.commit;
         final URIish uri = gitCodePushedEventArgs.getRepoURIish();
@@ -142,7 +142,7 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
                                 if (!triggered) {
                                     final TeamPushTrigger pushTrigger = TeamWebHook.findTrigger(job, TeamPushTrigger.class);
                                     if (pushTrigger != null) {
-                                        pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction);
+                                        pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction, bypassPolling);
                                         result.add(new TeamWebHook.PollingScheduledResponseContributor(project));
                                         triggered = true;
                                     }
