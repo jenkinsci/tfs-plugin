@@ -10,8 +10,10 @@ import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.model.AbstractHookEvent;
+import hudson.plugins.tfs.model.GitCodePushedHookEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
+import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedHookEvent;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
@@ -66,6 +68,8 @@ public class TeamWebHook implements UnprotectedRootAction {
         final Map<String, AbstractHookEvent.Factory> eventMap =
                 new TreeMap<String, AbstractHookEvent.Factory>(String.CASE_INSENSITIVE_ORDER);
         eventMap.put("ping", new PingHookEvent.Factory());
+        eventMap.put("gitCodePushed", new GitCodePushedHookEvent.Factory());
+        eventMap.put("pullRequestMergeCommitCreated", new PullRequestMergeCommitCreatedHookEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
     }
 
@@ -146,6 +150,20 @@ public class TeamWebHook implements UnprotectedRootAction {
 
     @RequirePOST
     public HttpResponse doPing(
+            final HttpServletRequest request,
+            @StringBodyParameter @Nonnull final String body) {
+        return dispatch(request, body);
+    }
+
+    @RequirePOST
+    public HttpResponse doGitCodePushed(
+            final HttpServletRequest request,
+            @StringBodyParameter @Nonnull final String body) {
+        return dispatch(request, body);
+    }
+
+    @RequirePOST
+    public HttpResponse doPullRequestMergeCommitCreated(
             final HttpServletRequest request,
             @StringBodyParameter @Nonnull final String body) {
         return dispatch(request, body);
