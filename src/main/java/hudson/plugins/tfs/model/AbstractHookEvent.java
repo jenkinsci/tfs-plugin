@@ -13,6 +13,7 @@ public abstract class AbstractHookEvent {
 
     public interface Factory {
         AbstractHookEvent create(final JSONObject requestPayload);
+        String getSampleRequestPayload();
     }
 
     public JSONObject getResponse() {

@@ -40,6 +40,11 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
         public AbstractHookEvent create(final JSONObject requestPayload) {
             return new GitCodePushedHookEvent(requestPayload);
         }
+
+        @Override
+        public String getSampleRequestPayload() {
+            return GitCodePushedEventArgs.SAMPLE_REQUEST_PAYLOAD;
+        }
     }
 
     public GitCodePushedHookEvent(final JSONObject requestPayload) {
