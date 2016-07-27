@@ -30,6 +30,7 @@ import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.HttpResponse;
@@ -96,14 +97,34 @@ public class TeamWebHook implements UnprotectedRootAction {
     public HttpResponse doIndex(final HttpServletRequest request) throws IOException {
         final Class<? extends TeamWebHook> me = this.getClass();
         final InputStream stream = me.getResourceAsStream("TeamWebHook.html");
+        final Jenkins instance = Jenkins.getInstance();
+        final String rootUrl = instance.getRootUrl();
+        final String eventRows = describeEvents(HOOK_EVENT_FACTORIES_BY_NAME, URL_NAME);
         try {
             final String template = IOUtils.toString(stream, MediaType.UTF_8);
-            final String content = String.format(template, URL_PREFIX, "TODO: event names");
+            final String content = String.format(template, URL_NAME, eventRows, rootUrl);
             return HttpResponses.html(content);
         }
         finally {
             IOUtils.closeQuietly(stream);
         }
+    }
+
+    static String describeEvents(final Map<String, AbstractHookEvent.Factory> eventMap, final String urlName) {
+        final String newLine = System.getProperty("line.separator");
+        final StringBuilder sb = new StringBuilder();
+        for (final Map.Entry<String, AbstractHookEvent.Factory> eventPair : eventMap.entrySet()) {
+            final String eventName = eventPair.getKey();
+            final AbstractHookEvent.Factory factory = eventPair.getValue();
+            sb.append("<tr>").append(newLine);
+            sb.append("<td valign='top'>").append(eventName).append("</td>").append(newLine);
+            sb.append("<td valign='top'>").append('/').append(urlName).append('/').append(eventName).append("</td>").append(newLine);
+            final String rawSample = factory.getSampleRequestPayload();
+            final String escapedSample = StringEscapeUtils.escapeHtml4(rawSample);
+            sb.append("<td><pre>").append(escapedSample).append("</pre></td>").append(newLine);
+            sb.append("</tr>").append(newLine);
+        }
+        return sb.toString();
     }
 
     static String pathInfoToEventName(final String pathInfo) {
