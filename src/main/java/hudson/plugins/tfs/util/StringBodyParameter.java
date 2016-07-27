@@ -37,19 +37,18 @@ public @interface StringBodyParameter {
             final String rawContentType = request.getContentType();
             final String contentType = StringHelper.determineContentTypeWithoutCharset(rawContentType);
 
-            if (MediaType.APPLICATION_JSON.equals(contentType)) {
-                final String characterEncoding = request.getCharacterEncoding();
-                try {
-                    return IOUtils.toString(request.getInputStream(), characterEncoding);
-                }
-                catch (final IOException e) {
-                    LOGGER.log(Level.SEVERE, "Unable to obtain request body: {}", e.getMessage());
-                }
-            }
-            else if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
+            if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
                 return request.getParameter(parameterName);
             }
 
+            // default to application/json
+            final String characterEncoding = request.getCharacterEncoding();
+            try {
+                return IOUtils.toString(request.getInputStream(), characterEncoding);
+            }
+            catch (final IOException e) {
+                LOGGER.log(Level.SEVERE, "Unable to obtain request body: {}", e.getMessage());
+            }
             return null;
         }
 

@@ -9,7 +9,11 @@ import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
+import hudson.plugins.tfs.model.AbstractHookEvent;
+import hudson.plugins.tfs.model.GitCodePushedHookEvent;
+import hudson.plugins.tfs.model.PingHookEvent;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
+import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedHookEvent;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
@@ -21,8 +25,10 @@ import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
+import net.sf.json.JSONObject;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.HttpResponse;
@@ -40,10 +46,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 /**
@@ -53,8 +62,19 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 public class TeamWebHook implements UnprotectedRootAction {
 
     private static final Logger LOGGER = Logger.getLogger(TeamWebHook.class.getName());
+    private static final Map<String, AbstractHookEvent.Factory> HOOK_EVENT_FACTORIES_BY_NAME;
+
+    static {
+        final Map<String, AbstractHookEvent.Factory> eventMap =
+                new TreeMap<String, AbstractHookEvent.Factory>(String.CASE_INSENSITIVE_ORDER);
+        eventMap.put("ping", new PingHookEvent.Factory());
+        eventMap.put("gitCodePushed", new GitCodePushedHookEvent.Factory());
+        eventMap.put("pullRequestMergeCommitCreated", new PullRequestMergeCommitCreatedHookEvent.Factory());
+        HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
+    }
 
     public static final String URL_NAME = "team-events";
+    static final String URL_PREFIX = "/" + URL_NAME + "/";
 
     @Override
     public String getIconFileName() {
@@ -71,165 +91,85 @@ public class TeamWebHook implements UnprotectedRootAction {
         return URL_NAME;
     }
 
-    @RequirePOST
-    public HttpResponse doIndex(
-            final HttpServletRequest request,
-            @QueryParameter(required = true) @Nonnull final TeamHookEventName event,
-            @StringBodyParameter @Nonnull final String body) {
-        LOGGER.log(Level.FINER, "{}/?event={}\n{}", new String[]{URL_NAME, event.name(), body});
-        final Object parsedBody = event.parse(body);
-        List<? extends GitStatus.ResponseContributor> contributors = null;
-        switch (event) {
-            case PING:
-                final String message = "Pong from the TFS plugin for Jenkins! Here's your body:\n" + parsedBody;
-                final GitStatus.MessageResponseContributor contributor;
-                contributor = new GitStatus.MessageResponseContributor(message);
-                contributors = Collections.singletonList(contributor);
-            case BUILD_COMPLETED:
-                break;
-            case GIT_CODE_PUSHED:
-                final GitCodePushedEventArgs gitCodePushedEventArgs = (GitCodePushedEventArgs) parsedBody;
-                contributors = gitCodePushed(gitCodePushedEventArgs);
-                break;
-            case TFVC_CODE_CHECKED_IN:
-                break;
-            case PULL_REQUEST_MERGE_COMMIT_CREATED:
-                final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs = (PullRequestMergeCommitCreatedEventArgs) parsedBody;
-                contributors = pullRequestMergeCommitCreated(pullRequestMergeCommitCreatedEventArgs);
-                break;
-            case DEPLOYMENT_COMPLETED:
-                break;
+    public HttpResponse doIndex(final HttpServletRequest request) {
+        return HttpResponses.plainText("TODO: return documentation");
+    }
+
+    static String pathInfoToEventName(final String pathInfo) {
+        if (pathInfo.startsWith(URL_PREFIX)) {
+            final String restOfPath = pathInfo.substring(URL_PREFIX.length());
+            final int firstSlash = restOfPath.indexOf('/');
+            final String eventName;
+            if (firstSlash != -1) {
+                eventName = restOfPath.substring(0, firstSlash);
+            }
+            else {
+                eventName = restOfPath;
+            }
+            return eventName;
         }
-        if (contributors == null) {
-            return HttpResponses.error(SC_BAD_REQUEST, "Not implemented");
+        return null;
+    }
+
+    HttpResponse dispatch(final HttpServletRequest request, final String body) {
+        final String pathInfo = request.getPathInfo();
+        final String eventName = pathInfoToEventName(pathInfo);
+        if (StringUtils.isBlank(eventName) || !HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
+            return HttpResponses.error(SC_BAD_REQUEST, "Invalid event");
         }
-        else {
-            final List<? extends GitStatus.ResponseContributor> finalContributors = contributors;
+        final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
+        try {
+            final JSONObject requestBody = JSONObject.fromObject(body);
+            final AbstractHookEvent hookEvent = factory.create(requestBody);
+            final JSONObject response = hookEvent.perform(requestBody);
             return new HttpResponse() {
                 public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node)
                         throws IOException, ServletException {
                     rsp.setStatus(SC_OK);
-                    rsp.setContentType(MediaType.TEXT_PLAIN);
-                    for (GitStatus.ResponseContributor c : finalContributors) {
-                        c.addHeaders(req, rsp);
-                    }
-                    rsp.setCharacterEncoding(MediaType.UTF_8.name());
-                    PrintWriter w = rsp.getWriter();
-                    for (GitStatus.ResponseContributor c : finalContributors) {
-                        c.writeBody(req, rsp, w);
-                    }
+                    rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
+                    final PrintWriter w = rsp.getWriter();
+                    final String responseJsonString = response.toString();
+                    w.print(responseJsonString);
+                    w.println();
                 }
             };
-
+        }
+        catch (final IllegalArgumentException e) {
+            LOGGER.log(Level.WARNING, "IllegalArgumentException", e);
+            // TODO: serialize it to JSON and set as the response
+            return HttpResponses.error(SC_BAD_REQUEST, e.getMessage());
+        }
+        catch (final Exception e) {
+            final String template = "Error while performing reaction to '%s' event.";
+            final String message = String.format(template, eventName);
+            LOGGER.log(Level.SEVERE, message, e);
+            // TODO: serialize it to JSON and set as the response
+            return HttpResponses.error(SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
-    public List<GitStatus.ResponseContributor> pullRequestMergeCommitCreated(final PullRequestMergeCommitCreatedEventArgs args) {
-        final PullRequestParameterAction action = new PullRequestParameterAction(args);
-        // TODO: add extension point for this event, then extract current implementation as extension(s)
-
-        return pollOrQueueFromEvent(args, action);
+    @RequirePOST
+    public HttpResponse doPing(
+            final HttpServletRequest request,
+            @StringBodyParameter @Nonnull final String body) {
+        return dispatch(request, body);
     }
 
-    public List<GitStatus.ResponseContributor> gitCodePushed(final GitCodePushedEventArgs gitCodePushedEventArgs) {
-        final CommitParameterAction commitParameterAction = new CommitParameterAction(gitCodePushedEventArgs);
-        // TODO: add extension point for this event, then extract current implementation as extension(s)
-
-        return pollOrQueueFromEvent(gitCodePushedEventArgs, commitParameterAction);
+    @RequirePOST
+    public HttpResponse doGitCodePushed(
+            final HttpServletRequest request,
+            @StringBodyParameter @Nonnull final String body) {
+        return dispatch(request, body);
     }
 
-    List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
-        List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
-        final String commit = gitCodePushedEventArgs.commit;
-        final URIish uri = gitCodePushedEventArgs.getRepoURIish();
-
-        // run in high privilege to see all the projects anonymous users don't see.
-        // this is safe because when we actually schedule a build, it's a build that can
-        // happen at some random time anyway.
-        SecurityContext old = ACL.impersonate(ACL.SYSTEM);
-        try {
-
-            boolean scmFound = false;
-            final Jenkins jenkins = Jenkins.getInstance();
-            if (jenkins == null) {
-                LOGGER.severe("Jenkins.getInstance() is null");
-                return result;
-            }
-            for (final Item project : Jenkins.getInstance().getAllItems()) {
-                final SCMTriggerItem scmTriggerItem = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(project);
-                if (scmTriggerItem == null) {
-                    continue;
-                }
-                for (final SCM scm : scmTriggerItem.getSCMs()) {
-                    if (!(scm instanceof GitSCM)) {
-                        continue;
-                    }
-                    final GitSCM git = (GitSCM) scm;
-                    scmFound = true;
-
-                    for (final RemoteConfig repository : git.getRepositories()) {
-                        boolean repositoryMatches = false;
-                        for (URIish remoteURL : repository.getURIs()) {
-                            if (GitStatus.looselyMatches(uri, remoteURL)) {
-                                repositoryMatches = true;
-                                break;
-                            }
-                        }
-
-                        if (!repositoryMatches || git.getExtensions().get(IgnoreNotifyCommit.class)!=null) {
-                            continue;
-                        }
-
-                        if (!(project instanceof AbstractProject && ((AbstractProject) project).isDisabled())) {
-                            if (project instanceof Job) {
-                                // TODO: Add default parameters defined in the job
-                                final Job job = (Job) project;
-
-                                boolean triggered = false;
-                                if (!triggered) {
-                                    // TODO: check global override here
-                                }
-
-                                if (!triggered) {
-                                    final SCMTrigger scmTrigger = findTrigger(job, SCMTrigger.class);
-                                    if (scmTrigger != null && !scmTrigger.isIgnorePostCommitHooks()) {
-                                        // queue build without first polling
-                                        final int quietPeriod = scmTriggerItem.getQuietPeriod();
-                                        final Cause cause = new TeamHookCause(commit);
-                                        final CauseAction causeAction = new CauseAction(cause);
-                                        scmTriggerItem.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
-                                        result.add(new ScheduledResponseContributor(project));
-                                        triggered = true;
-                                    }
-                                }
-                                if (!triggered) {
-                                    final TeamPushTrigger pushTrigger = findTrigger(job, TeamPushTrigger.class);
-                                    if (pushTrigger != null) {
-                                        pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction);
-                                        result.add(new PollingScheduledResponseContributor(project));
-                                        triggered = true;
-                                    }
-                                }
-                                if (triggered) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (!scmFound) {
-                result.add(new GitStatus.MessageResponseContributor("No Git jobs found"));
-            }
-
-            return result;
-        }
-        finally {
-            SecurityContextHolder.setContext(old);
-        }
+    @RequirePOST
+    public HttpResponse doPullRequestMergeCommitCreated(
+            final HttpServletRequest request,
+            @StringBodyParameter @Nonnull final String body) {
+        return dispatch(request, body);
     }
 
-    private static <T extends Trigger> T findTrigger(final Job<?, ?> job, final Class<T> tClass) {
+    public static <T extends Trigger> T findTrigger(final Job<?, ?> job, final Class<T> tClass) {
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             final ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
             for (final Trigger trigger : pJob.getTriggers().values()) {
@@ -246,7 +186,7 @@ public class TeamWebHook implements UnprotectedRootAction {
      *
      * @since 1.4.1
      */
-    private static class PollingScheduledResponseContributor extends GitStatus.ResponseContributor {
+    public static class PollingScheduledResponseContributor extends GitStatus.ResponseContributor {
         /**
          * The project
          */
@@ -278,7 +218,7 @@ public class TeamWebHook implements UnprotectedRootAction {
         }
     }
 
-    private static class ScheduledResponseContributor extends GitStatus.ResponseContributor {
+    public static class ScheduledResponseContributor extends GitStatus.ResponseContributor {
         /**
          * The project
          */
