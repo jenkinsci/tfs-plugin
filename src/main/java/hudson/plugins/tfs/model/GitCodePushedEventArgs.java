@@ -23,6 +23,10 @@ public class GitCodePushedEventArgs {
 
     public static GitCodePushedEventArgs fromJsonString(final String jsonString) {
         final JSONObject jsonObject = JSONObject.fromObject(jsonString);
+        return fromJsonObject(jsonObject);
+    }
+
+    static GitCodePushedEventArgs fromJsonObject(final JSONObject jsonObject) {
         final GitCodePushedEventArgs result;
 
         final JsonConfig jsonConfig = new JsonConfig();

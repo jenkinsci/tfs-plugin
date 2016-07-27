@@ -14,6 +14,10 @@ public class PullRequestMergeCommitCreatedEventArgs extends GitCodePushedEventAr
 
     public static PullRequestMergeCommitCreatedEventArgs fromJsonString(final String jsonString) {
         final JSONObject jsonObject = JSONObject.fromObject(jsonString);
+        return fromJsonObject(jsonObject);
+    }
+
+    static PullRequestMergeCommitCreatedEventArgs fromJsonObject(final JSONObject jsonObject) {
         final PullRequestMergeCommitCreatedEventArgs result;
 
         final JsonConfig jsonConfig = new JsonConfig();
