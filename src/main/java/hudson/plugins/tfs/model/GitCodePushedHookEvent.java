@@ -122,17 +122,16 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
                             if (project instanceof Job) {
                                 // TODO: Add default parameters defined in the job
                                 final Job job = (Job) project;
+                                final int quietPeriod = scmTriggerItem.getQuietPeriod();
 
                                 boolean triggered = false;
                                 if (!triggered) {
                                     // TODO: check global override here
                                 }
-
                                 if (!triggered) {
                                     final SCMTrigger scmTrigger = TeamWebHook.findTrigger(job, SCMTrigger.class);
                                     if (scmTrigger != null && !scmTrigger.isIgnorePostCommitHooks()) {
                                         // queue build without first polling
-                                        final int quietPeriod = scmTriggerItem.getQuietPeriod();
                                         final Cause cause = new TeamHookCause(commit);
                                         final CauseAction causeAction = new CauseAction(cause);
                                         scmTriggerItem.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
