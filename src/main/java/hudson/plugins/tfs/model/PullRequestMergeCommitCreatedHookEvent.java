@@ -1,6 +1,10 @@
 package hudson.plugins.tfs.model;
 
+import hudson.plugins.git.GitStatus;
+import hudson.plugins.tfs.PullRequestParameterAction;
 import net.sf.json.JSONObject;
+
+import java.util.List;
 
 public class PullRequestMergeCommitCreatedHookEvent extends GitCodePushedHookEvent {
 
@@ -17,7 +21,10 @@ public class PullRequestMergeCommitCreatedHookEvent extends GitCodePushedHookEve
 
     @Override
     public JSONObject perform(final JSONObject requestPayload) {
-        // TODO: implement
-        return null;
+        final PullRequestMergeCommitCreatedEventArgs args = PullRequestMergeCommitCreatedEventArgs.fromJsonObject(requestPayload);
+        final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
+        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction);
+        final JSONObject response = fromResponseContributors(contributors);
+        return response;
     }
 }
