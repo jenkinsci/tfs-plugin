@@ -28,6 +28,7 @@ import jenkins.triggers.SCMTriggerItem;
 import net.sf.json.JSONObject;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
@@ -42,6 +43,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,8 +93,17 @@ public class TeamWebHook implements UnprotectedRootAction {
         return URL_NAME;
     }
 
-    public HttpResponse doIndex(final HttpServletRequest request) {
-        return HttpResponses.plainText("TODO: return documentation");
+    public HttpResponse doIndex(final HttpServletRequest request) throws IOException {
+        final Class<? extends TeamWebHook> me = this.getClass();
+        final InputStream stream = me.getResourceAsStream("TeamWebHook.html");
+        try {
+            final String template = IOUtils.toString(stream, MediaType.UTF_8);
+            final String content = String.format(template, URL_PREFIX, "TODO: event names");
+            return HttpResponses.html(content);
+        }
+        finally {
+            IOUtils.closeQuietly(stream);
+        }
     }
 
     static String pathInfoToEventName(final String pathInfo) {
