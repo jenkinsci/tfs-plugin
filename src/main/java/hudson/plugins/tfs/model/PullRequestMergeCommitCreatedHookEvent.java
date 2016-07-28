@@ -23,7 +23,7 @@ public class PullRequestMergeCommitCreatedHookEvent extends GitCodePushedHookEve
     public JSONObject perform(final JSONObject requestPayload) {
         final PullRequestMergeCommitCreatedEventArgs args = PullRequestMergeCommitCreatedEventArgs.fromJsonObject(requestPayload);
         final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction);
+        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
     }

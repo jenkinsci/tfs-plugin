@@ -40,9 +40,9 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
     public TeamPushTrigger() {
     }
 
-    public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
+    public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction, final boolean bypassPolling) {
         // TODO: Consider executing the poll + queue asynchronously
-        final Runner runner = new Runner(gitCodePushedEventArgs, commitParameterAction);
+        final Runner runner = new Runner(gitCodePushedEventArgs, commitParameterAction, bypassPolling);
         runner.run();
     }
 
@@ -55,10 +55,12 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
         private final GitCodePushedEventArgs gitCodePushedEventArgs;
         private final CommitParameterAction commitParameterAction;
+        private final boolean bypassPolling;
 
-        public Runner(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction) {
+        public Runner(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction, final boolean bypassPolling) {
             this.gitCodePushedEventArgs = gitCodePushedEventArgs;
             this.commitParameterAction = commitParameterAction;
+            this.bypassPolling = bypassPolling;
         }
 
         private SCMTriggerItem job() {
@@ -108,8 +110,15 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public void run() {
-            if (runPolling()) {
-                final String changesDetected = "SCM changes detected in " + job.getFullDisplayName() + ".";
+            boolean shouldSchedule = bypassPolling;
+            String changesDetected = "";
+            if (!bypassPolling) {
+                if (runPolling()) {
+                    changesDetected = "SCM changes detected in " + job.getFullDisplayName() + ". ";
+                    shouldSchedule = true;
+                }
+            }
+            if (shouldSchedule) {
                 final SCMTriggerItem p = job();
                 final String name = " #" + p.getNextBuildNumber();
                 final String pushedBy = gitCodePushedEventArgs.pushedBy;
@@ -125,10 +134,10 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                 final CauseAction causeAction = new CauseAction(cause);
                 final QueueTaskFuture<?> queueTaskFuture = p.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
                 if (queueTaskFuture != null) {
-                    LOGGER.info(changesDetected + " Triggering " + name);
+                    LOGGER.info(changesDetected + "Triggering " + name);
                 }
                 else {
-                    LOGGER.info(changesDetected + " Job is already in the queue");
+                    LOGGER.info(changesDetected + "Job is already in the queue");
                 }
             }
         }
