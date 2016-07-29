@@ -11,6 +11,7 @@ import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
@@ -107,7 +108,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         final InputStream stream = me.getResourceAsStream("TeamBuildEndpoint.html");
         final Jenkins instance = Jenkins.getInstance();
         final String rootUrl = instance.getRootUrl();
-        final String commandRows = "<tr><td>TODO</td><td>TODO</td><td>TODO</td></tr>";
+        final String commandRows = describeCommands(COMMAND_FACTORIES_BY_NAME, URL_NAME);
         try {
             final String template = IOUtils.toString(stream, MediaType.UTF_8);
             final String content = String.format(template, URL_NAME, commandRows, rootUrl);
@@ -117,6 +118,23 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             IOUtils.closeQuietly(stream);
         }
     }
+    static String describeCommands(final Map<String, AbstractCommand.Factory> commandMap, final String urlName) {
+        final String newLine = System.getProperty("line.separator");
+        final StringBuilder sb = new StringBuilder();
+        for (final Map.Entry<String, AbstractCommand.Factory> commandPair : commandMap.entrySet()) {
+            final String commandName = commandPair.getKey();
+            final AbstractCommand.Factory factory = commandPair.getValue();
+            sb.append("<tr>").append(newLine);
+            sb.append("<td valign='top'>").append(commandName).append("</td>").append(newLine);
+            sb.append("<td valign='top'>").append('/').append(urlName).append('/').append(commandName).append('/').append("JOB_NAME").append("</td>").append(newLine);
+            final String rawSample = factory.getSampleRequestPayload();
+            final String escapedSample = StringEscapeUtils.escapeHtml4(rawSample);
+            sb.append("<td><pre>").append(escapedSample).append("</pre></td>").append(newLine);
+            sb.append("</tr>").append(newLine);
+        }
+        return sb.toString();
+    }
+
 
     void checkPermission(final AbstractProject project, final StaplerRequest req, final StaplerResponse rsp) {
         if (!Jenkins.getInstance().isUseSecurity()) {

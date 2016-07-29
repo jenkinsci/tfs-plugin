@@ -21,10 +21,10 @@
 
         <h2>Example</h2>
         Suppose we have a secured Jenkins server at <code>%3$s</code> and a dedicated <em>Remote Trigger</em> user named <code>remote</code> that has an <a href="%3$sme/configure">API Token</a> of <code>92e9d8998a8c005697d252f09a2a311b</code>.
-        The following example demonstrates a PUT to the <code>ping</code> command using the <a href="https://curl.haxx.se/">curl</a> tool:
+        The following example demonstrates a PUT to the <code>ping</code> command for the job named JOB_NAME using the <a href="https://curl.haxx.se/">curl</a> tool:
         <br />
         <pre>
-curl --request PUT %3$s%1$s/ping --data-urlencode json='{"parameter": [{"name":"id", "value":"123"}, {"name":"verbosity", "value":"high"}], "team-parameters": {"name":"value"}}' --user remote:92e9d8998a8c005697d252f09a2a311b
+curl --request PUT %3$s%1$s/ping/JOB_NAME --data-urlencode json='{"parameter": [{"name":"id", "value":"123"}, {"name":"verbosity", "value":"high"}], "team-parameters": {"name":"value"}}' --user remote:92e9d8998a8c005697d252f09a2a311b
         </pre>
         The console output should look like the following when the <code>ping</code> command from the <code>%1$s</code> endpoint returns the provided payload, formatted for compactness:
         <pre>
