@@ -11,6 +11,8 @@ import org.kohsuke.stapler.HttpResponses;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.logging.Logger;
 
 /**
@@ -56,7 +58,13 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             if (firstSlash != -1) {
                 commandName = restOfPath.substring(0, firstSlash);
                 if (firstSlash < restOfPath.length() - 1) {
-                    jobName = restOfPath.substring(firstSlash + 1);
+                    final String encodedJobName = restOfPath.substring(firstSlash + 1);
+                    try {
+                        jobName = URLDecoder.decode(encodedJobName, MediaType.UTF_8.name());
+                    }
+                    catch (final UnsupportedEncodingException e) {
+                        throw new Error(e);
+                    }
                     return true;
                 }
             }

@@ -19,6 +19,17 @@ public class TeamBuildEndpointTest {
         Assert.assertEquals("a", cut.getJobName());
     }
 
+    @Test public void decodeCommandAndJobNames_withDecoding() throws Exception {
+        final TeamBuildEndpoint cut = new TeamBuildEndpoint();
+
+        final String input = TeamBuildEndpoint.URL_PREFIX + "ping/a+job%20name%2Fcontaining%3Dencoded+characters%3F";
+        final boolean actual = cut.decodeCommandAndJobNames(input);
+
+        Assert.assertEquals(true, actual);
+        Assert.assertEquals("ping", cut.getCommandName());
+        Assert.assertEquals("a job name/containing=encoded characters?", cut.getJobName());
+    }
+
     @Test public void decodeCommandAndJobNames_noJob() throws Exception {
         final TeamBuildEndpoint cut = new TeamBuildEndpoint();
         final String input = TeamBuildEndpoint.URL_PREFIX + "ping/";
