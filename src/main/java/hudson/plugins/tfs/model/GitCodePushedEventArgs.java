@@ -54,7 +54,7 @@ public class GitCodePushedEventArgs {
         "            \"Microsoft.VSTS.Scheduling.Effort\": 8,\n" +
         "            \"WEF_6CB513B6E70E43499D9FC94E5BBFB784_System.ExtensionMarker\": true,\n" +
         "            \"WEF_6CB513B6E70E43499D9FC94E5BBFB784_Kanban.Column\": \"New\",\n" +
-        "            \"System.Description\": \"Our authorization logic needs to allow for users with Microsoft accounts (formerly Live Ids) - http://msdn.microsoft.com/en-us/library/live/hh826547.aspx\"\n" +
+        "            \"System.Description\": \"Our authorization logic needs to allow for users with Microsoft Accounts (formerly Windows Live IDs) - http://msdn.microsoft.com/en-us/library/live/hh826547.aspx\"\n" +
         "          },\n" +
         "          \"relations\": [\n" +
         "            {\n" +
