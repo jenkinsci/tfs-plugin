@@ -2,7 +2,7 @@ package hudson.plugins.tfs;
 
 import hudson.Extension;
 import hudson.model.AbstractProject;
-import hudson.model.Job;
+import hudson.model.Item;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.PingCommand;
@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 /**
@@ -117,9 +118,21 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
     }
 
+    void checkPermission(final AbstractProject project, final StaplerRequest req, final StaplerResponse rsp) {
+        if (!Jenkins.getInstance().isUseSecurity()) {
+            return;    // everyone is authorized
+        }
+
+        project.checkPermission(Item.BUILD);
+
+        if (req.getMethod().equals("PUT")) {
+            return;
+        }
+
+        throw HttpResponses.error(SC_METHOD_NOT_ALLOWED, "Only PUT is supported");
+    }
+
     void dispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) {
-        // TODO: enforce PUT
-        // TODO: enforce authentication
         // TODO: it looks like command and jobName might preserve their values across requests?
         final String pathInfo = req.getPathInfo();
         if (!decodeCommandAndJobNames(pathInfo)) {
@@ -136,6 +149,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         if (project == null) {
             throw HttpResponses.error(SC_BAD_REQUEST, "Project not found");
         }
+        checkPermission(project, req, rsp);
         final TimeDuration actualDelay =
                 delay == null ? new TimeDuration(project.getQuietPeriod()) : delay;
 
