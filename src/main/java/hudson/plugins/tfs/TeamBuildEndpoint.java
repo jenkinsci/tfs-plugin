@@ -21,6 +21,10 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
 
     private static final Logger LOGGER = Logger.getLogger(TeamBuildEndpoint.class.getName());
     public static final String URL_NAME = "team-build";
+    static final String URL_PREFIX = "/" + URL_NAME + "/";
+
+    private String commandName;
+    private String jobName;
 
     @Override
     public String getIconFileName() {
@@ -35,6 +39,33 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     @Override
     public String getUrlName() {
         return URL_NAME;
+    }
+
+    public String getCommandName() {
+        return commandName;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    boolean decodeCommandAndJobNames(final String pathInfo) {
+        if (pathInfo.startsWith(URL_PREFIX)) {
+            final String restOfPath = pathInfo.substring(URL_PREFIX.length());
+            final int firstSlash = restOfPath.indexOf('/');
+            if (firstSlash != -1) {
+                commandName = restOfPath.substring(0, firstSlash);
+                if (firstSlash < restOfPath.length() - 1) {
+                    jobName = restOfPath.substring(firstSlash + 1);
+                    return true;
+                }
+            }
+            else {
+                commandName = restOfPath;
+            }
+        }
+
+        return false;
     }
 
     public HttpResponse doIndex(final HttpServletRequest request) throws IOException {
