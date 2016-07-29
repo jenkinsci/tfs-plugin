@@ -156,12 +156,16 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         // TODO: it looks like command and jobName might preserve their values across requests?
         final String pathInfo = req.getPathInfo();
         if (!decodeCommandAndJobNames(pathInfo)) {
-            if (commandName == null || !COMMAND_FACTORIES_BY_NAME.containsKey(commandName)) {
-                throw HttpResponses.error(SC_BAD_REQUEST, "Invalid command");
+            if (commandName == null) {
+                throw HttpResponses.error(SC_BAD_REQUEST, "Command not provided");
             }
             if (jobName == null) {
                 throw HttpResponses.error(SC_BAD_REQUEST, "Job name not provided after command");
             }
+        }
+
+        if (!COMMAND_FACTORIES_BY_NAME.containsKey(commandName)) {
+            throw HttpResponses.error(SC_BAD_REQUEST, "Command not implemented");
         }
 
         final Jenkins jenkins = Jenkins.getInstance();
