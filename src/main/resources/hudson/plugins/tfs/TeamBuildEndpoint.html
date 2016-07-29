@@ -21,21 +21,15 @@
         </table>
 
         <h2>Example</h2>
-        Suppose we have a Jenkins server at <code>%3$s</code> and the following <code>payload.json</code> file:
-        <pre>
-{
-    "message": "Hello, world!"
-}
-        </pre>
-        The following example demonstrates a PUT to the <code>ping</code> event using the <a href="https://curl.haxx.se/">curl</a> tool:
+        Suppose we have a Jenkins server at <code>%3$s</code>, the following example demonstrates a PUT to the <code>ping</code> command using the <a href="https://curl.haxx.se/">curl</a> tool:
         <br />
         TODO: add authentication
         <pre>
-curl --request PUT %3$s%1$s/ping --header 'Content-Type: application/json' --data-binary @payload.json
+curl --request PUT %3$s%1$s/ping --data-urlencode json='{"parameter": [{"name":"id", "value":"123"}, {"name":"verbosity", "value":"high"}], "team-parameters": {"name":"value"}}'
         </pre>
-        The console output should look like the following when the <code>ping</code> event from the <code>%1$s</code> endpoint returns the provided payload, formatted for compactness:
+        The console output should look like the following when the <code>ping</code> command from the <code>%1$s</code> endpoint returns the provided payload, formatted for compactness:
         <pre>
-{"message":"Hello, world!"}
+{"parameter":[{"name":"id","value":"123"},{"name":"verbosity","value":"high"}],"team-parameters":{"name":"value"}}
         </pre>
     </body>
 </html>
