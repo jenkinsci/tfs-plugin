@@ -1,41 +1,25 @@
 package hudson.plugins.tfs;
 
 import hudson.Extension;
-import hudson.model.AbstractProject;
-import hudson.model.Cause;
-import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
-import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.model.AbstractHookEvent;
 import hudson.plugins.tfs.model.GitCodePushedHookEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
-import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedHookEvent;
 import hudson.plugins.tfs.util.MediaType;
-import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
-import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.util.StringBodyParameter;
-import hudson.scm.SCM;
-import hudson.security.ACL;
-import hudson.triggers.SCMTrigger;
 import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
-import jenkins.triggers.SCMTriggerItem;
 import net.sf.json.JSONObject;
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -46,9 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -62,9 +44,9 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
  * The endpoint that TFS/Team Services will POST to on Git code push, pull request merge commit creation, etc.
  */
 @Extension
-public class TeamWebHook implements UnprotectedRootAction {
+public class TeamEventsEndpoint implements UnprotectedRootAction {
 
-    private static final Logger LOGGER = Logger.getLogger(TeamWebHook.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(TeamEventsEndpoint.class.getName());
     private static final Map<String, AbstractHookEvent.Factory> HOOK_EVENT_FACTORIES_BY_NAME;
 
     static {
@@ -95,8 +77,8 @@ public class TeamWebHook implements UnprotectedRootAction {
     }
 
     public HttpResponse doIndex(final HttpServletRequest request) throws IOException {
-        final Class<? extends TeamWebHook> me = this.getClass();
-        final InputStream stream = me.getResourceAsStream("TeamWebHook.html");
+        final Class<? extends TeamEventsEndpoint> me = this.getClass();
+        final InputStream stream = me.getResourceAsStream("TeamEventsEndpoint.html");
         final Jenkins instance = Jenkins.getInstance();
         final String rootUrl = instance.getRootUrl();
         final String eventRows = describeEvents(HOOK_EVENT_FACTORIES_BY_NAME, URL_NAME);

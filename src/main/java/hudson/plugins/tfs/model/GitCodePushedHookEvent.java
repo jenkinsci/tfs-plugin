@@ -11,7 +11,7 @@ import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.TeamHookCause;
 import hudson.plugins.tfs.TeamPushTrigger;
-import hudson.plugins.tfs.TeamWebHook;
+import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
@@ -134,26 +134,26 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
                                     // TODO: check global override here
                                 }
                                 if (!triggered) {
-                                    final SCMTrigger scmTrigger = TeamWebHook.findTrigger(job, SCMTrigger.class);
+                                    final SCMTrigger scmTrigger = TeamEventsEndpoint.findTrigger(job, SCMTrigger.class);
                                     if (scmTrigger != null && !scmTrigger.isIgnorePostCommitHooks()) {
                                         // queue build without first polling
                                         final Cause cause = new TeamHookCause(commit);
                                         final CauseAction causeAction = new CauseAction(cause);
                                         scmTriggerItem.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
-                                        result.add(new TeamWebHook.ScheduledResponseContributor(project));
+                                        result.add(new TeamEventsEndpoint.ScheduledResponseContributor(project));
                                         triggered = true;
                                     }
                                 }
                                 if (!triggered) {
-                                    final TeamPushTrigger pushTrigger = TeamWebHook.findTrigger(job, TeamPushTrigger.class);
+                                    final TeamPushTrigger pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPushTrigger.class);
                                     if (pushTrigger != null) {
                                         pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction, bypassPolling);
                                         final GitStatus.ResponseContributor response;
                                         if (bypassPolling) {
-                                            response = new TeamWebHook.ScheduledResponseContributor(project);
+                                            response = new TeamEventsEndpoint.ScheduledResponseContributor(project);
                                         }
                                         else {
-                                            response = new TeamWebHook.PollingScheduledResponseContributor(project);
+                                            response = new TeamEventsEndpoint.PollingScheduledResponseContributor(project);
                                         }
                                         result.add(response);
                                         triggered = true;
