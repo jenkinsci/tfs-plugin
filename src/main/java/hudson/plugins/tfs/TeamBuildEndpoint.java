@@ -1,6 +1,8 @@
 package hudson.plugins.tfs;
 
 import hudson.Extension;
+import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.PingCommand;
@@ -9,7 +11,6 @@ import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
@@ -129,11 +130,20 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
                 throw HttpResponses.error(SC_BAD_REQUEST, "Job name not provided after command");
             }
         }
+
+        final Jenkins jenkins = Jenkins.getInstance();
+        final AbstractProject project = jenkins.getItemByFullName(jobName, AbstractProject.class);
+        if (project == null) {
+            throw HttpResponses.error(SC_BAD_REQUEST, "Project not found");
+        }
+        final TimeDuration actualDelay =
+                delay == null ? new TimeDuration(project.getQuietPeriod()) : delay;
+
         final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
         try {
             final JSONObject formData = req.getSubmittedForm();
             final AbstractCommand command = factory.create();
-            final JSONObject response = command.perform(formData);
+            final JSONObject response = command.perform(project, actualDelay, formData);
 
             rsp.setStatus(SC_OK);
             rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
