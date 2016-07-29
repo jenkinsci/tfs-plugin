@@ -9,6 +9,13 @@ public class PingHookEvent extends AbstractHookEvent {
         public AbstractHookEvent create(final JSONObject requestPayload) {
             return new PingHookEvent(requestPayload);
         }
+
+        @Override
+        public String getSampleRequestPayload() {
+            return "{\n" +
+                    "    \"message\": \"Hello, world!\"\n" +
+                    "}";
+        }
     }
 
     public PingHookEvent(final JSONObject requestPayload) {

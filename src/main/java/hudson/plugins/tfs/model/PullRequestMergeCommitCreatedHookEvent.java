@@ -13,6 +13,11 @@ public class PullRequestMergeCommitCreatedHookEvent extends GitCodePushedHookEve
         public AbstractHookEvent create(final JSONObject requestPayload) {
             return new PullRequestMergeCommitCreatedHookEvent(requestPayload);
         }
+
+        @Override
+        public String getSampleRequestPayload() {
+            return PullRequestMergeCommitCreatedEventArgs.SAMPLE_REQUEST_PAYLOAD;
+        }
     }
 
     public PullRequestMergeCommitCreatedHookEvent(final JSONObject requestPayload) {

@@ -1,0 +1,30 @@
+<html>
+    <body>
+        <h1>The <code>/%1$s/</code> endpoint</h1>
+        <h2>Events</h2>
+        The following events are available to POST to:
+        <table border="1">
+            <tr>
+                <th>Name</th>
+                <th>Path</th>
+                <th>Sample payload</th>
+            </tr>
+%2$s
+        </table>
+        <h2>Example</h2>
+        Suppose we have a Jenkins server at <code>%3$s</code> and the following <code>payload.json</code> file:
+        <pre>
+{
+    "message": "Hello, world!"
+}
+        </pre>
+        The following example demonstrates a POST to the <code>ping</code> event using the <a href="https://curl.haxx.se/">curl</a> tool:
+        <pre>
+curl --request POST %3$s%1$s/ping --header 'Content-Type: application/json' --data-binary @payload.json
+        </pre>
+        The console output should look like the following when the <code>ping</code> event from the <code>%1$s</code> endpoint returns the provided payload, formatted for compactness:
+        <pre>
+{"message":"Hello, world!"}
+        </pre>
+    </body>
+</html>
