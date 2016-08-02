@@ -181,7 +181,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         try {
             final JSONObject formData = req.getSubmittedForm();
             final AbstractCommand command = factory.create();
-            final JSONObject response = command.perform(project, actualDelay, formData);
+            final JSONObject response = command.perform(project, formData, actualDelay);
 
             rsp.setStatus(SC_OK);
             rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);

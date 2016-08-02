@@ -43,7 +43,7 @@ public class BuildCommand extends AbstractCommand {
     }
 
     @Override
-    public JSONObject perform(final AbstractProject project, final TimeDuration delay, final JSONObject requestPayload) {
+    public JSONObject perform(final AbstractProject project, final JSONObject requestPayload, final TimeDuration delay) {
         // TODO: detect if a job is parameterized and react appropriately
         final JSONObject result = new JSONObject();
 
