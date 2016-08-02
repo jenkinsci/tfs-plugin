@@ -183,6 +183,27 @@ public class TeamRestClient {
         }
     }
 
+    public TeamGitStatus addPullRequestStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
+
+        final QueryString qs = new QueryString(API_VERSION, "3.0-preview.1");
+        final URI requestUri = UriHelper.join(
+            collectionUri, args.projectId,
+            "_apis", "git",
+            "repositories", args.repoId,
+            "pullRequests", args.pullRequestId,
+            "statuses",
+            qs);
+
+        final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
+        registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
+        try {
+            return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
+        }
+        finally {
+            registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);
+        }
+    }
+
     public TeamGitStatus addPullRequestIterationStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
 
         final QueryString qs = new QueryString(API_VERSION, "3.0-preview.1");
