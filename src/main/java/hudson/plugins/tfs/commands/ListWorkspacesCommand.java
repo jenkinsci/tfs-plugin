@@ -22,18 +22,21 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
     private static final String ListingWorkspacesTemplate = "Listing workspaces from %s...";
 
     private final String computer;
+    private final boolean shouldLogWorkspaces;
 
     public interface WorkspaceFactory {
         Workspace createWorkspace(String name, String computer, String owner, String comment);
     }
     
     public ListWorkspacesCommand(final ServerConfigurationProvider server) {
-        this(server, null);
+        // TODO: shouldLogWorkspaces could be controlled by a property
+        this(server, null, false);
     }
 
-    ListWorkspacesCommand(final ServerConfigurationProvider server, final String computer) {
+    ListWorkspacesCommand(final ServerConfigurationProvider server, final String computer, final boolean shouldLogWorkspaces) {
         super(server);
         this.computer = computer;
+        this.shouldLogWorkspaces = shouldLogWorkspaces;
     }
 
     @Override
@@ -74,7 +77,9 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
             result.add(workspace);
         }
 
-        log(result, logger);
+        if (shouldLogWorkspaces) {
+            log(result, logger);
+        }
 
         return result;
     }

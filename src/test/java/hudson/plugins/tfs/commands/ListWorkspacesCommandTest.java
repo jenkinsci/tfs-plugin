@@ -56,7 +56,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             when(server.getUrl()).thenReturn("http://tfs.invalid:8080/tfs/DefaultCollection/");
             when(this.vcc.queryWorkspaces(null, null, "XXXX-XXXX-007", WorkspacePermissions.NONE_OR_NOT_SUPPORTED))
                     .thenReturn(workspaces);
-            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, "XXXX-XXXX-007") {
+            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, "XXXX-XXXX-007", true) {
                 @Override
                 public Server createServer() {
                     return server;
@@ -103,7 +103,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             when(server.getUrl()).thenReturn("http://tfs.invalid:8080/tfs/DefaultCollection/");
             when(this.vcc.queryWorkspaces(anyString(), anyString(), anyString(), isA(WorkspacePermissions.class)))
                     .thenReturn(workspaces);
-            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, null) {
+            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, null, true) {
                 @Override
                 public Server createServer() {
                     return server;
@@ -243,6 +243,6 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     }
 
     @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
-        return new ListWorkspacesCommand(serverConfig, "computer");
+        return new ListWorkspacesCommand(serverConfig, "computer", true);
     }
 }
