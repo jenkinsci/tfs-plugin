@@ -43,9 +43,7 @@ public class BuildCommand extends AbstractCommand {
         }
     }
 
-    @Override
-    public JSONObject perform(final AbstractProject project, final JSONObject requestPayload, final TimeDuration delay) {
-        // TODO: detect if a job is parameterized and react appropriately
+    protected JSONObject innerPerform(final AbstractProject project, final TimeDuration delay, final List<Action> extraActions) {
         final JSONObject result = new JSONObject();
 
         final Jenkins jenkins = Jenkins.getInstance();
@@ -55,6 +53,21 @@ public class BuildCommand extends AbstractCommand {
         final List<Action> actions = new ArrayList<Action>();
         actions.add(causeAction);
 
+        actions.addAll(extraActions);
+
+        final Action[] actionArray = actions.toArray(EMPTY_ACTION_ARRAY);
+        final ScheduleResult scheduleResult = queue.schedule2(project, delay.getTime(), actionArray);
+        final Queue.Item item = scheduleResult.getItem();
+        if (item != null) {
+            result.put("created", jenkins.getRootUrl() + item.getUrl());
+        }
+        return result;
+    }
+
+    @Override
+    public JSONObject perform(final AbstractProject project, final JSONObject requestPayload, final TimeDuration delay) {
+
+        final List<Action> actions = new ArrayList<Action>();
         if (requestPayload.containsKey(TEAM_PARAMETERS)) {
             final JSONObject eventArgsJson = requestPayload.getJSONObject(TEAM_PARAMETERS);
             final CommitParameterAction action;
@@ -69,15 +82,9 @@ public class BuildCommand extends AbstractCommand {
             }
             actions.add(action);
         }
+        // TODO: detect if a job is parameterized and react appropriately
 
-        final Action[] actionArray = actions.toArray(EMPTY_ACTION_ARRAY);
-        final ScheduleResult scheduleResult = queue.schedule2(project, delay.getTime(), actionArray);
-        final Queue.Item item = scheduleResult.getItem();
-        if (item != null) {
-            result.put("created", jenkins.getRootUrl() + item.getUrl());
-        }
-
-        return result;
+        return innerPerform(project, delay, actions);
     }
 
     @Override
