@@ -15,6 +15,14 @@ import java.util.List;
 
 public class GitPushEvent extends GitCodePushedHookEvent {
 
+    static final String EVENT_TYPE = "eventType";
+    static final String RESOURCE = "resource";
+    static final String REPOSITORY = "repository";
+    static final String REMOTE_URL = "remoteUrl";
+    static final String NAME = "name";
+
+    private static final String GIT_PUSH = "git.push";
+
     public static class Factory implements AbstractHookEvent.Factory {
 
         @Override
@@ -115,14 +123,14 @@ public class GitPushEvent extends GitCodePushedHookEvent {
     }
 
     static GitCodePushedEventArgs decodeGitPush(final JSONObject gitPushJson) {
-        assertEquals(gitPushJson, "eventType", "git.push");
-        final JSONObject resource = gitPushJson.getJSONObject("resource");
-        final JSONObject repository = resource.getJSONObject("repository");
+        assertEquals(gitPushJson, EVENT_TYPE, GIT_PUSH);
+        final JSONObject resource = gitPushJson.getJSONObject(RESOURCE);
+        final JSONObject repository = resource.getJSONObject(REPOSITORY);
         final URI collectionUri = determineCollectionUri(repository);
-        final String repoUriString = repository.getString("remoteUrl");
+        final String repoUriString = repository.getString(REMOTE_URL);
         final URI repoUri = URI.create(repoUriString);
         final String projectId = determineProjectId(repository);
-        final String repoId = repository.getString("name");
+        final String repoId = repository.getString(NAME);
         final String commit = determineCommit(resource);
         final String pushedBy = determinePushedBy(resource);
 
