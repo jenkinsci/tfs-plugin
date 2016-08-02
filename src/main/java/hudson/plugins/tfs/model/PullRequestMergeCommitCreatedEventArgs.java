@@ -271,7 +271,7 @@ public class PullRequestMergeCommitCreatedEventArgs extends GitCodePushedEventAr
         "    ]\n" +
         "}";
     public int pullRequestId;
-    public int iterationId;
+    public int iterationId = -1;
 
     public static PullRequestMergeCommitCreatedEventArgs fromJsonString(final String jsonString) {
         final JSONObject jsonObject = JSONObject.fromObject(jsonString);
