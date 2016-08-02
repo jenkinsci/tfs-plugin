@@ -8,6 +8,7 @@ import hudson.model.Queue;
 import hudson.model.queue.ScheduleResult;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
+import hudson.plugins.tfs.TeamBuildEndpoint;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
@@ -21,7 +22,6 @@ import java.util.Map;
 
 public class BuildCommand extends AbstractCommand {
 
-    private static final String TEAM_PARAMETERS = "team-parameters";
     private static final Action[] EMPTY_ACTION_ARRAY = new Action[0];
     protected static final String TEAM_BUILD_PREFIX = "_team-build_";
     protected static final int TEAM_BUILD_PREFIX_LENGTH = TEAM_BUILD_PREFIX.length();
@@ -82,8 +82,8 @@ public class BuildCommand extends AbstractCommand {
     public JSONObject perform(final AbstractProject project, final JSONObject requestPayload, final TimeDuration delay) {
 
         final List<Action> actions = new ArrayList<Action>();
-        if (requestPayload.containsKey(TEAM_PARAMETERS)) {
-            final JSONObject eventArgsJson = requestPayload.getJSONObject(TEAM_PARAMETERS);
+        if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_PARAMETERS)) {
+            final JSONObject eventArgsJson = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_PARAMETERS);
             final CommitParameterAction action;
             // TODO: improve the payload detection!
             if (eventArgsJson.containsKey("pullRequestId")) {

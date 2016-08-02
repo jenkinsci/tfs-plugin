@@ -10,6 +10,7 @@ import hudson.plugins.tfs.model.PingCommand;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -45,8 +46,10 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     private static final Logger LOGGER = Logger.getLogger(TeamBuildEndpoint.class.getName());
     private static final Map<String, AbstractCommand.Factory> COMMAND_FACTORIES_BY_NAME;
     public static final String URL_NAME = "team-build";
+    public static final String TEAM_PARAMETERS = "team-parameters";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
     private static final String JSON = "json";
+    private static final String PARAMETER = "parameter";
 
     static {
         final Map<String, AbstractCommand.Factory> map = new TreeMap<String, AbstractCommand.Factory>(String.CASE_INSENSITIVE_ORDER);
@@ -182,7 +185,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         try {
             final AbstractCommand command = factory.create();
             final JSONObject response;
-            if (req.getParameter(JSON) != null) {
+            if (isStructuredForm(req.getParameter(JSON))) {
                 final JSONObject formData = req.getSubmittedForm();
                 response = command.perform(project, formData, actualDelay);
             }
@@ -209,6 +212,21 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             // TODO: serialize it to JSON and set as the response
             throw HttpResponses.error(SC_INTERNAL_SERVER_ERROR, e);
         }
+    }
+
+    static boolean isStructuredForm(final String jsonParameter) {
+        if (jsonParameter != null) {
+            try {
+                final JSONObject jsonObject = JSONObject.fromObject(jsonParameter);
+                if (jsonObject.containsKey(PARAMETER) && jsonObject.containsKey(TEAM_PARAMETERS)) {
+                    return true;
+                }
+            }
+            catch (final JSONException e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     public void doPing(
