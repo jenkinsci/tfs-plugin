@@ -11,6 +11,7 @@ import hudson.plugins.tfs.PullRequestParameterAction;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,5 +78,10 @@ public class BuildCommand extends AbstractCommand {
         }
 
         return result;
+    }
+
+    @Override
+    public JSONObject perform(final AbstractProject project, final StaplerRequest request, final TimeDuration delay) {
+        throw new IllegalStateException("Not implemented");
     }
 }

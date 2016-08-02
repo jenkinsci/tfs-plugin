@@ -46,6 +46,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     private static final Map<String, AbstractCommand.Factory> COMMAND_FACTORIES_BY_NAME;
     public static final String URL_NAME = "team-build";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
+    private static final String JSON = "json";
 
     static {
         final Map<String, AbstractCommand.Factory> map = new TreeMap<String, AbstractCommand.Factory>(String.CASE_INSENSITIVE_ORDER);
@@ -179,9 +180,15 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
 
         final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
         try {
-            final JSONObject formData = req.getSubmittedForm();
             final AbstractCommand command = factory.create();
-            final JSONObject response = command.perform(project, formData, actualDelay);
+            final JSONObject response;
+            if (req.getParameter(JSON) != null) {
+                final JSONObject formData = req.getSubmittedForm();
+                response = command.perform(project, formData, actualDelay);
+            }
+            else {
+                response = command.perform(project, req, delay);
+            }
 
             rsp.setStatus(SC_OK);
             rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
