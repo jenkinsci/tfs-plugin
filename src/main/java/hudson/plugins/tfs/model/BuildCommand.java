@@ -165,47 +165,16 @@ public class BuildCommand extends AbstractCommand {
             final String projectId = teamParameters.get(SYSTEM_TEAM_PROJECT);
             final String commit = teamParameters.get(BUILD_SOURCE_VERSION);
             final String pushedBy = teamParameters.get(BUILD_REQUESTED_FOR);
-            final Integer pullRequestId = determinePullRequestId(teamParameters);
-            final CommitParameterAction action;
-            if (pullRequestId != null) {
-                final PullRequestMergeCommitCreatedEventArgs args = new PullRequestMergeCommitCreatedEventArgs();
-                args.collectionUri = collectionUri;
-                args.repoUri = repoUri;
-                args.projectId = projectId;
-                args.commit = commit;
-                args.pushedBy = pushedBy;
-                args.pullRequestId = pullRequestId;
-                args.iterationId = -1 /* TODO: the pull request iteration ID is missing! */;
-                action = new PullRequestParameterAction(args);
-            }
-            else {
-                final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
-                args.collectionUri = collectionUri;
-                args.repoUri = repoUri;
-                args.projectId = projectId;
-                args.commit = commit;
-                args.pushedBy = pushedBy;
-                action = new CommitParameterAction(args);
-            }
+            final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
+            args.collectionUri = collectionUri;
+            args.repoUri = repoUri;
+            args.projectId = projectId;
+            args.commit = commit;
+            args.pushedBy = pushedBy;
+            final CommitParameterAction action = new CommitParameterAction(args);
             actions.add(action);
         }
 
         return innerPerform(project, delay, actions);
-    }
-
-    static Integer determinePullRequestId(final HashMap<String, String> teamParameters) {
-        Integer pullRequestId = null;
-        if (teamParameters.containsKey(BUILD_SOURCE_BRANCH)) {
-            final String sourceBranch = teamParameters.get(BUILD_SOURCE_BRANCH);
-            if (sourceBranch.startsWith(REFS_PULL_SLASH)) {
-                final String idSlashMerge = sourceBranch.substring(REFS_PULL_SLASH_LENGTH);
-                final int nextSlash = idSlashMerge.indexOf('/');
-                if (nextSlash > 0) {
-                    final String pullRequestIdString = idSlashMerge.substring(0, nextSlash);
-                    pullRequestId = Integer.valueOf(pullRequestIdString, 10);
-                }
-            }
-        }
-        return pullRequestId;
     }
 }
