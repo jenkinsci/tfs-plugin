@@ -153,9 +153,6 @@ public class BuildCommand extends AbstractCommand {
                 }
                 teamParameters.put(teamParamName, valueArray[0]);
             }
-            else {
-                // TODO: implement when we add support for parameterized builds
-            }
         }
 
         if (teamParameters.containsKey(BUILD_REPOSITORY_PROVIDER) && "TfGit".equalsIgnoreCase(teamParameters.get(BUILD_REPOSITORY_PROVIDER))) {
@@ -175,6 +172,22 @@ public class BuildCommand extends AbstractCommand {
             args.commit = commit;
             args.pushedBy = pushedBy;
             final CommitParameterAction action = new CommitParameterAction(args);
+            actions.add(action);
+        }
+
+        //noinspection UnnecessaryLocalVariable
+        final Job<?, ?> job = project;
+        final ParametersDefinitionProperty pp = job.getProperty(ParametersDefinitionProperty.class);
+        if (pp != null) {
+            final List<ParameterDefinition> parameterDefinitions = pp.getParameterDefinitions();
+            final List<ParameterValue> values = new ArrayList<ParameterValue>();
+            for (final ParameterDefinition d : parameterDefinitions) {
+                final ParameterValue value = d.createValue(request);
+                if (value != null) {
+                    values.add(value);
+                }
+            }
+            final ParametersAction action = new ParametersAction(values);
             actions.add(action);
         }
 
