@@ -47,9 +47,9 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     private static final Map<String, AbstractCommand.Factory> COMMAND_FACTORIES_BY_NAME;
     public static final String URL_NAME = "team-build";
     public static final String TEAM_PARAMETERS = "team-parameters";
+    public static final String PARAMETER = "parameter";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
     private static final String JSON = "json";
-    private static final String PARAMETER = "parameter";
 
     static {
         final Map<String, AbstractCommand.Factory> map = new TreeMap<String, AbstractCommand.Factory>(String.CASE_INSENSITIVE_ORDER);
