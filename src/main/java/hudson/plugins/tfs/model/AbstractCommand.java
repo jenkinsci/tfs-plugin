@@ -20,12 +20,13 @@ public abstract class AbstractCommand {
      * {@code requestPayload} and returning the output as a {@link JSONObject}.
      *
      * @param project an {@link AbstractProject to operate on}
+     * @param request a {@link StaplerRequest} to help build parameter values
      * @param requestPayload a {@link JSONObject} representing the command's input
      * @param delay how long to wait before the project starts executing
      *
      * @return a {@link JSONObject} representing the hook event's output
      */
-    public abstract JSONObject perform(final AbstractProject project, final JSONObject requestPayload, final TimeDuration delay);
+    public abstract JSONObject perform(final AbstractProject project, final StaplerRequest request, final JSONObject requestPayload, final TimeDuration delay);
 
     /**
      * Actually do the work of the command, using the supplied

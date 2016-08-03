@@ -79,7 +79,7 @@ public class BuildCommand extends AbstractCommand {
     }
 
     @Override
-    public JSONObject perform(final AbstractProject project, final JSONObject requestPayload, final TimeDuration delay) {
+    public JSONObject perform(final AbstractProject project, final StaplerRequest req, final JSONObject requestPayload, final TimeDuration delay) {
 
         final List<Action> actions = new ArrayList<Action>();
         if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_PARAMETERS)) {

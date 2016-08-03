@@ -187,7 +187,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final JSONObject response;
             if (isStructuredForm(req.getParameter(JSON))) {
                 final JSONObject formData = req.getSubmittedForm();
-                response = command.perform(project, formData, actualDelay);
+                response = command.perform(project, req, formData, actualDelay);
             }
             else {
                 response = command.perform(project, req, delay);
