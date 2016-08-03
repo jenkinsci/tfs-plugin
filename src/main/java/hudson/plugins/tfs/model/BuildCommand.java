@@ -95,7 +95,17 @@ public class BuildCommand extends AbstractCommand {
     public JSONObject perform(final AbstractProject project, final StaplerRequest req, final JSONObject requestPayload, final TimeDuration delay) {
 
         final List<Action> actions = new ArrayList<Action>();
-        if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_PARAMETERS)) {
+
+        if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_BUILD)) {
+            final HashMap<String, String> teamBuildParameters = new HashMap<String, String>();
+            final JSONObject variables = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_BUILD);
+            for (final String key : ((Map<String, Object>)variables).keySet()) {
+                final String value = variables.getString(key);
+                teamBuildParameters.put(key, value);
+            }
+            contributeTeamBuildParameterActions(teamBuildParameters, actions);
+        }
+        else if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_PARAMETERS)) {
             final JSONObject eventArgsJson = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_PARAMETERS);
             final CommitParameterAction action;
             // TODO: improve the payload detection!
