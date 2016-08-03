@@ -144,7 +144,7 @@ public class BuildCommand extends AbstractCommand {
 
         final List<Action> actions = new ArrayList<Action>();
 
-        final HashMap<String, String> teamParameters = new HashMap<String, String>();
+        final HashMap<String, String> teamBuildParameters = new HashMap<String, String>();
 
         final Map<String, String[]> parameters = request.getParameterMap();
         for (final Map.Entry<String, String[]> entry : parameters.entrySet()) {
@@ -155,29 +155,11 @@ public class BuildCommand extends AbstractCommand {
                 if (valueArray == null || valueArray.length != 1) {
                     throw new IllegalArgumentException(String.format("Expected exactly 1 value for parameter '%s'.", teamParamName));
                 }
-                teamParameters.put(teamParamName, valueArray[0]);
+                teamBuildParameters.put(teamParamName, valueArray[0]);
             }
         }
 
-        if (teamParameters.containsKey(BUILD_REPOSITORY_PROVIDER) && "TfGit".equalsIgnoreCase(teamParameters.get(BUILD_REPOSITORY_PROVIDER))) {
-            final String collectionUriString = teamParameters.get(SYSTEM_TEAM_FOUNDATION_COLLECTION_URI);
-            final URI collectionUri = URI.create(collectionUriString);
-            final String repoUriString = teamParameters.get(BUILD_REPOSITORY_URI);
-            final URI repoUri = URI.create(repoUriString);
-            final String projectId = teamParameters.get(SYSTEM_TEAM_PROJECT);
-            final String repoId = teamParameters.get(BUILD_REPOSITORY_NAME);
-            final String commit = teamParameters.get(BUILD_SOURCE_VERSION);
-            final String pushedBy = teamParameters.get(BUILD_REQUESTED_FOR);
-            final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
-            args.collectionUri = collectionUri;
-            args.repoUri = repoUri;
-            args.projectId = projectId;
-            args.repoId = repoId;
-            args.commit = commit;
-            args.pushedBy = pushedBy;
-            final CommitParameterAction action = new CommitParameterAction(args);
-            actions.add(action);
-        }
+        contributeTeamBuildParameterActions(teamBuildParameters, actions);
 
         //noinspection UnnecessaryLocalVariable
         final Job<?, ?> job = project;
@@ -196,5 +178,27 @@ public class BuildCommand extends AbstractCommand {
         }
 
         return innerPerform(project, delay, actions);
+    }
+
+    static void contributeTeamBuildParameterActions(final HashMap<String, String> teamBuildParameters, final List<Action> actions) {
+        if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER) && "TfGit".equalsIgnoreCase(teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER))) {
+            final String collectionUriString = teamBuildParameters.get(SYSTEM_TEAM_FOUNDATION_COLLECTION_URI);
+            final URI collectionUri = URI.create(collectionUriString);
+            final String repoUriString = teamBuildParameters.get(BUILD_REPOSITORY_URI);
+            final URI repoUri = URI.create(repoUriString);
+            final String projectId = teamBuildParameters.get(SYSTEM_TEAM_PROJECT);
+            final String repoId = teamBuildParameters.get(BUILD_REPOSITORY_NAME);
+            final String commit = teamBuildParameters.get(BUILD_SOURCE_VERSION);
+            final String pushedBy = teamBuildParameters.get(BUILD_REQUESTED_FOR);
+            final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
+            args.collectionUri = collectionUri;
+            args.repoUri = repoUri;
+            args.projectId = projectId;
+            args.repoId = repoId;
+            args.commit = commit;
+            args.pushedBy = pushedBy;
+            final CommitParameterAction action = new CommitParameterAction(args);
+            actions.add(action);
+        }
     }
 }
