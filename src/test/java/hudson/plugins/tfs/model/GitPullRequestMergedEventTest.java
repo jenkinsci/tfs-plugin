@@ -23,7 +23,7 @@ public class GitPullRequestMergedEventTest {
         Assert.assertEquals(URI.create("https://fabrikam.visualstudio.com/DefaultCollection/_git/Fabrikam"), actual.repoUri);
         Assert.assertEquals("Fabrikam", actual.projectId);
         Assert.assertEquals("Fabrikam", actual.repoId);
-        Assert.assertEquals("53d54ac915144006c2c9e90d2c7d3880920db49c", actual.commit);
+        Assert.assertEquals("eef717f69257a6333f221566c1c987dc94cc0d72", actual.commit);
         Assert.assertEquals("Jamal Hartnett", actual.pushedBy);
         Assert.assertEquals(1, actual.pullRequestId);
         Assert.assertEquals(-1, actual.iterationId);

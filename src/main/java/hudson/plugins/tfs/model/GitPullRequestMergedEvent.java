@@ -48,6 +48,38 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         return result;
     }
 
+    /*
+    Given the following sample payload fragment:
+
+    "lastMergeSourceCommit": {
+      "commitId": "53d54ac915144006c2c9e90d2c7d3880920db49c",
+      "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/53d54ac915144006c2c9e90d2c7d3880920db49c"
+    },
+    "lastMergeTargetCommit": {
+      "commitId": "a511f535b1ea495ee0c903badb68fbc83772c882",
+      "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/a511f535b1ea495ee0c903badb68fbc83772c882"
+    },
+    "lastMergeCommit": {
+      "commitId": "eef717f69257a6333f221566c1c987dc94cc0d72",
+      "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/eef717f69257a6333f221566c1c987dc94cc0d72"
+    },
+    "commits": [
+      {
+        "commitId": "53d54ac915144006c2c9e90d2c7d3880920db49c",
+        "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/53d54ac915144006c2c9e90d2c7d3880920db49c"
+      }
+    ],
+
+    ...we are assuming the user pushed `53d54a` (lastMergeSourceCommit) and Team Services attempted
+    to merge it with `a511f5` (the tip of whatever the branch the PR is targeting, lastMergeTargetCommit),
+    yielding `eef717f`.
+     */
+    static String determineMergeCommit(final JSONObject resource) {
+        final JSONObject lastMergeCommit = resource.getJSONObject("lastMergeCommit");
+        final String result = lastMergeCommit.getString("commitId");
+        return result;
+    }
+
     @Override
     public JSONObject perform(final JSONObject requestPayload) {
         final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequestMerged(requestPayload);
@@ -66,7 +98,7 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         final URI repoUri = URI.create(repoUriString);
         final String projectId = determineProjectId(repository);
         final String repoId = repository.getString(NAME);
-        final String commit = determineCommit(resource);
+        final String commit = determineMergeCommit(resource);
         final String pushedBy = determineCreatedBy(resource);
         final int pullRequestId = resource.getInt("pullRequestId");
 
