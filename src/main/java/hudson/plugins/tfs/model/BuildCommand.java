@@ -38,6 +38,7 @@ public class BuildCommand extends AbstractCommand {
     private static final String REFS_PULL_SLASH = "refs/pull/";
     private static final int REFS_PULL_SLASH_LENGTH = REFS_PULL_SLASH.length();
     private static final String BUILD_REPOSITORY_URI = "Build.Repository.Uri";
+    private static final String BUILD_REPOSITORY_NAME = "Build.Repository.Name";
     private static final String SYSTEM_TEAM_PROJECT = "System.TeamProject";
     private static final String BUILD_SOURCE_VERSION = "Build.SourceVersion";
     private static final String BUILD_REQUESTED_FOR = "Build.RequestedFor";
@@ -163,12 +164,14 @@ public class BuildCommand extends AbstractCommand {
             final String repoUriString = teamParameters.get(BUILD_REPOSITORY_URI);
             final URI repoUri = URI.create(repoUriString);
             final String projectId = teamParameters.get(SYSTEM_TEAM_PROJECT);
+            final String repoId = teamParameters.get(BUILD_REPOSITORY_NAME);
             final String commit = teamParameters.get(BUILD_SOURCE_VERSION);
             final String pushedBy = teamParameters.get(BUILD_REQUESTED_FOR);
             final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
             args.collectionUri = collectionUri;
             args.repoUri = repoUri;
             args.projectId = projectId;
+            args.repoId = repoId;
             args.commit = commit;
             args.pushedBy = pushedBy;
             final CommitParameterAction action = new CommitParameterAction(args);
