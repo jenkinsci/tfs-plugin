@@ -218,7 +218,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         if (jsonParameter != null) {
             try {
                 final JSONObject jsonObject = JSONObject.fromObject(jsonParameter);
-                if (jsonObject.containsKey(PARAMETER) && jsonObject.containsKey(TEAM_PARAMETERS)) {
+                if (jsonObject.containsKey(TEAM_PARAMETERS)) {
                     return true;
                 }
             }
