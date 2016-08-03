@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;
+import com.microsoft.tfs.jni.helpers.LocalHost;
 import hudson.Util;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
@@ -21,18 +22,21 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
     private static final String ListingWorkspacesTemplate = "Listing workspaces from %s...";
 
     private final String computer;
+    private final boolean shouldLogWorkspaces;
 
     public interface WorkspaceFactory {
         Workspace createWorkspace(String name, String computer, String owner, String comment);
     }
     
     public ListWorkspacesCommand(final ServerConfigurationProvider server) {
-        this(server, null);
+        // TODO: shouldLogWorkspaces could be controlled by a property
+        this(server, null, false);
     }
 
-    public ListWorkspacesCommand(final ServerConfigurationProvider server, final String computer) {
+    ListWorkspacesCommand(final ServerConfigurationProvider server, final String computer, final boolean shouldLogWorkspaces) {
         super(server);
         this.computer = computer;
+        this.shouldLogWorkspaces = shouldLogWorkspaces;
     }
 
     @Override
@@ -45,6 +49,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
+        final String computerName = (computer != null) ? computer : LocalHost.getShortName();
 
         final String listWorkspacesMessage = String.format(ListingWorkspacesTemplate, server.getUrl());
         logger.println(listWorkspacesMessage);
@@ -53,7 +58,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
                 = vcc.queryWorkspaces(
                 null,
                 null,
-                Util.fixEmpty(computer),
+                computerName,
                 WorkspacePermissions.NONE_OR_NOT_SUPPORTED
         );
 
@@ -72,7 +77,9 @@ public class ListWorkspacesCommand extends AbstractCallableCommand implements Ca
             result.add(workspace);
         }
 
-        log(result, logger);
+        if (shouldLogWorkspaces) {
+            log(result, logger);
+        }
 
         return result;
     }

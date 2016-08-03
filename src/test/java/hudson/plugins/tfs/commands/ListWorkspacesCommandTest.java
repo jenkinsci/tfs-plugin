@@ -1,14 +1,5 @@
 package hudson.plugins.tfs.commands;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
@@ -19,11 +10,23 @@ import hudson.plugins.tfs.IntegrationTests;
 import hudson.plugins.tfs.model.NativeLibraryManager;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
-
 import hudson.remoting.Callable;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Bug;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
 
@@ -53,7 +56,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             when(server.getUrl()).thenReturn("http://tfs.invalid:8080/tfs/DefaultCollection/");
             when(this.vcc.queryWorkspaces(null, null, "XXXX-XXXX-007", WorkspacePermissions.NONE_OR_NOT_SUPPORTED))
                     .thenReturn(workspaces);
-            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, "XXXX-XXXX-007") {
+            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, "XXXX-XXXX-007", true) {
                 @Override
                 public Server createServer() {
                     return server;
@@ -98,9 +101,9 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
                     WorkspaceLocation.SERVER
             );
             when(server.getUrl()).thenReturn("http://tfs.invalid:8080/tfs/DefaultCollection/");
-            when(this.vcc.queryWorkspaces(null, null, null, WorkspacePermissions.NONE_OR_NOT_SUPPORTED))
+            when(this.vcc.queryWorkspaces(anyString(), anyString(), anyString(), isA(WorkspacePermissions.class)))
                     .thenReturn(workspaces);
-            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, null) {
+            final ListWorkspacesCommand command = new ListWorkspacesCommand(server, null, true) {
                 @Override
                 public Server createServer() {
                     return server;
@@ -240,6 +243,6 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     }
 
     @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
-        return new ListWorkspacesCommand(serverConfig, "computer");
+        return new ListWorkspacesCommand(serverConfig, "computer", true);
     }
 }
