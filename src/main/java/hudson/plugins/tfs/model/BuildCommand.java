@@ -15,13 +15,17 @@ import hudson.model.queue.ScheduleResult;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.TeamBuildEndpoint;
+import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.io.IOUtils;
 import org.jfree.data.Values;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,17 +56,17 @@ public class BuildCommand extends AbstractCommand {
 
         @Override
         public String getSampleRequestPayload() {
-            return "{\n" +
-                    "    \"team-parameters\":\n" +
-                    "    {\n" +
-                    "        \"collectionUri\":\"https://fabrikam-fiber-inc.visualstudio.com\",\n" +
-                    "        \"repoUri\":\"https://fabrikam-fiber-inc.visualstudio.com/Personal/_git/olivida.tfs-plugin\",\n" +
-                    "        \"projectId\":\"Personal\",\n" +
-                    "        \"repoId\":\"olivida.tfs-plugin\",\n" +
-                    "        \"commit\":\"6a23fc7afec31f0a14bade6544bed4f16492e6d2\",\n" +
-                    "        \"pushedBy\":\"olivida\"\n" +
-                    "    }\n" +
-                    "}";
+            final Class<? extends Factory> me = this.getClass();
+            final InputStream stream = me.getResourceAsStream("BuildCommand.json");
+            try {
+                return IOUtils.toString(stream, MediaType.UTF_8);
+            }
+            catch (final IOException e) {
+                throw new Error(e);
+            }
+            finally {
+                IOUtils.closeQuietly(stream);
+            }
         }
     }
 
