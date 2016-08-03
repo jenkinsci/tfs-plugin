@@ -2,7 +2,8 @@ package hudson.plugins.tfs;
 
 import hudson.Extension;
 import hudson.model.AbstractProject;
-import hudson.model.Item;
+import hudson.model.BuildAuthorizationToken;
+import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.BuildCommand;
@@ -36,7 +37,6 @@ import java.util.logging.Logger;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_CREATED;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 /**
@@ -145,21 +145,14 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     }
 
 
-    void checkPermission(final AbstractProject project, final StaplerRequest req, final StaplerResponse rsp) {
-        if (!Jenkins.getInstance().isUseSecurity()) {
-            return;    // everyone is authorized
-        }
-
-        project.checkPermission(Item.BUILD);
-
-        if (req.getMethod().equals("PUT")) {
-            return;
-        }
-
-        throw HttpResponses.error(SC_METHOD_NOT_ALLOWED, "Only PUT is supported");
+    @SuppressWarnings("deprecation" /* We want to do exactly what Jenkins does */)
+    void checkPermission(final AbstractProject project, final StaplerRequest req, final StaplerResponse rsp) throws IOException {
+        Job<?, ?> job = project;
+        final BuildAuthorizationToken authToken = project.getAuthToken();
+        hudson.model.BuildAuthorizationToken.checkPermission(job, authToken, req, rsp);
     }
 
-    void dispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) {
+    void dispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) throws IOException {
         // TODO: it looks like command and jobName might preserve their values across requests?
         final String pathInfo = req.getPathInfo();
         if (!decodeCommandAndJobNames(pathInfo)) {
@@ -241,7 +234,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final StaplerRequest request,
             final StaplerResponse response,
             @QueryParameter final TimeDuration delay
-    ) {
+    ) throws IOException {
         dispatch(request, response, delay);
     }
 
@@ -249,7 +242,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final StaplerRequest request,
             final StaplerResponse response,
             @QueryParameter final TimeDuration delay
-    ) {
+    ) throws IOException {
         dispatch(request, response, delay);
     }
 
@@ -257,7 +250,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final StaplerRequest request,
             final StaplerResponse response,
             @QueryParameter final TimeDuration delay
-    ) {
+    ) throws IOException {
         dispatch(request, response, delay);
     }
 
