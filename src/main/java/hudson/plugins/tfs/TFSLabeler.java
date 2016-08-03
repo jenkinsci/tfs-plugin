@@ -57,13 +57,13 @@ public class TFSLabeler extends Notifier {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        SCM scm = build.getProject().getScm();
+        SCM scm = build.getRootBuild().getProject().getScm();
         if (!(scm instanceof TeamFoundationServerScm)) {
             listener.getLogger().println("Labels are only supported for projects using the 'Team Foundation Server' SCM");
             return false;
         }
 
-        FilePath workspace = build.getWorkspace();
+        FilePath workspace = build.getRootBuild().getWorkspace();
 
         TeamFoundationServerScm tfsScm = (TeamFoundationServerScm) scm;
 
@@ -73,11 +73,11 @@ public class TFSLabeler extends Notifier {
         if ("always".equals(whenCreateLabel) || ("success".equals(whenCreateLabel) && buildSuccess)) {
 
             final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
-            Server server = new Server(localLauncher, listener, tfsScm.getServerUrl(build), tfsScm.getUserName(), tfsScm.getUserPassword());
+            Server server = new Server(localLauncher, listener, tfsScm.getServerUrl(build.getRootBuild()), tfsScm.getUserName(), tfsScm.getUserPassword());
 
             Computer computer = Computer.currentComputer();
             String normalizedLabelName = computeDynamicValue(build, getLabelName());
-            String tfsWorkspace = tfsScm.getWorkspaceName(build, computer);
+            String tfsWorkspace = tfsScm.getWorkspaceName(build.getRootBuild(), computer);
             String tfsProjectPath = computeDynamicValue(build, tfsScm.getProjectPath());
             
             try {
