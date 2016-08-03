@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
@@ -195,7 +196,12 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
                 response = command.perform(project, req, actualDelay);
             }
 
-            rsp.setStatus(SC_OK);
+            if (response.containsKey("created")) {
+                rsp.setStatus(SC_CREATED);
+            }
+            else {
+                rsp.setStatus(SC_OK);
+            }
             rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
             final PrintWriter w = rsp.getWriter();
             final String responseJsonString = response.toString();
