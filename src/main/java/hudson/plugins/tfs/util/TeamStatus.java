@@ -42,7 +42,12 @@ public class TeamStatus {
         final TeamGitStatus status = TeamGitStatus.fromRun(run);
         // TODO: when code is pushed and polling happens, are we sure we built against the requested commit?
         if (pullRequestMergeCommitCreatedEventArgs != null) {
-            client.addPullRequestIterationStatus(pullRequestMergeCommitCreatedEventArgs, status);
+            if (pullRequestMergeCommitCreatedEventArgs.iterationId == -1) {
+                client.addPullRequestStatus(pullRequestMergeCommitCreatedEventArgs, status);
+            }
+            else {
+                client.addPullRequestIterationStatus(pullRequestMergeCommitCreatedEventArgs, status);
+            }
         }
         if (gitCodePushedEventArgs != null) {
             client.addCommitStatus(gitCodePushedEventArgs, status);
