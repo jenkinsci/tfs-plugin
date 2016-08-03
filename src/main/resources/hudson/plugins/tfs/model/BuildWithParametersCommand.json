@@ -1,0 +1,16 @@
+{
+  "parameter":
+  [
+    {"name":"id","value":"123"},
+    {"name":"verbosity","value":"high"}
+  ],
+  "team-parameters":
+  {
+    "collectionUri":"https://fabrikam-fiber-inc.visualstudio.com",
+    "repoUri":"https://fabrikam-fiber-inc.visualstudio.com/Personal/_git/olivida.tfs-plugin",
+    "projectId":"Personal",
+    "repoId":"olivida.tfs-plugin",
+    "commit":"6a23fc7afec31f0a14bade6544bed4f16492e6d2",
+    "pushedBy":"olivida"
+  }
+}

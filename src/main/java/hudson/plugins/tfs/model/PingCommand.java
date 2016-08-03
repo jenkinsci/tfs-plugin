@@ -34,7 +34,7 @@ public class PingCommand extends AbstractCommand {
     }
 
     @Override
-    public JSONObject perform(final AbstractProject project, final JSONObject requestPayload, final TimeDuration delay) {
+    public JSONObject perform(final AbstractProject project, final StaplerRequest request, final JSONObject requestPayload, final TimeDuration delay) {
         return requestPayload;
     }
 
