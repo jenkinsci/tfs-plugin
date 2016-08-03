@@ -4,6 +4,12 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import hudson.model.Job;
+import hudson.model.JobProperty;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
+import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
 import hudson.model.queue.ScheduleResult;
 import hudson.plugins.tfs.CommitParameterAction;
@@ -11,7 +17,9 @@ import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.TeamBuildEndpoint;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.jfree.data.Values;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.net.URI;
@@ -96,7 +104,32 @@ public class BuildCommand extends AbstractCommand {
             }
             actions.add(action);
         }
-        // TODO: detect if a job is parameterized and react appropriately
+
+        //noinspection UnnecessaryLocalVariable
+        final Job<?, ?> job = project;
+        final ParametersDefinitionProperty pp = job.getProperty(ParametersDefinitionProperty.class);
+        if (pp != null && requestPayload.containsKey(TeamBuildEndpoint.PARAMETER)) {
+            final List<ParameterValue> values = new ArrayList<ParameterValue>();
+            final JSONArray a = requestPayload.getJSONArray(TeamBuildEndpoint.PARAMETER);
+
+            for (final Object o : a) {
+                final JSONObject jo = (JSONObject) o;
+                final String name = jo.getString("name");
+
+                final ParameterDefinition d = pp.getParameterDefinition(name);
+                if (d == null)
+                    throw new IllegalArgumentException("No such parameter definition: " + name);
+                final ParameterValue parameterValue = d.createValue(req, jo);
+                if (parameterValue != null) {
+                    values.add(parameterValue);
+                }
+                else {
+                    throw new IllegalArgumentException("Cannot retrieve the parameter value: " + name);
+                }
+            }
+            final ParametersAction action = new ParametersAction(values);
+            actions.add(action);
+        }
 
         return innerPerform(project, delay, actions);
     }
