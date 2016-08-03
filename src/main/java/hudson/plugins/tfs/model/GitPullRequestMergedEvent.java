@@ -84,7 +84,7 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
     public JSONObject perform(final JSONObject requestPayload) {
         final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequestMerged(requestPayload);
         final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
+        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
     }
