@@ -6,6 +6,7 @@ import hudson.model.Item;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.BuildCommand;
+import hudson.plugins.tfs.model.BuildWithParametersCommand;
 import hudson.plugins.tfs.model.PingCommand;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
@@ -55,6 +56,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         final Map<String, AbstractCommand.Factory> map = new TreeMap<String, AbstractCommand.Factory>(String.CASE_INSENSITIVE_ORDER);
         map.put("ping", new PingCommand.Factory());
         map.put("build", new BuildCommand.Factory());
+        map.put("buildWithParameters", new BuildWithParametersCommand.Factory());
         COMMAND_FACTORIES_BY_NAME = Collections.unmodifiableMap(map);
     }
 
@@ -238,6 +240,14 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     }
 
     public void doBuild(
+            final StaplerRequest request,
+            final StaplerResponse response,
+            @QueryParameter final TimeDuration delay
+    ) {
+        dispatch(request, response, delay);
+    }
+
+    public void doBuildWithParameters(
             final StaplerRequest request,
             final StaplerResponse response,
             @QueryParameter final TimeDuration delay
