@@ -190,7 +190,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
                 response = command.perform(project, req, formData, actualDelay);
             }
             else {
-                response = command.perform(project, req, delay);
+                response = command.perform(project, req, actualDelay);
             }
 
             rsp.setStatus(SC_OK);
