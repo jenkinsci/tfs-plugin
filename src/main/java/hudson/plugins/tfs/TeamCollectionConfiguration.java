@@ -93,7 +93,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
             try {
                 final StandardUsernamePasswordCredentials credential = findCredential(hostName, credentialsId);
-                if (StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com")) {
+                if (isTeamServices(hostName)) {
                     if (credential == null) {
                         return FormValidation.error(errorTemplate, "Team Services accounts need credentials, preferably a Personal Access Token");
                     }
@@ -131,6 +131,10 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
                     .withEmptySelection()
                     .withAll(matches);
         }
+    }
+
+    static boolean isTeamServices(final String hostName) {
+        return StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
     }
 
     static void testConnection(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {
