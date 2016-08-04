@@ -17,16 +17,25 @@ import hudson.remoting.Callable;
 public class GetFilesToWorkFolderCommand extends AbstractCallableCommand implements Callable<Void, Exception>, GetListener {
 
     private static final String GettingTemplate = "Getting version '%s' to '%s'...";
-    private static final String GotTemplate = "Finished getting version '%s'.";
+    private static final String GotTemplate = "Finished getting version '%s'. Retrieved %d resources.";
 
     private final String workFolder;
     private final String versionSpec;
+    private final boolean shouldLogEachGet;
     private PrintStream logger;
+    private int getCount = 0;
 
     public GetFilesToWorkFolderCommand(final ServerConfigurationProvider server, final String workFolder, final String versionSpec) {
+        this(server, workFolder, versionSpec, false);
+        // using shouldLogEachGet false as default, could be controlled by a config option at a later stage if desired, just adds noise to log though
+    }
+
+    public GetFilesToWorkFolderCommand(final ServerConfigurationProvider server, final String workFolder, final String versionSpec, 
+        final boolean shouldLogEachGet) {
         super(server);
         this.workFolder = workFolder;
         this.versionSpec = versionSpec;
+        this.shouldLogEachGet = shouldLogEachGet;
     }
 
     @Override
@@ -58,18 +67,19 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand impleme
         final VersionControlEventEngine eventEngine = vcc.getEventEngine();
         eventEngine.addGetListener(this);
         workspace.get(getVersionSpec, GetOptions.NONE);
-        // TODO: (PR #34) throw an exception if not all files could be fetched, there were conflicts, etc.
         eventEngine.removeGetListener(this);
 
-        final String gotMessage = String.format(GotTemplate, versionSpecString);
+        final String gotMessage = String.format(GotTemplate, versionSpecString, getCount);
         logger.println(gotMessage);
 
         return null;
     }
 
     public void onGet(final GetEvent getEvent) {
-        // TODO: The CLC used to emit folder paths as headings, then files within; should we do that?
-        logger.println(getEvent.getTargetLocalItem());
+        getCount++;
+        if (shouldLogEachGet) {
+            logger.println(getEvent.getTargetLocalItem());
+        }
     }
 
 }
