@@ -67,6 +67,12 @@
       <email>dastahel@microsoft.com</email>
       <timezone>-5</timezone>
     </developer>
+    <developer>
+      <id>mosabua</id>
+      <name>Manfred Moser</name>
+      <email>manfred@simpligility.com</email>
+      <timezone>-8</timezone>
+    </developer>
   </developers>
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/tfs-plugin.git</connection>
