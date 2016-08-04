@@ -48,6 +48,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     private static final Logger LOGGER = Logger.getLogger(TeamBuildEndpoint.class.getName());
     private static final Map<String, AbstractCommand.Factory> COMMAND_FACTORIES_BY_NAME;
     public static final String URL_NAME = "team-build";
+    public static final String TEAM_EVENT = "team-event";
     public static final String TEAM_PARAMETERS = "team-parameters";
     public static final String TEAM_BUILD = "team-build";
     public static final String PARAMETER = "parameter";
@@ -220,7 +221,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         if (jsonParameter != null) {
             try {
                 final JSONObject jsonObject = JSONObject.fromObject(jsonParameter);
-                if (jsonObject.containsKey(TEAM_PARAMETERS) || jsonObject.containsKey(TEAM_BUILD)) {
+                if (jsonObject.containsKey(TEAM_PARAMETERS) || jsonObject.containsKey(TEAM_BUILD) || jsonObject.containsKey(TEAM_EVENT)) {
                     return true;
                 }
             }

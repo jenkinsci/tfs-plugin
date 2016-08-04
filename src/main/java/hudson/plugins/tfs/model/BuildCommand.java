@@ -105,6 +105,20 @@ public class BuildCommand extends AbstractCommand {
             }
             contributeTeamBuildParameterActions(teamBuildParameters, actions);
         }
+        else if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_EVENT)) {
+            final JSONObject teamEventJson = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_EVENT);
+            final String eventType = teamEventJson.getString("eventType");
+            if ("git.push".equals(eventType)) {
+                final GitCodePushedEventArgs args = GitPushEvent.decodeGitPush(teamEventJson);
+                final Action action = new CommitParameterAction(args);
+                actions.add(action);
+            }
+            else if ("git.pullrequest.merged".equals(eventType)) {
+                final PullRequestMergeCommitCreatedEventArgs args = GitPullRequestMergedEvent.decodeGitPullRequestMerged(teamEventJson);
+                final Action action = new PullRequestParameterAction(args);
+                actions.add(action);
+            }
+        }
         else if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_PARAMETERS)) {
             final JSONObject eventArgsJson = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_PARAMETERS);
             final CommitParameterAction action;
