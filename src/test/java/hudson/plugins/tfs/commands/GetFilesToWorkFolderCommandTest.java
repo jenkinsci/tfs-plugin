@@ -33,7 +33,7 @@ public class GetFilesToWorkFolderCommandTest extends AbstractCallableCommandTest
         final GetEvent getEvent = mock(GetEvent.class);
         final String pathToFile = "C:\\.jenkins\\jobs\\typical\\workspace\\TODO.txt";
         when(getEvent.getTargetLocalItem()).thenReturn(pathToFile);
-        final GetFilesToWorkFolderCommand cut = new GetFilesToWorkFolderCommand(server, null, null);
+        final GetFilesToWorkFolderCommand cut = new GetFilesToWorkFolderCommand(server, null, null, true);
         cut.setLogger(new PrintStream(this.outputStream));
 
         cut.onGet(getEvent);
