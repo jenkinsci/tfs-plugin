@@ -5,11 +5,14 @@
         <h2>Security</h2>
         When your Jenkins is secured, you can use HTTP BASIC authentication to authenticate remote API requests. See <a href="https://wiki.jenkins-ci.org/display/JENKINS/Authenticating+scripted+clients">Authenticating scripted clients</a> for more details.
         <br />
+        <h2>Cross Site Request Forgery (CSRF) protection</h2>
+        If your Jenkins uses the "Prevent Cross Site Request Forgery exploits" security option (which it should), when you make a POST request, you have to send a CSRF protection token as an HTTP request header.  See <a href="https://wiki.jenkins-ci.org/display/JENKINS/Remote+access+API#RemoteaccessAPI-CSRFProtection">CSRF Protection</a> for more details.
+        <br />
         <h3>WARNING</h3>
         This endpoint SHOULD be reachable only through a secure channel.
 
         <h2>Build commands</h2>
-        The following build commands are available to PUT to:
+        The following build commands are available to POST to:
         <table border="1">
             <tr>
                 <th>Name</th>
@@ -20,11 +23,25 @@
         </table>
 
         <h2>Example</h2>
-        Suppose we have a secured Jenkins server at <code>%3$s</code> and a dedicated <em>Remote Trigger</em> user named <code>remote</code> that has an <a href="%3$sme/configure">API Token</a> of <code>92e9d8998a8c005697d252f09a2a311b</code>.
-        The following example demonstrates a PUT to the <code>ping</code> command for the job named JOB_NAME using the <a href="https://curl.haxx.se/">curl</a> tool:
+        Suppose we have a secured Jenkins server at <code>%3$s</code>, a dedicated <em>Remote Trigger</em> user named <code>remote</code> that has an <a href="%3$sme/configure">API Token</a> of <code>92e9d8998a8c005697d252f09a2a311b</code> and the following <code>payload.json</code> file:
+        <pre>
+{
+    "parameter":
+    [
+        {"name":"id","value":"123"},
+        {"name":"verbosity","value":"high"}
+    ],
+    "team-parameters":
+    {
+        "name":"value"
+    }
+}
+        </pre>
+        The following example demonstrates a GET to the <code>/crumbIssuer</code> endpoint to retrieve a header and then a POST to the <code>ping</code> command for the job named JOB_NAME using the <a href="https://curl.haxx.se/">curl</a> tool:
         <br />
         <pre>
-curl --request PUT %3$s%1$s/ping/JOB_NAME --data-urlencode json='{"parameter": [{"name":"id", "value":"123"}, {"name":"verbosity", "value":"high"}], "team-parameters": {"name":"value"}}' --user remote:92e9d8998a8c005697d252f09a2a311b
+crumb=$(curl '%3$scrumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)' --user remote:92e9d8998a8c005697d252f09a2a311b)
+curl --request POST %3$s%1$s/ping/JOB_NAME --data-urlencode json@payload.json --user remote:92e9d8998a8c005697d252f09a2a311b --header "$crumb"
         </pre>
         The console output should look like the following when the <code>ping</code> command from the <code>%1$s</code> endpoint returns the provided payload, formatted for compactness:
         <pre>
