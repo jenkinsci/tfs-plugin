@@ -9,6 +9,7 @@ import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.BuildCommand;
 import hudson.plugins.tfs.model.BuildWithParametersCommand;
 import hudson.plugins.tfs.model.PingCommand;
+import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
@@ -174,7 +175,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
         catch (final IllegalArgumentException e) {
             LOGGER.log(Level.WARNING, "IllegalArgumentException", e);
-            error(SC_BAD_REQUEST, e);
+            EndpointHelper.error(SC_BAD_REQUEST, e);
         }
         catch (final ForwardToView e) {
             throw e;
@@ -183,7 +184,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final String template = "Error while performing reaction to '%s' command.";
             final String message = String.format(template, commandName);
             LOGGER.log(Level.SEVERE, message, e);
-            error(SC_INTERNAL_SERVER_ERROR, e);
+            EndpointHelper.error(SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
@@ -224,22 +225,6 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             response = command.perform(project, req, actualDelay);
         }
         return response;
-    }
-
-
-    static void error(final int code, final Throwable cause) {
-        throw new HttpResponses.HttpResponseException(cause) {
-            public void generateResponse(final StaplerRequest req, final StaplerResponse rsp, final Object node) throws IOException, ServletException {
-                rsp.setStatus(code);
-                rsp.setHeader("X-Error-Message", cause.getMessage());
-                rsp.setContentType("text/plain;charset=UTF-8");
-
-                final PrintWriter w = new PrintWriter(rsp.getWriter());
-                // TODO: serialize "cause" to JSON write that, instead
-                cause.printStackTrace(w);
-                w.close();
-            }
-        };
     }
 
     static boolean isStructuredForm(final String jsonParameter) {
