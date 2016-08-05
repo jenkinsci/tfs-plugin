@@ -4,7 +4,7 @@ Copyright &copy; Erik Ramfelt, Olivier Dagenais, CloudBees, Inc. and others.
 Licensed under [MIT Licence].
  
 ## Summary
-This plugin integrates [Team Foundation Version Control], also known as TFVC, to Jenkins by connecting to Team Foundation Server (TFS) and Visual Studio Team Services (Team Services).
+This plugin integrates [Team Foundation Version Control] (also known as TFVC) and Git to Jenkins by connecting to Team Foundation Server (TFS) and Visual Studio Team Services (Team Services).
 
 ## Quick links
 * The legacy [wiki] page on the Jenkins Confluence instance
@@ -14,6 +14,9 @@ This plugin integrates [Team Foundation Version Control], also known as TFVC, to
 
 ## What can you do with it?
 
+That depends on which version control system you use in TFS/Team Services:
+
+### Team Foundation Version Control 
 Allows you to use a TFVC repository as an SCM in Jenkins jobs. At the moment, this plugin supports:
 * Retrieving read-only copies of files and folders from a TFVC repository.
 * Polling a TFVC repository to automatically start builds when there are changes.
@@ -21,6 +24,14 @@ Allows you to use a TFVC repository as an SCM in Jenkins jobs. At the moment, th
 * Creating a label in the TFVC repository
 
 The plugin will automatically create a workspace in TFS/Team Services and map a work folder (in the Jenkins workspace) to it.
+
+### Git
+The TFS plug-in for Jenkins enhances the Git plug-in for Jenkins by adding some integration features:
+* A push trigger, to request builds of specific commits in Git repositories without needing to schedule SCM polling
+* A build step that adds a "build pending" status to the associated pull request and/or commit in TFS/Team Services
+* A post-build action that add a "build completed" status to the associated pull request and/or commit in TFS/Team Services
+* Some endpoints for TFS/Team Services to use to activate the integration.
+
 
 # Supported versions
 
