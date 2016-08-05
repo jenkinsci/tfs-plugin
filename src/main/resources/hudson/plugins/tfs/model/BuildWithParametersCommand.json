@@ -19,7 +19,7 @@
         "project": {
           "name": "Fabrikam-Fiber-Git"
         },
-        "remoteUrl": "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/_git/Fabrikam-Fiber-Git"
+        "remoteUrl": "https://fabrikam-fiber-inc.visualstudio.com/_git/Fabrikam-Fiber-Git"
       },
       "pushedBy": {
         "displayName": "Jamal Hartnett"

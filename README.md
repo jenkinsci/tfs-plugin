@@ -4,7 +4,7 @@ Copyright &copy; Erik Ramfelt, Olivier Dagenais, CloudBees, Inc. and others.
 Licensed under [MIT Licence].
  
 ## Summary
-This plugin integrates [Team Foundation Version Control], also known as TFVC, to Jenkins by connecting to Team Foundation Server (TFS) and Visual Studio Team Services (Team Services).
+This plugin integrates [Team Foundation Version Control] (also known as TFVC) and Git to Jenkins by connecting to Team Foundation Server (TFS) and Visual Studio Team Services (Team Services).
 
 ## Quick links
 * The legacy [wiki] page on the Jenkins Confluence instance
@@ -14,6 +14,10 @@ This plugin integrates [Team Foundation Version Control], also known as TFVC, to
 
 ## What can you do with it?
 
+That depends on which version control system you use in TFS/Team Services:
+
+### Team Foundation Version Control
+
 Allows you to use a TFVC repository as an SCM in Jenkins jobs. At the moment, this plugin supports:
 * Retrieving read-only copies of files and folders from a TFVC repository.
 * Polling a TFVC repository to automatically start builds when there are changes.
@@ -21,6 +25,16 @@ Allows you to use a TFVC repository as an SCM in Jenkins jobs. At the moment, th
 * Creating a label in the TFVC repository
 
 The plugin will automatically create a workspace in TFS/Team Services and map a work folder (in the Jenkins workspace) to it.
+
+
+### Git
+
+The TFS plug-in for Jenkins enhances the Git plug-in for Jenkins by adding some integration features:
+* A push trigger, to request builds of specific commits in Git repositories without needing to schedule SCM polling
+* A build step that adds a "build pending" status to the associated pull request and/or commit in TFS/Team Services
+* A post-build action that add a "build completed" status to the associated pull request and/or commit in TFS/Team Services
+* Some endpoints for TFS/Team Services to use to activate the integration.  Please refer to the [Jenkins with Visual Studio Team Services](https://www.visualstudio.com/en-us/docs/service-hooks/services/jenkins) page for instructions on configuring the integration.
+
 
 # Supported versions
 
@@ -52,7 +66,7 @@ Ubuntu Linux | Server 14.04 LTS
 
 ## Jenkins
 
-The plugin is built against Jenkins version **1.448** and that's the version integration tests are run against.
+The plugin is built against Jenkins version **1.580** and that's the version integration tests are run against.
 
 # Configuration
 
@@ -69,13 +83,45 @@ Versions 3.2.0 and earlier of the plugin required a command line tool to be inst
 1. Install either Microsoft Visual Studio or [Microsoft Team Explorer Everywhere] Command-Line Client (CLC) on the build agents
 2. Add `tf.exe` (Visual Studio) OR one of `tf.cmd` or `tf` (TEE CLC) to the `PATH` of the build agents' user(s).
 
+## Global configuration
+
+To make use of the Git integration with TFS/Team Services, it is necessary to first configure your team project collection(s).  Follow these instructions for each team project collection (most organizations will only have one).
+
+1. Add credentials:
+    1. Select **Jenkins** > **Credentials**
+    2. Select **Add domain**
+        1. In the _Domain Name_ field, enter the host's friendly name, such as `fabrikam-fiber-inc`
+        2. In the _Description_ field, you can enter some notes, such as who maintains the server, etc.
+        3. Next to _Specification_, select **Add** > **Hostname**
+            1. In the _Include_ field, enter the Fully-Qualified Domain Name (FQDN), such as `fabrikam-fiber-inc.visualstudio.com`
+        4. Click **OK**
+    3. Select **Add Credentials**
+        1. For the _Kind_ field, select **Username with password**
+        2. For the _Scope_ field, select **Global (Jenkins, nodes, items, all child items, etc)**
+        3. See the _User name and password_ section below for the values of the _Username_ and _Password_; a Personal Access Token (PAT) is strongly recommended, with the following _Authorized Scopes_:
+            1. `Code (read)`
+            2. `Code (status)`
+        4. You can use the _Description_ field to record details about the PAT, such as its intended collection, the selected authorization scopes and expiration date.  For example: `fabrikam-fiber-inc, code read+status, expires 2017-08-05`
+        5. Click **OK**   
+2. Add the collection URL and associate it with the right credential:
+    1. Select **Jenkins** > **Manage Jenkins** > **Configure System**
+    2. Scroll to **TFS/Team Services** and click **Add**
+        1. If using Team Services, the value of the _Collection URL_ field should omit `/DefaultCollection`.
+        2. Select the associated `Credentials` value created earlier.
+        3. Click **Test Connection**.
+    3. Click **Save**
+
 ## Job configuration
+
+### Team Foundation Version Control
+
+If your source code is in a TFVC repository, this section is for you.
 
 ![SCM configuration](tfs-job-config4.png)
 
 Field | Description
 ----- | -----------
-`Collection URL` | The URL to the [Team Project Collection](https://msdn.microsoft.com/en-us/library/dd236915(v=vs.120).aspx). Examples: `https://tfs02.codeplex.com`, `https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection`, `http://tfs:8080/tfs/DefaultCollection`
+`Collection URL` | The URL to the [Team Project Collection](https://msdn.microsoft.com/en-us/library/dd236915(v=vs.120).aspx). Examples: `https://tfs02.codeplex.com`, `https://fabrikam-fiber-inc.visualstudio.com`, `http://tfs:8080/tfs/DefaultCollection`
 `Project path` | The Team Project and path to retrieve from the server. The project path must start with `$/`, and contain any sub path that exists in the project repository. Example: `$/Fabrikam-Fiber-TFVC/AuthSample-dev`
 `User name` | The name of the user that will be connecting to TFS/Team Services to query history, checkout files, etc. See _User name and password_ below for a full description.
 `User password` | The password, alternate password or personal access token associated with the user. See _User name and password_ below for more details.
@@ -84,6 +130,24 @@ Field | Description
 `Workspace name` | The name of the workspace that Jenkins should use when creating and deleting workspaces on the server. The workspace name supports three macros; `${JOB_NAME}` is replaced by the job name, `${USER_NAME}` is replaced by the user name Jenkins is running as and `${NODE_NAME}` is replaced by the name of the node. Default workspace name is `Hudson-${JOB_NAME}-${NODE_NAME}`.
 `Cloaked paths` | A collection of server paths to cloak to exclude from the workspace and from the build trigger. Multiple entries must be placed onto separate lines.
 `Repository browser` | Select `Microsoft Team Foundation Server/Visual Studio Team Services` to turn on links inside Jenkins jobs (in the **Changes** page) back to TFS/Team Services, for easier traceability.  If the TFS server is reached by users through a different URL than that provided in `Collection URL`, such as the Fully-Qualified Domain Name (FQDN), provide a value for the `URL` sub-field.
+
+### Git
+
+If your source code is in a Git repository located on a TFS/Team Services server, this section is for you.  **Make sure you first followed the instructions in "Global configuration" and added your team project collections, associated with credentials.**
+
+![Git configuration](git-job-config.png)
+
+If you didn't have the Git plug-in for Jenkins already, installing the TFS plug-in for Jenkins should have brought it on as a dependency.
+
+1. Use the **Git** _Source Code Management_ and add the URL to your Git repository in TFS/Team Services, omitting the `/DefaultCollection` if you are using Team Services.
+2. If you haven't done so already, follow the instructions in the "User name and password" section to generate a Personal Access Token, and then add a "Credential" as specified in the "Global configuration" section.  You should then be able to select it in the _Credentials_ field.
+3. To be able to build the merge commits created for pull requests in TFS/Team Services, click the **Advanced...** button
+    1. In the _Name_ field, enter **origin** (or some unique name if you already have other repositories)
+    2. In the _Refspec_ field, enter `+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin-pull/*` (replacing "origin" as necessary)
+4. Scroll down to _Build Triggers_ and you can now check the **Build when a change is pushed to TFS/Team Services** checkbox.
+5. Scroll down to _Build_, select **Add build step** > **Set build pending status in TFS/Team Services**, moving it _first_ in the list of steps, to notify TFS/Team Services as early as possible that a Jenkins build has been started.
+6. Add other build steps, as necessary. 
+7. Scroll down to _Post-build Actions_, select **Add post-build action** > **Set build completion status in TFS/Team Services**.
 
 ### User name and password
 
@@ -181,12 +245,7 @@ The best way to get an idea of what will be coming in future releases is to look
 
 ## Present
 
-The next release will be 4.2.0.  See what's been committed [since 4.1.0](https://github.com/jenkinsci/tfs-plugin/compare/tfs-4.1.0...master) and the upcoming [ReleaseNotes.md](ReleaseNotes.md).
-
-Also planned for release 4.2.0 are the following:
-* [JENKINS-3033: TFS plug-in 4.0.0 lists all workspaces on server](https://issues.jenkins-ci.org/browse/JENKINS-30330)
-* #33: Local workspaces are supported
-* #35: overwrite flag
+The next release will be 5.0.0.  See what's been committed [since 4.1.0](https://github.com/jenkinsci/tfs-plugin/compare/tfs-4.1.0...master) and the upcoming [ReleaseNotes.md](ReleaseNotes.md).
 
 ## Past
 
