@@ -113,6 +113,10 @@ To make use of the Git integration with TFS/Team Services, it is necessary to fi
 
 ## Job configuration
 
+### Team Foundation Version Control
+
+If your source code is in a TFVC repository, this section is for you.
+
 ![SCM configuration](tfs-job-config4.png)
 
 Field | Description
@@ -126,6 +130,24 @@ Field | Description
 `Workspace name` | The name of the workspace that Jenkins should use when creating and deleting workspaces on the server. The workspace name supports three macros; `${JOB_NAME}` is replaced by the job name, `${USER_NAME}` is replaced by the user name Jenkins is running as and `${NODE_NAME}` is replaced by the name of the node. Default workspace name is `Hudson-${JOB_NAME}-${NODE_NAME}`.
 `Cloaked paths` | A collection of server paths to cloak to exclude from the workspace and from the build trigger. Multiple entries must be placed onto separate lines.
 `Repository browser` | Select `Microsoft Team Foundation Server/Visual Studio Team Services` to turn on links inside Jenkins jobs (in the **Changes** page) back to TFS/Team Services, for easier traceability.  If the TFS server is reached by users through a different URL than that provided in `Collection URL`, such as the Fully-Qualified Domain Name (FQDN), provide a value for the `URL` sub-field.
+
+### Git
+
+If your source code is in a Git repository located on a TFS/Team Services server, this section is for you.  **Make sure you first followed the instructions in "Global configuration" and added your team project collections, associated with credentials.**
+
+![Git configuration](git-job-config.png)
+
+If you didn't have the Git plug-in for Jenkins already, installing the TFS plug-in for Jenkins should have brought it on as a dependency.
+
+1. Use the **Git** _Source Code Management_ and add the URL to your Git repository in TFS/Team Services, omitting the `/DefaultCollection` if you are using Team Services.
+2. If you haven't done so already, follow the instructions in the "User name and password" section to generate a Personal Access Token, and then add a "Credential" as specified in the "Global configuration" section.  You should then be able to select it in the _Credentials_ field.
+3. To be able to build the merge commits created for pull requests in TFS/Team Services, click the **Advanced...** button
+    1. In the _Name_ field, enter **origin** (or some unique name if you already have other repositories)
+    2. In the _Refspec_ field, enter `+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin-pull/*` (replacing "origin" as necessary)
+4. Scroll down to _Build Triggers_ and you can now check the **Build when a change is pushed to TFS/Team Services** checkbox.
+5. Scroll down to _Build_, select **Add build step** > **Set build pending status in TFS/Team Services**, moving it _first_ in the list of steps, to notify TFS/Team Services as early as possible that a Jenkins build has been started.
+6. Add other build steps, as necessary. 
+7. Scroll down to _Post-build Actions_, select **Add post-build action** > **Set build completion status in TFS/Team Services**.
 
 ### User name and password
 
