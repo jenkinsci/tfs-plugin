@@ -9,7 +9,7 @@
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
   <name>Team Foundation Server Plug-in</name>
-  <version>4.1.1-SNAPSHOT</version>
+  <version>5.0.0</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
   <properties>
     <jenkins.version>1.580</jenkins.version>
@@ -77,7 +77,7 @@
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/tfs-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/tfs-plugin.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>tfs-5.0.0</tag>
   </scm>
 
   <distributionManagement>
