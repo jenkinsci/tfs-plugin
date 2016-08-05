@@ -69,6 +69,34 @@ Versions 3.2.0 and earlier of the plugin required a command line tool to be inst
 1. Install either Microsoft Visual Studio or [Microsoft Team Explorer Everywhere] Command-Line Client (CLC) on the build agents
 2. Add `tf.exe` (Visual Studio) OR one of `tf.cmd` or `tf` (TEE CLC) to the `PATH` of the build agents' user(s).
 
+## Global configuration
+
+To make use of the Git integration with TFS/Team Services, it is necessary to first configure your team project collection(s).  Follow these instructions for each team project collection (most organizations will only have one).
+
+1. Add credentials:
+    1. Select **Jenkins** > **Credentials**
+    2. Select **Add domain**
+        1. In the _Domain Name_ field, enter the host's friendly name, such as `fabrikam-fiber-inc`
+        2. In the _Description_ field, you can enter some notes, such as who maintains the server, etc.
+        3. Next to _Specification_, select **Add** > **Hostname**
+            1. In the _Include_ field, enter the Fully-Qualified Domain Name (FQDN), such as `fabrikam-fiber-inc.visualstudio.com`
+        4. Click **OK**
+    3. Select **Add Credentials**
+        1. For the _Kind_ field, select **Username with password**
+        2. For the _Scope_ field, select **Global (Jenkins, nodes, items, all child items, etc)**
+        3. See the _User name and password_ section below for the values of the _Username_ and _Password_; a Personal Access Token (PAT) is strongly recommended, with the following _Authorized Scopes_:
+            1. `Code (read)`
+            2. `Code (status)`
+        4. You can use the _Description_ field to record details about the PAT, such as its intended collection, the selected authorization scopes and expiration date.  For example: `fabrikam-fiber-inc, code read+status, expires 2017-08-05`
+        5. Click **OK**   
+2. Add the collection URL and associate it with the right credential:
+    1. Select **Jenkins** > **Manage Jenkins** > **Configure System**
+    2. Scroll to **TFS/Team Services** and click **Add**
+        1. If using Team Services, the value of the _Collection URL_ field should omit `/DefaultCollection`.
+        2. Select the associated `Credentials` value created earlier.
+        3. Click **Test Connection**.
+    3. Click **Save**
+
 ## Job configuration
 
 ![SCM configuration](tfs-job-config4.png)
