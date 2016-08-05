@@ -11,6 +11,7 @@ import hudson.plugins.tfs.model.GitPullRequestMergedEvent;
 import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedHookEvent;
+import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.tfs.util.StringBodyParameter;
 import hudson.triggers.Trigger;
@@ -129,76 +130,79 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         return null;
     }
 
-    HttpResponse dispatch(final HttpServletRequest request, final String body) {
+    void dispatch(final StaplerRequest request, final StaplerResponse rsp, final String body) {
         final String pathInfo = request.getPathInfo();
         final String eventName = pathInfoToEventName(pathInfo);
-        if (StringUtils.isBlank(eventName) || !HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
-            return HttpResponses.error(SC_BAD_REQUEST, "Invalid event");
-        }
-        final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
         try {
-            final JSONObject requestBody = JSONObject.fromObject(body);
-            final AbstractHookEvent hookEvent = factory.create(requestBody);
-            final JSONObject response = hookEvent.perform(requestBody);
-            return new HttpResponse() {
-                public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node)
-                        throws IOException, ServletException {
-                    rsp.setStatus(SC_OK);
-                    rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
-                    final PrintWriter w = rsp.getWriter();
-                    final String responseJsonString = response.toString();
-                    w.print(responseJsonString);
-                    w.println();
-                }
-            };
+            final JSONObject response = innerDispatch(body, eventName);
+
+            rsp.setStatus(SC_OK);
+            rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
+            final PrintWriter w = rsp.getWriter();
+            final String responseJsonString = response.toString();
+            w.print(responseJsonString);
+            w.println();
         }
         catch (final IllegalArgumentException e) {
             LOGGER.log(Level.WARNING, "IllegalArgumentException", e);
-            // TODO: serialize it to JSON and set as the response
-            return HttpResponses.error(SC_BAD_REQUEST, e.getMessage());
+            EndpointHelper.error(SC_BAD_REQUEST, e);
         }
         catch (final Exception e) {
             final String template = "Error while performing reaction to '%s' event.";
             final String message = String.format(template, eventName);
             LOGGER.log(Level.SEVERE, message, e);
-            // TODO: serialize it to JSON and set as the response
-            return HttpResponses.error(SC_INTERNAL_SERVER_ERROR, e);
+            EndpointHelper.error(SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 
-    @RequirePOST
-    public HttpResponse doPing(
-            final HttpServletRequest request,
-            @StringBodyParameter @Nonnull final String body) {
-        return dispatch(request, body);
+    private JSONObject innerDispatch(final String body, final String eventName) {
+        if (StringUtils.isBlank(eventName) || !HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
+            throw new IllegalArgumentException("Invalid event");
+        }
+        final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
+        final JSONObject requestBody = JSONObject.fromObject(body);
+        final AbstractHookEvent hookEvent = factory.create(requestBody);
+        return hookEvent.perform(requestBody);
     }
 
     @RequirePOST
-    public HttpResponse doGitCodePushed(
-            final HttpServletRequest request,
+    public void doPing(
+            final StaplerRequest request,
+            final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
-        return dispatch(request, body);
+        dispatch(request, response, body);
     }
 
     @RequirePOST
-    public HttpResponse doGitPullRequestMerged(
-            final HttpServletRequest request,
+    public void doGitCodePushed(
+            final StaplerRequest request,
+            final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
-        return dispatch(request, body);
+        dispatch(request, response, body);
     }
 
     @RequirePOST
-    public HttpResponse doGitPush(
-            final HttpServletRequest request,
+    public void doGitPullRequestMerged(
+            final StaplerRequest request,
+            final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
-        return dispatch(request, body);
+        dispatch(request, response, body);
     }
 
     @RequirePOST
-    public HttpResponse doPullRequestMergeCommitCreated(
-            final HttpServletRequest request,
+    public void doGitPush(
+            final StaplerRequest request,
+            final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
-        return dispatch(request, body);
+        dispatch(request, response, body);
+    }
+
+    @RequirePOST
+    public void doPullRequestMergeCommitCreated(
+            final StaplerRequest request,
+            final StaplerResponse response,
+            @StringBodyParameter @Nonnull final String body) {
+        dispatch(request, response, body);
     }
 
     public static <T extends Trigger> T findTrigger(final Job<?, ?> job, final Class<T> tClass) {
