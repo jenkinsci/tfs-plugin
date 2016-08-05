@@ -18,7 +18,7 @@ public class IntegrationTestHelperTest {
 
         final String actual = cut.getServerUrl();
 
-        Assert.assertEquals("https://automated-testing.visualstudio.com:443/DefaultCollection", actual);
+        Assert.assertEquals("https://automated-testing.visualstudio.com:443/", actual);
     }
 
 }

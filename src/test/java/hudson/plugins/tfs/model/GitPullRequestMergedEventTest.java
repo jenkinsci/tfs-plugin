@@ -19,8 +19,8 @@ public class GitPullRequestMergedEventTest {
 
         final PullRequestMergeCommitCreatedEventArgs actual = GitPullRequestMergedEvent.decodeGitPullRequestMerged(input);
 
-        Assert.assertEquals(URI.create("https://fabrikam.visualstudio.com/DefaultCollection/"), actual.collectionUri);
-        Assert.assertEquals(URI.create("https://fabrikam.visualstudio.com/DefaultCollection/_git/Fabrikam"), actual.repoUri);
+        Assert.assertEquals(URI.create("https://fabrikam.visualstudio.com/"), actual.collectionUri);
+        Assert.assertEquals(URI.create("https://fabrikam.visualstudio.com/_git/Fabrikam"), actual.repoUri);
         Assert.assertEquals("Fabrikam", actual.projectId);
         Assert.assertEquals("Fabrikam", actual.repoId);
         Assert.assertEquals("eef717f69257a6333f221566c1c987dc94cc0d72", actual.commit);

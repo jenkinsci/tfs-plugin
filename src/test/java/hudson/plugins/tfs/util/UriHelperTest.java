@@ -182,9 +182,9 @@ public class UriHelperTest {
         final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com/";
         final QueryString qs = new QueryString("api-version", "2.0");
 
-        final URI actual = UriHelper.join(collectionUrl, "DefaultCollection", "_apis", "projects", qs);
+        final URI actual = UriHelper.join(collectionUrl, "_apis", "projects", qs);
 
-        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/_apis/projects?api-version=2.0"), actual);
+        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_apis/projects?api-version=2.0"), actual);
     }
 
 }

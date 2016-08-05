@@ -49,20 +49,20 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
 
     "lastMergeSourceCommit": {
       "commitId": "53d54ac915144006c2c9e90d2c7d3880920db49c",
-      "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/53d54ac915144006c2c9e90d2c7d3880920db49c"
+      "url": "https://fabrikam.visualstudio.com/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/53d54ac915144006c2c9e90d2c7d3880920db49c"
     },
     "lastMergeTargetCommit": {
       "commitId": "a511f535b1ea495ee0c903badb68fbc83772c882",
-      "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/a511f535b1ea495ee0c903badb68fbc83772c882"
+      "url": "https://fabrikam.visualstudio.com/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/a511f535b1ea495ee0c903badb68fbc83772c882"
     },
     "lastMergeCommit": {
       "commitId": "eef717f69257a6333f221566c1c987dc94cc0d72",
-      "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/eef717f69257a6333f221566c1c987dc94cc0d72"
+      "url": "https://fabrikam.visualstudio.com/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/eef717f69257a6333f221566c1c987dc94cc0d72"
     },
     "commits": [
       {
         "commitId": "53d54ac915144006c2c9e90d2c7d3880920db49c",
-        "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/53d54ac915144006c2c9e90d2c7d3880920db49c"
+        "url": "https://fabrikam.visualstudio.com/_apis/git/repositories/4bc14d40-c903-45e2-872e-0462c7748079/commits/53d54ac915144006c2c9e90d2c7d3880920db49c"
       }
     ],
 

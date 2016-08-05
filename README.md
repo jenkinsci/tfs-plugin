@@ -103,7 +103,7 @@ To make use of the Git integration with TFS/Team Services, it is necessary to fi
 
 Field | Description
 ----- | -----------
-`Collection URL` | The URL to the [Team Project Collection](https://msdn.microsoft.com/en-us/library/dd236915(v=vs.120).aspx). Examples: `https://tfs02.codeplex.com`, `https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection`, `http://tfs:8080/tfs/DefaultCollection`
+`Collection URL` | The URL to the [Team Project Collection](https://msdn.microsoft.com/en-us/library/dd236915(v=vs.120).aspx). Examples: `https://tfs02.codeplex.com`, `https://fabrikam-fiber-inc.visualstudio.com`, `http://tfs:8080/tfs/DefaultCollection`
 `Project path` | The Team Project and path to retrieve from the server. The project path must start with `$/`, and contain any sub path that exists in the project repository. Example: `$/Fabrikam-Fiber-TFVC/AuthSample-dev`
 `User name` | The name of the user that will be connecting to TFS/Team Services to query history, checkout files, etc. See _User name and password_ below for a full description.
 `User password` | The password, alternate password or personal access token associated with the user. See _User name and password_ below for more details.
