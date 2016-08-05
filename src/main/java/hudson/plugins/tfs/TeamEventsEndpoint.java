@@ -7,6 +7,8 @@ import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.model.AbstractHookEvent;
 import hudson.plugins.tfs.model.GitCodePushedHookEvent;
+import hudson.plugins.tfs.model.GitPullRequestMergedEvent;
+import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedHookEvent;
 import hudson.plugins.tfs.util.MediaType;
@@ -54,6 +56,8 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
                 new TreeMap<String, AbstractHookEvent.Factory>(String.CASE_INSENSITIVE_ORDER);
         eventMap.put("ping", new PingHookEvent.Factory());
         eventMap.put("gitCodePushed", new GitCodePushedHookEvent.Factory());
+        eventMap.put("gitPullRequestMerged", new GitPullRequestMergedEvent.Factory());
+        eventMap.put("gitPush", new GitPushEvent.Factory());
         eventMap.put("pullRequestMergeCommitCreated", new PullRequestMergeCommitCreatedHookEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
     }
@@ -171,6 +175,20 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
 
     @RequirePOST
     public HttpResponse doGitCodePushed(
+            final HttpServletRequest request,
+            @StringBodyParameter @Nonnull final String body) {
+        return dispatch(request, body);
+    }
+
+    @RequirePOST
+    public HttpResponse doGitPullRequestMerged(
+            final HttpServletRequest request,
+            @StringBodyParameter @Nonnull final String body) {
+        return dispatch(request, body);
+    }
+
+    @RequirePOST
+    public HttpResponse doGitPush(
             final HttpServletRequest request,
             @StringBodyParameter @Nonnull final String body) {
         return dispatch(request, body);

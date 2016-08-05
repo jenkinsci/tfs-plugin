@@ -5,12 +5,12 @@ import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Job;
-import hudson.model.JobProperty;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
+import hudson.model.SimpleParameterDefinition;
 import hudson.model.queue.ScheduleResult;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
@@ -21,7 +21,6 @@ import jenkins.util.TimeDuration;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
-import org.jfree.data.Values;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
@@ -47,6 +46,8 @@ public class BuildCommand extends AbstractCommand {
     private static final String BUILD_SOURCE_VERSION = "Build.SourceVersion";
     private static final String BUILD_REQUESTED_FOR = "Build.RequestedFor";
     private static final String SYSTEM_TEAM_FOUNDATION_COLLECTION_URI = "System.TeamFoundationCollectionUri";
+    private static final String COMMIT_ID = "commitId";
+    private static final String PULL_REQUEST_ID = "pullRequestId";
 
     public static class Factory implements AbstractCommand.Factory {
         @Override
@@ -94,6 +95,10 @@ public class BuildCommand extends AbstractCommand {
     @Override
     public JSONObject perform(final AbstractProject project, final StaplerRequest req, final JSONObject requestPayload, final TimeDuration delay) {
 
+        // These values are for optional parameters of the same name, for the git.pullrequest.merged event
+        String commitId = null;
+        String pullRequestId = null;
+
         final List<Action> actions = new ArrayList<Action>();
 
         if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_BUILD)) {
@@ -105,11 +110,28 @@ public class BuildCommand extends AbstractCommand {
             }
             contributeTeamBuildParameterActions(teamBuildParameters, actions);
         }
+        else if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_EVENT)) {
+            final JSONObject teamEventJson = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_EVENT);
+            final String eventType = teamEventJson.getString("eventType");
+            if ("git.push".equals(eventType)) {
+                final GitCodePushedEventArgs args = GitPushEvent.decodeGitPush(teamEventJson);
+                final Action action = new CommitParameterAction(args);
+                actions.add(action);
+            }
+            else if ("git.pullrequest.merged".equals(eventType)) {
+                final PullRequestMergeCommitCreatedEventArgs args = GitPullRequestMergedEvent.decodeGitPullRequestMerged(teamEventJson);
+                // record the values for the special optional parameters
+                commitId = args.commit;
+                pullRequestId = Integer.toString(args.pullRequestId, 10);
+                final Action action = new PullRequestParameterAction(args);
+                actions.add(action);
+            }
+        }
         else if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_PARAMETERS)) {
             final JSONObject eventArgsJson = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_PARAMETERS);
             final CommitParameterAction action;
             // TODO: improve the payload detection!
-            if (eventArgsJson.containsKey("pullRequestId")) {
+            if (eventArgsJson.containsKey(PULL_REQUEST_ID)) {
                 final PullRequestMergeCommitCreatedEventArgs args = PullRequestMergeCommitCreatedEventArgs.fromJsonObject(eventArgsJson);
                 action = new PullRequestParameterAction(args);
             }
@@ -134,7 +156,24 @@ public class BuildCommand extends AbstractCommand {
                 final ParameterDefinition d = pp.getParameterDefinition(name);
                 if (d == null)
                     throw new IllegalArgumentException("No such parameter definition: " + name);
-                final ParameterValue parameterValue = d.createValue(req, jo);
+                final ParameterValue parameterValue;
+                // commitId and pullRequestId are special and override any user-provided value
+                // when the team-event's eventType was "git.pullrequest.merged"
+                if (name.equals(COMMIT_ID) && commitId != null && d instanceof SimpleParameterDefinition) {
+                    final SimpleParameterDefinition spd = (SimpleParameterDefinition) d;
+                    parameterValue = spd.createValue(commitId);
+                    // erase value to avoid adding it a second time
+                    commitId = null;
+                }
+                else if (name.equals(PULL_REQUEST_ID) && pullRequestId != null & d instanceof SimpleParameterDefinition) {
+                    final SimpleParameterDefinition spd = (SimpleParameterDefinition) d;
+                    parameterValue = spd.createValue(pullRequestId);
+                    // erase value to avoid adding it a second time
+                    pullRequestId = null;
+                }
+                else {
+                    parameterValue = d.createValue(req, jo);
+                }
                 if (parameterValue != null) {
                     values.add(parameterValue);
                 }
@@ -142,6 +181,25 @@ public class BuildCommand extends AbstractCommand {
                     throw new IllegalArgumentException("Cannot retrieve the parameter value: " + name);
                 }
             }
+
+            // typical case: set optional "git.pullrequest.merged" parameters
+            if (commitId != null) {
+                final ParameterDefinition d = pp.getParameterDefinition(COMMIT_ID);
+                if (d != null && d instanceof SimpleParameterDefinition) {
+                    final SimpleParameterDefinition spd = (SimpleParameterDefinition) d;
+                    final ParameterValue parameterValue = spd.createValue(commitId);
+                    values.add(parameterValue);
+                }
+            }
+            if (pullRequestId != null) {
+                final ParameterDefinition d = pp.getParameterDefinition(PULL_REQUEST_ID);
+                if (d != null && d instanceof SimpleParameterDefinition) {
+                    final SimpleParameterDefinition spd = (SimpleParameterDefinition) d;
+                    final ParameterValue parameterValue = spd.createValue(pullRequestId);
+                    values.add(parameterValue);
+                }
+            }
+
             final ParametersAction action = new ParametersAction(values);
             actions.add(action);
         }
