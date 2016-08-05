@@ -155,7 +155,8 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     }
 
     void dispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) throws IOException {
-        // TODO: it looks like command and jobName might preserve their values across requests?
+        commandName = null;
+        jobName = null;
         final String pathInfo = req.getPathInfo();
         if (!decodeCommandAndJobNames(pathInfo)) {
             if (commandName == null) {
