@@ -9,6 +9,7 @@ import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.BuildCommand;
 import hudson.plugins.tfs.model.BuildWithParametersCommand;
 import hudson.plugins.tfs.model.PingCommand;
+import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
@@ -16,12 +17,14 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.kohsuke.stapler.ForwardToView;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
@@ -155,41 +158,8 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     }
 
     void dispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) throws IOException {
-        // TODO: it looks like command and jobName might preserve their values across requests?
-        final String pathInfo = req.getPathInfo();
-        if (!decodeCommandAndJobNames(pathInfo)) {
-            if (commandName == null) {
-                throw HttpResponses.error(SC_BAD_REQUEST, "Command not provided");
-            }
-            if (jobName == null) {
-                throw HttpResponses.error(SC_BAD_REQUEST, "Job name not provided after command");
-            }
-        }
-
-        if (!COMMAND_FACTORIES_BY_NAME.containsKey(commandName)) {
-            throw HttpResponses.error(SC_BAD_REQUEST, "Command not implemented");
-        }
-
-        final Jenkins jenkins = Jenkins.getInstance();
-        final AbstractProject project = jenkins.getItemByFullName(jobName, AbstractProject.class);
-        if (project == null) {
-            throw HttpResponses.error(SC_BAD_REQUEST, "Project not found");
-        }
-        checkPermission(project, req, rsp);
-        final TimeDuration actualDelay =
-                delay == null ? new TimeDuration(project.getQuietPeriod()) : delay;
-
-        final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
         try {
-            final AbstractCommand command = factory.create();
-            final JSONObject response;
-            if (isStructuredForm(req.getParameter(JSON))) {
-                final JSONObject formData = req.getSubmittedForm();
-                response = command.perform(project, req, formData, actualDelay);
-            }
-            else {
-                response = command.perform(project, req, actualDelay);
-            }
+            final JSONObject response = innerDispatch(req, rsp, delay);
 
             if (response.containsKey("created")) {
                 rsp.setStatus(SC_CREATED);
@@ -205,16 +175,56 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
         catch (final IllegalArgumentException e) {
             LOGGER.log(Level.WARNING, "IllegalArgumentException", e);
-            // TODO: serialize it to JSON and set as the response
-            throw HttpResponses.error(SC_BAD_REQUEST, e.getMessage());
+            EndpointHelper.error(SC_BAD_REQUEST, e);
+        }
+        catch (final ForwardToView e) {
+            throw e;
         }
         catch (final Exception e) {
             final String template = "Error while performing reaction to '%s' command.";
             final String message = String.format(template, commandName);
             LOGGER.log(Level.SEVERE, message, e);
-            // TODO: serialize it to JSON and set as the response
-            throw HttpResponses.error(SC_INTERNAL_SERVER_ERROR, e);
+            EndpointHelper.error(SC_INTERNAL_SERVER_ERROR, e);
         }
+    }
+
+    private JSONObject innerDispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) throws IOException, ServletException {
+        commandName = null;
+        jobName = null;
+        final String pathInfo = req.getPathInfo();
+        if (!decodeCommandAndJobNames(pathInfo)) {
+            if (commandName == null) {
+                throw new IllegalArgumentException("Command not provided");
+            }
+            if (jobName == null) {
+                throw new IllegalArgumentException("Job name not provided after command");
+            }
+        }
+
+        if (!COMMAND_FACTORIES_BY_NAME.containsKey(commandName)) {
+            throw new IllegalArgumentException("Command not implemented");
+        }
+
+        final Jenkins jenkins = Jenkins.getInstance();
+        final AbstractProject project = jenkins.getItemByFullName(jobName, AbstractProject.class);
+        if (project == null) {
+            throw new IllegalArgumentException("Project not found");
+        }
+        checkPermission(project, req, rsp);
+        final TimeDuration actualDelay =
+                delay == null ? new TimeDuration(project.getQuietPeriod()) : delay;
+
+        final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
+        final AbstractCommand command = factory.create();
+        final JSONObject response;
+        if (isStructuredForm(req.getParameter(JSON))) {
+            final JSONObject formData = req.getSubmittedForm();
+            response = command.perform(project, req, formData, actualDelay);
+        }
+        else {
+            response = command.perform(project, req, actualDelay);
+        }
+        return response;
     }
 
     static boolean isStructuredForm(final String jsonParameter) {
