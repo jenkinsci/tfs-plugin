@@ -52,7 +52,7 @@ Ubuntu Linux | Server 14.04 LTS
 
 ## Jenkins
 
-The plugin is built against Jenkins version **1.448** and that's the version integration tests are run against.
+The plugin is built against Jenkins version **1.580** and that's the version integration tests are run against.
 
 # Configuration
 
