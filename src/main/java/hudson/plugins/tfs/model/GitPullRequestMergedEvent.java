@@ -18,8 +18,8 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
     public static class Factory implements AbstractHookEvent.Factory {
 
         @Override
-        public AbstractHookEvent create(final JSONObject requestPayload) {
-            return new GitPullRequestMergedEvent(requestPayload);
+        public AbstractHookEvent create() {
+            return new GitPullRequestMergedEvent();
         }
 
         @Override
@@ -36,10 +36,6 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
                 IOUtils.closeQuietly(stream);
             }
         }
-    }
-
-    public GitPullRequestMergedEvent(final JSONObject requestPayload) {
-        super(requestPayload);
     }
 
     static String determineCreatedBy(final JSONObject resource) {

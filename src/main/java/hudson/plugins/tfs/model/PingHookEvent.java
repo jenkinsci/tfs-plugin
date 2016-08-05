@@ -6,8 +6,8 @@ public class PingHookEvent extends AbstractHookEvent {
 
     public static class Factory implements AbstractHookEvent.Factory {
         @Override
-        public AbstractHookEvent create(final JSONObject requestPayload) {
-            return new PingHookEvent(requestPayload);
+        public AbstractHookEvent create() {
+            return new PingHookEvent();
         }
 
         @Override
@@ -16,10 +16,6 @@ public class PingHookEvent extends AbstractHookEvent {
                     "    \"message\": \"Hello, world!\"\n" +
                     "}";
         }
-    }
-
-    public PingHookEvent(final JSONObject requestPayload) {
-        super(requestPayload);
     }
 
     @Override

@@ -26,8 +26,8 @@ public class GitPushEvent extends GitCodePushedHookEvent {
     public static class Factory implements AbstractHookEvent.Factory {
 
         @Override
-        public AbstractHookEvent create(final JSONObject requestPayload) {
-            return new GitPushEvent(requestPayload);
+        public AbstractHookEvent create() {
+            return new GitPushEvent();
         }
 
         @Override
@@ -44,10 +44,6 @@ public class GitPushEvent extends GitCodePushedHookEvent {
                 IOUtils.closeQuietly(stream);
             }
         }
-    }
-
-    public GitPushEvent(final JSONObject requestPayload) {
-        super(requestPayload);
     }
 
     @Override

@@ -37,18 +37,14 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
 
     public static class Factory implements AbstractHookEvent.Factory {
         @Override
-        public AbstractHookEvent create(final JSONObject requestPayload) {
-            return new GitCodePushedHookEvent(requestPayload);
+        public AbstractHookEvent create() {
+            return new GitCodePushedHookEvent();
         }
 
         @Override
         public String getSampleRequestPayload() {
             return GitCodePushedEventArgs.SAMPLE_REQUEST_PAYLOAD;
         }
-    }
-
-    public GitCodePushedHookEvent(final JSONObject requestPayload) {
-        super(requestPayload);
     }
 
     @Override

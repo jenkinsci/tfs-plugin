@@ -28,7 +28,6 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
@@ -161,7 +160,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         }
         final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
         final JSONObject requestBody = JSONObject.fromObject(body);
-        final AbstractHookEvent hookEvent = factory.create(requestBody);
+        final AbstractHookEvent hookEvent = factory.create();
         return hookEvent.perform(requestBody);
     }
 

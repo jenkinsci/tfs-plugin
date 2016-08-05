@@ -10,18 +10,14 @@ public class PullRequestMergeCommitCreatedHookEvent extends GitCodePushedHookEve
 
     public static class Factory implements AbstractHookEvent.Factory {
         @Override
-        public AbstractHookEvent create(final JSONObject requestPayload) {
-            return new PullRequestMergeCommitCreatedHookEvent(requestPayload);
+        public AbstractHookEvent create() {
+            return new PullRequestMergeCommitCreatedHookEvent();
         }
 
         @Override
         public String getSampleRequestPayload() {
             return PullRequestMergeCommitCreatedEventArgs.SAMPLE_REQUEST_PAYLOAD;
         }
-    }
-
-    public PullRequestMergeCommitCreatedHookEvent(final JSONObject requestPayload) {
-        super(requestPayload);
     }
 
     @Override
