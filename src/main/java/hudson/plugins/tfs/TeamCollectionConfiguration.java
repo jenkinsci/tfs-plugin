@@ -144,6 +144,23 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         return FormValidation.ok();
     }
 
+    static boolean areSameCollectionUri(final URI a, final URI b) {
+        if (a == null) {
+            throw new IllegalArgumentException("Parameter 'a' is null");
+        }
+        if (b == null) {
+            throw new IllegalArgumentException("Parameter 'b' is null");
+        }
+
+        final String aHost = a.getHost();
+        final String bHost = b.getHost();
+        if (isTeamServices(aHost) && isTeamServices(bHost)) {
+            return StringHelper.equalIgnoringCase(aHost, bHost);
+        }
+
+        return UriHelper.areSame(a, b);
+    }
+
     public static boolean isTeamServices(final String hostName) {
         return StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
     }
@@ -196,7 +213,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         for (final TeamCollectionConfiguration pair : pairs) {
             final String candidateCollectionUrlString = pair.getCollectionUrl();
             final URI candidateCollectionUri = URI.create(candidateCollectionUrlString);
-            if (UriHelper.areSame(candidateCollectionUri, collectionUri)) {
+            if (areSameCollectionUri(candidateCollectionUri, collectionUri)) {
                 final String credentialsId = pair.credentialsId;
                 if (credentialsId != null) {
                     return findCredentialsById(credentialsId);
