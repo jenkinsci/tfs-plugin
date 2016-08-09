@@ -3,6 +3,7 @@ package hudson.plugins.tfs.util;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
@@ -40,7 +41,7 @@ public class TeamRestClient {
     public TeamRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) {
         this.collectionUri = collectionUri;
         final String hostName = collectionUri.getHost();
-        isHosted = StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
+        isHosted = TeamCollectionConfiguration.isTeamServices(hostName);
         if (credentials != null) {
             authorization = createAuthorization(credentials);
         }

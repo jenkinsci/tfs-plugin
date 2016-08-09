@@ -147,7 +147,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         return FormValidation.ok();
     }
 
-    static boolean isTeamServices(final String hostName) {
+    public static boolean isTeamServices(final String hostName) {
         return StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
     }
 
