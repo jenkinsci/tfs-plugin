@@ -10,10 +10,12 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.CommitParameterAction;
+import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamHookCause;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
+import hudson.plugins.tfs.util.StringHelper;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
@@ -178,6 +180,34 @@ public abstract class AbstractHookEvent {
         finally {
             SecurityContextHolder.setContext(old);
         }
+    }
+
+    // TODO: find a better home for this method
+    static boolean isTeamServicesNearMatch(final URIish a, final URIish b) {
+        final String aHost = a.getHost();
+        final String bHost = b.getHost();
+        if (TeamCollectionConfiguration.isTeamServices(aHost)
+                && TeamCollectionConfiguration.isTeamServices(bHost)) {
+            final String aPath = normalizePath(a.getPath());
+            final String bPath = normalizePath(b.getPath());
+            if (StringHelper.endsWithIgnoreCase(aPath, bPath)
+                    || StringHelper.endsWithIgnoreCase(bPath, aPath)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static String normalizePath(String path) {
+        if(path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
+        if(path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+
+        return path;
     }
 
 }
