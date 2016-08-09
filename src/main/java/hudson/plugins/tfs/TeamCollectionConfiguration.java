@@ -11,8 +11,8 @@ import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.plugins.tfs.util.StringHelper;
-import hudson.plugins.tfs.util.UriHelper;
 import hudson.plugins.tfs.util.TeamRestClient;
+import hudson.plugins.tfs.util.UriHelper;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -21,9 +21,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,10 +62,11 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         public FormValidation doCheckCollectionUrl(
                 @QueryParameter final String value) {
 
+            final URI uri;
             try {
-                new URL(value);
+                uri = new URI(value);
             }
-            catch (MalformedURLException e) {
+            catch (final URISyntaxException e) {
                 return FormValidation.error("Malformed TFS/Team Services collection URL (%s)", e.getMessage());
             }
 
@@ -84,10 +84,10 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
             String hostName = null;
             try {
-                final URL url = new URL(collectionUrl);
-                hostName = url.getHost();
+                final URI uri = new URI(collectionUrl);
+                hostName = uri.getHost();
             }
-            catch (final MalformedURLException e) {
+            catch (final URISyntaxException e) {
                 return FormValidation.error(errorTemplate, e.getMessage());
             }
 
@@ -116,10 +116,10 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
             String hostName = null;
             try {
-                final URL url = new URL(collectionUrl);
-                hostName = url.getHost();
+                final URI uri = new URI(collectionUrl);
+                hostName = uri.getHost();
             }
-            catch (final MalformedURLException ignored) {
+            catch (final URISyntaxException ignored) {
             }
 
             if (hostName == null || !jenkins.hasPermission(Jenkins.ADMINISTER)) {
