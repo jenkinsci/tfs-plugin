@@ -122,6 +122,40 @@ public class UriHelperTest {
         assertNotSame("http://one.example.com/path?q=example#top", "http://one.example.com/path?q=example#bottom");
     }
 
+
+    @Test public void hasPath_hostOnly() throws Exception {
+        final URI input = URI.create("https://fabrikam-fiber-inc.visualstudio.com");
+
+        final boolean actual = UriHelper.hasPath(input);
+
+        Assert.assertEquals(false, actual);
+    }
+
+    @Test public void hasPath_hostSlash() throws Exception {
+        final URI input = URI.create("https://fabrikam-fiber-inc.visualstudio.com/");
+
+        final boolean actual = UriHelper.hasPath(input);
+
+        Assert.assertEquals(false, actual);
+    }
+
+    @Test public void hasPath_path() throws Exception {
+        final URI input = URI.create("https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection");
+
+        final boolean actual = UriHelper.hasPath(input);
+
+        Assert.assertEquals(true, actual);
+    }
+
+    @Test public void hasPath_pathSlash() throws Exception {
+        final URI input = URI.create("https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/");
+
+        final boolean actual = UriHelper.hasPath(input);
+
+        Assert.assertEquals(true, actual);
+    }
+
+
     @Test public void join_uriNoSlash_pathComponents() throws Exception {
         final URI collectionUri = URI.create("https://fabrikam-fiber-inc.visualstudio.com");
 

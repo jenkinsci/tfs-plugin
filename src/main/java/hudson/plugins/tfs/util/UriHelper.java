@@ -106,6 +106,16 @@ public class UriHelper {
         return path;
     }
 
+    public static boolean hasPath(final URI uri) {
+        final String path = uri.getPath();
+        if (path != null) {
+            if (path.length() > 0 && !path.equals("/")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean isWellFormedUriString(final String uriString) {
         try {
             new URI(uriString);
