@@ -70,6 +70,10 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
                 return FormValidation.error("Malformed TFS/Team Services collection URL (%s)", e.getMessage());
             }
 
+            final String hostName = uri.getHost();
+            if (isTeamServices(hostName)) {
+                return checkTeamServices(uri);
+            }
             // TODO: check that it's not a deep URL to a repository, work item, API endpoint, etc.
 
             return FormValidation.ok();
@@ -131,6 +135,16 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
                     .withEmptySelection()
                     .withAll(matches);
         }
+    }
+
+    static FormValidation checkTeamServices(final URI uri) {
+        final String path = uri.getPath();
+        if (path != null) {
+            if (path.length() > 0 && !path.equals("/")) {
+                return FormValidation.error("A Team Services collection URL must have an empty path.");
+            }
+        }
+        return FormValidation.ok();
     }
 
     static boolean isTeamServices(final String hostName) {
