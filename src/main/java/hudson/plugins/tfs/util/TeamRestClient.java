@@ -38,6 +38,19 @@ public class TeamRestClient {
     private final boolean isTeamServices;
     private final String authorization;
 
+    public TeamRestClient(final URI collectionUri) {
+        this.collectionUri = collectionUri;
+        final String hostName = collectionUri.getHost();
+        isTeamServices = TeamCollectionConfiguration.isTeamServices(hostName);
+        final StandardUsernamePasswordCredentials credentials = TeamCollectionConfiguration.findCredentialsForCollection(collectionUri);
+        if (credentials != null) {
+            authorization = createAuthorization(credentials);
+        }
+        else {
+            authorization = null;
+        }
+    }
+
     public TeamRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) {
         this.collectionUri = collectionUri;
         final String hostName = collectionUri.getHost();
