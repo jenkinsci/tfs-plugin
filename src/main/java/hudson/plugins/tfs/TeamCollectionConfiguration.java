@@ -138,11 +138,8 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
     }
 
     static FormValidation checkTeamServices(final URI uri) {
-        final String path = uri.getPath();
-        if (path != null) {
-            if (path.length() > 0 && !path.equals("/")) {
-                return FormValidation.error("A Team Services collection URL must have an empty path.");
-            }
+        if (UriHelper.hasPath(uri)) {
+            return FormValidation.error("A Team Services collection URL must have an empty path.");
         }
         return FormValidation.ok();
     }
