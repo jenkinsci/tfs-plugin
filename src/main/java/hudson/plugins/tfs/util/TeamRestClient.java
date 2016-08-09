@@ -35,13 +35,13 @@ public class TeamRestClient {
     }
 
     private final URI collectionUri;
-    private final boolean isHosted;
+    private final boolean isTeamServices;
     private final String authorization;
 
     public TeamRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) {
         this.collectionUri = collectionUri;
         final String hostName = collectionUri.getHost();
-        isHosted = TeamCollectionConfiguration.isTeamServices(hostName);
+        isTeamServices = TeamCollectionConfiguration.isTeamServices(hostName);
         if (credentials != null) {
             authorization = createAuthorization(credentials);
         }
@@ -164,7 +164,7 @@ public class TeamRestClient {
 
     public String ping() throws IOException {
         final URI requestUri;
-        if (isHosted) {
+        if (isTeamServices) {
             requestUri = UriHelper.join(collectionUri, "_apis", "connectiondata");
         }
         else {
