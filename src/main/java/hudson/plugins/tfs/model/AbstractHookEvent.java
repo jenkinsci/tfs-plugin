@@ -79,6 +79,7 @@ public abstract class AbstractHookEvent {
 
     // TODO: it would be easiest if pollOrQueueFromEvent built a JSONObject directly
     List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction, final boolean bypassPolling) {
+        final String almostMatchTemplate = "Remote URL '%s' of job '%s' almost matched event URL '%s'.";
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
         final String commit = gitCodePushedEventArgs.commit;
         final URIish uri = gitCodePushedEventArgs.getRepoURIish();
@@ -115,6 +116,15 @@ public abstract class AbstractHookEvent {
                                 repositoryMatches = true;
                                 totalRepositoryMatches++;
                                 break;
+                            }
+                        }
+
+                        if (!repositoryMatches) {
+                            for (URIish remoteURL : repository.getURIs()) {
+                                if (isTeamServicesNearMatch(uri, remoteURL)) {
+                                    final String message = String.format(almostMatchTemplate, uri, project.getFullDisplayName(), remoteURL);
+                                    LOGGER.warning(message);
+                                }
                             }
                         }
 
