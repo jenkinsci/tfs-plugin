@@ -127,20 +127,6 @@ public class BuildCommand extends AbstractCommand {
                 actions.add(action);
             }
         }
-        else if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_PARAMETERS)) {
-            final JSONObject eventArgsJson = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_PARAMETERS);
-            final CommitParameterAction action;
-            // TODO: improve the payload detection!
-            if (eventArgsJson.containsKey(PULL_REQUEST_ID)) {
-                final PullRequestMergeCommitCreatedEventArgs args = PullRequestMergeCommitCreatedEventArgs.fromJsonObject(eventArgsJson);
-                action = new PullRequestParameterAction(args);
-            }
-            else {
-                final GitCodePushedEventArgs args = GitCodePushedEventArgs.fromJsonObject(eventArgsJson);
-                action = new CommitParameterAction(args);
-            }
-            actions.add(action);
-        }
 
         //noinspection UnnecessaryLocalVariable
         final Job<?, ?> job = project;
