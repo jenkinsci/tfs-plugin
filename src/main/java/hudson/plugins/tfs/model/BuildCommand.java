@@ -34,10 +34,7 @@ import java.util.Map;
 public class BuildCommand extends AbstractCommand {
 
     private static final Action[] EMPTY_ACTION_ARRAY = new Action[0];
-    private static final String BUILD_SOURCE_BRANCH = "Build.SourceBranch";
     private static final String BUILD_REPOSITORY_PROVIDER = "Build.Repository.Provider";
-    private static final String REFS_PULL_SLASH = "refs/pull/";
-    private static final int REFS_PULL_SLASH_LENGTH = REFS_PULL_SLASH.length();
     private static final String BUILD_REPOSITORY_URI = "Build.Repository.Uri";
     private static final String BUILD_REPOSITORY_NAME = "Build.Repository.Name";
     private static final String SYSTEM_TEAM_PROJECT = "System.TeamProject";
