@@ -1,9 +1,6 @@
 package hudson.plugins.tfs.model;
 
-import net.sf.ezmorph.MorpherRegistry;
-import net.sf.json.JSONObject;
-import net.sf.json.util.JSONTokener;
-import net.sf.json.util.JSONUtils;
+import hudson.plugins.tfs.util.TeamRestClient;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -48,17 +45,8 @@ public class TeamGitStatusTest {
                 "}" +
             "}";
 
-        final JSONTokener tokener = new JSONTokener(input);
-        final JSONObject jsonObject = JSONObject.fromObject(tokener);
-        final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
-        registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
-        final TeamGitStatus actual;
-        try {
-            actual = (TeamGitStatus) jsonObject.toBean(TeamGitStatus.class);
-        }
-        finally {
-            registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);
-        }
+        final TeamGitStatus actual = TeamRestClient.deserialize(TeamGitStatus.class, input);
+
         Assert.assertEquals(GitStatusState.Succeeded, actual.state);
     }
 }

@@ -1,16 +1,14 @@
 package hudson.plugins.tfs.util;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
-import hudson.plugins.tfs.model.GitStatusStateMorpher;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.TeamGitStatus;
 import hudson.util.Secret;
-import net.sf.ezmorph.MorpherRegistry;
 import net.sf.json.JSONObject;
-import net.sf.json.util.JSONTokener;
-import net.sf.json.util.JSONUtils;
 import org.apache.commons.io.IOUtils;
 
 import javax.xml.bind.DatatypeConverter;
@@ -28,6 +26,12 @@ public class TeamRestClient {
     private static final String AUTHORIZATION = "Authorization";
     private static final String API_VERSION = "api-version";
     private static final String NEW_LINE = System.getProperty("line.separator");
+    private static final ObjectMapper MAPPER;
+
+    static {
+        MAPPER = new ObjectMapper();
+        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
 
     private final URI collectionUri;
     private final boolean isHosted;
@@ -105,10 +109,13 @@ public class TeamRestClient {
         }
     }
 
-    static <TResponse> TResponse deserialize(final Class<TResponse> responseClass, final String stringResponseBody) {
-        final JSONTokener tokener = new JSONTokener(stringResponseBody);
-        final JSONObject jsonObject = JSONObject.fromObject(tokener);
-        return (TResponse) jsonObject.toBean(responseClass);
+    public static <TResponse> TResponse deserialize(final Class<TResponse> responseClass, final String stringResponseBody) {
+        try {
+            return MAPPER.readValue(stringResponseBody, responseClass);
+        }
+        catch (final IOException e) {
+            throw new Error(e);
+        }
     }
 
     static String innerRequest(final HttpMethod httpMethod, final HttpURLConnection connection, final String body) throws IOException {
@@ -177,14 +184,7 @@ public class TeamRestClient {
             "statuses",
             qs);
 
-        final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
-        registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
-        try {
-            return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
-        }
-        finally {
-            registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);
-        }
+        return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
     }
 
     public TeamGitStatus addPullRequestStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
@@ -198,14 +198,7 @@ public class TeamRestClient {
             "statuses",
             qs);
 
-        final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
-        registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
-        try {
-            return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
-        }
-        finally {
-            registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);
-        }
+        return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
     }
 
     public TeamGitStatus addPullRequestIterationStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
@@ -220,13 +213,6 @@ public class TeamRestClient {
             "statuses",
             qs);
 
-        final MorpherRegistry registry = JSONUtils.getMorpherRegistry();
-        registry.registerMorpher(GitStatusStateMorpher.INSTANCE);
-        try {
-            return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
-        }
-        finally {
-            registry.deregisterMorpher(GitStatusStateMorpher.INSTANCE);
-        }
+        return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
     }
 }
