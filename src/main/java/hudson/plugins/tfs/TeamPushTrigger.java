@@ -118,6 +118,9 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                     shouldSchedule = true;
                 }
             }
+            else {
+                changesDetected = "Polling bypassed for " + job.getFullDisplayName() + ". ";;
+            }
             if (shouldSchedule) {
                 final SCMTriggerItem p = job();
                 final String name = " #" + p.getNextBuildNumber();
