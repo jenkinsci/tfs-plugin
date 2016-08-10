@@ -123,7 +123,7 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
             }
             if (shouldSchedule) {
                 final SCMTriggerItem p = job();
-                final String name = " #" + p.getNextBuildNumber();
+                final String name = "#" + p.getNextBuildNumber();
                 final String pushedBy = gitCodePushedEventArgs.pushedBy;
                 TeamPushCause cause;
                 try {
