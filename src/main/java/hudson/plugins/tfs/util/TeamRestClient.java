@@ -97,14 +97,18 @@ public class TeamRestClient {
                 return (TResponse) stringResponseBody;
             }
 
-            final JSONTokener tokener = new JSONTokener(stringResponseBody);
-            final JSONObject jsonObject = JSONObject.fromObject(tokener);
-            final TResponse result = (TResponse) jsonObject.toBean(responseClass);
+            final TResponse result = deserialize(responseClass, stringResponseBody);
             return result;
         }
         finally {
             connection.disconnect();
         }
+    }
+
+    static <TResponse> TResponse deserialize(final Class<TResponse> responseClass, final String stringResponseBody) {
+        final JSONTokener tokener = new JSONTokener(stringResponseBody);
+        final JSONObject jsonObject = JSONObject.fromObject(tokener);
+        return (TResponse) jsonObject.toBean(responseClass);
     }
 
     static String innerRequest(final HttpMethod httpMethod, final HttpURLConnection connection, final String body) throws IOException {
