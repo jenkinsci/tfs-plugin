@@ -10,7 +10,6 @@ import hudson.plugins.tfs.model.GitCodePushedHookEvent;
 import hudson.plugins.tfs.model.GitPullRequestMergedEvent;
 import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
-import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedHookEvent;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.tfs.util.StringBodyParameter;
@@ -58,7 +57,6 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         eventMap.put("gitCodePushed", new GitCodePushedHookEvent.Factory());
         eventMap.put("gitPullRequestMerged", new GitPullRequestMergedEvent.Factory());
         eventMap.put("gitPush", new GitPushEvent.Factory());
-        eventMap.put("pullRequestMergeCommitCreated", new PullRequestMergeCommitCreatedHookEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
     }
 
@@ -190,14 +188,6 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
 
     @RequirePOST
     public void doGitPush(
-            final StaplerRequest request,
-            final StaplerResponse response,
-            @StringBodyParameter @Nonnull final String body) {
-        dispatch(request, response, body);
-    }
-
-    @RequirePOST
-    public void doPullRequestMergeCommitCreated(
             final StaplerRequest request,
             final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
