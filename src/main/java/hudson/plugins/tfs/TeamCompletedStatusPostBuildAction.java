@@ -37,6 +37,9 @@ public class TeamCompletedStatusPostBuildAction extends Notifier implements Simp
         try {
             TeamStatus.createFromRun(run);
         }
+        catch (final IllegalArgumentException e) {
+            listener.error(e.getMessage());
+        }
         catch (final Exception e) {
             e.printStackTrace(listener.error("Error while trying to update completion status in TFS/Team Services"));
         }
