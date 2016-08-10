@@ -216,29 +216,9 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
         final AbstractCommand command = factory.create();
         final JSONObject response;
-        if (isStructuredForm(req.getParameter(JSON))) {
-            final JSONObject formData = req.getSubmittedForm();
-            response = command.perform(project, req, formData, actualDelay);
-        }
-        else {
-            response = command.perform(project, req, actualDelay);
-        }
+        final JSONObject formData = req.getSubmittedForm();
+        response = command.perform(project, req, formData, actualDelay);
         return response;
-    }
-
-    static boolean isStructuredForm(final String jsonParameter) {
-        if (jsonParameter != null) {
-            try {
-                final JSONObject jsonObject = JSONObject.fromObject(jsonParameter);
-                if (jsonObject.containsKey(TEAM_BUILD) || jsonObject.containsKey(TEAM_EVENT)) {
-                    return true;
-                }
-            }
-            catch (final JSONException e) {
-                return false;
-            }
-        }
-        return false;
     }
 
     public void doPing(

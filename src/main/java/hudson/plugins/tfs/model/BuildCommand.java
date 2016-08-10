@@ -34,8 +34,6 @@ import java.util.Map;
 public class BuildCommand extends AbstractCommand {
 
     private static final Action[] EMPTY_ACTION_ARRAY = new Action[0];
-    protected static final String TEAM_BUILD_PREFIX = "_team-build_";
-    protected static final int TEAM_BUILD_PREFIX_LENGTH = TEAM_BUILD_PREFIX.length();
     private static final String BUILD_SOURCE_BRANCH = "Build.SourceBranch";
     private static final String BUILD_REPOSITORY_PROVIDER = "Build.Repository.Provider";
     private static final String REFS_PULL_SLASH = "refs/pull/";
@@ -186,47 +184,6 @@ public class BuildCommand extends AbstractCommand {
                 }
             }
 
-            final ParametersAction action = new ParametersAction(values);
-            actions.add(action);
-        }
-
-        return innerPerform(project, delay, actions);
-    }
-
-    @Override
-    public JSONObject perform(final AbstractProject project, final StaplerRequest request, final TimeDuration delay) {
-
-        final List<Action> actions = new ArrayList<Action>();
-
-        final HashMap<String, String> teamBuildParameters = new HashMap<String, String>();
-
-        final Map<String, String[]> parameters = request.getParameterMap();
-        for (final Map.Entry<String, String[]> entry : parameters.entrySet()) {
-            final String paramName = entry.getKey();
-            if (paramName.startsWith(TEAM_BUILD_PREFIX)) {
-                final String teamParamName = paramName.substring(TEAM_BUILD_PREFIX_LENGTH);
-                final String[] valueArray = entry.getValue();
-                if (valueArray == null || valueArray.length != 1) {
-                    throw new IllegalArgumentException(String.format("Expected exactly 1 value for parameter '%s'.", teamParamName));
-                }
-                teamBuildParameters.put(teamParamName, valueArray[0]);
-            }
-        }
-
-        contributeTeamBuildParameterActions(teamBuildParameters, actions);
-
-        //noinspection UnnecessaryLocalVariable
-        final Job<?, ?> job = project;
-        final ParametersDefinitionProperty pp = job.getProperty(ParametersDefinitionProperty.class);
-        if (pp != null) {
-            final List<ParameterDefinition> parameterDefinitions = pp.getParameterDefinitions();
-            final List<ParameterValue> values = new ArrayList<ParameterValue>();
-            for (final ParameterDefinition d : parameterDefinitions) {
-                final ParameterValue value = d.createValue(request);
-                if (value != null) {
-                    values.add(value);
-                }
-            }
             final ParametersAction action = new ParametersAction(values);
             actions.add(action);
         }
