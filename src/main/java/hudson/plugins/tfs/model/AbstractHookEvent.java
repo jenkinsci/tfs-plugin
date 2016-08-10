@@ -93,6 +93,7 @@ public abstract class AbstractHookEvent {
                 LOGGER.severe("Jenkins.getInstance() is null");
                 return result;
             }
+            int totalRepositoryMatches = 0;
             for (final Item project : Jenkins.getInstance().getAllItems()) {
                 final SCMTriggerItem scmTriggerItem = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(project);
                 if (scmTriggerItem == null) {
@@ -110,6 +111,7 @@ public abstract class AbstractHookEvent {
                         for (URIish remoteURL : repository.getURIs()) {
                             if (GitStatus.looselyMatches(uri, remoteURL)) {
                                 repositoryMatches = true;
+                                totalRepositoryMatches++;
                                 break;
                             }
                         }
@@ -164,6 +166,11 @@ public abstract class AbstractHookEvent {
             }
             if (!scmFound) {
                 result.add(new GitStatus.MessageResponseContributor("No Git jobs found"));
+            }
+            else if (totalRepositoryMatches == 0) {
+                final String template = "No Git jobs matched the remote URL '%s' requested by an event.";
+                final String message = String.format(template, uri);
+                LOGGER.warning(message);
             }
 
             return result;
