@@ -4,15 +4,9 @@ import net.sf.json.JSONObject;
 
 public abstract class AbstractHookEvent {
 
-    private JSONObject response;
-
     public interface Factory {
         AbstractHookEvent create();
         String getSampleRequestPayload();
-    }
-
-    public JSONObject getResponse() {
-        return response;
     }
 
     /**
