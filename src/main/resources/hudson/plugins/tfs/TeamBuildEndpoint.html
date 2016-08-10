@@ -30,11 +30,7 @@
     [
         {"name":"id","value":"123"},
         {"name":"verbosity","value":"high"}
-    ],
-    "team-parameters":
-    {
-        "name":"value"
-    }
+    ]
 }
         </pre>
         The following example demonstrates a GET to the <code>/crumbIssuer</code> endpoint to retrieve a header and then a POST to the <code>ping</code> command for the job named JOB_NAME using the <a href="https://curl.haxx.se/">curl</a> tool:
@@ -45,7 +41,7 @@ curl --request POST %3$s%1$s/ping/JOB_NAME --data-urlencode json@payload.json --
         </pre>
         The console output should look like the following when the <code>ping</code> command from the <code>%1$s</code> endpoint returns the provided payload, formatted for compactness:
         <pre>
-{"parameter":[{"name":"id","value":"123"},{"name":"verbosity","value":"high"}],"team-parameters":{"name":"value"}}
+{"parameter":[{"name":"id","value":"123"},{"name":"verbosity","value":"high"}]}
         </pre>
     </body>
 </html>

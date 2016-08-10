@@ -20,11 +20,7 @@ public class PingCommand extends AbstractCommand {
                     "    [\n" +
                     "        {\"name\":\"id\",\"value\":\"123\"},\n" +
                     "        {\"name\":\"verbosity\",\"value\":\"high\"}\n" +
-                    "    ],\n" +
-                    "    \"team-parameters\":\n" +
-                    "    {\n" +
-                    "        \"name\":\"value\"\n" +
-                    "    }\n" +
+                    "    ]\n" +
                     "}\n";
         }
     }
