@@ -1,5 +1,7 @@
 package hudson.plugins.tfs.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -23,6 +25,8 @@ public enum GitStatusState {
         CASE_INSENSITIVE_LOOKUP = Collections.unmodifiableMap(map);
     }
 
+    @SuppressWarnings("unused" /* Invoked by Jackson via @JsonCreator */)
+    @JsonCreator
     public static GitStatusState caseInsensitiveValueOf(final String name) {
         if (name == null) {
             throw new NullPointerException("Name is null");
