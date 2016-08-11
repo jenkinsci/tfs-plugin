@@ -59,7 +59,8 @@ public class TeamBuildDetailsAction implements Action, Serializable {
 
     @Override
     public String getUrlName() {
-        return "team-build";
+        // TODO: set this once we add an index.jelly with useful information
+        return null;
     }
 
     // the following methods are called from this/summary.jelly
