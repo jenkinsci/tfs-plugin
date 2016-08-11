@@ -35,25 +35,9 @@ public class GitCodePushedHookEvent extends AbstractHookEvent {
 
     private static final Logger LOGGER = Logger.getLogger(GitCodePushedHookEvent.class.getName());
 
-    public static class Factory implements AbstractHookEvent.Factory {
-        @Override
-        public AbstractHookEvent create() {
-            return new GitCodePushedHookEvent();
-        }
-
-        @Override
-        public String getSampleRequestPayload() {
-            return GitCodePushedEventArgs.SAMPLE_REQUEST_PAYLOAD;
-        }
-    }
-
     @Override
     public JSONObject perform(final JSONObject requestPayload) {
-        final GitCodePushedEventArgs args = GitCodePushedEventArgs.fromJsonObject(requestPayload);
-        final CommitParameterAction parameterAction = new CommitParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
-        final JSONObject response = fromResponseContributors(contributors);
-        return response;
+        throw new IllegalStateException("GitCodePushedHookEvent was disabled");
     }
 
     static JSONObject fromResponseContributors(final List<GitStatus.ResponseContributor> contributors) {

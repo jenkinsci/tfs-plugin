@@ -13,7 +13,6 @@ import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
-import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -52,11 +51,9 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     private static final Map<String, AbstractCommand.Factory> COMMAND_FACTORIES_BY_NAME;
     public static final String URL_NAME = "team-build";
     public static final String TEAM_EVENT = "team-event";
-    public static final String TEAM_PARAMETERS = "team-parameters";
     public static final String TEAM_BUILD = "team-build";
     public static final String PARAMETER = "parameter";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
-    private static final String JSON = "json";
 
     static {
         final Map<String, AbstractCommand.Factory> map = new TreeMap<String, AbstractCommand.Factory>(String.CASE_INSENSITIVE_ORDER);
@@ -217,29 +214,9 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
         final AbstractCommand command = factory.create();
         final JSONObject response;
-        if (isStructuredForm(req.getParameter(JSON))) {
-            final JSONObject formData = req.getSubmittedForm();
-            response = command.perform(project, req, formData, actualDelay);
-        }
-        else {
-            response = command.perform(project, req, actualDelay);
-        }
+        final JSONObject formData = req.getSubmittedForm();
+        response = command.perform(project, req, formData, actualDelay);
         return response;
-    }
-
-    static boolean isStructuredForm(final String jsonParameter) {
-        if (jsonParameter != null) {
-            try {
-                final JSONObject jsonObject = JSONObject.fromObject(jsonParameter);
-                if (jsonObject.containsKey(TEAM_PARAMETERS) || jsonObject.containsKey(TEAM_BUILD) || jsonObject.containsKey(TEAM_EVENT)) {
-                    return true;
-                }
-            }
-            catch (final JSONException e) {
-                return false;
-            }
-        }
-        return false;
     }
 
     public void doPing(
