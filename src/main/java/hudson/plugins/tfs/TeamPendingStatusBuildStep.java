@@ -35,6 +35,9 @@ public class TeamPendingStatusBuildStep extends Builder implements SimpleBuildSt
         try {
             TeamStatus.createFromRun(run);
         }
+        catch (final IllegalArgumentException e) {
+            listener.error(e.getMessage());
+        }
         catch (final Exception e) {
             e.printStackTrace(listener.error("Error while trying to update pending status in TFS/Team Services"));
         }
