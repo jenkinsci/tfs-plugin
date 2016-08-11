@@ -17,6 +17,7 @@ import hudson.model.SimpleParameterDefinition;
 import hudson.model.queue.ScheduleResult;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
+import hudson.plugins.tfs.TeamBuildDetailsAction;
 import hudson.plugins.tfs.TeamBuildEndpoint;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.MediaType;
@@ -216,6 +217,9 @@ public class BuildCommand extends AbstractCommand {
             args.pushedBy = pushedBy;
             final CommitParameterAction action = new CommitParameterAction(args);
             actions.add(action);
+
+            final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
+            actions.add(teamBuildDetails);
         }
     }
 }
