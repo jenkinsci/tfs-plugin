@@ -1,0 +1,9 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+	xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+	<t:summary>
+
+ 	Triggered by TFS/Team Services build <a href="${it.buildUrl}">${it.buildNumber} of '${it.buildDefinitionName}'</a>
+	</t:summary>
+</j:jelly>
