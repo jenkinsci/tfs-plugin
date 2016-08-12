@@ -1,5 +1,9 @@
 package hudson.plugins.tfs;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -48,6 +52,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
 
     private static final Logger LOGGER = Logger.getLogger(TeamEventsEndpoint.class.getName());
     private static final Map<String, AbstractHookEvent.Factory> HOOK_EVENT_FACTORIES_BY_NAME;
+    private static final ObjectMapper MAPPER;
 
     static {
         final Map<String, AbstractHookEvent.Factory> eventMap =
@@ -56,6 +61,9 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         eventMap.put("gitPullRequestMerged", new GitPullRequestMergedEvent.Factory());
         eventMap.put("gitPush", new GitPushEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
+
+        MAPPER = new ObjectMapper();
+        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     public static final String URL_NAME = "team-events";
@@ -150,14 +158,25 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         }
     }
 
-    private JSONObject innerDispatch(final String body, final String eventName) {
+    private JSONObject innerDispatch(final String body, final String eventName) throws IOException {
         if (StringUtils.isBlank(eventName) || !HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
             throw new IllegalArgumentException("Invalid event");
         }
         final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
-        final JSONObject requestBody = JSONObject.fromObject(body);
+        final JsonNode eventNode = MAPPER.readTree(body);
+        final JsonNode eventTypeNode = eventNode.get("eventType");
+        if (eventTypeNode == null) {
+            throw new IllegalArgumentException("Payload did not contain 'eventType'.");
+        }
+        final String eventType = eventTypeNode.asText();
+        // TODO: assert eventType with what Factory claims to support
+        final JsonNode resourceNode = eventNode.get("resource");
+        if (resourceNode == null) {
+            throw new IllegalArgumentException("Payload did not contain 'resource'.");
+        }
+        final JsonParser resourceParser = resourceNode.traverse();
         final AbstractHookEvent hookEvent = factory.create();
-        return hookEvent.perform(requestBody);
+        return hookEvent.perform(MAPPER, resourceParser);
     }
 
     @RequirePOST
