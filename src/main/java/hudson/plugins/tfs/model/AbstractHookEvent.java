@@ -14,6 +14,7 @@ import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamHookCause;
 import hudson.plugins.tfs.TeamPushTrigger;
+import hudson.plugins.tfs.util.MediaType;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
@@ -27,6 +28,8 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -40,6 +43,19 @@ public abstract class AbstractHookEvent {
     public interface Factory {
         AbstractHookEvent create();
         String getSampleRequestPayload();
+    }
+
+    static String fetchResourceAsString(final Class<? extends Factory> referenceClass, final String fileName) {
+        final InputStream stream = referenceClass.getResourceAsStream(fileName);
+        try {
+            return IOUtils.toString(stream, MediaType.UTF_8);
+        }
+        catch (final IOException e) {
+            throw new Error(e);
+        }
+        finally {
+            IOUtils.closeQuietly(stream);
+        }
     }
 
     /**

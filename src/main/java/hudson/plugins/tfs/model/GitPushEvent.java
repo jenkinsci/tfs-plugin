@@ -4,13 +4,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.CommitParameterAction;
-import hudson.plugins.tfs.util.MediaType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.IOUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -34,17 +30,7 @@ public class GitPushEvent extends AbstractHookEvent {
 
         @Override
         public String getSampleRequestPayload() {
-            final Class<? extends Factory> me = this.getClass();
-            final InputStream stream = me.getResourceAsStream("GitPushEvent.json");
-            try {
-                return IOUtils.toString(stream, MediaType.UTF_8);
-            }
-            catch (final IOException e) {
-                throw new Error(e);
-            }
-            finally {
-                IOUtils.closeQuietly(stream);
-            }
+            return fetchResourceAsString(this.getClass(), "GitPushEvent.json");
         }
     }
 
