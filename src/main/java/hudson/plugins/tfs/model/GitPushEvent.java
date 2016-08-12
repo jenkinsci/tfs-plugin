@@ -1,5 +1,7 @@
 package hudson.plugins.tfs.model;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.util.MediaType;
@@ -53,6 +55,12 @@ public class GitPushEvent extends AbstractHookEvent {
         final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
+    }
+
+    @Override
+    public JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser) {
+        // TODO: implement this overload
+        return null;
     }
 
     static void assertEquals(final JSONObject jsonObject, final String key, final String expectedValue) {

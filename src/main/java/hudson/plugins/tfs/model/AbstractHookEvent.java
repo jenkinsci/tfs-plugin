@@ -1,5 +1,7 @@
 package hudson.plugins.tfs.model;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
@@ -49,6 +51,19 @@ public abstract class AbstractHookEvent {
      * @return a {@link JSONObject} representing the hook event's output
      */
     public abstract JSONObject perform(final JSONObject requestPayload);
+
+    /**
+     * Actually do the work of the hook event, using the supplied
+     * {@code mapper} to decode the event's data from the supplied {@code resourceParser}
+     * and returning the output as a {@link JSONObject}.
+     *
+     * @param mapper an {@link ObjectMapper} instance to use to read from {@code resourceParser}
+     * @param resourceParser a {@link JsonParser} initialized to the {@code resource} node
+     *                       in the request payload
+     *
+     * @return a {@link JSONObject} representing the hook event's output
+     */
+    public abstract JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser);
 
     static JSONObject fromResponseContributors(final List<GitStatus.ResponseContributor> contributors) {
         final JSONObject result = new JSONObject();
