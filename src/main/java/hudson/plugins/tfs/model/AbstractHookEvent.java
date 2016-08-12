@@ -60,16 +60,6 @@ public abstract class AbstractHookEvent {
 
     /**
      * Actually do the work of the hook event, using the supplied
-     * {@code requestPayload} and returning the output as a {@link JSONObject}.
-     *
-     * @param requestPayload a {@link JSONObject} representing the hook event's input
-     *
-     * @return a {@link JSONObject} representing the hook event's output
-     */
-    public abstract JSONObject perform(final JSONObject requestPayload);
-
-    /**
-     * Actually do the work of the hook event, using the supplied
      * {@code mapper} to decode the event's data from the supplied {@code resourceParser}
      * and returning the output as a {@link JSONObject}.
      *

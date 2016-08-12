@@ -82,15 +82,6 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
     }
 
     @Override
-    public JSONObject perform(final JSONObject requestPayload) {
-        final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequestMerged(requestPayload);
-        final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
-        final JSONObject response = fromResponseContributors(contributors);
-        return response;
-    }
-
-    @Override
     public JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser) {
         final GitPullRequest gitPullRequest;
         try {

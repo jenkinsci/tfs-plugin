@@ -31,11 +31,6 @@ public class PingHookEvent extends AbstractHookEvent {
     }
 
     @Override
-    public JSONObject perform(final JSONObject requestPayload) {
-        return requestPayload;
-    }
-
-    @Override
     public JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser) {
         final TreeNode treeNode;
         try {

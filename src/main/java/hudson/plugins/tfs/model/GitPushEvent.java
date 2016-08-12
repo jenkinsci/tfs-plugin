@@ -41,15 +41,6 @@ public class GitPushEvent extends AbstractHookEvent {
     }
 
     @Override
-    public JSONObject perform(final JSONObject requestPayload) {
-        final GitCodePushedEventArgs args = decodeGitPush(requestPayload);
-        final CommitParameterAction parameterAction = new CommitParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
-        final JSONObject response = fromResponseContributors(contributors);
-        return response;
-    }
-
-    @Override
     public JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser) {
         final GitPush gitPush;
         try {
