@@ -13,7 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-public class GitPushEvent extends GitCodePushedHookEvent {
+public class GitPushEvent extends AbstractHookEvent {
 
     static final String EVENT_TYPE = "eventType";
     static final String RESOURCE = "resource";
