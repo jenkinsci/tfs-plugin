@@ -4,7 +4,7 @@
     xmlns:f="/lib/form" xmlns:i="jelly:fmt">
     <t:summary icon="${it.iconFileName}">
 
-    ${it.message}
+    Triggered by TFS/Team Services pull request <a href="${it.pullRequestUrl}">#${it.gitPullRequest.pullRequestId}</a>: '${it.gitPullRequest.title}', created by ${it.gitPullRequest.createdBy.displayName}
     <j:if test="${it.hasWorkItems()}">
         <br />
         Associated work items:

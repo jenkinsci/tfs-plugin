@@ -6,7 +6,10 @@
 
         <dl>
             <dt>Pull request</dt>
-            <dd><a href="${it.pullRequestUrl}">#${it.gitPullRequest.pullRequestId}</a>, created by ${it.gitPullRequest.createdBy.displayName}</dd>
+            <dd><a href="${it.pullRequestUrl}">#${it.gitPullRequest.pullRequestId}</a>: '${it.gitPullRequest.title}', created by ${it.gitPullRequest.createdBy.displayName}</dd>
+
+            <dt>Description</dt>
+            <dd><pre>${it.gitPullRequest.description}</pre></dd>
 
             <dt>Message</dt>
             <dd><pre>${it.detailedMessage}</pre></dd>
