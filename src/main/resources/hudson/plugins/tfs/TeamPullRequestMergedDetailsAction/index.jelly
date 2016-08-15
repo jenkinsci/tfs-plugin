@@ -1,0 +1,33 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <l:layout>
+        <l:main-panel>
+        <h2>${it.displayName}</h2>
+
+        <dl>
+            <dt>Pull request</dt>
+            <dd><a href="${it.pullRequestUrl}">#${it.gitPullRequest.pullRequestId}</a>, created by ${it.gitPullRequest.createdBy.displayName}</dd>
+
+            <dt>Message</dt>
+            <dd><pre>${it.detailedMessage}</pre></dd>
+
+            <dt>Git repository</dt>
+            <dd><a href="${it.gitPullRequest.repository.remoteUrl}">${it.gitPullRequest.repository.name}</a></dd>
+
+            <dt>Project</dt>
+            <dd>${it.gitPullRequest.repository.project.name}</dd>
+
+            <j:if test="${it.hasWorkItems()}">
+                <dt>Associated work items</dt>
+                <dd>
+                    <ul>
+                    <j:forEach var="workItem" items="${it.workItems}">
+                        <li><a href="${workItem.url}">${workItem.id}</a></li>
+                    </j:forEach>
+                    </ul>
+                </dd>
+            </j:if>
+        </dl>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

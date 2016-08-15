@@ -77,7 +77,7 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
 
         final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequest(gitPullRequest, serviceHookEvent);
         final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
-        final Action teamPullRequestMergedDetailsAction = new TeamPullRequestMergedDetailsAction(gitPullRequest, message, detailedMessage);
+        final Action teamPullRequestMergedDetailsAction = new TeamPullRequestMergedDetailsAction(gitPullRequest, message, detailedMessage, args.collectionUri.toString());
         final ArrayList<Action> actions = new ArrayList<Action>();
         actions.add(parameterAction);
         actions.add(teamPullRequestMergedDetailsAction);

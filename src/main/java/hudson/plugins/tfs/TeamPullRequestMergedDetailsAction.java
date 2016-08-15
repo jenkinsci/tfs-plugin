@@ -1,12 +1,17 @@
 package hudson.plugins.tfs;
 
+import com.microsoft.teamfoundation.core.webapi.model.TeamProjectReference;
+import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.ResourceRef;
 import hudson.model.Action;
 import hudson.plugins.tfs.model.GitPullRequestEx;
+import hudson.plugins.tfs.model.GitPushEvent;
+import hudson.plugins.tfs.util.UriHelper;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
 import java.io.Serializable;
+import java.net.URI;
 
 /**
  * Captures details of the TFS/Team Services pull request event which triggered us.
@@ -19,15 +24,17 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
     public GitPullRequestEx gitPullRequest;
     public String message;
     public String detailedMessage;
+    public String collectionUri;
 
     public TeamPullRequestMergedDetailsAction() {
 
     }
 
-    public TeamPullRequestMergedDetailsAction(final GitPullRequestEx gitPullRequest, final String message, final String detailedMessage) {
+    public TeamPullRequestMergedDetailsAction(final GitPullRequestEx gitPullRequest, final String message, final String detailedMessage, final String collectionUri) {
         this.gitPullRequest = gitPullRequest;
         this.message = message;
         this.detailedMessage = detailedMessage;
+        this.collectionUri = collectionUri;
     }
 
     @Override
@@ -67,5 +74,21 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
     public boolean hasWorkItems() {
         final ResourceRef[] workItemRefs = gitPullRequest.getWorkItemRefs();
         return workItemRefs != null && workItemRefs.length > 0;
+    }
+
+    @Exported
+    public String getPullRequestUrl() {
+        final GitRepository repository = gitPullRequest.getRepository();
+        final URI collectionUri = URI.create(this.collectionUri);
+        final TeamProjectReference project = repository.getProject();
+        final URI pullRequestUrl = UriHelper.join(collectionUri,
+                project.getName(),
+                "_git",
+                repository.getName(),
+                "pullrequest",
+                gitPullRequest.getPullRequestId()
+        );
+        final String result = pullRequestUrl.toString();
+        return result;
     }
 }
