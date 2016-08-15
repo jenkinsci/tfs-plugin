@@ -4,8 +4,12 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
+import com.microsoft.visualstudio.services.webapi.patch.Operation;
+import com.microsoft.visualstudio.services.webapi.patch.json.JsonPatchDocument;
+import com.microsoft.visualstudio.services.webapi.patch.json.JsonPatchOperation;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
+import hudson.plugins.tfs.model.Link;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.TeamGitStatus;
 import hudson.util.Secret;
@@ -199,6 +203,36 @@ public class TeamRestClient {
             qs);
 
         return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
+    }
+
+    public void addHyperlinkToWorkItem(final int workItemId, final String hyperlink) throws IOException {
+        final JsonPatchDocument doc = new JsonPatchDocument();
+
+        final JsonPatchOperation testRev = new JsonPatchOperation();
+        testRev.setOp(Operation.TEST);
+        testRev.setPath("/rev");
+        testRev.setValue(workItemId);
+        doc.add(testRev);
+
+        // TODO: do we also need to "add" to "/fields/System.History"?
+
+        final Link link = new Link("Hyperlink", hyperlink);
+        final JsonPatchOperation addRelation = new JsonPatchOperation();
+        addRelation.setOp(Operation.ADD);
+        addRelation.setPath("/relations/-");
+        addRelation.setValue(link);
+        doc.add(addRelation);
+
+        final QueryString qs = new QueryString(API_VERSION, "1.0");
+        final URI requestUri = UriHelper.join(
+            collectionUri,
+            "_apis",
+            "wit",
+            "workitems",
+            workItemId,
+            qs);
+
+        request(Void.class, HttpMethod.PATCH, requestUri, doc);
     }
 
     public TeamGitStatus addPullRequestStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
