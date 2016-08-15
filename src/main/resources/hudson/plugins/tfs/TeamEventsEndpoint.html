@@ -20,7 +20,11 @@
         Suppose we have a Jenkins server at <code>%3$s</code> and the following <code>payload.json</code> file:
         <pre>
 {
-    "message": "Hello, world!"
+    "eventType": "ping",
+    "resource":
+    {
+        "message": "Hello, world!"
+    }
 }
         </pre>
         The following example demonstrates a GET to the <code>/crumbIssuer</code> endpoint to retrieve a header and then a POST to the <code>ping</code> event using the <a href="https://curl.haxx.se/">curl</a> tool:
