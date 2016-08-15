@@ -9,6 +9,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
+import hudson.plugins.tfs.util.ActionHelper;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -23,9 +24,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,9 +43,9 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
     public TeamPushTrigger() {
     }
 
-    public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction, final boolean bypassPolling) {
+    public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling) {
         // TODO: Consider executing the poll + queue asynchronously
-        final Runner runner = new Runner(gitCodePushedEventArgs, commitParameterAction, bypassPolling);
+        final Runner runner = new Runner(gitCodePushedEventArgs, actions, bypassPolling);
         runner.run();
     }
 
@@ -54,12 +57,12 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
     public class Runner implements Runnable {
 
         private final GitCodePushedEventArgs gitCodePushedEventArgs;
-        private final CommitParameterAction commitParameterAction;
+        private final List<Action> actions;
         private final boolean bypassPolling;
 
-        public Runner(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction, final boolean bypassPolling) {
+        public Runner(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling) {
             this.gitCodePushedEventArgs = gitCodePushedEventArgs;
-            this.commitParameterAction = commitParameterAction;
+            this.actions = actions;
             this.bypassPolling = bypassPolling;
         }
 
@@ -135,7 +138,8 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                 }
                 final int quietPeriod = p.getQuietPeriod();
                 final CauseAction causeAction = new CauseAction(cause);
-                final QueueTaskFuture<?> queueTaskFuture = p.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
+                final Action[] actionArray = ActionHelper.create(actions, causeAction);
+                final QueueTaskFuture<?> queueTaskFuture = p.scheduleBuild2(quietPeriod, actionArray);
                 if (queueTaskFuture != null) {
                     LOGGER.info(changesDetected + "Triggering " + name);
                 }

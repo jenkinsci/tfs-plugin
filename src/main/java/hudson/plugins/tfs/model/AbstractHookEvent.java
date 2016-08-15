@@ -2,6 +2,7 @@ package hudson.plugins.tfs.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Item;
@@ -16,6 +17,7 @@ import hudson.plugins.tfs.TeamHookCause;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.StringHelper;
+import hudson.plugins.tfs.util.ActionHelper;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
@@ -78,7 +80,7 @@ public abstract class AbstractHookEvent {
     }
 
     // TODO: it would be easiest if pollOrQueueFromEvent built a JSONObject directly
-    List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction, final boolean bypassPolling) {
+    List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling) {
         final String almostMatchTemplate = "Remote URL '%s' of job '%s' almost matched event URL '%s'.";
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
         final String commit = gitCodePushedEventArgs.commit;
@@ -148,7 +150,8 @@ public abstract class AbstractHookEvent {
                                         // queue build without first polling
                                         final Cause cause = new TeamHookCause(commit);
                                         final CauseAction causeAction = new CauseAction(cause);
-                                        scmTriggerItem.scheduleBuild2(quietPeriod, causeAction, commitParameterAction);
+                                        final Action[] actionArray = ActionHelper.create(actions, causeAction);
+                                        scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
                                         result.add(new TeamEventsEndpoint.ScheduledResponseContributor(project));
                                         triggered = true;
                                     }
@@ -156,7 +159,7 @@ public abstract class AbstractHookEvent {
                                 if (!triggered) {
                                     final TeamPushTrigger pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPushTrigger.class);
                                     if (pushTrigger != null) {
-                                        pushTrigger.execute(gitCodePushedEventArgs, commitParameterAction, bypassPolling);
+                                        pushTrigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
                                         final GitStatus.ResponseContributor response;
                                         if (bypassPolling) {
                                             response = new TeamEventsEndpoint.ScheduledResponseContributor(project);

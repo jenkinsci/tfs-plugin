@@ -5,6 +5,7 @@ import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitCommitRef;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPullRequest;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
+import hudson.model.Action;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
@@ -12,6 +13,7 @@ import hudson.plugins.tfs.util.ResourceHelper;
 import net.sf.json.JSONObject;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GitPullRequestMergedEvent extends GitPushEvent {
@@ -74,7 +76,9 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
 
         final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequest(gitPullRequest, serviceHookEvent);
         final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
+        final ArrayList<Action> actions = new ArrayList<Action>();
+        actions.add(parameterAction);
+        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, actions, true);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
     }
