@@ -1,7 +1,8 @@
 package hudson.plugins.tfs;
 
-import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPullRequest;
+import com.microsoft.visualstudio.services.webapi.model.ResourceRef;
 import hudson.model.Action;
+import hudson.plugins.tfs.model.GitPullRequestEx;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
@@ -15,7 +16,7 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
     private static final long serialVersionUID = 1L;
     private static final String URL_NAME = "team-pullRequestMergedDetails";
 
-    public GitPullRequest gitPullRequest;
+    public GitPullRequestEx gitPullRequest;
     public String message;
     public String detailedMessage;
 
@@ -23,7 +24,7 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
 
     }
 
-    public TeamPullRequestMergedDetailsAction(final GitPullRequest gitPullRequest, final String message, final String detailedMessage) {
+    public TeamPullRequestMergedDetailsAction(final GitPullRequestEx gitPullRequest, final String message, final String detailedMessage) {
         this.gitPullRequest = gitPullRequest;
         this.message = message;
         this.detailedMessage = detailedMessage;

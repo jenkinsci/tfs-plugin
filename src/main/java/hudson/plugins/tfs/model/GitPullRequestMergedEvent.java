@@ -73,7 +73,7 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
     @Override
     public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent, final String message, final String detailedMessage) {
         final Object resource = serviceHookEvent.getResource();
-        final GitPullRequest gitPullRequest = mapper.convertValue(resource, GitPullRequest.class);
+        final GitPullRequestEx gitPullRequest = mapper.convertValue(resource, GitPullRequestEx.class);
 
         final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequest(gitPullRequest, serviceHookEvent);
         final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
