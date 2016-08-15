@@ -57,4 +57,15 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
     public String getDetailedMessage() {
         return detailedMessage;
     }
+
+    @Exported
+    public ResourceRef[] getWorkItems() {
+        return gitPullRequest.getWorkItemRefs();
+    }
+
+    @Exported
+    public boolean hasWorkItems() {
+        final ResourceRef[] workItemRefs = gitPullRequest.getWorkItemRefs();
+        return workItemRefs != null && workItemRefs.length > 0;
+    }
 }
