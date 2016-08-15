@@ -25,6 +25,8 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
 
     public TeamPullRequestMergedDetailsAction(final GitPullRequest gitPullRequest, final String message, final String detailedMessage) {
         this.gitPullRequest = gitPullRequest;
+        this.message = message;
+        this.detailedMessage = detailedMessage;
     }
 
     @Override
