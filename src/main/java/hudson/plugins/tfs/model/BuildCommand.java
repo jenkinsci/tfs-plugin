@@ -21,6 +21,7 @@ import hudson.plugins.tfs.TeamBuildDetailsAction;
 import hudson.plugins.tfs.TeamBuildEndpoint;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
+import hudson.plugins.tfs.util.ActionHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
@@ -41,7 +42,6 @@ public class BuildCommand extends AbstractCommand {
 
     private static final Logger LOGGER = Logger.getLogger(BuildCommand.class.getName());
 
-    private static final Action[] EMPTY_ACTION_ARRAY = new Action[0];
     private static final String BUILD_REPOSITORY_PROVIDER = "Build.Repository.Provider";
     private static final String BUILD_REPOSITORY_URI = "Build.Repository.Uri";
     private static final String BUILD_REPOSITORY_NAME = "Build.Repository.Name";
@@ -87,12 +87,7 @@ public class BuildCommand extends AbstractCommand {
         final Queue queue = jenkins.getQueue();
         final Cause cause = new Cause.UserIdCause();
         final CauseAction causeAction = new CauseAction(cause);
-        final List<Action> actions = new ArrayList<Action>();
-        actions.add(causeAction);
-
-        actions.addAll(extraActions);
-
-        final Action[] actionArray = actions.toArray(EMPTY_ACTION_ARRAY);
+        final Action[] actionArray = ActionHelper.create(extraActions, causeAction);
         final ScheduleResult scheduleResult = queue.schedule2(project, delay.getTime(), actionArray);
         final Queue.Item item = scheduleResult.getItem();
         if (item != null) {
