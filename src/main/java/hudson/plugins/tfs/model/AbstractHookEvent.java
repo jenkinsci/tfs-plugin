@@ -54,10 +54,12 @@ public abstract class AbstractHookEvent {
      * @param mapper an {@link ObjectMapper} instance to use to convert the {@link Event#resource}
      * @param serviceHookEvent an {@link Event} that represents the request payload
      *                         and from which the {@link Event#resource} can be obtained
+     * @param message a simple description of the event
+     * @param detailedMessage a longer description of the event, with some details
      *
      * @return a {@link JSONObject} representing the hook event's output
      */
-    public abstract JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent);
+    public abstract JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent, final String message, final String detailedMessage);
 
     static JSONObject fromResponseContributors(final List<GitStatus.ResponseContributor> contributors) {
         final JSONObject result = new JSONObject();

@@ -164,8 +164,10 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         }
         final AbstractHookEvent.Factory factory = factoriesByName.get(eventName);
         final Event serviceHookEvent = deserializeEvent(body);
+        final String message = serviceHookEvent.getMessage().getText();
+        final String detailedMessage = serviceHookEvent.getDetailedMessage().getText();
         final AbstractHookEvent hookEvent = factory.create();
-        return hookEvent.perform(MAPPER, serviceHookEvent);
+        return hookEvent.perform(MAPPER, serviceHookEvent, message, detailedMessage);
     }
 
     public static Event deserializeEvent(final String input) throws IOException {

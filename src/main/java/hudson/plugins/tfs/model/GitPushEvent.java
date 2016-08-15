@@ -37,7 +37,7 @@ public class GitPushEvent extends AbstractHookEvent {
     }
 
     @Override
-    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
+    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent, final String message, final String detailedMessage) {
         final Object resource = serviceHookEvent.getResource();
         final GitPush gitPush = mapper.convertValue(resource, GitPush.class);
 

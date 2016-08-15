@@ -56,7 +56,7 @@ public class TeamEventsEndpointTest {
         };
 
         @Override
-        public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
+        public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent, final String message, final String detailedMessage) {
             final Object resource = serviceHookEvent.getResource();
             final GitPush actual = mapper.convertValue(resource, GitPush.class);
             Assert.assertEquals(ProjectState.WELL_FORMED, actual.getRepository().getProject().getState());

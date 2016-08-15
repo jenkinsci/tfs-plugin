@@ -25,7 +25,7 @@ public class PingHookEvent extends AbstractHookEvent {
     }
 
     @Override
-    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
+    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent, final String message, final String detailedMessage) {
         return JSONObject.fromObject(serviceHookEvent);
     }
 }
