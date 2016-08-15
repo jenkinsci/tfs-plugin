@@ -4,6 +4,7 @@ import com.microsoft.teamfoundation.core.webapi.model.TeamProjectReference;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.ResourceRef;
 import hudson.model.Action;
+import hudson.model.Run;
 import hudson.plugins.tfs.model.GitPullRequestEx;
 import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.util.UriHelper;
@@ -12,6 +13,8 @@ import org.kohsuke.stapler.export.ExportedBean;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Captures details of the TFS/Team Services pull request event which triggered us.
@@ -35,6 +38,18 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
         this.message = message;
         this.detailedMessage = detailedMessage;
         this.collectionUri = collectionUri;
+    }
+
+    public static URI addWorkItemsForRun(final Run<?, ?> run, final List<ResourceRef> destination) {
+        final TeamPullRequestMergedDetailsAction action = run.getAction(TeamPullRequestMergedDetailsAction.class);
+        if (action != null && action.hasWorkItems()) {
+            Collections.addAll(destination, action.getWorkItems());
+            final GitPullRequestEx gitPullRequest = action.gitPullRequest;
+            final GitRepository repository = gitPullRequest.getRepository();
+            final URI collectionUri = URI.create(action.collectionUri);
+            return collectionUri;
+        }
+        return null;
     }
 
     @Override
