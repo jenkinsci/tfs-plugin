@@ -243,7 +243,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final String serverUrl = helper.getServerUrl();
         final String userName = helper.getUserName();
         final String userPassword = helper.getUserPassword();
-        final Server server = new Server(null, null, serverUrl, userName, userPassword);
+        final Server server = new Server(null, null, serverUrl, userName, userPassword, null, ExtraSettings.DEFAULT);
         try {
             final Project project = new Project(server, "$/FunctionalTests");
             final UserLookup userLookup = mock(UserLookup.class);

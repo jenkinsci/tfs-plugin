@@ -17,6 +17,8 @@ public class ExtraSettings implements Serializable {
     private final boolean configFolderPerNode;
     private final String computerName;
 
+    public static final ExtraSettings DEFAULT = new ExtraSettings(false, null);
+
     @SuppressWarnings("unused" /* Needed by Serializable interface */)
     private ExtraSettings() {
         this(false, null);

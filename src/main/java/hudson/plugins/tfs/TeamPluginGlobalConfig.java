@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
     private static final Logger LOGGER = Logger.getLogger(TeamPluginGlobalConfig.class.getName());
-    private static final TeamPluginGlobalConfig DEFAULT_CONFIG = new TeamPluginGlobalConfig(false);
+    public static final TeamPluginGlobalConfig DEFAULT_CONFIG = new TeamPluginGlobalConfig(false);
 
     private List<TeamCollectionConfiguration> collectionConfigurations = new ArrayList<TeamCollectionConfiguration>();
 

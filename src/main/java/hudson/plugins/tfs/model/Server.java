@@ -18,7 +18,6 @@ import com.microsoft.tfs.util.Closable;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
 import hudson.Util;
-import hudson.model.Computer;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
@@ -31,9 +30,11 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class Server implements ServerConfigurationProvider, Closable {
-    
+
+    private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
     private static final String nativeFolderPropertyName = "com.microsoft.tfs.jni.native.base-directory";
     private final String url;
     private final String userName;
@@ -44,13 +45,17 @@ public class Server implements ServerConfigurationProvider, Closable {
     private final TaskListener taskListener;
     private final TFSTeamProjectCollection tpc;
     private final WebProxySettings webProxySettings;
+    private final ExtraSettings extraSettings;
     private MockableVersionControlClient mockableVcc;
 
+    /**
+     * This constructor overload assumes a Jenkins instance is present.
+     */
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password) throws IOException {
-        this(launcher, taskListener, url, username, password, null);
+        this(launcher, taskListener, url, username, password, null, null);
     }
 
-    public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, final WebProxySettings webProxySettings) throws IOException {
+    public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, final WebProxySettings webProxySettings, final ExtraSettings extraSettings) throws IOException {
         this.launcher = launcher;
         this.taskListener = taskListener;
         this.url = url;
@@ -71,22 +76,28 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
 
         if (credentials != null) {
+            final VirtualChannel channel = launcher != null ? launcher.getChannel() : null;
             if (webProxySettings != null) {
                 this.webProxySettings = webProxySettings;
             }
             else {
-                final VirtualChannel channel = launcher != null ? launcher.getChannel() : null;
                 final ProxyConfiguration proxyConfiguration = determineProxyConfiguration(channel);
                 this.webProxySettings = new WebProxySettings(proxyConfiguration);
             }
             final String host = uri.getHost();
             final ProxyHost proxyHost = this.webProxySettings.toProxyHost(host);
+
+            if (extraSettings != null) {
+                this.extraSettings = extraSettings;
+            }
+            else {
+                final TeamPluginGlobalConfig globalConfig = determineGlobalConfig(channel);
+                this.extraSettings = new ExtraSettings(globalConfig);
+            }
             final PersistenceStoreProvider defaultProvider = DefaultPersistenceStoreProvider.INSTANCE;
-            final TeamPluginGlobalConfig globalConfig = TeamPluginGlobalConfig.get();
             final PersistenceStoreProvider provider;
-            if (globalConfig.isConfigFolderPerNode()) {
-                final Computer computer = Computer.currentComputer();
-                final String computerName = computer.getName();
+            if (this.extraSettings.isConfigFolderPerNode()) {
+                final String computerName = this.extraSettings.getComputerName();
                 final String nodeName = Util.fixEmpty(computerName) == null ? "MASTER" : computerName;
                 provider = new ClonePersistenceStoreProvider(defaultProvider, nodeName);
             }
@@ -98,12 +109,38 @@ public class Server implements ServerConfigurationProvider, Closable {
         }
         else {
             this.webProxySettings = null;
+            this.extraSettings = null;
             this.tpc = null;
         }
     }
 
-    Server(String url) throws IOException {
-        this(null, null, url, null, null);
+    static TeamPluginGlobalConfig determineGlobalConfig(final VirtualChannel channel) {
+        final Jenkins jenkins = Jenkins.getInstance();
+        final TeamPluginGlobalConfig result;
+        if (jenkins == null) {
+            if (channel != null) {
+                try {
+                    result = channel.call(new Callable<TeamPluginGlobalConfig, Throwable>() {
+                        @Override
+                        public TeamPluginGlobalConfig call() throws Throwable {
+                            final Jenkins jenkins = Jenkins.getInstance();
+                            final TeamPluginGlobalConfig result = jenkins != null ? TeamPluginGlobalConfig.get() : null;
+                            return result;
+                        }
+                    });
+                }
+                catch (final Throwable throwable) {
+                    throw new Error(throwable);
+                }
+            }
+            else {
+                result = TeamPluginGlobalConfig.DEFAULT_CONFIG;
+            }
+        }
+        else {
+            result = TeamPluginGlobalConfig.get();
+        }
+        return result;
     }
 
     static ProxyConfiguration determineProxyConfiguration(final VirtualChannel channel) {
@@ -188,6 +225,10 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public WebProxySettings getWebProxySettings() {
         return webProxySettings;
+    }
+
+    public ExtraSettings getExtraSettings() {
+        return extraSettings;
     }
 
     public TaskListener getListener() {

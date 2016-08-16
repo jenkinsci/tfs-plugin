@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.model.ExtraSettings;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.WebProxySettings;
 import hudson.remoting.Callable;
@@ -15,6 +16,7 @@ public abstract class AbstractCallableCommand implements Serializable {
     private final String userPassword;
     private final TaskListener listener;
     private final WebProxySettings webProxySettings;
+    private final ExtraSettings extraSettings;
 
     protected AbstractCallableCommand(final ServerConfigurationProvider serverConfig) {
         url = serverConfig.getUrl();
@@ -22,10 +24,11 @@ public abstract class AbstractCallableCommand implements Serializable {
         userPassword = serverConfig.getUserPassword();
         listener = serverConfig.getListener();
         webProxySettings = serverConfig.getWebProxySettings();
+        extraSettings = serverConfig.getExtraSettings();
     }
 
     public Server createServer() throws IOException {
-        final Server server = new Server(null, listener, url, userName, userPassword, webProxySettings);
+        final Server server = new Server(null, listener, url, userName, userPassword, webProxySettings, extraSettings);
         return server;
     }
 
