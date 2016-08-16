@@ -9,4 +9,11 @@ f.section(title: descriptor.displayName) {
 
         f.repeatableProperty(field: "collectionConfigurations")
     }
+    f.advanced() {
+        f.entry(title: _("Store configuration in node-specific folders"),
+                field: "configFolderPerNode",
+                description: "Warning: don't turn this on unless you know what you are doing!") {
+            f.checkbox (default: false)
+        }
+    }
 }

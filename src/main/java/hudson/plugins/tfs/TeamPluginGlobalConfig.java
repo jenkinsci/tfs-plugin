@@ -23,6 +23,7 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
     private List<TeamCollectionConfiguration> collectionConfigurations = new ArrayList<TeamCollectionConfiguration>();
 
+    private boolean configFolderPerNode;
 
     public TeamPluginGlobalConfig() {
         load();
@@ -45,6 +46,14 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
     public void setCollectionConfigurations(final List<TeamCollectionConfiguration> collectionConfigurations) {
         this.collectionConfigurations = collectionConfigurations;
+    }
+
+    public boolean isConfigFolderPerNode() {
+        return configFolderPerNode;
+    }
+
+    public void setConfigFolderPerNode(final boolean configFolderPerNode) {
+        this.configFolderPerNode = configFolderPerNode;
     }
 
     @Override
