@@ -18,20 +18,21 @@ public class ClonePersistenceStoreProvider implements PersistenceStoreProvider {
 
         this.nodeName = nodeName;
         final FilesystemPersistenceStore sourceCache = sourcePersistenceStoreProvider.getCachePersistenceStore();
-        final File cacheFolder = createAndCopy(sourceCache, nodeName, "cache");
+        final File cacheFolder = createAndCopy(sourceCache, nodeName);
         this.cacheStore = new FilesystemPersistenceStore(cacheFolder);
 
         final FilesystemPersistenceStore sourceConfiguration = sourcePersistenceStoreProvider.getConfigurationPersistenceStore();
-        final File configurationFolder = createAndCopy(sourceConfiguration, nodeName, "configuration");
+        final File configurationFolder = createAndCopy(sourceConfiguration, nodeName);
         this.configurationStore = new FilesystemPersistenceStore(configurationFolder);
 
         final FilesystemPersistenceStore sourceLog = sourcePersistenceStoreProvider.getLogPersistenceStore();
-        final File logFolder = createAndCopy(sourceLog, nodeName, "log");
+        final File logFolder = createAndCopy(sourceLog, nodeName);
         this.logStore = new FilesystemPersistenceStore(logFolder);
     }
 
-    static File createAndCopy(final FilesystemPersistenceStore sourceStore, final String nodeName, final String childName) {
+    static File createAndCopy(final FilesystemPersistenceStore sourceStore, final String nodeName) {
         final File sourceBase = sourceStore.getStoreFile();
+        final String childName = sourceBase.getName();
         final File sourceParent = sourceBase.getParentFile();
         final File destinationBase = new File(sourceParent, nodeName);
         final File destination = new File(destinationBase, childName);
