@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
-import java.nio.charset.Charset;
 
 public enum HttpMethod {
     GET {
@@ -23,7 +22,12 @@ public enum HttpMethod {
             // do nothing for HEAD
         }
     },
-    PATCH,
+    PATCH {
+        @Override
+        public void sendRequest(final HttpURLConnection connection, final String body) throws IOException{
+            innerSendRequest(connection, body, MediaType.APPLICATION_JSON_PATCH_JSON_UTF_8);
+        }
+    },
     OPTIONS,
     PUT,
     DELETE,
@@ -31,6 +35,11 @@ public enum HttpMethod {
     ;
 
     public void sendRequest(final HttpURLConnection connection, final String body) throws IOException {
+        innerSendRequest(connection, body, MediaType.APPLICATION_JSON_UTF_8);
+
+    }
+
+    void innerSendRequest(final HttpURLConnection connection, final String body, final String contentType) throws IOException {
         // https://www.visualstudio.com/en-us/docs/integrate/get-started/rest/basics#http-method-override
         try {
             connection.setRequestMethod("POST");
@@ -43,7 +52,7 @@ public enum HttpMethod {
 
         if (body != null) {
             final byte[] bytes = body.getBytes(MediaType.UTF_8);
-            connection.setRequestProperty("Content-Type", MediaType.APPLICATION_JSON_UTF_8);
+            connection.setRequestProperty("Content-Type", contentType);
             connection.setRequestProperty("Content-Length", Integer.toString(bytes.length, 10));
             connection.setDoInput(true);
             connection.setDoOutput(true);
