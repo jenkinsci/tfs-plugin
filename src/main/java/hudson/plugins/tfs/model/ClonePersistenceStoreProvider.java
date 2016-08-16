@@ -36,7 +36,7 @@ public class ClonePersistenceStoreProvider implements PersistenceStoreProvider {
         final File sourceParent = sourceBase.getParentFile();
         final File destinationBase = new File(sourceParent, nodeName);
         final File destination = new File(destinationBase, childName);
-        if (!destination.isDirectory()) {
+        if (!destination.isDirectory() && sourceBase.isDirectory()) {
             try {
                 FileUtils.copyDirectory(sourceBase, destination);
             }
