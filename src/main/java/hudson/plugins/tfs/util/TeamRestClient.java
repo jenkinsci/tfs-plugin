@@ -11,6 +11,7 @@ import hudson.plugins.tfs.model.JsonPatchOperation;
 import hudson.plugins.tfs.model.Link;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.TeamGitStatus;
+import hudson.plugins.tfs.model.WorkItem;
 import hudson.util.Secret;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -212,14 +213,29 @@ public class TeamRestClient {
         return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
     }
 
+    public WorkItem getWorkItem(final int workItemId) throws IOException {
+        final QueryString qs = new QueryString(API_VERSION, "1.0");
+        final URI requestUri = UriHelper.join(
+                collectionUri,
+                "_apis",
+                "wit",
+                "workitems",
+                workItemId,
+                qs
+        );
+
+        return request(WorkItem.class, HttpMethod.GET, requestUri, null);
+    }
+
     public void addHyperlinkToWorkItem(final int workItemId, final String hyperlink) throws IOException {
 
         final JSONArray doc = new JSONArray();
 
+        final WorkItem workItem = getWorkItem(workItemId);
         final JsonPatchOperation testRev = new JsonPatchOperation();
         testRev.setOp(Operation.TEST);
         testRev.setPath("/rev");
-        testRev.setValue(workItemId);
+        testRev.setValue(workItem.getRev());
         doc.add(testRev);
 
         // TODO: do we also need to "add" to "/fields/System.History"?
@@ -240,6 +256,7 @@ public class TeamRestClient {
             workItemId,
             qs);
 
+        // TODO: this call could fail because something else bumped the rev in the meantime; retry?
         request(Void.class, HttpMethod.PATCH, requestUri, doc);
     }
 
