@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
 import com.microsoft.visualstudio.services.webapi.patch.Operation;
-import com.microsoft.visualstudio.services.webapi.patch.json.JsonPatchDocument;
-import com.microsoft.visualstudio.services.webapi.patch.json.JsonPatchOperation;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
+import hudson.plugins.tfs.model.JsonPatchOperation;
 import hudson.plugins.tfs.model.Link;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.TeamGitStatus;
@@ -214,7 +213,8 @@ public class TeamRestClient {
     }
 
     public void addHyperlinkToWorkItem(final int workItemId, final String hyperlink) throws IOException {
-        final JsonPatchDocument doc = new JsonPatchDocument();
+
+        final JSONArray doc = new JSONArray();
 
         final JsonPatchOperation testRev = new JsonPatchOperation();
         testRev.setOp(Operation.TEST);
