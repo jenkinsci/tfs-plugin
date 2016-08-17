@@ -45,19 +45,6 @@ public abstract class AbstractHookEvent {
         String getSampleRequestPayload();
     }
 
-    static String fetchResourceAsString(final Class<? extends Factory> referenceClass, final String fileName) {
-        final InputStream stream = referenceClass.getResourceAsStream(fileName);
-        try {
-            return IOUtils.toString(stream, MediaType.UTF_8);
-        }
-        catch (final IOException e) {
-            throw new Error(e);
-        }
-        finally {
-            IOUtils.closeQuietly(stream);
-        }
-    }
-
     /**
      * Actually do the work of the hook event, using the supplied
      * {@code mapper} to decode the event's data from the supplied {@code resourceParser}

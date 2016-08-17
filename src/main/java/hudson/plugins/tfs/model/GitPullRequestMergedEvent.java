@@ -8,6 +8,7 @@ import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.PullRequestParameterAction;
+import hudson.plugins.tfs.util.ResourceHelper;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
 
         @Override
         public String getSampleRequestPayload() {
-            return fetchResourceAsString(this.getClass(), "GitPullRequestMergedEvent.json");
+            return ResourceHelper.fetchAsString(this.getClass(), "GitPullRequestMergedEvent.json");
         }
     }
 
