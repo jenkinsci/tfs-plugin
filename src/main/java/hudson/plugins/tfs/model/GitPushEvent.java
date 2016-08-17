@@ -61,7 +61,14 @@ public class GitPushEvent extends AbstractHookEvent {
 
     @Override
     public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
-        return null;
+        final Object resource = serviceHookEvent.getResource();
+        final GitPush gitPush = mapper.convertValue(resource, GitPush.class);
+
+        final GitCodePushedEventArgs args = decodeGitPush(gitPush);
+        final CommitParameterAction parameterAction = new CommitParameterAction(args);
+        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
+        final JSONObject response = fromResponseContributors(contributors);
+        return response;
     }
 
     static void assertEquals(final JSONObject jsonObject, final String key, final String expectedValue) {

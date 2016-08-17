@@ -50,6 +50,6 @@ public class PingHookEvent extends AbstractHookEvent {
 
     @Override
     public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
-        return null;
+        return JSONObject.fromObject(serviceHookEvent);
     }
 }
