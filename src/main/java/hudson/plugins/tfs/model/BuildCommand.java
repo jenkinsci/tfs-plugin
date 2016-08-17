@@ -188,7 +188,7 @@ public class BuildCommand extends AbstractCommand {
         return innerPerform(project, delay, actions);
     }
 
-    static boolean isTeamGit(final HashMap<String, String> teamBuildParameters) {
+    static boolean isTeamGit(final Map<String, String> teamBuildParameters) {
         if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER)) {
             final String provider = teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER);
             return "TfGit".equalsIgnoreCase(provider)
@@ -197,7 +197,7 @@ public class BuildCommand extends AbstractCommand {
         return false;
     }
 
-    static void contributeTeamBuildParameterActions(final HashMap<String, String> teamBuildParameters, final List<Action> actions) {
+    static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
         if (isTeamGit(teamBuildParameters)) {
             final String collectionUriString = teamBuildParameters.get(SYSTEM_TEAM_FOUNDATION_COLLECTION_URI);
             final URI collectionUri = URI.create(collectionUriString);
