@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hudson.plugins.tfs.model.servicehooks.Event;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
@@ -45,5 +46,10 @@ public class PingHookEvent extends AbstractHookEvent {
         catch (final IOException e) {
             throw new Error(e);
         }
+    }
+
+    @Override
+    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
+        return null;
     }
 }

@@ -14,6 +14,7 @@ import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamHookCause;
 import hudson.plugins.tfs.TeamPushTrigger;
+import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.scm.SCM;
 import hudson.security.ACL;
@@ -57,6 +58,19 @@ public abstract class AbstractHookEvent {
      * @return a {@link JSONObject} representing the hook event's output
      */
     public abstract JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser);
+
+    /**
+     * Actually do the work of the hook event, using the supplied
+     * {@code mapper} to convert the event's data from the supplied {@code serviceHookEvent}
+     * and returning the output as a {@link JSONObject}.
+     *
+     * @param mapper an {@link ObjectMapper} instance to use to convert the {@link Event#resource}
+     * @param serviceHookEvent an {@link Event} that represents the request payload
+     *                         and from which the {@link Event#resource} can be obtained
+     *
+     * @return a {@link JSONObject} representing the hook event's output
+     */
+    public abstract JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent);
 
     static JSONObject fromResponseContributors(final List<GitStatus.ResponseContributor> contributors) {
         final JSONObject result = new JSONObject();

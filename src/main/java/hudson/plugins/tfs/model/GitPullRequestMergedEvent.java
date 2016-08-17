@@ -8,6 +8,7 @@ import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.PullRequestParameterAction;
+import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ResourceHelper;
 import net.sf.json.JSONObject;
 
@@ -97,6 +98,11 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
+    }
+
+    @Override
+    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
+        return null;
     }
 
     static PullRequestMergeCommitCreatedEventArgs decodeGitPullRequestMerged(final JSONObject gitPullRequestMergedJson) {

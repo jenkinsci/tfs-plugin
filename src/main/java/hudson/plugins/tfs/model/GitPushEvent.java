@@ -9,6 +9,7 @@ import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.CommitParameterAction;
+import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ResourceHelper;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -56,6 +57,11 @@ public class GitPushEvent extends AbstractHookEvent {
         final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
+    }
+
+    @Override
+    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
+        return null;
     }
 
     static void assertEquals(final JSONObject jsonObject, final String key, final String expectedValue) {
