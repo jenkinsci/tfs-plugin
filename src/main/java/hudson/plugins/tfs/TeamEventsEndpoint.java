@@ -62,6 +62,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
 
         MAPPER = new ObjectMapper();
+        MAPPER.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
         MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
