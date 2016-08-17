@@ -136,7 +136,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         final String pathInfo = request.getPathInfo();
         final String eventName = pathInfoToEventName(pathInfo);
         try {
-            final JSONObject response = innerDispatch(body, eventName);
+            final JSONObject response = innerDispatch(body, eventName, HOOK_EVENT_FACTORIES_BY_NAME);
 
             rsp.setStatus(SC_OK);
             rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
@@ -157,11 +157,11 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         }
     }
 
-    private JSONObject innerDispatch(final String body, final String eventName) throws IOException {
-        if (StringUtils.isBlank(eventName) || !HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
+    static JSONObject innerDispatch(final String body, final String eventName, final Map<String, AbstractHookEvent.Factory> factoriesByName) throws IOException {
+        if (StringUtils.isBlank(eventName) || !factoriesByName.containsKey(eventName)) {
             throw new IllegalArgumentException("Invalid event");
         }
-        final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
+        final AbstractHookEvent.Factory factory = factoriesByName.get(eventName);
         final Event serviceHookEvent = deserializeEvent(body);
         final AbstractHookEvent hookEvent = factory.create();
         return hookEvent.perform(MAPPER, serviceHookEvent);
