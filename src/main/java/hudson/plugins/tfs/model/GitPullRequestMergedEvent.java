@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.model;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitCommitRef;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPullRequest;
@@ -12,7 +11,6 @@ import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ResourceHelper;
 import net.sf.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -81,23 +79,6 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         final GitCommitRef lastMergeCommit = gitPullRequest.getLastMergeCommit();
         final String result = lastMergeCommit.getCommitId();
         return result;
-    }
-
-    @Override
-    public JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser) {
-        final GitPullRequest gitPullRequest;
-        try {
-            gitPullRequest = mapper.readValue(resourceParser, GitPullRequest.class);
-        }
-        catch (final IOException e) {
-            throw new Error(e);
-        }
-
-        final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequest(gitPullRequest);
-        final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
-        final JSONObject response = fromResponseContributors(contributors);
-        return response;
     }
 
     @Override

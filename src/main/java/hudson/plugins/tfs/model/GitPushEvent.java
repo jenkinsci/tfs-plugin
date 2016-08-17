@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.model;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.core.webapi.model.TeamProjectReference;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitCommitRef;
@@ -14,7 +13,6 @@ import hudson.plugins.tfs.util.ResourceHelper;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -40,23 +38,6 @@ public class GitPushEvent extends AbstractHookEvent {
         public String getSampleRequestPayload() {
             return ResourceHelper.fetchAsString(this.getClass(), "GitPushEvent.json");
         }
-    }
-
-    @Override
-    public JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser) {
-        final GitPush gitPush;
-        try {
-            gitPush = mapper.readValue(resourceParser, GitPush.class);
-        }
-        catch (final IOException e) {
-            throw new Error(e);
-        }
-
-        final GitCodePushedEventArgs args = decodeGitPush(gitPush);
-        final CommitParameterAction parameterAction = new CommitParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
-        final JSONObject response = fromResponseContributors(contributors);
-        return response;
     }
 
     @Override
