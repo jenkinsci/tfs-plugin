@@ -23,6 +23,7 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.Extension;
@@ -81,7 +82,7 @@ public class TeamFoundationServerScm extends SCM {
 
     private final String serverUrl;
     private final String projectPath;
-    private final Collection<String> cloakedPaths;
+    private Collection<String> cloakedPaths;
     private final String localPath;
     private final String workspaceName;
     private @Deprecated String userPassword;
@@ -96,15 +97,14 @@ public class TeamFoundationServerScm extends SCM {
     
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
 
-    TeamFoundationServerScm(String serverUrl, String projectPath, String cloakedPaths, String localPath, boolean useUpdate, String workspaceName) {
-        this(serverUrl, projectPath, cloakedPaths, localPath, useUpdate, workspaceName, null, (Secret)null);
+    TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName) {
+        this(serverUrl, projectPath, localPath, useUpdate, workspaceName, null, (Secret)null);
     }
 
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String cloakedPaths, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
-        this.cloakedPaths = splitCloakedPaths(cloakedPaths);
         this.useUpdate = useUpdate;
         this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
@@ -157,6 +157,12 @@ public class TeamFoundationServerScm extends SCM {
     public String getCloakedPaths() {
         return serializeCloakedPathCollectionToString(this.cloakedPaths);
     }
+
+    @DataBoundSetter
+    public void setCloakedPaths(final String cloakedPaths) {
+        this.cloakedPaths = splitCloakedPaths(cloakedPaths);
+    }
+
     // Bean properties END
 
     static String serializeCloakedPathCollectionToString(final Collection<String> cloakedPaths) {
