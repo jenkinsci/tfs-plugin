@@ -97,10 +97,30 @@ public class TeamFoundationServerScm extends SCM {
     
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
 
+    /**
+     * Constructor used for unit tests.
+     *
+     * @param serverUrl the URL to the team project collection
+     * @param projectPath the path in TFVC to download from
+     * @param workspaceName the name (or expression) to use when mapping the workspace
+     */
     TeamFoundationServerScm(String serverUrl, String projectPath, String workspaceName) {
         this(serverUrl, projectPath, workspaceName, null, null);
     }
 
+    /**
+     * Constructor used during serialization (and a few tests).
+     *
+     * WARNING: do NOT add parameters to this constructor when adding fields for new settings.
+     * Instead, add a setter annotated with {@link DataBoundSetter} in the "Bean properties" section.
+     * See {@link #setLocalPath(String)} for an example.
+     *
+     * @param serverUrl the URL to the team project collection
+     * @param projectPath the path in TFVC to download from
+     * @param workspaceName the name (or expression) to use when mapping the workspace
+     * @param userName the name of the user account to use to talk to TFS/Team Services
+     * @param password the password or personal access token to use to talk to TFS/Team Services
+     */
     @DataBoundConstructor
     public TeamFoundationServerScm(String serverUrl, String projectPath, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
@@ -110,7 +130,7 @@ public class TeamFoundationServerScm extends SCM {
         this.password = password;
     }
 
-    /* Migrate legacy data */
+    @SuppressWarnings("unused" /* Migrate legacy data */)
     private Object readResolve() {
         if (password == null && userPassword != null) {
             password = Secret.fromString(Scrambler.descramble(userPassword));
@@ -119,7 +139,7 @@ public class TeamFoundationServerScm extends SCM {
         return this;
     }
 
-    // Bean properties need for job configuration
+    // Bean properties needed for job configuration
     public String getServerUrl() {
         return serverUrl;
     }
