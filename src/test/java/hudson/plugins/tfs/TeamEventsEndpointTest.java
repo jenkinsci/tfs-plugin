@@ -13,11 +13,12 @@ import java.util.Map;
  */
 public class TeamEventsEndpointTest {
 
+    private static final String GIT_PUSH_SAMPLE_JSON =
+            ResourceHelper.fetchAsString(TeamEventsEndpointTest.class, "git.push-sample.json");
+
     @Test
     public void deserializeEvent_sample() throws Exception {
-        final String input = ResourceHelper.fetchAsString(TeamEventsEndpointTest.class, "git.push-sample.json");
-
-        final Event actual = TeamEventsEndpoint.deserializeEvent(input);
+        final Event actual = TeamEventsEndpoint.deserializeEvent(GIT_PUSH_SAMPLE_JSON);
 
         Assert.assertEquals("git.push", actual.getEventType());
         final Map<String, ResourceContainer> containers = actual.getResourceContainers();
