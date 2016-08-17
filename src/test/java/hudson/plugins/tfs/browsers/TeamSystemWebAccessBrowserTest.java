@@ -63,7 +63,7 @@ public class TeamSystemWebAccessBrowserTest {
         final String projectPath = "$/project/folder/folder/branch";
         final Secret password = null;
         final String userName = null;
-        final TeamFoundationServerScm result = new TeamFoundationServerScm(serverUrl, projectPath, null, false, null, userName, password);
+        final TeamFoundationServerScm result = new TeamFoundationServerScm(serverUrl, projectPath, null, null, userName, password);
 
         final TeamFoundationServerRepositoryBrowser repositoryBrowser = mock(TeamFoundationServerRepositoryBrowser.class);
         result.setRepositoryBrowser(repositoryBrowser);
