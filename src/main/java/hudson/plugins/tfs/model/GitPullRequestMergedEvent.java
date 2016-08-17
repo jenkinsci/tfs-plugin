@@ -86,7 +86,7 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         final Object resource = serviceHookEvent.getResource();
         final GitPullRequest gitPullRequest = mapper.convertValue(resource, GitPullRequest.class);
 
-        final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequest(gitPullRequest);
+        final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequest(gitPullRequest, serviceHookEvent);
         final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
         final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
         final JSONObject response = fromResponseContributors(contributors);
@@ -117,9 +117,9 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         return args;
     }
 
-    static PullRequestMergeCommitCreatedEventArgs decodeGitPullRequest(final GitPullRequest gitPullRequest) {
+    static PullRequestMergeCommitCreatedEventArgs decodeGitPullRequest(final GitPullRequest gitPullRequest, final Event serviceHookEvent) {
         final GitRepository repository = gitPullRequest.getRepository();
-        final URI collectionUri = determineCollectionUri(repository);
+        final URI collectionUri = determineCollectionUri(repository, serviceHookEvent);
         final String repoUriString = repository.getRemoteUrl();
         final URI repoUri = URI.create(repoUriString);
         final String projectId = determineProjectId(repository);

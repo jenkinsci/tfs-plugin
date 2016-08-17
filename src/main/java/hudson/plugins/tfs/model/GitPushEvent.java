@@ -9,13 +9,16 @@ import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
+import hudson.plugins.tfs.model.servicehooks.ResourceContainer;
 import hudson.plugins.tfs.util.ResourceHelper;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 
 public class GitPushEvent extends AbstractHookEvent {
 
@@ -45,7 +48,7 @@ public class GitPushEvent extends AbstractHookEvent {
         final Object resource = serviceHookEvent.getResource();
         final GitPush gitPush = mapper.convertValue(resource, GitPush.class);
 
-        final GitCodePushedEventArgs args = decodeGitPush(gitPush);
+        final GitCodePushedEventArgs args = decodeGitPush(gitPush, serviceHookEvent);
         final CommitParameterAction parameterAction = new CommitParameterAction(args);
         final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
         final JSONObject response = fromResponseContributors(contributors);
@@ -94,10 +97,23 @@ public class GitPushEvent extends AbstractHookEvent {
         return determineCollectionUri(repoApiUri);
     }
 
-    static URI determineCollectionUri(final GitRepository repository) {
-        final String repoApiUrlString = repository.getUrl();
-        final URI repoApiUri = URI.create(repoApiUrlString);
-        return determineCollectionUri(repoApiUri);
+    static URI determineCollectionUri(final GitRepository repository, final Event serviceHookEvent) {
+        URI result = null;
+        final Map<String, ResourceContainer> containers = serviceHookEvent.getResourceContainers();
+        final String collection = "collection";
+        if (containers.containsKey(collection)) {
+            final ResourceContainer collectionContainer = containers.get(collection);
+            final String baseUrl = collectionContainer.getBaseUrl();
+            if (StringUtils.isNotEmpty(baseUrl)) {
+                result = URI.create(baseUrl);
+            }
+        }
+        if (result == null) {
+            final String repoApiUrlString = repository.getUrl();
+            final URI repoApiUri = URI.create(repoApiUrlString);
+            result = determineCollectionUri(repoApiUri);
+        }
+        return result;
     }
 
     static String determineProjectId(final JSONObject repository) {
@@ -164,9 +180,9 @@ public class GitPushEvent extends AbstractHookEvent {
         return args;
     }
 
-    static GitCodePushedEventArgs decodeGitPush(final GitPush gitPush) {
+    static GitCodePushedEventArgs decodeGitPush(final GitPush gitPush, final Event serviceHookEvent) {
         final GitRepository repository = gitPush.getRepository();
-        final URI collectionUri = determineCollectionUri(repository);
+        final URI collectionUri = determineCollectionUri(repository, serviceHookEvent);
         final String repoUriString = repository.getRemoteUrl();
         final URI repoUri = URI.create(repoUriString);
         final String projectId = determineProjectId(repository);
