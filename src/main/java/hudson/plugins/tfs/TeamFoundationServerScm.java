@@ -98,7 +98,7 @@ public class TeamFoundationServerScm extends SCM {
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
 
     TeamFoundationServerScm(String serverUrl, String projectPath, String workspaceName) {
-        this(serverUrl, projectPath, workspaceName, null, (Secret)null);
+        this(serverUrl, projectPath, workspaceName, null, null);
     }
 
     @DataBoundConstructor
