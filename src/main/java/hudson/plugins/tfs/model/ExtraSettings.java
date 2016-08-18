@@ -15,7 +15,7 @@ public class ExtraSettings implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private boolean configFolderPerNode;
-    private String computerName;
+    private String nodeComputerName;
 
     public static final ExtraSettings DEFAULT = new ExtraSettings();
 
@@ -26,11 +26,11 @@ public class ExtraSettings implements Serializable {
     public ExtraSettings(final TeamPluginGlobalConfig teamPluginGlobalConfig) {
         if (teamPluginGlobalConfig != null) {
             this.configFolderPerNode = teamPluginGlobalConfig.isConfigFolderPerNode();
-            this.computerName = Computer.currentComputer().getName();
+            this.nodeComputerName = Computer.currentComputer().getName();
         }
         else {
             this.configFolderPerNode = false;
-            this.computerName = null;
+            this.nodeComputerName = null;
         }
     }
 
@@ -42,11 +42,11 @@ public class ExtraSettings implements Serializable {
         this.configFolderPerNode = configFolderPerNode;
     }
 
-    public String getComputerName() {
-        return computerName;
+    public String getNodeComputerName() {
+        return nodeComputerName;
     }
 
-    public void setComputerName(final String computerName) {
-        this.computerName = computerName;
+    public void setNodeComputerName(final String nodeComputerName) {
+        this.nodeComputerName = nodeComputerName;
     }
 }

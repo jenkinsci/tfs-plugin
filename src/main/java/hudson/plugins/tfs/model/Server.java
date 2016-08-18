@@ -97,8 +97,8 @@ public class Server implements ServerConfigurationProvider, Closable {
             final PersistenceStoreProvider defaultProvider = DefaultPersistenceStoreProvider.INSTANCE;
             final PersistenceStoreProvider provider;
             if (this.extraSettings.isConfigFolderPerNode()) {
-                final String computerName = this.extraSettings.getComputerName();
-                final String nodeName = Util.fixEmpty(computerName) == null ? "MASTER" : computerName;
+                final String nodeComputerName = this.extraSettings.getNodeComputerName();
+                final String nodeName = Util.fixEmpty(nodeComputerName) == null ? "MASTER" : nodeComputerName;
                 provider = new ClonePersistenceStoreProvider(defaultProvider, nodeName);
             }
             else {
