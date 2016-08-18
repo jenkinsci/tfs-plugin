@@ -223,6 +223,8 @@ public class BuildCommand extends AbstractCommand {
                 final CommitParameterAction action = new CommitParameterAction(args);
                 actions.add(action);
 
+                UnsupportedIntegrationAction.addToBuild(actions, "Posting build status is not supported for builds triggered by the 'Jenkins Queue Job' task.");
+
                 final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
                 actions.add(teamBuildDetails);
             }
