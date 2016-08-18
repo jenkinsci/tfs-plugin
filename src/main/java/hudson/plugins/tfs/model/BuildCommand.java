@@ -20,6 +20,7 @@ import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.TeamBuildDetailsAction;
 import hudson.plugins.tfs.TeamBuildEndpoint;
 import hudson.plugins.tfs.model.servicehooks.Event;
+import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
@@ -228,6 +229,7 @@ public class BuildCommand extends AbstractCommand {
             else {
                 final String reason = String.format(
                         "The '%s' build variable has a value of '%s', which is not supported.", BUILD_REPOSITORY_PROVIDER, provider);
+                UnsupportedIntegrationAction.addToBuild(actions, reason);
                 LOGGER.warning(formatUnsupportedReason(reason));
             }
         }
@@ -235,6 +237,7 @@ public class BuildCommand extends AbstractCommand {
             final String reason = String.format(
                     "There was no value provided for the '%s' build variable.",
                     BUILD_REPOSITORY_PROVIDER);
+            UnsupportedIntegrationAction.addToBuild(actions, reason);
             LOGGER.warning(formatUnsupportedReason(reason));
         }
     }
