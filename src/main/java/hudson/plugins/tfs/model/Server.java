@@ -14,6 +14,7 @@ import com.microsoft.tfs.core.httpclient.ProxyHost;
 import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
+import com.microsoft.tfs.jni.helpers.LocalHost;
 import com.microsoft.tfs.util.Closable;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
@@ -97,9 +98,8 @@ public class Server implements ServerConfigurationProvider, Closable {
             final PersistenceStoreProvider defaultProvider = DefaultPersistenceStoreProvider.INSTANCE;
             final PersistenceStoreProvider provider;
             if (this.extraSettings.isConfigFolderPerNode()) {
-                final String nodeComputerName = this.extraSettings.getNodeComputerName();
-                final String nodeName = Util.fixEmpty(nodeComputerName) == null ? "MASTER" : nodeComputerName;
-                provider = new ClonePersistenceStoreProvider(defaultProvider, nodeName);
+                final String hostName = LocalHost.getShortName();
+                provider = new ClonePersistenceStoreProvider(defaultProvider, hostName);
             }
             else {
                 provider = defaultProvider;

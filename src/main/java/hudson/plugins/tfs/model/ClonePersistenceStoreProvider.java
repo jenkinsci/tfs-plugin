@@ -12,21 +12,21 @@ public class ClonePersistenceStoreProvider implements PersistenceStoreProvider {
     private final FilesystemPersistenceStore cacheStore;
     private final FilesystemPersistenceStore configurationStore;
     private final FilesystemPersistenceStore logStore;
-    private final String nodeName;
+    private final String hostName;
 
-    public ClonePersistenceStoreProvider(final PersistenceStoreProvider sourcePersistenceStoreProvider, final String nodeName) {
+    public ClonePersistenceStoreProvider(final PersistenceStoreProvider sourcePersistenceStoreProvider, final String hostName) {
 
-        this.nodeName = nodeName;
+        this.hostName = hostName;
         final FilesystemPersistenceStore sourceCache = sourcePersistenceStoreProvider.getCachePersistenceStore();
-        final File cacheFolder = createAndCopy(sourceCache, nodeName);
+        final File cacheFolder = createAndCopy(sourceCache, hostName);
         this.cacheStore = new FilesystemPersistenceStore(cacheFolder);
 
         final FilesystemPersistenceStore sourceConfiguration = sourcePersistenceStoreProvider.getConfigurationPersistenceStore();
-        final File configurationFolder = createAndCopy(sourceConfiguration, nodeName);
+        final File configurationFolder = createAndCopy(sourceConfiguration, hostName);
         this.configurationStore = new FilesystemPersistenceStore(configurationFolder);
 
         final FilesystemPersistenceStore sourceLog = sourcePersistenceStoreProvider.getLogPersistenceStore();
-        final File logFolder = createAndCopy(sourceLog, nodeName);
+        final File logFolder = createAndCopy(sourceLog, hostName);
         this.logStore = new FilesystemPersistenceStore(logFolder);
     }
 
@@ -59,7 +59,7 @@ public class ClonePersistenceStoreProvider implements PersistenceStoreProvider {
         return logStore;
     }
 
-    public String getNodeName() {
-        return nodeName;
+    public String getHostName() {
+        return hostName;
     }
 }
