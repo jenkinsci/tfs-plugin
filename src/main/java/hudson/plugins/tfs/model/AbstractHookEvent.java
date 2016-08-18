@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.model;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
@@ -15,7 +14,6 @@ import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamHookCause;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
-import hudson.plugins.tfs.util.MediaType;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
@@ -29,8 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;

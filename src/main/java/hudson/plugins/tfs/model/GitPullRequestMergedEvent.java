@@ -16,8 +16,6 @@ import java.util.List;
 
 public class GitPullRequestMergedEvent extends GitPushEvent {
 
-    private static final String GIT_PULLREQUEST_MERGED = "git.pullrequest.merged";
-
     public static class Factory implements AbstractHookEvent.Factory {
 
         @Override
@@ -29,12 +27,6 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         public String getSampleRequestPayload() {
             return ResourceHelper.fetchAsString(this.getClass(), "GitPullRequestMergedEvent.json");
         }
-    }
-
-    static String determineCreatedBy(final JSONObject resource) {
-        final JSONObject createdBy = resource.getJSONObject("createdBy");
-        final String result = createdBy.getString("displayName");
-        return result;
     }
 
     static String determineCreatedBy(final GitPullRequest gitPullRequest) {
@@ -69,12 +61,6 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
     to merge it with `a511f5` (the tip of whatever the branch the PR is targeting, lastMergeTargetCommit),
     yielding `eef717f`.
      */
-    static String determineMergeCommit(final JSONObject resource) {
-        final JSONObject lastMergeCommit = resource.getJSONObject("lastMergeCommit");
-        final String result = lastMergeCommit.getString("commitId");
-        return result;
-    }
-
     static String determineMergeCommit(final GitPullRequest gitPullRequest) {
         final GitCommitRef lastMergeCommit = gitPullRequest.getLastMergeCommit();
         final String result = lastMergeCommit.getCommitId();
@@ -91,30 +77,6 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
-    }
-
-    static PullRequestMergeCommitCreatedEventArgs decodeGitPullRequestMerged(final JSONObject gitPullRequestMergedJson) {
-        assertEquals(gitPullRequestMergedJson, EVENT_TYPE, GIT_PULLREQUEST_MERGED);
-        final JSONObject resource = gitPullRequestMergedJson.getJSONObject(RESOURCE);
-        final JSONObject repository = resource.getJSONObject(REPOSITORY);
-        final URI collectionUri = determineCollectionUri(repository);
-        final String repoUriString = repository.getString(REMOTE_URL);
-        final URI repoUri = URI.create(repoUriString);
-        final String projectId = determineProjectId(repository);
-        final String repoId = repository.getString(NAME);
-        final String commit = determineMergeCommit(resource);
-        final String pushedBy = determineCreatedBy(resource);
-        final int pullRequestId = resource.getInt("pullRequestId");
-
-        final PullRequestMergeCommitCreatedEventArgs args = new PullRequestMergeCommitCreatedEventArgs();
-        args.collectionUri = collectionUri;
-        args.repoUri = repoUri;
-        args.projectId = projectId;
-        args.repoId = repoId;
-        args.commit = commit;
-        args.pushedBy = pushedBy;
-        args.pullRequestId = pullRequestId;
-        return args;
     }
 
     static PullRequestMergeCommitCreatedEventArgs decodeGitPullRequest(final GitPullRequest gitPullRequest, final Event serviceHookEvent) {

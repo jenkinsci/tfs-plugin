@@ -9,7 +9,6 @@ import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.BuildCommand;
-import hudson.plugins.tfs.model.BuildParameter;
 import hudson.plugins.tfs.model.BuildWithParametersCommand;
 import hudson.plugins.tfs.model.PingCommand;
 import hudson.plugins.tfs.model.TeamBuildPayload;
@@ -55,8 +54,6 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     private static final Map<String, AbstractCommand.Factory> COMMAND_FACTORIES_BY_NAME;
     private static final ObjectMapper MAPPER;
     public static final String URL_NAME = "team-build";
-    public static final String TEAM_EVENT = "team-event";
-    public static final String TEAM_BUILD = "team-build";
     public static final String PARAMETER = "parameter";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
 

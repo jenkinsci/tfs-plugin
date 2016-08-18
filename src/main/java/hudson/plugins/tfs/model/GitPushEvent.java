@@ -11,7 +11,6 @@ import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.model.servicehooks.ResourceContainer;
 import hudson.plugins.tfs.util.ResourceHelper;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 
@@ -21,14 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 public class GitPushEvent extends AbstractHookEvent {
-
-    static final String EVENT_TYPE = "eventType";
-    static final String RESOURCE = "resource";
-    static final String REPOSITORY = "repository";
-    static final String REMOTE_URL = "remoteUrl";
-    static final String NAME = "name";
-
-    private static final String GIT_PUSH = "git.push";
 
     public static class Factory implements AbstractHookEvent.Factory {
 
@@ -55,24 +46,6 @@ public class GitPushEvent extends AbstractHookEvent {
         return response;
     }
 
-    static void assertEquals(final JSONObject jsonObject, final String key, final String expectedValue) {
-        final String template = "Expected key '%s' to be equal to %s in object:\n%s\n";
-        final String message = String.format(template, key, expectedValue, jsonObject);
-        if (!jsonObject.containsKey(key)) {
-            throw new IllegalArgumentException(message);
-        }
-        final Object actualValue = jsonObject.get(key);
-        if (actualValue instanceof String) {
-            final String actualStringValue = (String) actualValue;
-            if (!expectedValue.equals(actualStringValue)) {
-                throw new IllegalArgumentException(message);
-            }
-        }
-        else {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
     static URI determineCollectionUri(final URI repoApiUri) {
         final String path = repoApiUri.getPath();
         final int i = path.indexOf("_apis/");
@@ -89,12 +62,6 @@ public class GitPushEvent extends AbstractHookEvent {
             throw new Error(e);
         }
         return uri;
-    }
-
-    static URI determineCollectionUri(final JSONObject repository) {
-        final String repoApiUrlString = repository.getString("url");
-        final URI repoApiUri = URI.create(repoApiUrlString);
-        return determineCollectionUri(repoApiUri);
     }
 
     static URI determineCollectionUri(final GitRepository repository, final Event serviceHookEvent) {
@@ -118,25 +85,10 @@ public class GitPushEvent extends AbstractHookEvent {
         return result;
     }
 
-    static String determineProjectId(final JSONObject repository) {
-        final JSONObject project = repository.getJSONObject("project");
-        final String result = project.getString("name");
-        return result;
-    }
-
     static String determineProjectId(final GitRepository repository) {
         final TeamProjectReference project = repository.getProject();
         final String result = project.getName();
         return result;
-    }
-
-    static String determineCommit(final JSONObject resource) {
-        final JSONArray commits = resource.getJSONArray("commits");
-        if (commits.size() < 1) {
-            throw new IllegalArgumentException("No commits found");
-        }
-        final JSONObject commitObject = commits.getJSONObject(0);
-        return commitObject.getString("commitId");
     }
 
     static String determineCommit(final GitPush gitPush) {
@@ -148,38 +100,10 @@ public class GitPushEvent extends AbstractHookEvent {
         return commit.getCommitId();
     }
 
-    static String determinePushedBy(final JSONObject resource) {
-        final JSONObject pushedBy = resource.getJSONObject("pushedBy");
-        final String result = pushedBy.getString("displayName");
-        return result;
-    }
-
     static String determinePushedBy(final GitPush gitPush) {
         final IdentityRef pushedBy = gitPush.getPushedBy();
         final String result = pushedBy.getDisplayName();
         return result;
-    }
-
-    static GitCodePushedEventArgs decodeGitPush(final JSONObject gitPushJson) {
-        assertEquals(gitPushJson, EVENT_TYPE, GIT_PUSH);
-        final JSONObject resource = gitPushJson.getJSONObject(RESOURCE);
-        final JSONObject repository = resource.getJSONObject(REPOSITORY);
-        final URI collectionUri = determineCollectionUri(repository);
-        final String repoUriString = repository.getString(REMOTE_URL);
-        final URI repoUri = URI.create(repoUriString);
-        final String projectId = determineProjectId(repository);
-        final String repoId = repository.getString(NAME);
-        final String commit = determineCommit(resource);
-        final String pushedBy = determinePushedBy(resource);
-
-        final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
-        args.collectionUri = collectionUri;
-        args.repoUri = repoUri;
-        args.projectId = projectId;
-        args.repoId = repoId;
-        args.commit = commit;
-        args.pushedBy = pushedBy;
-        return args;
     }
 
     static GitCodePushedEventArgs decodeGitPush(final GitPush gitPush, final Event serviceHookEvent) {
