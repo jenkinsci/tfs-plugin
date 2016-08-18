@@ -14,19 +14,13 @@ import java.io.Serializable;
 public class ExtraSettings implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final boolean configFolderPerNode;
-    private final String computerName;
+    private boolean configFolderPerNode;
+    private String computerName;
 
-    public static final ExtraSettings DEFAULT = new ExtraSettings(false, null);
+    public static final ExtraSettings DEFAULT = new ExtraSettings();
 
     @SuppressWarnings("unused" /* Needed by Serializable interface */)
     private ExtraSettings() {
-        this(false, null);
-    }
-
-    public ExtraSettings(final boolean configFolderPerNode, final String computerName) {
-        this.configFolderPerNode = configFolderPerNode;
-        this.computerName = computerName;
     }
 
     public ExtraSettings(final TeamPluginGlobalConfig teamPluginGlobalConfig) {
@@ -44,7 +38,15 @@ public class ExtraSettings implements Serializable {
         return configFolderPerNode;
     }
 
+    public void setConfigFolderPerNode(final boolean configFolderPerNode) {
+        this.configFolderPerNode = configFolderPerNode;
+    }
+
     public String getComputerName() {
         return computerName;
+    }
+
+    public void setComputerName(final String computerName) {
+        this.computerName = computerName;
     }
 }
