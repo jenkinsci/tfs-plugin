@@ -4,7 +4,6 @@ import static hudson.Util.fixEmpty;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -24,9 +23,9 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -83,13 +82,13 @@ public class TeamFoundationServerScm extends SCM {
 
     private final String serverUrl;
     private final String projectPath;
-    private final Collection<String> cloakedPaths;
-    private final String localPath;
+    private Collection<String> cloakedPaths;
+    private String localPath;
     private final String workspaceName;
     private @Deprecated String userPassword;
     private /* almost final */ Secret password;
     private final String userName;
-    private final boolean useUpdate;
+    private boolean useUpdate;
     
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
@@ -98,28 +97,40 @@ public class TeamFoundationServerScm extends SCM {
     
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
 
-    @Deprecated
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String localPath, boolean useUpdate, String workspaceName, String userName, String password) {
-        this(serverUrl, projectPath, null, localPath, useUpdate, workspaceName, userName, Secret.fromString(password));
+    /**
+     * Constructor used for unit tests.
+     *
+     * @param serverUrl the URL to the team project collection
+     * @param projectPath the path in TFVC to download from
+     * @param workspaceName the name (or expression) to use when mapping the workspace
+     */
+    TeamFoundationServerScm(String serverUrl, String projectPath, String workspaceName) {
+        this(serverUrl, projectPath, workspaceName, null, null);
     }
 
-    TeamFoundationServerScm(String serverUrl, String projectPath, String cloakedPaths, String localPath, boolean useUpdate, String workspaceName) {
-        this(serverUrl, projectPath, cloakedPaths, localPath, useUpdate, workspaceName, null, (Secret)null);
-    }
-
+    /**
+     * Constructor used during serialization (and a few tests).
+     *
+     * WARNING: do NOT add parameters to this constructor when adding fields for new settings.
+     * Instead, add a setter annotated with {@link DataBoundSetter} in the "Bean properties" section.
+     * See {@link #setLocalPath(String)} for an example.
+     *
+     * @param serverUrl the URL to the team project collection
+     * @param projectPath the path in TFVC to download from
+     * @param workspaceName the name (or expression) to use when mapping the workspace
+     * @param userName the name of the user account to use to talk to TFS/Team Services
+     * @param password the password or personal access token to use to talk to TFS/Team Services
+     */
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String cloakedPaths, String localPath, boolean useUpdate, String workspaceName, String userName, Secret password) {
+    public TeamFoundationServerScm(String serverUrl, String projectPath, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
-        this.cloakedPaths = splitCloakedPaths(cloakedPaths);
-        this.useUpdate = useUpdate;
-        this.localPath = (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
         this.userName = userName;
         this.password = password;
     }
 
-    /* Migrate legacy data */
+    @SuppressWarnings("unused" /* Migrate legacy data */)
     private Object readResolve() {
         if (password == null && userPassword != null) {
             password = Secret.fromString(Scrambler.descramble(userPassword));
@@ -128,7 +139,7 @@ public class TeamFoundationServerScm extends SCM {
         return this;
     }
 
-    // Bean properties need for job configuration
+    // Bean properties needed for job configuration
     public String getServerUrl() {
         return serverUrl;
     }
@@ -142,11 +153,21 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     public String getLocalPath() {
-        return localPath;
+        return (Util.fixEmptyAndTrim(localPath) == null ? "." : localPath);
+    }
+
+    @DataBoundSetter
+    public void setLocalPath(final String localPath) {
+        this.localPath = localPath;
     }
 
     public boolean isUseUpdate() {
         return useUpdate;
+    }
+
+    @DataBoundSetter
+    public void setUseUpdate(final boolean useUpdate) {
+        this.useUpdate = useUpdate;
     }
 
     public String getUserPassword() {
@@ -164,6 +185,12 @@ public class TeamFoundationServerScm extends SCM {
     public String getCloakedPaths() {
         return serializeCloakedPathCollectionToString(this.cloakedPaths);
     }
+
+    @DataBoundSetter
+    public void setCloakedPaths(final String cloakedPaths) {
+        this.cloakedPaths = splitCloakedPaths(cloakedPaths);
+    }
+
     // Bean properties END
 
     static String serializeCloakedPathCollectionToString(final Collection<String> cloakedPaths) {
