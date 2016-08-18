@@ -100,12 +100,14 @@ public class GitPushEvent extends AbstractHookEvent {
     static URI determineCollectionUri(final GitRepository repository, final Event serviceHookEvent) {
         URI result = null;
         final Map<String, ResourceContainer> containers = serviceHookEvent.getResourceContainers();
-        final String collection = "collection";
-        if (containers.containsKey(collection)) {
-            final ResourceContainer collectionContainer = containers.get(collection);
-            final String baseUrl = collectionContainer.getBaseUrl();
-            if (StringUtils.isNotEmpty(baseUrl)) {
-                result = URI.create(baseUrl);
+        if (containers != null) {
+            final String collection = "collection";
+            if (containers.containsKey(collection)) {
+                final ResourceContainer collectionContainer = containers.get(collection);
+                final String baseUrl = collectionContainer.getBaseUrl();
+                if (StringUtils.isNotEmpty(baseUrl)) {
+                    result = URI.create(baseUrl);
+                }
             }
         }
         if (result == null) {
