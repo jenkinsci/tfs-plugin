@@ -1,8 +1,8 @@
 <div>
-    In some environments, the "home" directory is mounted over a network and shared between many build nodes, which eventually leads to corruption of the configuration directory used for TFVC workspaces.  If you have such an environment, check the box to use a sub-directory for each node.<br />
+    In some environments, the "home" directory is mounted over a network and shared between many computers, including Jenkins servers and their associated build nodes, which eventually leads to corruption of the configuration directory used for TFVC workspaces.  If you have such an environment, check the box to use a sub-directory for each computer (using the computers's host name).<br />
     <br />
     In other words, turning on this option means the TFS SDK will use the following base path for its <code>Cache</code>, <code>Configuration</code> and <code>Logs</code> directories:<br />
-    <code>~/.microsoft/Team Foundation/4.0/${NODE_NAME}/</code><br />
+    <code>~/.microsoft/Team Foundation/4.0/${HOSTNAME}/</code><br />
     <br />
     <h3>WARNING:</h3>
     Turning this on is equivalent to setting the <code>TEE_PROFILE_DIRECTORY</code> environment variable and thus any manual operations performed on nodes using the Command-Line Client (CLC) will need to be performed with the <code>TEE_PROFILE_DIRECTORY</code> environment variable set accordingly.
