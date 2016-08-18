@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.model;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
@@ -14,7 +13,7 @@ import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamHookCause;
 import hudson.plugins.tfs.TeamPushTrigger;
-import hudson.plugins.tfs.util.MediaType;
+import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
@@ -28,8 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -45,31 +42,18 @@ public abstract class AbstractHookEvent {
         String getSampleRequestPayload();
     }
 
-    static String fetchResourceAsString(final Class<? extends Factory> referenceClass, final String fileName) {
-        final InputStream stream = referenceClass.getResourceAsStream(fileName);
-        try {
-            return IOUtils.toString(stream, MediaType.UTF_8);
-        }
-        catch (final IOException e) {
-            throw new Error(e);
-        }
-        finally {
-            IOUtils.closeQuietly(stream);
-        }
-    }
-
     /**
      * Actually do the work of the hook event, using the supplied
-     * {@code mapper} to decode the event's data from the supplied {@code resourceParser}
+     * {@code mapper} to convert the event's data from the supplied {@code serviceHookEvent}
      * and returning the output as a {@link JSONObject}.
      *
-     * @param mapper an {@link ObjectMapper} instance to use to read from {@code resourceParser}
-     * @param resourceParser a {@link JsonParser} initialized to the {@code resource} node
-     *                       in the request payload
+     * @param mapper an {@link ObjectMapper} instance to use to convert the {@link Event#resource}
+     * @param serviceHookEvent an {@link Event} that represents the request payload
+     *                         and from which the {@link Event#resource} can be obtained
      *
      * @return a {@link JSONObject} representing the hook event's output
      */
-    public abstract JSONObject perform(final ObjectMapper mapper, final JsonParser resourceParser);
+    public abstract JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent);
 
     static JSONObject fromResponseContributors(final List<GitStatus.ResponseContributor> contributors) {
         final JSONObject result = new JSONObject();

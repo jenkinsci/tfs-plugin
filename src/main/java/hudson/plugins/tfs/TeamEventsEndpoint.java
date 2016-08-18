@@ -1,8 +1,6 @@
 package hudson.plugins.tfs;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
 import hudson.model.Item;
@@ -13,6 +11,7 @@ import hudson.plugins.tfs.model.AbstractHookEvent;
 import hudson.plugins.tfs.model.GitPullRequestMergedEvent;
 import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
+import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.tfs.util.StringBodyParameter;
@@ -63,6 +62,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
 
         MAPPER = new ObjectMapper();
+        MAPPER.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
         MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
@@ -137,7 +137,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         final String pathInfo = request.getPathInfo();
         final String eventName = pathInfoToEventName(pathInfo);
         try {
-            final JSONObject response = innerDispatch(body, eventName);
+            final JSONObject response = innerDispatch(body, eventName, HOOK_EVENT_FACTORIES_BY_NAME);
 
             rsp.setStatus(SC_OK);
             rsp.setContentType(MediaType.APPLICATION_JSON_UTF_8);
@@ -158,25 +158,28 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         }
     }
 
-    private JSONObject innerDispatch(final String body, final String eventName) throws IOException {
-        if (StringUtils.isBlank(eventName) || !HOOK_EVENT_FACTORIES_BY_NAME.containsKey(eventName)) {
+    static JSONObject innerDispatch(final String body, final String eventName, final Map<String, AbstractHookEvent.Factory> factoriesByName) throws IOException {
+        if (StringUtils.isBlank(eventName) || !factoriesByName.containsKey(eventName)) {
             throw new IllegalArgumentException("Invalid event");
         }
-        final AbstractHookEvent.Factory factory = HOOK_EVENT_FACTORIES_BY_NAME.get(eventName);
-        final JsonNode eventNode = MAPPER.readTree(body);
-        final JsonNode eventTypeNode = eventNode.get("eventType");
-        if (eventTypeNode == null) {
+        final AbstractHookEvent.Factory factory = factoriesByName.get(eventName);
+        final Event serviceHookEvent = deserializeEvent(body);
+        final AbstractHookEvent hookEvent = factory.create();
+        return hookEvent.perform(MAPPER, serviceHookEvent);
+    }
+
+    public static Event deserializeEvent(final String input) throws IOException {
+        final Event serviceHookEvent = MAPPER.readValue(input, Event.class);
+        final String eventType = serviceHookEvent.getEventType();
+        if (StringUtils.isEmpty(eventType)) {
             throw new IllegalArgumentException("Payload did not contain 'eventType'.");
         }
-        final String eventType = eventTypeNode.asText();
         // TODO: assert eventType with what Factory claims to support
-        final JsonNode resourceNode = eventNode.get("resource");
-        if (resourceNode == null) {
+        final Object resource = serviceHookEvent.getResource();
+        if (resource == null) {
             throw new IllegalArgumentException("Payload did not contain 'resource'.");
         }
-        final JsonParser resourceParser = resourceNode.traverse();
-        final AbstractHookEvent hookEvent = factory.create();
-        return hookEvent.perform(MAPPER, resourceParser);
+        return serviceHookEvent;
     }
 
     @RequirePOST

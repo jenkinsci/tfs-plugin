@@ -1,5 +1,8 @@
 package hudson.plugins.tfs.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPullRequest;
+import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
@@ -15,6 +18,7 @@ import hudson.model.queue.ScheduleResult;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.TeamBuildEndpoint;
+import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
@@ -27,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +91,7 @@ public class BuildCommand extends AbstractCommand {
     }
 
     @Override
-    public JSONObject perform(final AbstractProject project, final StaplerRequest req, final JSONObject requestPayload, final TimeDuration delay) {
+    public JSONObject perform(final AbstractProject project, final StaplerRequest req, final JSONObject requestPayload, final ObjectMapper mapper, final TeamBuildPayload teamBuildPayload, final TimeDuration delay) {
 
         // These values are for optional parameters of the same name, for the git.pullrequest.merged event
         String commitId = null;
@@ -96,25 +99,22 @@ public class BuildCommand extends AbstractCommand {
 
         final List<Action> actions = new ArrayList<Action>();
 
-        if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_BUILD)) {
-            final HashMap<String, String> teamBuildParameters = new HashMap<String, String>();
-            final JSONObject variables = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_BUILD);
-            for (final String key : ((Map<String, Object>)variables).keySet()) {
-                final String value = variables.getString(key);
-                teamBuildParameters.put(key, value);
-            }
-            contributeTeamBuildParameterActions(teamBuildParameters, actions);
+        if (teamBuildPayload.BuildVariables != null) {
+            contributeTeamBuildParameterActions(teamBuildPayload.BuildVariables, actions);
         }
-        else if (requestPayload.containsKey(TeamBuildEndpoint.TEAM_EVENT)) {
-            final JSONObject teamEventJson = requestPayload.getJSONObject(TeamBuildEndpoint.TEAM_EVENT);
-            final String eventType = teamEventJson.getString("eventType");
+        else if (teamBuildPayload.ServiceHookEvent != null) {
+            final Event event = teamBuildPayload.ServiceHookEvent;
+            final String eventType = event.getEventType();
+            final Object resource = event.getResource();
             if ("git.push".equals(eventType)) {
-                final GitCodePushedEventArgs args = GitPushEvent.decodeGitPush(teamEventJson);
+                final GitPush gitPush = mapper.convertValue(resource, GitPush.class);
+                final GitCodePushedEventArgs args = GitPushEvent.decodeGitPush(gitPush, event);
                 final Action action = new CommitParameterAction(args);
                 actions.add(action);
             }
             else if ("git.pullrequest.merged".equals(eventType)) {
-                final PullRequestMergeCommitCreatedEventArgs args = GitPullRequestMergedEvent.decodeGitPullRequestMerged(teamEventJson);
+                final GitPullRequest gitPullRequest = mapper.convertValue(resource, GitPullRequest.class);
+                final PullRequestMergeCommitCreatedEventArgs args = GitPullRequestMergedEvent.decodeGitPullRequest(gitPullRequest, event);
                 // record the values for the special optional parameters
                 commitId = args.commit;
                 pullRequestId = Integer.toString(args.pullRequestId, 10);
@@ -188,7 +188,7 @@ public class BuildCommand extends AbstractCommand {
         return innerPerform(project, delay, actions);
     }
 
-    static boolean isTeamGit(final HashMap<String, String> teamBuildParameters) {
+    static boolean isTeamGit(final Map<String, String> teamBuildParameters) {
         if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER)) {
             final String provider = teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER);
             return "TfGit".equalsIgnoreCase(provider)
@@ -197,7 +197,7 @@ public class BuildCommand extends AbstractCommand {
         return false;
     }
 
-    static void contributeTeamBuildParameterActions(final HashMap<String, String> teamBuildParameters, final List<Action> actions) {
+    static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
         if (isTeamGit(teamBuildParameters)) {
             final String collectionUriString = teamBuildParameters.get(SYSTEM_TEAM_FOUNDATION_COLLECTION_URI);
             final URI collectionUri = URI.create(collectionUriString);

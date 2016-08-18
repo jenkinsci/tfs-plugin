@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.AbstractProject;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
@@ -26,7 +27,7 @@ public class PingCommand extends AbstractCommand {
     }
 
     @Override
-    public JSONObject perform(final AbstractProject project, final StaplerRequest request, final JSONObject requestPayload, final TimeDuration delay) {
+    public JSONObject perform(final AbstractProject project, final StaplerRequest request, final JSONObject requestPayload, final ObjectMapper mapper, final TeamBuildPayload teamBuildPayload, final TimeDuration delay) {
         return requestPayload;
     }
 
