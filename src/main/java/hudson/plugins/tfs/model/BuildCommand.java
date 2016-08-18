@@ -34,8 +34,11 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class BuildCommand extends AbstractCommand {
+
+    private static final Logger LOGGER = Logger.getLogger(BuildCommand.class.getName());
 
     private static final Action[] EMPTY_ACTION_ARRAY = new Action[0];
     private static final String BUILD_REPOSITORY_PROVIDER = "Build.Repository.Provider";
@@ -47,6 +50,12 @@ public class BuildCommand extends AbstractCommand {
     private static final String SYSTEM_TEAM_FOUNDATION_COLLECTION_URI = "System.TeamFoundationCollectionUri";
     private static final String COMMIT_ID = "commitId";
     private static final String PULL_REQUEST_ID = "pullRequestId";
+    private static final String UNSUPPORTED_TEMPLATE =
+            "The rich integration with TFS/Team Services is not supported. Reason: %s";
+
+    public static String formatUnsupportedReason(final String reason) {
+        return String.format(UNSUPPORTED_TEMPLATE, reason);
+    }
 
     public static class Factory implements AbstractCommand.Factory {
         @Override
@@ -189,37 +198,44 @@ public class BuildCommand extends AbstractCommand {
         return innerPerform(project, delay, actions);
     }
 
-    static boolean isTeamGit(final Map<String, String> teamBuildParameters) {
+    static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
         if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER)) {
             final String provider = teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER);
-            return "TfGit".equalsIgnoreCase(provider)
+            final boolean isTeamGit = "TfGit".equalsIgnoreCase(provider)
                     || "TfsGit".equalsIgnoreCase(provider);
+            if (isTeamGit) {
+                final String collectionUriString = teamBuildParameters.get(SYSTEM_TEAM_FOUNDATION_COLLECTION_URI);
+                final URI collectionUri = URI.create(collectionUriString);
+                final String repoUriString = teamBuildParameters.get(BUILD_REPOSITORY_URI);
+                final URI repoUri = URI.create(repoUriString);
+                final String projectId = teamBuildParameters.get(SYSTEM_TEAM_PROJECT);
+                final String repoId = teamBuildParameters.get(BUILD_REPOSITORY_NAME);
+                final String commit = teamBuildParameters.get(BUILD_SOURCE_VERSION);
+                final String pushedBy = teamBuildParameters.get(BUILD_REQUESTED_FOR);
+                final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
+                args.collectionUri = collectionUri;
+                args.repoUri = repoUri;
+                args.projectId = projectId;
+                args.repoId = repoId;
+                args.commit = commit;
+                args.pushedBy = pushedBy;
+                final CommitParameterAction action = new CommitParameterAction(args);
+                actions.add(action);
+
+                final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
+                actions.add(teamBuildDetails);
+            }
+            else {
+                final String reason = String.format(
+                        "The '%s' build variable has a value of '%s', which is not supported.", BUILD_REPOSITORY_PROVIDER, provider);
+                LOGGER.warning(formatUnsupportedReason(reason));
+            }
         }
-        return false;
-    }
-
-    static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
-        if (isTeamGit(teamBuildParameters)) {
-            final String collectionUriString = teamBuildParameters.get(SYSTEM_TEAM_FOUNDATION_COLLECTION_URI);
-            final URI collectionUri = URI.create(collectionUriString);
-            final String repoUriString = teamBuildParameters.get(BUILD_REPOSITORY_URI);
-            final URI repoUri = URI.create(repoUriString);
-            final String projectId = teamBuildParameters.get(SYSTEM_TEAM_PROJECT);
-            final String repoId = teamBuildParameters.get(BUILD_REPOSITORY_NAME);
-            final String commit = teamBuildParameters.get(BUILD_SOURCE_VERSION);
-            final String pushedBy = teamBuildParameters.get(BUILD_REQUESTED_FOR);
-            final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
-            args.collectionUri = collectionUri;
-            args.repoUri = repoUri;
-            args.projectId = projectId;
-            args.repoId = repoId;
-            args.commit = commit;
-            args.pushedBy = pushedBy;
-            final CommitParameterAction action = new CommitParameterAction(args);
-            actions.add(action);
-
-            final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
-            actions.add(teamBuildDetails);
+        else {
+            final String reason = String.format(
+                    "There was no value provided for the '%s' build variable.",
+                    BUILD_REPOSITORY_PROVIDER);
+            LOGGER.warning(formatUnsupportedReason(reason));
         }
     }
 }
