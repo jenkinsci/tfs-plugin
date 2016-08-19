@@ -86,6 +86,7 @@ public class TeamFoundationServerScmTest {
                             "  <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
                             "  <password>GZ3wK9L4iJXsMwXnJ4NieiVpOlxj0AVrthfe7MIr9w0=</password>\n" +
                             "  <userName>example\\tfsbuilder</userName>\n" +
+                            "  <credentialsConfigurer class=\"hudson.plugins.tfs.model.ManualCredentialsConfigurer\"/>\n" +
                             "  <useUpdate>false</useUpdate>\n" +
                             "</hudson.plugins.tfs.TeamFoundationServerScm>";
 

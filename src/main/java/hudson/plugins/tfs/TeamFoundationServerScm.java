@@ -1,5 +1,6 @@
 package hudson.plugins.tfs;
 
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
@@ -187,6 +188,9 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     public CredentialsConfigurer getCredentialsConfigurer() {
+        if (credentialsConfigurer == null) {
+            credentialsConfigurer = new ManualCredentialsConfigurer(userName, password);
+        }
         return credentialsConfigurer;
     }
 
@@ -431,7 +435,13 @@ public class TeamFoundationServerScm extends SCM {
     }
     
     protected Server createServer(final Launcher launcher, final TaskListener taskListener, Run<?,?> run) throws IOException {
-        return new Server(launcher, taskListener, getServerUrl(run), getUserName(), getUserPassword());
+        final CredentialsConfigurer credentialsConfigurer = getCredentialsConfigurer();
+        final String collectionUri = getServerUrl(run);
+        final StandardUsernamePasswordCredentials credentials = credentialsConfigurer.getCredentials(collectionUri);
+        final String username = credentials.getUsername();
+        final Secret password = credentials.getPassword();
+        final String userPassword = password.getPlainText();
+        return new Server(launcher, taskListener, collectionUri, username, userPassword);
     }
 
     @Override
