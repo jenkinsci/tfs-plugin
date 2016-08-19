@@ -2,7 +2,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout">
     <l:ajax>
         <div>
-            Add pairs of Team Project Collections and associated credentials, one for each server or Team Services account you will be using elsewhere in Jenkins with the TFS plugin.
+            Add pairs of Team Project Collections and associated credentials, one for each collection and Team Services account you will be using elsewhere in Jenkins with the TFS plugin.
         </div>
     </l:ajax>
 </j:jelly>
