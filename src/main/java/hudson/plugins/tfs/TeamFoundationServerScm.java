@@ -1,34 +1,8 @@
 package hudson.plugins.tfs;
 
-import static hudson.Util.fixEmpty;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import javax.annotation.CheckForNull;
-
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
-import hudson.plugins.tfs.model.CredentialsConfigurer;
-import hudson.plugins.tfs.model.CredentialsConfigurerDescriptor;
-import hudson.plugins.tfs.model.ManualCredentialsConfigurer;
-import hudson.util.Secret;
-import net.sf.json.JSONObject;
-
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.StaplerRequest;
-
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -45,10 +19,13 @@ import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
 import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
 import hudson.plugins.tfs.browsers.TeamSystemWebAccessBrowser;
-import hudson.plugins.tfs.model.Project;
-import hudson.plugins.tfs.model.WorkspaceConfiguration;
-import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.model.CredentialsConfigurer;
+import hudson.plugins.tfs.model.CredentialsConfigurerDescriptor;
+import hudson.plugins.tfs.model.ManualCredentialsConfigurer;
+import hudson.plugins.tfs.model.Project;
+import hudson.plugins.tfs.model.Server;
+import hudson.plugins.tfs.model.WorkspaceConfiguration;
 import hudson.plugins.tfs.util.BuildVariableResolver;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
@@ -57,15 +34,35 @@ import hudson.scm.PollingResult;
 import hudson.scm.PollingResult.Change;
 import hudson.scm.RepositoryBrowser;
 import hudson.scm.RepositoryBrowsers;
-import hudson.scm.SCMRevisionState;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
+import hudson.scm.SCMRevisionState;
+import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.LogTaskListener;
 import hudson.util.Scrambler;
+import hudson.util.Secret;
 import hudson.util.VariableResolver;
-
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
+import javax.annotation.CheckForNull;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+import static hudson.Util.fixEmpty;
 
 /**
  * SCM for Microsoft Team Foundation Server.
@@ -551,6 +548,16 @@ public class TeamFoundationServerScm extends SCM {
                 }
             }
             return FormValidation.error(noMatchText);
+        }
+
+        public ComboBoxModel doFillServerUrlItems() {
+            final TeamPluginGlobalConfig pluginGlobalConfig = TeamPluginGlobalConfig.get();
+            final List<TeamCollectionConfiguration> collectionConfigurations = pluginGlobalConfig.getCollectionConfigurations();
+            final ComboBoxModel result = new ComboBoxModel(collectionConfigurations.size());
+            for (final TeamCollectionConfiguration collectionConfiguration : collectionConfigurations) {
+                result.add(collectionConfiguration.getCollectionUrl());
+            }
+            return result;
         }
 
         public FormValidation doProjectPathCheck(@QueryParameter final String value) {
