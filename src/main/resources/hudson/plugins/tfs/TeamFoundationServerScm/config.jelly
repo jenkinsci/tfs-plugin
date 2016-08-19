@@ -7,12 +7,11 @@
         <f:textbox checkUrl="'${rootURL}/scm/TeamFoundationServerScm/projectPathCheck?value='+escape(this.value)"/>
     </f:entry>
 
-    <f:entry field="userName" title="User name" description="(domain alias, e-mail address or alternate credentials)">
-        <f:textbox />
-    </f:entry>
-    
-    <f:entry field="password" title="User password">
-        <f:password />
+    <f:entry>
+        <f:dropdownDescriptorSelector
+            title="Credentials"
+            field="credentialsConfigurer"
+            descriptors="${descriptor.getCredentialsConfigurerDescriptors()}" />
     </f:entry>
 
     <f:advanced>

@@ -18,6 +18,9 @@ import javax.annotation.CheckForNull;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
+import hudson.plugins.tfs.model.CredentialsConfigurer;
+import hudson.plugins.tfs.model.CredentialsConfigurerDescriptor;
+import hudson.plugins.tfs.model.ManualCredentialsConfigurer;
 import hudson.util.Secret;
 import net.sf.json.JSONObject;
 
@@ -86,8 +89,9 @@ public class TeamFoundationServerScm extends SCM {
     private String localPath;
     private final String workspaceName;
     private @Deprecated String userPassword;
-    private /* almost final */ Secret password;
-    private final String userName;
+    private Secret password;
+    private String userName;
+    private CredentialsConfigurer credentialsConfigurer;
     private boolean useUpdate;
     
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
@@ -136,6 +140,9 @@ public class TeamFoundationServerScm extends SCM {
             password = Secret.fromString(Scrambler.descramble(userPassword));
             userPassword = null;
         }
+        if (userName != null && password != null) {
+            credentialsConfigurer = new ManualCredentialsConfigurer(userName, password);
+        }
         return this;
     }
 
@@ -180,6 +187,15 @@ public class TeamFoundationServerScm extends SCM {
 
     public String getUserName() {
         return userName;
+    }
+
+    public CredentialsConfigurer getCredentialsConfigurer() {
+        return credentialsConfigurer;
+    }
+
+    @DataBoundSetter
+    public void setCredentialsConfigurer(final CredentialsConfigurer credentialsConfigurer) {
+        this.credentialsConfigurer = credentialsConfigurer;
     }
 
     public String getCloakedPaths() {
@@ -508,6 +524,14 @@ public class TeamFoundationServerScm extends SCM {
         public SCM newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             TeamFoundationServerScm scm = (TeamFoundationServerScm) super.newInstance(req, formData);
             scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class,req,formData,"browser");
+            // TODO: is there a more polymorphic way of doing this?
+            if (scm.credentialsConfigurer instanceof ManualCredentialsConfigurer) {
+                // ManualCredentialsConfigurer has its fields "transient"; transfer the values here
+                // for backward-compatibility
+                final ManualCredentialsConfigurer manualCredentialsConfigurer = (ManualCredentialsConfigurer) scm.credentialsConfigurer;
+                scm.userName = manualCredentialsConfigurer.getUserName();
+                scm.password = manualCredentialsConfigurer.getPassword();
+            }
             return scm;
         }
 
@@ -545,6 +569,10 @@ public class TeamFoundationServerScm extends SCM {
             return doRegexCheck(new Pattern[]{CLOAKED_PATHS_REGEX},
                     "Each cloaked path must begin with '$/'. Multiple paths must be separated by blank lines.",
                     null, value );
+        }
+
+        public List<CredentialsConfigurerDescriptor> getCredentialsConfigurerDescriptors() {
+            return CredentialsConfigurer.all();
         }
 
         @Override
