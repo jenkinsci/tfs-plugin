@@ -33,6 +33,10 @@ The TFS plug-in for Jenkins enhances the Git plug-in for Jenkins by adding some 
 * A push trigger, to request builds of specific commits in Git repositories without needing to schedule SCM polling
 * A build step that adds a "build pending" status to the associated pull request and/or commit in TFS/Team Services
 * A post-build action that add a "build completed" status to the associated pull request and/or commit in TFS/Team Services
+* A link to (and summary information about) the associated TFS/Team Services build that triggered the Jenkins build.
+* A link to (and summary information about) the associated TFS/Team Services pull request that triggered the Jenkins build.
+    * Links to associated TFS/Team Services work items.
+    * Associated TFS/Team Services work items link back to the Jenkins build.
 * Some endpoints for TFS/Team Services to use to activate the integration.  Please refer to the [Jenkins with Visual Studio Team Services](https://www.visualstudio.com/en-us/docs/service-hooks/services/jenkins) page for instructions on configuring the integration.
 
 
