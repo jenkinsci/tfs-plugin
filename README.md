@@ -98,7 +98,7 @@ To make use of the Git integration with TFS/Team Services and/or to use automati
     3. Select **Add Credentials**
         1. For the _Kind_ field, select **Username with password**
         2. For the _Scope_ field, select **Global (Jenkins, nodes, items, all child items, etc)**
-        3. See the _User name and password_ section below for the values of the _Username_ and _Password_; a Personal Access Token (PAT) is strongly recommended, with the following _Authorized Scopes_:
+        3. See the _User name and password_ section below for the values of the _Username_ and _Password_; a Personal Access Token (PAT) is strongly recommended.  If the credentials will be used for TFVC, select **All scopes**, otherwise select the following _Authorized Scopes_:
             1. `Code (read)`
             2. `Code (status)`
         4. You can use the _Description_ field to record details about the PAT, such as its intended collection, the selected authorization scopes and expiration date.  For example: `fabrikam-fiber-inc, code read+status, expires 2017-08-05`
@@ -170,7 +170,7 @@ For Team Services, there are also two options:
 1. Personal access tokens (recommended)
     1. In Team Services, click your name in the top right corner and select **Security**.
     2. In the _Personal access tokens_ area, select **Add**.
-    3. Describe the token (use something like "Jenkins server at jenkins.example.com"), select an expiry timeframe, double-check the Team Services account the token will be valid for and, until the corresponding defect in Team Services is fixed, select **All scopes**.
+    3. Describe the token (use something like "Jenkins server at jenkins.example.com"), select an expiry timeframe, double-check the Team Services account the token will be valid for and, if the user account will be used for TFVC, select **All scopes** otherwise you can select smaller scopes based on what features you will need.
     4. Click **\[Create Token\]** and copy the generated personal access token to the clipboard.
     5. Back to Jenkins, enter the e-mail address associated with your Team Services account as the _User name_ and the generated personal access token as the _User password_.
 2.  Alternate credentials
