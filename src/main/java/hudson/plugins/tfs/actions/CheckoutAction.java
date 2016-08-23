@@ -81,6 +81,8 @@ public class CheckoutAction {
             throws IOException, InterruptedException {
         final Workspaces workspaces = server.getWorkspaces();
         final Project project = server.getProject(projectPath);
+        final FilePath localFolderPath = workspacePath.child(localFolder);
+        final String localPath = localFolderPath.getRemote();
 
         if (workspaces.exists(workspaceName) && !useUpdate) {
             Workspace workspace = workspaces.getWorkspace(workspaceName);
@@ -89,12 +91,10 @@ public class CheckoutAction {
 
         Workspace workspace;
         if (! workspaces.exists(workspaceName)) {
-            final FilePath localFolderPath = workspacePath.child(localFolder);
             if (!useUpdate && localFolderPath.exists()) {
                 localFolderPath.deleteContents();
             }
             final String serverPath = project.getProjectPath();
-            final String localPath = localFolderPath.getRemote();
             workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakedPaths, localPath);
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
