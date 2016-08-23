@@ -90,11 +90,11 @@ public class CheckoutAction {
         final PrintStream logger = listener.getLogger();
 
         final HashSet<String> workspaceNamesToDelete = new HashSet<String>();
-        if (!useUpdate) {
-            workspaceNamesToDelete.add(workspaceName);
-        }
         final String existingWorkspaceName = workspaces.getWorkspaceMapping(localPath);
         if (workspaces.exists(workspaceName)) {
+            if (!useUpdate) {
+                workspaceNamesToDelete.add(workspaceName);
+            }
             if (existingWorkspaceName == null) {
                 logger.println("Warning: Although the server thinks the workspace exists, no mapping was found.");
                 workspaceNamesToDelete.add(workspaceName);
