@@ -1,6 +1,11 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
+import com.microsoft.tfs.core.clients.versioncontrol.Workstation;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import com.microsoft.tfs.core.config.persistence.PersistenceStoreProvider;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
@@ -28,6 +33,8 @@ public class IsWorkspaceMappedCommand extends AbstractCallableCommand implements
     public Boolean call() throws Exception {
         final Server server = createServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
+        final TFSTeamProjectCollection connection = vcc.getConnection();
+        updateCache(connection);
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
         final String listWorkspacesMessage = String.format(CheckingMappingTemplate, localPath);
@@ -39,5 +46,12 @@ public class IsWorkspaceMappedCommand extends AbstractCallableCommand implements
         logger.println(existsMapping ? "yes" : "no");
 
         return existsMapping;
+    }
+
+    static void updateCache(final TFSTeamProjectCollection connection) {
+        final PersistenceStoreProvider persistenceStoreProvider = connection.getPersistenceStoreProvider();
+        final Workstation workstation = Workstation.getCurrent(persistenceStoreProvider);
+        final VersionControlClient vcc = connection.getVersionControlClient();
+        workstation.updateWorkspaceInfoCache(vcc, VersionControlConstants.AUTHENTICATED_USER);
     }
 }
