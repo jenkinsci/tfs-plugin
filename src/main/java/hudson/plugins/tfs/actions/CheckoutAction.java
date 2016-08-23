@@ -134,7 +134,7 @@ public class CheckoutAction {
 
         Workspace workspace;
         if (! workspaces.exists(workspaceName)) {
-            if (workspaceNamesToDelete.size() > 0 && localFolderPath.exists()) {
+            if ((!useUpdate || workspaceNamesToDelete.size() > 0) && localFolderPath.exists()) {
                 localFolderPath.deleteContents();
             }
             final String serverPath = project.getProjectPath();
