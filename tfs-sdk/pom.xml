@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>tfs-parent</artifactId>
+    <version>5.1.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>tfs-sdk</artifactId>
+  <name>TFS SDK installer</name>
+  <packaging>pom</packaging>
+
+  <!-- http://stackoverflow.com/a/31511080/98903 -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.5.2</version>
+        <executions>
+          <execution>
+            <id>install.tfs.sdk.jar.locally</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <configuration>
+              <file>src/com.microsoft.tfs.sdk-14.0.3.jar</file>
+              <groupId>com.microsoft.tfs.sdk</groupId>
+              <artifactId>com.microsoft.tfs.sdk</artifactId>
+              <version>14.0.3</version>
+              <packaging>jar</packaging>
+              <generatePom>true</generatePom>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
