@@ -32,7 +32,7 @@ public abstract class AbstractCallableCommand implements Serializable {
         extraSettings = serverConfig.getExtraSettings();
     }
 
-    static void updateCache(final TFSTeamProjectCollection connection) {
+    protected void updateCache(final TFSTeamProjectCollection connection) {
         final PersistenceStoreProvider persistenceStoreProvider = connection.getPersistenceStoreProvider();
         final Workstation workstation = Workstation.getCurrent(persistenceStoreProvider);
         final VersionControlClient vcc = connection.getVersionControlClient();

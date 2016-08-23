@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
@@ -32,6 +33,11 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
             public Server createServer() {
                 return server;
             }
+
+            @Override
+            protected void updateCache(final TFSTeamProjectCollection connection) {
+                // no-op for tests
+            }
         };
         final Callable<Void, Exception> callable = command.getCallable();
 
@@ -58,6 +64,11 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
             @Override
             public Server createServer() {
                 return server;
+            }
+
+            @Override
+            protected void updateCache(final TFSTeamProjectCollection connection) {
+                // no-op for tests
             }
         };
         final Callable<Void, Exception> callable = command.getCallable();
