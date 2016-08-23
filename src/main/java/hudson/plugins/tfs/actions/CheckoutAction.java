@@ -1,12 +1,5 @@
 package hudson.plugins.tfs.actions;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
-
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.FilePath;
@@ -16,6 +9,13 @@ import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
 import hudson.plugins.tfs.model.Workspaces;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
 
 public class CheckoutAction {
 
@@ -77,19 +77,19 @@ public class CheckoutAction {
         return result;
     }
 
-    private Project getProject(Server server, FilePath workspacePath)
-			throws IOException, InterruptedException {
-		Workspaces workspaces = server.getWorkspaces();
-        Project project = server.getProject(projectPath);
-        
+    private Project getProject(final Server server, final FilePath workspacePath)
+            throws IOException, InterruptedException {
+        final Workspaces workspaces = server.getWorkspaces();
+        final Project project = server.getProject(projectPath);
+
         if (workspaces.exists(workspaceName) && !useUpdate) {
             Workspace workspace = workspaces.getWorkspace(workspaceName);
             workspaces.deleteWorkspace(workspace);
         }
-        
+
         Workspace workspace;
         if (! workspaces.exists(workspaceName)) {
-            FilePath localFolderPath = workspacePath.child(localFolder);
+            final FilePath localFolderPath = workspacePath.child(localFolder);
             if (!useUpdate && localFolderPath.exists()) {
                 localFolderPath.deleteContents();
             }
@@ -99,7 +99,7 @@ public class CheckoutAction {
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }
-		return project;
+        return project;
 	}
 
 }
