@@ -1,7 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import hudson.plugins.tfs.commands.DeleteWorkspaceCommand;
-import hudson.plugins.tfs.commands.IsWorkspaceMappedCommand;
+import hudson.plugins.tfs.commands.GetWorkspaceMappingCommand;
 import hudson.plugins.tfs.commands.ListWorkspacesCommand;
 import hudson.plugins.tfs.commands.NewWorkspaceCommand;
 
@@ -82,13 +82,16 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
     }
 
     /**
-     * Returns whether there exists a workspace mapping for the given localPath.
+     * Returns the name of the workspace that mapped at the given localPath,
+     * if applicable.
+     *
      * @param localPath the path where TFVC files would be downloaded
-     * @return {@code true} if there exists a mapping; {@code false} otherwise.
+     * @return the workspace name if there exists a mapping;
+     *          {@code null} otherwise.
      */
-    public boolean isMapped(final String localPath) {
-        final IsWorkspaceMappedCommand command = new IsWorkspaceMappedCommand(server, localPath);
-        final Boolean result = server.execute(command.getCallable());
+    public String getWorkspaceMapping(final String localPath) {
+        final GetWorkspaceMappingCommand command = new GetWorkspaceMappingCommand(server, localPath);
+        final String result = server.execute(command.getCallable());
         return result;
     }
 

@@ -6,7 +6,6 @@ import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet;
-import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Project;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.Workspace;
@@ -18,6 +17,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 public class CheckoutAction {
@@ -89,30 +89,52 @@ public class CheckoutAction {
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
 
-        boolean shouldDelete = false;
+        final HashSet<String> workspaceNamesToDelete = new HashSet<String>();
+        if (!useUpdate) {
+            workspaceNamesToDelete.add(workspaceName);
+        }
+        final String existingWorkspaceName = workspaces.getWorkspaceMapping(localPath);
         if (workspaces.exists(workspaceName)) {
-            boolean localFolderExists = true;
-            final boolean isMapped = workspaces.isMapped(localPath);
-            if (!isMapped) {
+            if (existingWorkspaceName == null) {
                 logger.println("Warning: Although the server thinks the workspace exists, no mapping was found.");
+                workspaceNamesToDelete.add(workspaceName);
+            }
+            else if (existingWorkspaceName.equalsIgnoreCase(workspaceName)) {
+                // workspace exists and "localPath" is mapped there: everything is fine.
             }
             else {
-                localFolderExists = localFolderPath.exists();
-                if (!localFolderExists) {
-                    logger.println("Warning: The local folder is missing.");
-                }
+                // workspace exists AND "localPath" is mapped in another workspace???
+                final String template = "WARNING: Workspace '%s' already exists AND '%s' is also mapped in workspace '%s'.  Is there a configuration error?";
+                final String message = String.format(template, workspaceName, localPath, existingWorkspaceName);
+                logger.println(message);
+                workspaceNamesToDelete.add(workspaceName);
+                workspaceNamesToDelete.add(existingWorkspaceName);
+            }
+            final boolean localFolderExists = localFolderPath.exists();
+            if (!localFolderExists) {
+                logger.println("Warning: The local folder is missing.");
+                workspaceNamesToDelete.add(workspaceName);
+            }
+        }
+        else {
+            // there is (apparently) no workspace called "workspaceName"...
+            if (existingWorkspaceName != null && !existingWorkspaceName.equalsIgnoreCase(workspaceName)) {
+                // "localPath" is mapped under another workspace name: delete the old one
+                final String template = "Workspace was apparently renamed, will delete the old one: '%s'.";
+                final String message = String.format(template, existingWorkspaceName);
+                logger.println(message);
+                workspaceNamesToDelete.add(existingWorkspaceName);
+            }
+        }
 
-            }
-            if (!localFolderExists || !isMapped || !useUpdate) {
-                shouldDelete = true;
-                Workspace workspace = workspaces.getWorkspace(workspaceName);
-                workspaces.deleteWorkspace(workspace);
-            }
+        for (final String workspaceNameToDelete : workspaceNamesToDelete) {
+            final Workspace workspace = workspaces.getWorkspace(workspaceNameToDelete);
+            workspaces.deleteWorkspace(workspace);
         }
 
         Workspace workspace;
         if (! workspaces.exists(workspaceName)) {
-            if (shouldDelete && localFolderPath.exists()) {
+            if (workspaceNamesToDelete.size() > 0 && localFolderPath.exists()) {
                 localFolderPath.deleteContents();
             }
             final String serverPath = project.getProjectPath();

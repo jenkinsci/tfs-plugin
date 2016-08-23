@@ -9,39 +9,43 @@ import hudson.remoting.Callable;
 
 import java.io.PrintStream;
 
-public class IsWorkspaceMappedCommand extends AbstractCallableCommand implements Callable<Boolean, Exception> {
+public class GetWorkspaceMappingCommand extends AbstractCallableCommand implements Callable<String, Exception> {
 
     private static final String CheckingMappingTemplate = "Checking if there exists a mapping for %s...";
+    private static final String FoundResultTemplate = "yes, in workspace '%s'.";
 
     private final String localPath;
 
-    public IsWorkspaceMappedCommand(final ServerConfigurationProvider serverConfig, final String localPath) {
+    public GetWorkspaceMappingCommand(final ServerConfigurationProvider serverConfig, final String localPath) {
         super(serverConfig);
         this.localPath = localPath;
     }
 
     @Override
-    public Callable<Boolean, Exception> getCallable() {
+    public Callable<String, Exception> getCallable() {
         return this;
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public String call() throws Exception {
         final Server server = createServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
         final TFSTeamProjectCollection connection = vcc.getConnection();
         updateCache(connection);
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
-        final String listWorkspacesMessage = String.format(CheckingMappingTemplate, localPath);
-        logger.print(listWorkspacesMessage);
+
+        final String checkingMessage = String.format(CheckingMappingTemplate, localPath);
+        logger.print(checkingMessage);
 
         final Workspace workspace = vcc.tryGetWorkspace(localPath);
         final boolean existsMapping = workspace != null;
+        final String result = existsMapping ? workspace.getName() : null;
 
-        logger.println(existsMapping ? "yes" : "no");
+        final String resultMessage = existsMapping ? String.format(FoundResultTemplate, result) : "no.";
+        logger.println(resultMessage);
 
-        return existsMapping;
+        return result;
     }
 
 }
