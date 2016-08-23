@@ -305,6 +305,7 @@ public class CheckoutActionTest {
         verify(workspaces).getWorkspace("workspace");
         verify(workspaces).deleteWorkspace(workspace);
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -324,6 +325,7 @@ public class CheckoutActionTest {
         verify(workspaces).getWorkspace("workspace");
         verify(workspaces).deleteWorkspace(workspace);
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -339,6 +341,7 @@ public class CheckoutActionTest {
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).getWorkspace("workspace");
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -354,6 +357,7 @@ public class CheckoutActionTest {
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).getWorkspace("workspace");
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -370,6 +374,7 @@ public class CheckoutActionTest {
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -386,6 +391,7 @@ public class CheckoutActionTest {
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
