@@ -1,8 +1,8 @@
 /.settings
-/target
-/workspaces
-/work
+**/target
+**/workspaces
+**/work
 /.project
 /.classpath
 /.idea
-/*.iml
+**/*.iml
