@@ -369,4 +369,21 @@ public class MockableVersionControlClient implements Closable {
         makeSureNotClosed();
         return vcc.removeCachedWorkspace(workspaceName, workspaceOwner);
     }
+
+    /**
+     * This is the same as GetWorkspace() except that it returns null rather
+     * than throwing ItemNotMappedException if the path is not in any known
+     * local workspace.
+     *
+     * @param localPath
+     *        A local path for which a workspace is desired (must not be
+     *        <code>null</code>)
+     * @return A reference to the workspace object that has mapped the specified
+     *         local path or null if the local path is not in a local workspace
+     */
+    public Workspace tryGetWorkspace(final String localPath) {
+        makeSureNotClosed();
+        return vcc.tryGetWorkspace(localPath);
+    }
+
 }
