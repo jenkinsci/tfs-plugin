@@ -54,6 +54,7 @@
   </distributionManagement>
 
   <modules>
+    <module>tfs-sdk</module>
     <module>tfs</module>
   </modules>
 
