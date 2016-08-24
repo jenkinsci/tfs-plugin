@@ -33,7 +33,7 @@ public class TeamPendingStatusBuildStep extends Builder implements SimpleBuildSt
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
         try {
-            TeamStatus.createFromRun(run);
+            TeamStatus.createFromRun(run, listener);
         }
         catch (final IllegalArgumentException e) {
             listener.error(e.getMessage());

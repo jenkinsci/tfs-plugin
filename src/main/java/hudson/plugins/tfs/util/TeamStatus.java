@@ -2,9 +2,11 @@ package hudson.plugins.tfs.util;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
+import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.TeamGitStatus;
@@ -14,8 +16,12 @@ import java.io.IOException;
 import java.net.URI;
 
 public class TeamStatus {
-    public static void createFromRun(@Nonnull final Run<?, ?> run) throws IOException {
-        // TODO: also add support for a build triggered from a pull request
+    public static void createFromRun(@Nonnull final Run<?, ?> run, @Nonnull final TaskListener listener) throws IOException {
+
+        if (!UnsupportedIntegrationAction.isSupported(run, listener)) {
+            return;
+        }
+
         final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
         final GitCodePushedEventArgs gitCodePushedEventArgs;
         final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs;
