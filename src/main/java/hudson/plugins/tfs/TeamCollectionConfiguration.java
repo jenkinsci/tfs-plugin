@@ -11,8 +11,8 @@ import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.plugins.tfs.util.StringHelper;
-import hudson.plugins.tfs.util.UriHelper;
 import hudson.plugins.tfs.util.TeamRestClient;
+import hudson.plugins.tfs.util.UriHelper;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -21,9 +21,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,13 +62,18 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         public FormValidation doCheckCollectionUrl(
                 @QueryParameter final String value) {
 
+            final URI uri;
             try {
-                new URL(value);
+                uri = new URI(value);
             }
-            catch (MalformedURLException e) {
+            catch (final URISyntaxException e) {
                 return FormValidation.error("Malformed TFS/Team Services collection URL (%s)", e.getMessage());
             }
 
+            final String hostName = uri.getHost();
+            if (isTeamServices(hostName)) {
+                return checkTeamServices(uri);
+            }
             // TODO: check that it's not a deep URL to a repository, work item, API endpoint, etc.
 
             return FormValidation.ok();
@@ -84,16 +88,16 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
             String hostName = null;
             try {
-                final URL url = new URL(collectionUrl);
-                hostName = url.getHost();
+                final URI uri = new URI(collectionUrl);
+                hostName = uri.getHost();
             }
-            catch (final MalformedURLException e) {
+            catch (final URISyntaxException e) {
                 return FormValidation.error(errorTemplate, e.getMessage());
             }
 
             try {
                 final StandardUsernamePasswordCredentials credential = findCredential(hostName, credentialsId);
-                if (StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com")) {
+                if (isTeamServices(hostName)) {
                     if (credential == null) {
                         return FormValidation.error(errorTemplate, "Team Services accounts need credentials, preferably a Personal Access Token");
                     }
@@ -116,10 +120,10 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
             String hostName = null;
             try {
-                final URL url = new URL(collectionUrl);
-                hostName = url.getHost();
+                final URI uri = new URI(collectionUrl);
+                hostName = uri.getHost();
             }
-            catch (final MalformedURLException ignored) {
+            catch (final URISyntaxException ignored) {
             }
 
             if (hostName == null || !jenkins.hasPermission(Jenkins.ADMINISTER)) {
@@ -131,6 +135,34 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
                     .withEmptySelection()
                     .withAll(matches);
         }
+    }
+
+    static FormValidation checkTeamServices(final URI uri) {
+        if (UriHelper.hasPath(uri)) {
+            return FormValidation.error("A Team Services collection URL must have an empty path.");
+        }
+        return FormValidation.ok();
+    }
+
+    static boolean areSameCollectionUri(final URI a, final URI b) {
+        if (a == null) {
+            throw new IllegalArgumentException("Parameter 'a' is null");
+        }
+        if (b == null) {
+            throw new IllegalArgumentException("Parameter 'b' is null");
+        }
+
+        final String aHost = a.getHost();
+        final String bHost = b.getHost();
+        if (isTeamServices(aHost) && isTeamServices(bHost)) {
+            return StringHelper.equalIgnoringCase(aHost, bHost);
+        }
+
+        return UriHelper.areSame(a, b);
+    }
+
+    public static boolean isTeamServices(final String hostName) {
+        return StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
     }
 
     static void testConnection(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {
@@ -181,7 +213,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         for (final TeamCollectionConfiguration pair : pairs) {
             final String candidateCollectionUrlString = pair.getCollectionUrl();
             final URI candidateCollectionUri = URI.create(candidateCollectionUrlString);
-            if (UriHelper.areSame(candidateCollectionUri, collectionUri)) {
+            if (areSameCollectionUri(candidateCollectionUri, collectionUri)) {
                 final String credentialsId = pair.credentialsId;
                 if (credentialsId != null) {
                     return findCredentialsById(credentialsId);

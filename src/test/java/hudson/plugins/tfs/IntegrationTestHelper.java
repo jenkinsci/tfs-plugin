@@ -40,7 +40,7 @@ public class IntegrationTestHelper {
 
     public IntegrationTestHelper(final String tfsServerName, final String tfsUserName, final String tfsUserPassword) throws URISyntaxException {
         final URI serverUri;
-        if (tfsServerName.endsWith(".visualstudio.com")) {
+        if (TeamCollectionConfiguration.isTeamServices(tfsServerName)) {
             serverUri = new URI("https", null, tfsServerName, 443, "/", null, null);
             this.userName = tfsUserName;
             this.userPassword = tfsUserPassword;

@@ -35,9 +35,7 @@ public class TeamStatus {
         }
 
         final URI collectionUri = gitCodePushedEventArgs.collectionUri;
-        final StandardUsernamePasswordCredentials credentials =
-                TeamCollectionConfiguration.findCredentialsForCollection(collectionUri);
-        final TeamRestClient client = new TeamRestClient(collectionUri, credentials);
+        final TeamRestClient client = new TeamRestClient(collectionUri);
 
         final TeamGitStatus status = TeamGitStatus.fromRun(run);
         // TODO: when code is pushed and polling happens, are we sure we built against the requested commit?

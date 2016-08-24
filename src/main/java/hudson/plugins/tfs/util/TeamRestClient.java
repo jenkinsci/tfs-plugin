@@ -3,6 +3,7 @@ package hudson.plugins.tfs.util;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
@@ -34,13 +35,26 @@ public class TeamRestClient {
     }
 
     private final URI collectionUri;
-    private final boolean isHosted;
+    private final boolean isTeamServices;
     private final String authorization;
+
+    public TeamRestClient(final URI collectionUri) {
+        this.collectionUri = collectionUri;
+        final String hostName = collectionUri.getHost();
+        isTeamServices = TeamCollectionConfiguration.isTeamServices(hostName);
+        final StandardUsernamePasswordCredentials credentials = TeamCollectionConfiguration.findCredentialsForCollection(collectionUri);
+        if (credentials != null) {
+            authorization = createAuthorization(credentials);
+        }
+        else {
+            authorization = null;
+        }
+    }
 
     public TeamRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) {
         this.collectionUri = collectionUri;
         final String hostName = collectionUri.getHost();
-        isHosted = StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
+        isTeamServices = TeamCollectionConfiguration.isTeamServices(hostName);
         if (credentials != null) {
             authorization = createAuthorization(credentials);
         }
@@ -163,7 +177,7 @@ public class TeamRestClient {
 
     public String ping() throws IOException {
         final URI requestUri;
-        if (isHosted) {
+        if (isTeamServices) {
             requestUri = UriHelper.join(collectionUri, "_apis", "connectiondata");
         }
         else {

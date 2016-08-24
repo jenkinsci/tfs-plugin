@@ -10,10 +10,12 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.CommitParameterAction;
+import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamHookCause;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
+import hudson.plugins.tfs.util.StringHelper;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
@@ -77,6 +79,7 @@ public abstract class AbstractHookEvent {
 
     // TODO: it would be easiest if pollOrQueueFromEvent built a JSONObject directly
     List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final CommitParameterAction commitParameterAction, final boolean bypassPolling) {
+        final String almostMatchTemplate = "Remote URL '%s' of job '%s' almost matched event URL '%s'.";
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
         final String commit = gitCodePushedEventArgs.commit;
         final URIish uri = gitCodePushedEventArgs.getRepoURIish();
@@ -93,6 +96,7 @@ public abstract class AbstractHookEvent {
                 LOGGER.severe("Jenkins.getInstance() is null");
                 return result;
             }
+            int totalRepositoryMatches = 0;
             for (final Item project : Jenkins.getInstance().getAllItems()) {
                 final SCMTriggerItem scmTriggerItem = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(project);
                 if (scmTriggerItem == null) {
@@ -110,7 +114,17 @@ public abstract class AbstractHookEvent {
                         for (URIish remoteURL : repository.getURIs()) {
                             if (GitStatus.looselyMatches(uri, remoteURL)) {
                                 repositoryMatches = true;
+                                totalRepositoryMatches++;
                                 break;
+                            }
+                        }
+
+                        if (!repositoryMatches) {
+                            for (URIish remoteURL : repository.getURIs()) {
+                                if (isTeamServicesNearMatch(uri, remoteURL)) {
+                                    final String message = String.format(almostMatchTemplate, uri, project.getFullDisplayName(), remoteURL);
+                                    LOGGER.warning(message);
+                                }
                             }
                         }
 
@@ -165,12 +179,45 @@ public abstract class AbstractHookEvent {
             if (!scmFound) {
                 result.add(new GitStatus.MessageResponseContributor("No Git jobs found"));
             }
+            else if (totalRepositoryMatches == 0) {
+                final String template = "No Git jobs matched the remote URL '%s' requested by an event.";
+                final String message = String.format(template, uri);
+                LOGGER.warning(message);
+            }
 
             return result;
         }
         finally {
             SecurityContextHolder.setContext(old);
         }
+    }
+
+    // TODO: find a better home for this method
+    static boolean isTeamServicesNearMatch(final URIish a, final URIish b) {
+        final String aHost = a.getHost();
+        final String bHost = b.getHost();
+        if (TeamCollectionConfiguration.isTeamServices(aHost)
+                && TeamCollectionConfiguration.isTeamServices(bHost)) {
+            final String aPath = normalizePath(a.getPath());
+            final String bPath = normalizePath(b.getPath());
+            if (StringHelper.endsWithIgnoreCase(aPath, bPath)
+                    || StringHelper.endsWithIgnoreCase(bPath, aPath)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static String normalizePath(String path) {
+        if(path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
+        if(path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+
+        return path;
     }
 
 }
