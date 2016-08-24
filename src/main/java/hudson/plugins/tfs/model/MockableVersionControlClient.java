@@ -222,7 +222,7 @@ public class MockableVersionControlClient implements Closable {
      *        end at the most recent version).
      * @param maxCount
      *        the maximum number of changes to return (pass Integer.MAX_VALUE
-     *        for all available values). Must be > 0.
+     *        for all available values). Must be &gt; 0.
      * @param includeFileDetails
      *        true to include individual file change details with the returned
      *        results, false to return only general changeset information.
