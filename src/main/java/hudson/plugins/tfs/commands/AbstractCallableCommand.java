@@ -1,5 +1,10 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
+import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
+import com.microsoft.tfs.core.clients.versioncontrol.Workstation;
+import com.microsoft.tfs.core.config.persistence.PersistenceStoreProvider;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.ExtraSettings;
 import hudson.plugins.tfs.model.Server;
@@ -25,6 +30,13 @@ public abstract class AbstractCallableCommand implements Serializable {
         listener = serverConfig.getListener();
         webProxySettings = serverConfig.getWebProxySettings();
         extraSettings = serverConfig.getExtraSettings();
+    }
+
+    protected void updateCache(final TFSTeamProjectCollection connection) {
+        final PersistenceStoreProvider persistenceStoreProvider = connection.getPersistenceStoreProvider();
+        final Workstation workstation = Workstation.getCurrent(persistenceStoreProvider);
+        final VersionControlClient vcc = connection.getVersionControlClient();
+        workstation.updateWorkspaceInfoCache(vcc, VersionControlConstants.AUTHENTICATED_USER);
     }
 
     public Server createServer() throws IOException {

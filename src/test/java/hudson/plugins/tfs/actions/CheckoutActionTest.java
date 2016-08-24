@@ -12,6 +12,7 @@ import java.util.List;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.FilePath;
+import hudson.model.TaskListener;
 import hudson.plugins.tfs.Util;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.model.Project;
@@ -38,6 +39,7 @@ public class CheckoutActionTest {
     private @Mock Workspaces workspaces;
     private @Mock Workspace workspace;
     private @Mock Project project;
+    private @Mock TaskListener taskListener;
 
     @Before public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -49,11 +51,19 @@ public class CheckoutActionTest {
             hudsonWs.deleteRecursive();
         }
     }
+
+    private void prepareCommonMocks() {
+        when(server.getWorkspaces()).thenReturn(workspaces);
+        when(server.getProject("project")).thenReturn(project);
+
+        when(server.getListener()).thenReturn(taskListener);
+        when(taskListener.getLogger()).thenReturn(System.out);
+        when(workspaces.getWorkspaceMapping(anyString())).thenReturn("workspace");
+    }
     
     @Test
     public void assertFirstCheckoutBySingleVersionSpecNotUsingUpdate() throws Exception {
-    	when(server.getWorkspaces()).thenReturn(workspaces);
-    	when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
     	when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
@@ -68,8 +78,7 @@ public class CheckoutActionTest {
     
     @Test
     public void assertFirstCheckoutNotUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
@@ -84,8 +93,7 @@ public class CheckoutActionTest {
 
     @Test
     public void assertFirstCheckoutBySingleVersionSpecUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
@@ -99,8 +107,7 @@ public class CheckoutActionTest {
 
     @Test
     public void assertFirstCheckoutUsingUpdate() throws Exception {
-    	when(server.getWorkspaces()).thenReturn(workspaces);
-    	when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
     	when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
@@ -114,8 +121,7 @@ public class CheckoutActionTest {
     
     @Test
     public void assertSecondCheckoutBySingleVersionSpecUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
@@ -129,8 +135,7 @@ public class CheckoutActionTest {
     
     @Test
     public void assertSecondCheckoutUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
@@ -144,8 +149,7 @@ public class CheckoutActionTest {
 
     @Test
     public void assertSecondCheckoutBySingleVersionSpecNotUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
@@ -160,8 +164,7 @@ public class CheckoutActionTest {
 
     @Test
     public void assertSecondCheckoutNotUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
@@ -176,8 +179,7 @@ public class CheckoutActionTest {
    
     @Test
     public void assertDetailedHistoryIsNotRetrievedInFirstBuildCheckingOutByLabel() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
@@ -189,8 +191,7 @@ public class CheckoutActionTest {
    
     @Test
     public void assertDetailedHistoryIsNotRetrievedInFirstBuild() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
@@ -203,8 +204,7 @@ public class CheckoutActionTest {
     @Test
     public void assertDetailedHistoryIsRetrievedInSecondBuildCheckingOutByLabel() throws Exception {
         List<ChangeSet> list = new ArrayList<ChangeSet>();
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
@@ -220,8 +220,7 @@ public class CheckoutActionTest {
     @Test
     public void assertDetailedHistoryIsRetrievedInSecondBuild() throws Exception {
         List<ChangeSet> list = new ArrayList<ChangeSet>();
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
@@ -244,8 +243,7 @@ public class CheckoutActionTest {
         tfsWs.mkdirs();
         tfsWs.createTempFile("temp", "txt");
         
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
@@ -263,8 +261,7 @@ public class CheckoutActionTest {
         tfsWs.mkdirs();
         tfsWs.createTempFile("temp", "txt");
         
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
@@ -281,8 +278,7 @@ public class CheckoutActionTest {
         tfsWs.mkdirs();
         tfsWs.createTempFile("temp", "txt");
         
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
@@ -296,10 +292,9 @@ public class CheckoutActionTest {
     @Bug(3882)
     @Test
     public void assertCheckoutBySingleVersionSpecDeletesWorkspaceAtStartIfNotUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getProject("project")).thenReturn(project);
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
@@ -310,16 +305,16 @@ public class CheckoutActionTest {
         verify(workspaces).getWorkspace("workspace");
         verify(workspaces).deleteWorkspace(workspace);
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
     @Bug(3882)
     @Test
     public void assertCheckoutDeletesWorkspaceAtStartIfNotUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getProject("project")).thenReturn(project);
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
@@ -330,48 +325,48 @@ public class CheckoutActionTest {
         verify(workspaces).getWorkspace("workspace");
         verify(workspaces).deleteWorkspace(workspace);
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
     @Bug(3882)
     @Test
     public void assertCheckoutDoesNotDeleteWorkspaceAtStartIfUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getProject("project")).thenReturn(project);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).getWorkspace("workspace");
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
     @Bug(3882)
     @Test
     public void assertCheckoutBySingleVersionSpecDoesNotDeleteWorkspaceAtStartIfUsingUpdate() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
-        when(server.getProject("project")).thenReturn(project);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).getWorkspace("workspace");
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
     @Bug(3882)
     @Test
     public void assertCheckoutDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
-        when(server.getProject("project")).thenReturn(project);
         when(project.getProjectPath()).thenReturn("project");
 
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
@@ -379,16 +374,16 @@ public class CheckoutActionTest {
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
     @Bug(3882)
     @Test
     public void assertCheckoutBySingleVersionSpecDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
-        when(server.getWorkspaces()).thenReturn(workspaces);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
-        when(server.getProject("project")).thenReturn(project);
         when(project.getProjectPath()).thenReturn("project");
 
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
@@ -396,6 +391,7 @@ public class CheckoutActionTest {
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
     
@@ -403,8 +399,7 @@ public class CheckoutActionTest {
     @Test
     public void assertCheckoutOnlyRetrievesChangesToTheStartTimestampForCurrentBuild() throws Exception {
         List<ChangeSet> list = new ArrayList<ChangeSet>();
-        when(server.getWorkspaces()).thenReturn(workspaces);
-        when(server.getProject("project")).thenReturn(project);
+        prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");

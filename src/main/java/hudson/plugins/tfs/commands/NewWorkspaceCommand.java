@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.commands;
 
+import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlConstants;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceOptions;
@@ -47,6 +48,7 @@ public class NewWorkspaceCommand extends AbstractCallableCommand implements Call
     public Void call() throws IOException {
         final Server server = createServer();
         final MockableVersionControlClient vcc = server.getVersionControlClient();
+        final TFSTeamProjectCollection connection = vcc.getConnection();
         final TaskListener listener = server.getListener();
         final PrintStream logger = listener.getLogger();
         final String userName = server.getUserName();
@@ -73,6 +75,8 @@ public class NewWorkspaceCommand extends AbstractCallableCommand implements Call
             foldersToMap = folderList.toArray(EMPTY_WORKING_FOLDER_ARRAY);
         }
 
+        updateCache(connection);
+        // TODO: we might need to delete a previous workspace that had another name
         vcc.createWorkspace(
                 foldersToMap,
                 workspaceName,
