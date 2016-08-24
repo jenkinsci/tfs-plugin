@@ -3,6 +3,7 @@ package hudson.plugins.tfs;
 import hudson.Extension;
 import hudson.ExtensionList;
 import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.ObjectUtils;
 import org.kohsuke.stapler.StaplerRequest;
@@ -19,13 +20,20 @@ import java.util.logging.Logger;
 public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
     private static final Logger LOGGER = Logger.getLogger(TeamPluginGlobalConfig.class.getName());
-    private static final TeamPluginGlobalConfig DEFAULT_CONFIG = new TeamPluginGlobalConfig();
+    public static final TeamPluginGlobalConfig DEFAULT_CONFIG = new TeamPluginGlobalConfig(false);
 
     private List<TeamCollectionConfiguration> collectionConfigurations = new ArrayList<TeamCollectionConfiguration>();
 
+    private boolean configFolderPerNode;
 
     public TeamPluginGlobalConfig() {
-        load();
+        this(true);
+    }
+
+    TeamPluginGlobalConfig(final boolean shouldLoadConfig) {
+        if (shouldLoadConfig) {
+            load();
+        }
     }
 
     public TeamPluginGlobalConfig(final List<TeamCollectionConfiguration> collectionConfigurations) {
@@ -33,9 +41,12 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
     }
 
     public static TeamPluginGlobalConfig get() {
-        final ExtensionList<GlobalConfiguration> configurationExtensions = all();
-        final TeamPluginGlobalConfig config = configurationExtensions.get(TeamPluginGlobalConfig.class);
-        final TeamPluginGlobalConfig result = ObjectUtils.defaultIfNull(config, DEFAULT_CONFIG);
+        TeamPluginGlobalConfig result = DEFAULT_CONFIG;
+        if (Jenkins.getInstance() != null) {
+            final ExtensionList<GlobalConfiguration> configurationExtensions = all();
+            final TeamPluginGlobalConfig config = configurationExtensions.get(TeamPluginGlobalConfig.class);
+            result = ObjectUtils.defaultIfNull(config, DEFAULT_CONFIG);
+        }
         return result;
     }
 
@@ -45,6 +56,14 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
     public void setCollectionConfigurations(final List<TeamCollectionConfiguration> collectionConfigurations) {
         this.collectionConfigurations = collectionConfigurations;
+    }
+
+    public boolean isConfigFolderPerNode() {
+        return configFolderPerNode;
+    }
+
+    public void setConfigFolderPerNode(final boolean configFolderPerNode) {
+        this.configFolderPerNode = configFolderPerNode;
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.PendingSet;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.RecursionType;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.WorkingFolder;
 import com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace;
+import hudson.plugins.tfs.model.ExtraSettings;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.XmlHelper;
@@ -147,7 +148,7 @@ public @interface EndToEndTfs {
             final File currentFolder = new File("").getAbsoluteFile();
             final File workspaces = new File(currentFolder, "workspaces");
             // TODO: Consider NOT using the Server class
-            server = new Server(null, null, serverUrl, helper.getUserName(), helper.getUserPassword());
+            server = new Server(null, null, serverUrl, helper.getUserName(), helper.getUserPassword(), null, ExtraSettings.DEFAULT);
 
             final MockableVersionControlClient vcc = server.getVersionControlClient();
 

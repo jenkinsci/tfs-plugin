@@ -2,6 +2,7 @@ package hudson.plugins.tfs.commands;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.model.ExtraSettings;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.WebProxySettings;
@@ -105,6 +106,11 @@ public abstract class AbstractCallableCommandTest {
                     }
                 }
                 return new WebProxySettings("localhost", 8080, patterns, "user", secret);
+            }
+
+            @Override
+            public ExtraSettings getExtraSettings() {
+                return ExtraSettings.DEFAULT;
             }
         };
         final AbstractCallableCommand command = createCommand(server);

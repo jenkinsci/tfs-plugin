@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.commands;
 
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.model.ExtraSettings;
 import hudson.plugins.tfs.model.WebProxySettings;
 
 public interface ServerConfigurationProvider {
@@ -14,4 +15,6 @@ public interface ServerConfigurationProvider {
     public TaskListener getListener();
 
     public WebProxySettings getWebProxySettings();
+
+    public ExtraSettings getExtraSettings();
 }
