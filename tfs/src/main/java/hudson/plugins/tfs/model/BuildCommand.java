@@ -120,6 +120,10 @@ public class BuildCommand extends AbstractCommand {
 
         if (teamBuildPayload.BuildVariables != null) {
             contributeTeamBuildParameterActions(teamBuildPayload.BuildVariables, actions);
+            // TODO: does it make sense to expose this to builds triggered by an event?
+            if (teamBuildPayload.TeamResults != null) {
+                contributeTeamResultsParameterActions(teamBuildPayload.TeamResults, actions);
+            }
         }
         else if (teamBuildPayload.ServiceHookEvent != null) {
             final Event event = teamBuildPayload.ServiceHookEvent;
@@ -209,6 +213,10 @@ public class BuildCommand extends AbstractCommand {
         }
 
         return innerPerform(project, delay, actions);
+    }
+
+    static void contributeTeamResultsParameterActions(final List<TeamResult> teamResults, final List<Action> actions) {
+        // TODO: implement
     }
 
     static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
