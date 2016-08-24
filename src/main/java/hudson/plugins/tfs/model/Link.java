@@ -1,12 +1,19 @@
 package hudson.plugins.tfs.model;
 
-import java.net.URI;
-
+/**
+ * Workaround for missing Link model class in current version of vso-httpclient-java
+ */
 public class Link {
-    public URI href;
+    public String rel;
+    public String url;
 
-    @Override
-    public String toString() {
-        return href.toString();
+    public Link() {
+
     }
+
+    public Link(final String rel, final String url) {
+        this.rel = rel;
+        this.url = url;
+    }
+
 }

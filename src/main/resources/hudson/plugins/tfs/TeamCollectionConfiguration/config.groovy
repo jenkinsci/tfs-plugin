@@ -7,7 +7,8 @@ f.entry(title: _("Collection URL"), field: "collectionUrl") {
     f.textbox()
 }
 
-f.entry(title: _("Credentials"), field: "credentialsId") {
+f.entry(title: _("Credentials"), field: "credentialsId",
+        description: "Depending on the integration features used, the user account or personal access token may need code_read, code_status and/or work_write permissions") {
     c.select()
 }
 

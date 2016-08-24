@@ -1,7 +1,7 @@
 package hudson.plugins.tfs.model;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPullRequest;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -23,6 +23,7 @@ import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.TeamBuildDetailsAction;
 import hudson.plugins.tfs.TeamBuildEndpoint;
+import hudson.plugins.tfs.TeamPullRequestMergedDetailsAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.TeamEventsEndpoint;

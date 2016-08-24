@@ -4,11 +4,17 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
+import com.microsoft.visualstudio.services.webapi.patch.Operation;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
+import hudson.plugins.tfs.model.JsonPatchOperation;
+import hudson.plugins.tfs.model.Link;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.TeamGitStatus;
+import hudson.plugins.tfs.model.WorkItem;
 import hudson.util.Secret;
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 
@@ -98,8 +104,14 @@ public class TeamRestClient {
 
             final String stringRequestBody;
             if (requestBody != null) {
-                final JSONObject jsonObject = JSONObject.fromObject(requestBody);
-                stringRequestBody = jsonObject.toString();
+                final JSON jsonObject;
+                if (requestBody instanceof JSON) {
+                    jsonObject = (JSON) requestBody;
+                }
+                else {
+                    jsonObject = JSONObject.fromObject(requestBody);
+                }
+                stringRequestBody = jsonObject.toString(0);
             }
             else {
                 stringRequestBody = null;
@@ -199,6 +211,53 @@ public class TeamRestClient {
             qs);
 
         return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
+    }
+
+    public WorkItem getWorkItem(final int workItemId) throws IOException {
+        final QueryString qs = new QueryString(API_VERSION, "1.0");
+        final URI requestUri = UriHelper.join(
+                collectionUri,
+                "_apis",
+                "wit",
+                "workitems",
+                workItemId,
+                qs
+        );
+
+        return request(WorkItem.class, HttpMethod.GET, requestUri, null);
+    }
+
+    public void addHyperlinkToWorkItem(final int workItemId, final String hyperlink) throws IOException {
+
+        final JSONArray doc = new JSONArray();
+
+        final WorkItem workItem = getWorkItem(workItemId);
+        final JsonPatchOperation testRev = new JsonPatchOperation();
+        testRev.setOp(Operation.TEST);
+        testRev.setPath("/rev");
+        testRev.setValue(workItem.getRev());
+        doc.add(testRev);
+
+        // TODO: do we also need to "add" to "/fields/System.History"?
+
+        final Link link = new Link("Hyperlink", hyperlink);
+        final JsonPatchOperation addRelation = new JsonPatchOperation();
+        addRelation.setOp(Operation.ADD);
+        addRelation.setPath("/relations/-");
+        addRelation.setValue(link);
+        doc.add(addRelation);
+
+        final QueryString qs = new QueryString(API_VERSION, "1.0");
+        final URI requestUri = UriHelper.join(
+            collectionUri,
+            "_apis",
+            "wit",
+            "workitems",
+            workItemId,
+            qs);
+
+        // TODO: this call could fail because something else bumped the rev in the meantime; retry?
+        request(Void.class, HttpMethod.PATCH, requestUri, doc);
     }
 
     public TeamGitStatus addPullRequestStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
