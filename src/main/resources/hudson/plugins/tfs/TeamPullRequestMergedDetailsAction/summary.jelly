@@ -1,0 +1,18 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+    xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+    xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+    <t:summary icon="${it.iconFileName}">
+
+    Triggered by TFS/Team Services pull request <a href="${it.pullRequestUrl}">#${it.gitPullRequest.pullRequestId}</a>: '${it.gitPullRequest.title}', created by ${it.gitPullRequest.createdBy.displayName}
+    <j:if test="${it.hasWorkItems()}">
+        <br />
+        Associated work items:
+        <ul>
+        <j:forEach var="workItem" items="${it.workItems}">
+            <li><a href="${workItem.url}">${workItem.id}</a></li>
+        </j:forEach>
+        </ul>
+    </j:if>
+    </t:summary>
+</j:jelly>

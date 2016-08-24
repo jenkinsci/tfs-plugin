@@ -5,13 +5,16 @@ import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitCommitRef;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPullRequest;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
+import hudson.model.Action;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ResourceHelper;
+import hudson.plugins.tfs.TeamPullRequestMergedDetailsAction;
 import net.sf.json.JSONObject;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GitPullRequestMergedEvent extends GitPushEvent {
@@ -68,13 +71,17 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
     }
 
     @Override
-    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
+    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent, final String message, final String detailedMessage) {
         final Object resource = serviceHookEvent.getResource();
-        final GitPullRequest gitPullRequest = mapper.convertValue(resource, GitPullRequest.class);
+        final GitPullRequestEx gitPullRequest = mapper.convertValue(resource, GitPullRequestEx.class);
 
         final PullRequestMergeCommitCreatedEventArgs args = decodeGitPullRequest(gitPullRequest, serviceHookEvent);
         final PullRequestParameterAction parameterAction = new PullRequestParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, true);
+        final Action teamPullRequestMergedDetailsAction = new TeamPullRequestMergedDetailsAction(gitPullRequest, message, detailedMessage, args.collectionUri.toString());
+        final ArrayList<Action> actions = new ArrayList<Action>();
+        actions.add(parameterAction);
+        actions.add(teamPullRequestMergedDetailsAction);
+        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, actions, true);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
     }

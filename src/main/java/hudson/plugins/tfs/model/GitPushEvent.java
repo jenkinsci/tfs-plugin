@@ -6,6 +6,7 @@ import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitCommitRef;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
+import hudson.model.Action;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
@@ -16,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,13 +37,15 @@ public class GitPushEvent extends AbstractHookEvent {
     }
 
     @Override
-    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent) {
+    public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent, final String message, final String detailedMessage) {
         final Object resource = serviceHookEvent.getResource();
         final GitPush gitPush = mapper.convertValue(resource, GitPush.class);
 
         final GitCodePushedEventArgs args = decodeGitPush(gitPush, serviceHookEvent);
         final CommitParameterAction parameterAction = new CommitParameterAction(args);
-        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, parameterAction, false);
+        final ArrayList<Action> actions = new ArrayList<Action>();
+        actions.add(parameterAction);
+        final List<GitStatus.ResponseContributor> contributors = pollOrQueueFromEvent(args, actions, false);
         final JSONObject response = fromResponseContributors(contributors);
         return response;
     }

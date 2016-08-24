@@ -1,0 +1,94 @@
+package hudson.plugins.tfs;
+
+import com.microsoft.teamfoundation.core.webapi.model.TeamProjectReference;
+import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
+import com.microsoft.visualstudio.services.webapi.model.ResourceRef;
+import hudson.model.Action;
+import hudson.plugins.tfs.model.GitPullRequestEx;
+import hudson.plugins.tfs.model.GitPushEvent;
+import hudson.plugins.tfs.util.UriHelper;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
+
+import java.io.Serializable;
+import java.net.URI;
+
+/**
+ * Captures details of the TFS/Team Services pull request event which triggered us.
+ */
+@ExportedBean(defaultVisibility = 999)
+public class TeamPullRequestMergedDetailsAction implements Action, Serializable {
+    private static final long serialVersionUID = 1L;
+    private static final String URL_NAME = "team-pullRequestMergedDetails";
+
+    public GitPullRequestEx gitPullRequest;
+    public String message;
+    public String detailedMessage;
+    public String collectionUri;
+
+    public TeamPullRequestMergedDetailsAction() {
+
+    }
+
+    public TeamPullRequestMergedDetailsAction(final GitPullRequestEx gitPullRequest, final String message, final String detailedMessage, final String collectionUri) {
+        this.gitPullRequest = gitPullRequest;
+        this.message = message;
+        this.detailedMessage = detailedMessage;
+        this.collectionUri = collectionUri;
+    }
+
+    @Override
+    public String getIconFileName() {
+        // TODO: find an appropriate icon
+        return "clipboard.png";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "TFS/Team Services pull request";
+    }
+
+    @Override
+    public String getUrlName() {
+        return URL_NAME;
+    }
+
+    // the following methods are called from this/summary.jelly and/or this/index.jelly
+
+    @Exported
+    public String getMessage() {
+        return message;
+    }
+
+    @Exported
+    public String getDetailedMessage() {
+        return detailedMessage;
+    }
+
+    @Exported
+    public ResourceRef[] getWorkItems() {
+        return gitPullRequest.getWorkItemRefs();
+    }
+
+    @Exported
+    public boolean hasWorkItems() {
+        final ResourceRef[] workItemRefs = gitPullRequest.getWorkItemRefs();
+        return workItemRefs != null && workItemRefs.length > 0;
+    }
+
+    @Exported
+    public String getPullRequestUrl() {
+        final GitRepository repository = gitPullRequest.getRepository();
+        final URI collectionUri = URI.create(this.collectionUri);
+        final TeamProjectReference project = repository.getProject();
+        final URI pullRequestUrl = UriHelper.join(collectionUri,
+                project.getName(),
+                "_git",
+                repository.getName(),
+                "pullrequest",
+                gitPullRequest.getPullRequestId()
+        );
+        final String result = pullRequestUrl.toString();
+        return result;
+    }
+}
