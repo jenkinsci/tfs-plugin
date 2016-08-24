@@ -30,6 +30,7 @@ import java.util.List;
 public class TeamCollectResultsPostBuildAction extends Recorder implements SimpleBuildStep {
 
     private static final String TEAM_RESULTS = "team-results";
+    static final String TEAM_RESULTS_ZIP = "team-results.zip";
 
     @DataBoundConstructor
     public TeamCollectResultsPostBuildAction() {
@@ -76,7 +77,7 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
         }
         logger.print(". Compressing...");
         final ArchiverFactory zip = ArchiverFactory.ZIP;
-        final File resultsZipFile = new File(rootDir, "team-results.zip");
+        final File resultsZipFile = new File(rootDir, TEAM_RESULTS_ZIP);
         final FileOutputStream outputStream = new FileOutputStream(resultsZipFile);
         try {
             final Archiver archiver = zip.create(outputStream);
