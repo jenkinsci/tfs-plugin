@@ -119,11 +119,7 @@ public class BuildCommand extends AbstractCommand {
         final List<Action> actions = new ArrayList<Action>();
 
         if (teamBuildPayload.BuildVariables != null) {
-            contributeTeamBuildParameterActions(teamBuildPayload.BuildVariables, actions);
-            // TODO: does it make sense to expose this to builds triggered by an event?
-            if (teamBuildPayload.TeamResults != null) {
-                contributeTeamResultsParameterActions(teamBuildPayload.TeamResults, actions);
-            }
+            contributeTeamBuildParameterActions(teamBuildPayload.BuildVariables, teamBuildPayload.TeamResults, actions);
         }
         else if (teamBuildPayload.ServiceHookEvent != null) {
             final Event event = teamBuildPayload.ServiceHookEvent;
@@ -215,11 +211,7 @@ public class BuildCommand extends AbstractCommand {
         return innerPerform(project, delay, actions);
     }
 
-    static void contributeTeamResultsParameterActions(final List<TeamResult> teamResults, final List<Action> actions) {
-        // TODO: implement
-    }
-
-    static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
+    static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<TeamResult> teamResults, final List<Action> actions) {
         if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER)) {
             final String provider = teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER);
             final boolean isTeamGit = "TfGit".equalsIgnoreCase(provider)
@@ -245,7 +237,7 @@ public class BuildCommand extends AbstractCommand {
 
                 UnsupportedIntegrationAction.addToBuild(actions, "Posting build status is not supported for builds triggered by the 'Jenkins Queue Job' task.");
 
-                final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
+                final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters, teamResults);
                 actions.add(teamBuildDetails);
             }
             else {

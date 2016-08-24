@@ -1,6 +1,7 @@
 package hudson.plugins.tfs;
 
 import hudson.model.Action;
+import hudson.plugins.tfs.model.TeamResult;
 import hudson.plugins.tfs.util.QueryString;
 import hudson.plugins.tfs.util.UriHelper;
 import org.kohsuke.stapler.export.Exported;
@@ -8,7 +9,9 @@ import org.kohsuke.stapler.export.ExportedBean;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,14 +22,18 @@ public class TeamBuildDetailsAction implements Action, Serializable {
     private static final long serialVersionUID = 1L;
 
     public Map<String, String> buildVariables = new HashMap<String, String>();
+    public List<TeamResult> requestedResults = new ArrayList<TeamResult>();
     public String buildUrl;
 
     public TeamBuildDetailsAction() {
 
     }
 
-    public TeamBuildDetailsAction(final Map<String, String> buildVariables) {
+    public TeamBuildDetailsAction(final Map<String, String> buildVariables, final List<TeamResult> requestedResults) {
         this.buildVariables = new HashMap<String, String>(buildVariables);
+        if (requestedResults != null) {
+            this.requestedResults = new ArrayList<TeamResult>(requestedResults);
+        }
         this.buildUrl = determineBuildUrl(buildVariables).toString();
     }
 
@@ -58,11 +65,10 @@ public class TeamBuildDetailsAction implements Action, Serializable {
 
     @Override
     public String getUrlName() {
-        // TODO: set this once we add an index.jelly with useful information
-        return null;
+        return "team-results";
     }
 
-    // the following methods are called from this/summary.jelly
+    // the following methods are called from this/summary.jelly and this/index.jelly
 
     @Exported
     public String getBuildNumber() {
@@ -72,6 +78,11 @@ public class TeamBuildDetailsAction implements Action, Serializable {
     @Exported
     public String getBuildDefinitionName() {
         return buildVariables.get("Build.DefinitionName");
+    }
+
+    @Exported
+    public boolean hasRequestedResults() {
+        return requestedResults != null && requestedResults.size() > 0;
     }
 
     @Exported

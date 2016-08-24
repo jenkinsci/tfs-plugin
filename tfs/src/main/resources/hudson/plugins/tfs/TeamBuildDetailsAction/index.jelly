@@ -1,0 +1,29 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+	xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+	<l:layout>
+	    <l:main-panel>
+	    <h2>${it.displayName}</h2>
+
+        Triggered by TFS/Team Services build <a href="${it.buildUrl}">${it.buildNumber} of '${it.buildDefinitionName}'</a>
+        <j:if test="${it.hasRequestedResults()}">
+            <br />
+            <br />
+            The following results were requested:
+            <ul>
+            <j:forEach var="requestedResult" items="${it.requestedResults}">
+              <li>
+                ${requestedResult.name}
+                <ul>
+                <j:forEach var="pattern" items="${requestedResult.patterns}">
+                    <li>${pattern}</li>
+                </j:forEach>
+                </ul>
+              </li>
+            </j:forEach>
+            </ul>
+        </j:if>
+	    </l:main-panel>
+	</l:layout>
+</j:jelly>
