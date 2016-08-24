@@ -73,7 +73,7 @@ public class TFSLabeler extends Notifier {
         if ("always".equals(whenCreateLabel) || ("success".equals(whenCreateLabel) && buildSuccess)) {
 
             final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
-            Server server = new Server(localLauncher, listener, tfsScm.getServerUrl(build.getRootBuild()), tfsScm.getUserName(), tfsScm.getUserPassword());
+            Server server = tfsScm.createServer(localLauncher, listener, build.getRootBuild());
 
             Computer computer = Computer.currentComputer();
             String normalizedLabelName = computeDynamicValue(build, getLabelName());

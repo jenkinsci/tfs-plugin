@@ -1,31 +1,9 @@
 package hudson.plugins.tfs;
 
-import static hudson.Util.fixEmpty;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import javax.annotation.CheckForNull;
-
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.ChangesetVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
-import hudson.util.Secret;
-import net.sf.json.JSONObject;
-
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.StaplerRequest;
-
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -42,10 +20,13 @@ import hudson.plugins.tfs.actions.CheckoutAction;
 import hudson.plugins.tfs.actions.RemoveWorkspaceAction;
 import hudson.plugins.tfs.browsers.TeamFoundationServerRepositoryBrowser;
 import hudson.plugins.tfs.browsers.TeamSystemWebAccessBrowser;
-import hudson.plugins.tfs.model.Project;
-import hudson.plugins.tfs.model.WorkspaceConfiguration;
-import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.ChangeSet;
+import hudson.plugins.tfs.model.CredentialsConfigurer;
+import hudson.plugins.tfs.model.CredentialsConfigurerDescriptor;
+import hudson.plugins.tfs.model.ManualCredentialsConfigurer;
+import hudson.plugins.tfs.model.Project;
+import hudson.plugins.tfs.model.Server;
+import hudson.plugins.tfs.model.WorkspaceConfiguration;
 import hudson.plugins.tfs.util.BuildVariableResolver;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever;
 import hudson.plugins.tfs.util.BuildWorkspaceConfigurationRetriever.BuildWorkspaceConfiguration;
@@ -54,15 +35,35 @@ import hudson.scm.PollingResult;
 import hudson.scm.PollingResult.Change;
 import hudson.scm.RepositoryBrowser;
 import hudson.scm.RepositoryBrowsers;
-import hudson.scm.SCMRevisionState;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
+import hudson.scm.SCMRevisionState;
+import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.LogTaskListener;
 import hudson.util.Scrambler;
+import hudson.util.Secret;
 import hudson.util.VariableResolver;
-
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
+import javax.annotation.CheckForNull;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+import static hudson.Util.fixEmpty;
 
 /**
  * SCM for Microsoft Team Foundation Server.
@@ -86,8 +87,9 @@ public class TeamFoundationServerScm extends SCM {
     private String localPath;
     private final String workspaceName;
     private @Deprecated String userPassword;
-    private /* almost final */ Secret password;
-    private final String userName;
+    private Secret password;
+    private String userName;
+    private CredentialsConfigurer credentialsConfigurer;
     private boolean useUpdate;
     
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
@@ -136,6 +138,9 @@ public class TeamFoundationServerScm extends SCM {
             password = Secret.fromString(Scrambler.descramble(userPassword));
             userPassword = null;
         }
+        if (userName != null && password != null) {
+            credentialsConfigurer = new ManualCredentialsConfigurer(userName, password);
+        }
         return this;
     }
 
@@ -180,6 +185,18 @@ public class TeamFoundationServerScm extends SCM {
 
     public String getUserName() {
         return userName;
+    }
+
+    public CredentialsConfigurer getCredentialsConfigurer() {
+        if (credentialsConfigurer == null) {
+            credentialsConfigurer = new ManualCredentialsConfigurer(userName, password);
+        }
+        return credentialsConfigurer;
+    }
+
+    @DataBoundSetter
+    public void setCredentialsConfigurer(final CredentialsConfigurer credentialsConfigurer) {
+        this.credentialsConfigurer = credentialsConfigurer;
     }
 
     public String getCloakedPaths() {
@@ -418,7 +435,13 @@ public class TeamFoundationServerScm extends SCM {
     }
     
     protected Server createServer(final Launcher launcher, final TaskListener taskListener, Run<?,?> run) throws IOException {
-        return new Server(launcher, taskListener, getServerUrl(run), getUserName(), getUserPassword());
+        final CredentialsConfigurer credentialsConfigurer = getCredentialsConfigurer();
+        final String collectionUri = getServerUrl(run);
+        final StandardUsernamePasswordCredentials credentials = credentialsConfigurer.getCredentials(collectionUri);
+        final String username = credentials.getUsername();
+        final Secret password = credentials.getPassword();
+        final String userPassword = password.getPlainText();
+        return new Server(launcher, taskListener, collectionUri, username, userPassword);
     }
 
     @Override
@@ -493,8 +516,6 @@ public class TeamFoundationServerScm extends SCM {
     public static class DescriptorImpl extends SCMDescriptor<TeamFoundationServerScm> {
         
         public static final Pattern WORKSPACE_NAME_REGEX = Pattern.compile("[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$", Pattern.CASE_INSENSITIVE);
-        public static final Pattern USER_AT_DOMAIN_REGEX = Pattern.compile("^([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)@([a-z][a-z0-9.-]+)$", Pattern.CASE_INSENSITIVE);
-        public static final Pattern DOMAIN_SLASH_USER_REGEX = Pattern.compile("^([a-z][a-z0-9.-]+)\\\\([^\\/\\\\\"\\[\\]:|<>+=;,\\*@]+)$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         public static final Pattern CLOAKED_PATHS_REGEX = Pattern.compile("\\s*\\$[^\\n;]+(\\s*[\\n]\\s*\\$[^\\n;]+){0,}\\s*", Pattern.CASE_INSENSITIVE);
         private transient String tfExecutable;
@@ -508,6 +529,14 @@ public class TeamFoundationServerScm extends SCM {
         public SCM newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             TeamFoundationServerScm scm = (TeamFoundationServerScm) super.newInstance(req, formData);
             scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class,req,formData,"browser");
+            // TODO: is there a more polymorphic way of doing this?
+            if (scm.credentialsConfigurer instanceof ManualCredentialsConfigurer) {
+                // ManualCredentialsConfigurer has its fields "transient"; transfer the values here
+                // for backward-compatibility
+                final ManualCredentialsConfigurer manualCredentialsConfigurer = (ManualCredentialsConfigurer) scm.credentialsConfigurer;
+                scm.userName = manualCredentialsConfigurer.getUserName();
+                scm.password = manualCredentialsConfigurer.getPassword();
+            }
             return scm;
         }
 
@@ -529,6 +558,16 @@ public class TeamFoundationServerScm extends SCM {
             return FormValidation.error(noMatchText);
         }
 
+        public ComboBoxModel doFillServerUrlItems() {
+            final TeamPluginGlobalConfig pluginGlobalConfig = TeamPluginGlobalConfig.get();
+            final List<TeamCollectionConfiguration> collectionConfigurations = pluginGlobalConfig.getCollectionConfigurations();
+            final ComboBoxModel result = new ComboBoxModel(collectionConfigurations.size());
+            for (final TeamCollectionConfiguration collectionConfiguration : collectionConfigurations) {
+                result.add(collectionConfiguration.getCollectionUrl());
+            }
+            return result;
+        }
+
         public FormValidation doProjectPathCheck(@QueryParameter final String value) {
             return doRegexCheck(new Pattern[]{PROJECT_PATH_REGEX},
                     "Project path must begin with '$/'.",
@@ -545,6 +584,10 @@ public class TeamFoundationServerScm extends SCM {
             return doRegexCheck(new Pattern[]{CLOAKED_PATHS_REGEX},
                     "Each cloaked path must begin with '$/'. Multiple paths must be separated by blank lines.",
                     null, value );
+        }
+
+        public List<CredentialsConfigurerDescriptor> getCredentialsConfigurerDescriptors() {
+            return CredentialsConfigurer.all();
         }
 
         @Override

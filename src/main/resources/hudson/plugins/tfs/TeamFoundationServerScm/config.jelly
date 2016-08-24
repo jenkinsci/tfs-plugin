@@ -1,18 +1,17 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:entry field="serverUrl" title="Collection URL" description="The URL to the team project collection">
-        <f:textbox clazz="required" checkMessage="${%Collection URL is mandatory.}"/>
+        <f:combobox clazz="required" checkMessage="${%Collection URL is mandatory.}"/>
     </f:entry>
     
     <f:entry field="projectPath" title="Project path" description="The path to the TFVC project must start with '$/'">
         <f:textbox checkUrl="'${rootURL}/scm/TeamFoundationServerScm/projectPathCheck?value='+escape(this.value)"/>
     </f:entry>
 
-    <f:entry field="userName" title="User name" description="(domain alias, e-mail address or alternate credentials)">
-        <f:textbox />
-    </f:entry>
-    
-    <f:entry field="password" title="User password">
-        <f:password />
+    <f:entry>
+        <f:dropdownDescriptorSelector
+            title="Credentials"
+            field="credentialsConfigurer"
+            descriptors="${descriptor.getCredentialsConfigurerDescriptors()}" />
     </f:entry>
 
     <f:advanced>
