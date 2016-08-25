@@ -5,17 +5,16 @@ import com.microsoft.tfs.core.config.httpclient.DefaultHTTPClientFactory;
 import com.microsoft.tfs.core.httpclient.HostConfiguration;
 import com.microsoft.tfs.core.httpclient.HttpClient;
 import com.microsoft.tfs.core.httpclient.HttpState;
-import com.microsoft.tfs.core.httpclient.ProxyHost;
 
 public class ModernHTTPClientFactory extends DefaultHTTPClientFactory {
 
-    private final ProxyHost proxyHost;
+    private final ProxyHostEx proxyHost;
 
     public ModernHTTPClientFactory(final ConnectionInstanceData connectionInstanceData) {
         this(connectionInstanceData,  null);
     }
 
-    public ModernHTTPClientFactory(final ConnectionInstanceData connectionInstanceData, final ProxyHost proxyHost) {
+    public ModernHTTPClientFactory(final ConnectionInstanceData connectionInstanceData, final ProxyHostEx proxyHost) {
         super(connectionInstanceData);
         this.proxyHost = proxyHost;
     }

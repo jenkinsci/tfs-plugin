@@ -10,7 +10,6 @@ import com.microsoft.tfs.core.config.persistence.DefaultPersistenceStoreProvider
 import com.microsoft.tfs.core.config.persistence.PersistenceStoreProvider;
 import com.microsoft.tfs.core.httpclient.Credentials;
 import com.microsoft.tfs.core.httpclient.DefaultNTCredentials;
-import com.microsoft.tfs.core.httpclient.ProxyHost;
 import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
@@ -86,7 +85,7 @@ public class Server implements ServerConfigurationProvider, Closable {
                 this.webProxySettings = new WebProxySettings(proxyConfiguration);
             }
             final String host = uri.getHost();
-            final ProxyHost proxyHost = this.webProxySettings.toProxyHost(host);
+            final ProxyHostEx proxyHost = this.webProxySettings.toProxyHost(host);
 
             if (extraSettings != null) {
                 this.extraSettings = extraSettings;

@@ -8,18 +8,17 @@ import com.microsoft.tfs.core.config.DefaultConnectionAdvisor;
 import com.microsoft.tfs.core.config.httpclient.HTTPClientFactory;
 import com.microsoft.tfs.core.config.persistence.DefaultPersistenceStoreProvider;
 import com.microsoft.tfs.core.config.persistence.PersistenceStoreProvider;
-import com.microsoft.tfs.core.httpclient.ProxyHost;
 
 public class ModernConnectionAdvisor extends DefaultConnectionAdvisor {
 
-    private final ProxyHost proxyHost;
+    private final ProxyHostEx proxyHost;
     private final PersistenceStoreProvider persistenceStoreProvider;
 
-    public ModernConnectionAdvisor(final ProxyHost proxyHost) {
+    public ModernConnectionAdvisor(final ProxyHostEx proxyHost) {
         this(proxyHost, null);
     }
 
-    public ModernConnectionAdvisor(final ProxyHost proxyHost, final PersistenceStoreProvider persistenceStoreProvider) {
+    public ModernConnectionAdvisor(final ProxyHostEx proxyHost, final PersistenceStoreProvider persistenceStoreProvider) {
         super(Locale.getDefault(), TimeZone.getDefault());
         this.proxyHost = proxyHost;
         this.persistenceStoreProvider = persistenceStoreProvider;
