@@ -48,8 +48,7 @@ public class TeamBuildDetailsAction implements Action, Serializable {
 
     @Override
     public String getIconFileName() {
-        // TODO: find an appropriate icon
-        return "clipboard.png";
+        return "/plugin/tfs/48x48/logo.png";
     }
 
     @Override
