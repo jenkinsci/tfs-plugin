@@ -1,17 +1,21 @@
 package hudson.plugins.tfs.model;
 
-import com.microsoft.tfs.core.httpclient.ProxyHost;
 import hudson.ProxyConfiguration;
 import hudson.util.Secret;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
+import java.net.Authenticator;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * A {@link Serializable} adapter between {@link ProxyConfiguration} and {@link ProxyHost}.
+ * A {@link Serializable} adapter between {@link ProxyConfiguration} and {@link ProxyHostEx}.
  */
 public class WebProxySettings implements Serializable {
     private static final long serialVersionUID = 401L;
@@ -80,20 +84,19 @@ public class WebProxySettings implements Serializable {
     }
 
     /**
-     * Initialize a {@link ProxyHost} from this {@link WebProxySettings} for the provided hostToProxy.
+     * Initialize a {@link ProxyHostEx} from this {@link WebProxySettings} for the provided hostToProxy.
      * May return null, which either means there is no proxy server configured or it does not apply
      * to the provided hostToProxy.
      *
      * @param hostToProxy the name of the host for which proxying is considered.
-     * @return an instance of {@link ProxyHost} or {@code null} if no proxy is to be used.
+     * @return an instance of {@link ProxyHostEx} or {@code null} if no proxy is to be used.
      */
-    public ProxyHost toProxyHost(final String hostToProxy) {
-        final ProxyHost proxyHost;
+    public ProxyHostEx toProxyHost(final String hostToProxy) {
+        final ProxyHostEx proxyHost;
         if (this.hostName != null) {
             final boolean shouldProxy = shouldProxy(hostToProxy, noProxyHostPatterns);
             if (shouldProxy) {
-                // TODO: The version of httpclient used by the TFS SDK does not support proxy auth
-                proxyHost = new ProxyHost(hostName, port);
+                proxyHost = new ProxyHostEx(hostName, port, proxyUser, proxySecret);
             } else {
                 proxyHost = null;
             }
@@ -102,6 +105,36 @@ public class WebProxySettings implements Serializable {
             proxyHost = null;
         }
         return proxyHost;
+    }
+
+    public Proxy toProxy(final String hostToProxy) {
+        final Proxy proxy;
+        if (this.hostName != null) {
+            final boolean shouldProxy = shouldProxy(hostToProxy, noProxyHostPatterns);
+            if (shouldProxy) {
+                final InetSocketAddress proxyAddress = new InetSocketAddress(hostName, port);
+                proxy = new Proxy(Proxy.Type.HTTP, proxyAddress);
+                if (proxyUser != null && proxySecret != null) {
+                    final Authenticator authenticator = new Authenticator() {
+                        @Override
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            if (StringUtils.equalsIgnoreCase(hostName, this.getRequestingHost())) {
+                                return new PasswordAuthentication(proxyUser, proxySecret.getPlainText().toCharArray());
+                            }
+                            return null;
+                        }
+                    };
+                    Authenticator.setDefault(authenticator);
+                }
+            }
+            else {
+                proxy = Proxy.NO_PROXY;
+            }
+        }
+        else {
+            proxy = Proxy.NO_PROXY;
+        }
+        return proxy;
     }
 
     static boolean shouldProxy(final String host, final List<Pattern> noProxyHostPatterns) {
