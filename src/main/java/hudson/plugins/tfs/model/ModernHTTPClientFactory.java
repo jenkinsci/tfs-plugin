@@ -27,19 +27,21 @@ public class ModernHTTPClientFactory extends DefaultHTTPClientFactory {
     public void configureClientProxy(final HttpClient httpClient, final HostConfiguration hostConfiguration,final HttpState httpState, final ConnectionInstanceData connectionInstanceData) {
         hostConfiguration.setProxyHost(proxyHost);
 
-        final String proxyUser = proxyHost.getProxyUser();
-        final Secret proxySecret = proxyHost.getProxySecret();
-        if (proxyUser != null && proxySecret != null) {
-            httpState.setProxyCredentials(
-                    AuthScope.ANY,
-                    new UsernamePasswordCredentials(proxyUser, proxySecret.getPlainText())
-            );
-        }
-        else {
-            httpState.setProxyCredentials(
-                    AuthScope.ANY,
-                    new DefaultNTCredentials()
-            );
+        if (proxyHost != null) {
+            final String proxyUser = proxyHost.getProxyUser();
+            final Secret proxySecret = proxyHost.getProxySecret();
+            if (proxyUser != null && proxySecret != null) {
+                httpState.setProxyCredentials(
+                        AuthScope.ANY,
+                        new UsernamePasswordCredentials(proxyUser, proxySecret.getPlainText())
+                );
+            }
+            else {
+                httpState.setProxyCredentials(
+                        AuthScope.ANY,
+                        new DefaultNTCredentials()
+                );
+            }
         }
     }
 }
