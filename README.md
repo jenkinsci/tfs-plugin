@@ -33,6 +33,10 @@ The TFS plug-in for Jenkins enhances the Git plug-in for Jenkins by adding some 
 * A push trigger, to request builds of specific commits in Git repositories without needing to schedule SCM polling
 * A build step that adds a "build pending" status to the associated pull request and/or commit in TFS/Team Services
 * A post-build action that add a "build completed" status to the associated pull request and/or commit in TFS/Team Services
+* A link to (and summary information about) the associated TFS/Team Services build that triggered the Jenkins build.
+* A link to (and summary information about) the associated TFS/Team Services pull request that triggered the Jenkins build.
+    * Links to associated TFS/Team Services work items.
+    * Associated TFS/Team Services work items link back to the Jenkins build.
 * Some endpoints for TFS/Team Services to use to activate the integration.  Please refer to the [Jenkins with Visual Studio Team Services](https://www.visualstudio.com/en-us/docs/service-hooks/services/jenkins) page for instructions on configuring the integration.
 
 
@@ -130,7 +134,7 @@ Field | Description
 `Credentials` | If you added your team project collection(s) in the global configuration, select **Automatic** and the credentials will be looked up automatically, otherwise you can select **Manual** and configure the `User name` and `User password` fields.
 `Manual` > `User name` | The name of the user that will be connecting to TFS/Team Services to query history, checkout files, etc. See _User name and password_ below for a full description.
 `Manual` > `User password` | The password, alternate password or personal access token associated with the user. See _User name and password_ below for more details.
-`Use update` | If this option is checked, then the workspace and work folder will not be removed at the end of build. This makes the build faster, but artifacts remain between builds. If it is not checked, the plugin will create a workspace and map it to a local folder at the start of the build, and then delete the workspace at the end of the build.
+`Use update` | If this option is checked, then the workspace will not be deleted and re-created at the start of each build, making the build faster, but this causes the artifacts from the previous build to remain when a new build starts.
 `Local workfolder` | The name of the local work folder. The specified folder will contain the files retrieved from the repository. Default is `.`, ie the files will be downloaded into the Hudson workspace folder.
 `Workspace name` | The name of the workspace that Jenkins should use when creating and deleting workspaces on the server. The workspace name supports three macros; `${JOB_NAME}` is replaced by the job name, `${USER_NAME}` is replaced by the user name Jenkins is running as and `${NODE_NAME}` is replaced by the name of the node. Default workspace name is `Hudson-${JOB_NAME}-${NODE_NAME}`.
 `Cloaked paths` | A collection of server paths to cloak to exclude from the workspace and from the build trigger. Multiple entries must be placed onto separate lines.

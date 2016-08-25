@@ -1,29 +1,22 @@
-These notes are for release **5.0.0**.  Other releases and their notes can be found at the [tfs-plugin GitHub Releases](https://github.com/jenkinsci/tfs-plugin/releases) page.
+These notes are for release **5.1.0**.  Other releases and their notes can be found at the [tfs-plugin GitHub Releases](https://github.com/jenkinsci/tfs-plugin/releases) page.
 
 * Major:
-    * Integration with Git repositories hosted on TFS/Team Services, via pull requests #86, #87, #88, #89, #90, #91, #92, #93, #96, #97, #98, #99, #100, #101, #103, #105, #104, #102, #108, #107, #109.
-    * JENKINS-30330: Only request workspaces for the current computer, via pull request #95.
-    * JENKINS-34446: Fix bug - TFS PLUGIN environnement variables in project path.  Thanks to @sylvainmouquet for pull request #75.
-    * Deactivate logging of each resource get in build log.  Thanks to @mosabua for pull request #106.
+    * Link back to the TFS/Team Services build that triggered the Jenkins build, via pull request #114.
+    * Display "pull request merged" event details in build summary & details, via pull request #117.
+    * Associated work items link back to the Jenkins build, via pull request #118.
+    * Add support for per-computer TFVC configuration folders, via pull request #119.
+    * [[JENKINS-13663](https://issues.jenkins-ci.org/browse/JENKINS-13663)] The TFVC SCM can be used with collection credential pairs, via pull request #122.
+    * Withstand all sorts of workspace-related mishaps, via pull request #125.
+    * Improve support for proxy servers (including those that need authentication), via pull request #126.
 
 * Minor:
-    * Updated repo browser label.  Thanks to @mosabua for pull request #74.
-    * Fix Changeset number display for Delivery Pipeline.  Thanks to @pskumar448 for pull request #76, ultimately merged via pull request #78.
-    * Implemented getAffectedFiles in ChangeSet.  Thanks to @drphrozen for pull request #77.
-    * Cloaked paths should be case insensitive when polling for changes.  Thanks to @watsonlu for pull request #79.
-    * Work around TFS SDK defect when re-creating an older workspace.  Made possible with pull request #80.
-    * Automatically configure used webbrowser access. Thanks to @mosabua for pull request #84.
-    * Clarify the plugin's SCM is for Team Foundation Version Control (TFVC), via pull request #94. 
+    * Detect missing team project collection configuration, via pull request #111.
+    * Reduce the chance of error with Team Services URLs, via pull request #110.
+    * Improve validation of Collection URL, via pull request #127.
 
 * Tools and infrastructure:
-    * Upgrade Jenkins dependencies to 1.580, via pull request #81.
-    * Add David to the list of developers in pom.xml, via pull request #82.
-    * changed language level check to use 1.6.  Thanks to @mosabua for pull request #83.
-    * Test setup improvements.  Thanks to @mosabua for pull request #85.
-
-* Special thanks go out to:
-    * @DavidStaheli for all the code reviews and the end-to-end testing.
-    * @yacaovsnc for carefully reviewing and testing the documentation.
-    * @mosabua for running tests on a representative environment.
-    * @AndreyAlifanov for helping test pull request #95.
-    * @jasholl and @AlexRukhlin for testing and validating the endpoints.
+    * Upgrade TFS SDK to version 14.0.3, via pull request #115.
+    * Remove unused endpoint variations, via pull request #112.
+    * Switch to Jackson for events parsing, via pull request #116.
+    * Improve construction of TeamFoundationServerScm, via pull request #120.
+    * Use collection URI in payloads, if possible, via pull request #121.
