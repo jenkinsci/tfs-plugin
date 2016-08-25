@@ -203,9 +203,9 @@ Now, the next time you want to queue a build, you will need to provide a value f
 
 ## Proxy server support (New since version 4.1.0)
 
-In the event Jenkins is deployed on a network with no direct access to other networks (such as the internet), the TFS plugin now supports connecting through _unauthenticated_ proxy servers.
+In the event Jenkins is deployed on a network with no direct access to other networks (such as the internet), the TFS plugin now supports connecting through proxy servers.
 
-> :information_source: Support for proxy servers requiring authentication is planned. :information_source:
+> :information_source: Support for proxy servers requiring authentication was added in version 5.1.0. :information_source:
 
 Follow the instructions at [JenkinsBehindProxy](https://wiki.jenkins-ci.org/display/JENKINS/JenkinsBehindProxy) to configure Jenkins' use of a proxy server, which the TFS plugin also uses.
 
