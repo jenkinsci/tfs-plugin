@@ -17,6 +17,7 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -62,6 +63,10 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         public FormValidation doCheckCollectionUrl(
                 @QueryParameter final String value) {
 
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.warning("Please provide a value");
+            }
+
             final URI uri;
             try {
                 uri = new URI(value);
@@ -71,6 +76,9 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
             }
 
             final String hostName = uri.getHost();
+            if (StringUtils.isBlank(hostName)) {
+                return FormValidation.error("Please provide a host name");
+            }
             if (isTeamServices(hostName)) {
                 return checkTeamServices(uri);
             }
