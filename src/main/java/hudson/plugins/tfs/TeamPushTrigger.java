@@ -184,7 +184,7 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public String getIconFileName() {
-            return "clipboard.png";
+            return "/plugin/tfs/48x48/logo.png";
         }
 
         @Override
