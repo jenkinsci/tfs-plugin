@@ -81,6 +81,10 @@
   </scm>
 
   <distributionManagement>
+    <snapshotRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/snapshots/</url>
+    </snapshotRepository>
     <repository>
       <id>repo.jenkins-ci.org</id>
       <url>https://repo.jenkins-ci.org/releases/</url>
