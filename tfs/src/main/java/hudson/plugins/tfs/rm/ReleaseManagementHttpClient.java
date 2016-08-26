@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.rm;
 
 import com.google.gson.Gson;
+import hudson.util.Secret;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -21,17 +22,17 @@ public class ReleaseManagementHttpClient
 {
     private final HttpClient httpClient;
     private final String username;
-    private final String password;
+    private final Secret password;
     private final String accountUrl;
     private final String basicAuth;
     
-    ReleaseManagementHttpClient(String accountUrl, String username, String password)
+    ReleaseManagementHttpClient(String accountUrl, String username, Secret password)
     {
         this.accountUrl = accountUrl;
         this.username = username;
         this.password = password;
         this.httpClient = new HttpClient();
-        this.basicAuth = "Basic " + new String(Base64.encodeBase64((this.username + ":" + this.password).getBytes(Charset.defaultCharset())), Charset.defaultCharset());
+        this.basicAuth = "Basic " + new String(Base64.encodeBase64((this.username + ":" + Secret.toString(this.password)).getBytes(Charset.defaultCharset())), Charset.defaultCharset());
     }
     
     public List<ReleaseDefinition> GetReleaseDefinitions(String project) throws ReleaseManagementException

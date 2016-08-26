@@ -64,6 +64,5 @@ public class ReleaseManagementException extends Exception
     public ReleaseManagementException(Throwable cause)
     {
         super(cause);
-    }
-    
+    }    
 }
