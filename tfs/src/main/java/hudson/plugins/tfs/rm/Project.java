@@ -63,5 +63,4 @@ public class Project
     {
         this.additionalProperties.put(name, value);
     }
-
 }

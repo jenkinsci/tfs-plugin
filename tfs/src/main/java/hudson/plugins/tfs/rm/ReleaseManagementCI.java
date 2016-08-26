@@ -11,6 +11,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.util.Secret;
 import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,11 +28,11 @@ public class ReleaseManagementCI extends Notifier{
     public final String projectName;
     public final String releaseDefinitionName;
     public final String username;
-    public final String password;
+    public final Secret password;
     
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public ReleaseManagementCI(String collectionUrl, String projectName, String releaseDefinitionName, String username, String password)
+    public ReleaseManagementCI(String collectionUrl, String projectName, String releaseDefinitionName, String username, Secret password)
     {
         if (collectionUrl.endsWith("/"))
         {
@@ -222,7 +223,7 @@ public class ReleaseManagementCI extends Notifier{
         @Override
         public String getDisplayName() 
         {
-            return "VS Team Services Continuous Deployment";
+            return "Trigger release in TFS/Team Services";
         }
 
     }
