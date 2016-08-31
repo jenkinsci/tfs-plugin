@@ -212,6 +212,14 @@ public class UriHelperTest {
         Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_home/About?answer=42"), actual);
     }
 
+    @Test public void join_urlEncoding() throws Exception {
+        final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com/";
+
+        final URI actual = UriHelper.join(collectionUrl, "_git", "Repo Name With Spaces");
+
+        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_git/Repo+Name+With+Spaces"), actual);
+    }
+
     @Test public void join_sampleApiCall() throws Exception {
         final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com/";
         final QueryString qs = new QueryString("api-version", "2.0");
