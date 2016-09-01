@@ -6,7 +6,8 @@ import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.tfs.model.TeamResult;
+import hudson.plugins.tfs.model.TeamRequestedResult;
+import hudson.plugins.tfs.model.TeamResultType;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -19,12 +20,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TeamCollectResultsPostBuildAction extends Recorder implements SimpleBuildStep {
@@ -32,9 +35,20 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
     private static final String TEAM_RESULTS = "team-results";
     static final String TEAM_RESULTS_ZIP = "team-results.zip";
 
+    private List<TeamRequestedResult> requestedResults = new ArrayList<TeamRequestedResult>();
+
     @DataBoundConstructor
     public TeamCollectResultsPostBuildAction() {
 
+    }
+
+    public List<TeamRequestedResult> getRequestedResults() {
+        return requestedResults;
+    }
+
+    @DataBoundSetter
+    public void setRequestedResults(final List<TeamRequestedResult> requestedResults) {
+        this.requestedResults = requestedResults;
     }
 
     @Override
@@ -43,34 +57,28 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             @Nonnull final FilePath workspace,
             @Nonnull final Launcher launcher,
             @Nonnull final TaskListener listener) throws InterruptedException, IOException {
-        final TeamBuildDetailsAction action = run.getAction(TeamBuildDetailsAction.class);
-        final DescriptorImpl descriptor = getDescriptor();
-        final String displayName = descriptor.getDisplayName();
-        if (action == null) {
-            final String template = "No TeamBuildDetailsAction found; the '%s' post-build action is designed to be used along with the Jenkins Queue Job build task.  Aborting.";
-            final String message = String.format(template, displayName);
-            listener.error(message);
-            return;
-        }
-        final List<TeamResult> requestedResults = action.requestedResults;
+        // TODO: do we want to emit an error or warning like the following?
+        /*
         if (requestedResults == null || requestedResults.size() == 0) {
             final String template = "No results were requested.  Aborting the '%s' post-build action.";
             final String message = String.format(template, displayName);
             listener.error(message);
             return;
         }
+        */
 
         final PrintStream logger = listener.getLogger();
         logger.print("Recording results...");
         final File rootDir = run.getRootDir();
         final File resultsRoot = new File(rootDir, TEAM_RESULTS);
-        for (final TeamResult requestedResult : requestedResults) {
-            final String name = requestedResult.name;
-            logger.print(" " + name);
-            final File resultFolder = new File(resultsRoot, name);
+        for (final TeamRequestedResult requestedResult : requestedResults) {
+            final TeamResultType teamResultType = requestedResult.getTeamResultType();
+            final String folderName = teamResultType.getFolderName();
+            logger.print(" " + teamResultType.getDisplayName());
+            final File resultFolder = new File(resultsRoot, folderName);
             //noinspection ResultOfMethodCallIgnored
             resultFolder.mkdirs();
-            final String includes = StringUtils.join(requestedResult.patterns, ",");
+            final String includes = StringUtils.join(requestedResult.getPatternList(), ",");
             final FilePath resultPath = new FilePath(resultFolder);
             final int numCopied = workspace.copyRecursiveTo(includes, resultPath);
             logger.print(" (" + numCopied + " file" + ((numCopied == 1) ? "" : "s") + ")");
