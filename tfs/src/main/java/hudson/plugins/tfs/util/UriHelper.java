@@ -159,7 +159,13 @@ public class UriHelper {
                 else {
                     sb.append('/');
                 }
-                sb.append(component);
+                try {
+                    final String encodedComponent = URLEncoder.encode(component.toString(), UTF_8);
+                    sb.append(encodedComponent);
+                }
+                catch (final UnsupportedEncodingException e) {
+                    throw new Error(e);
+                }
             }
         }
 
