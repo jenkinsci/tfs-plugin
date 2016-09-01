@@ -4,11 +4,13 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.util.TeamStatus;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Builder;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import jenkins.tasks.SimpleBuildStep;
@@ -35,7 +37,7 @@ public class TeamCompletedStatusPostBuildAction extends Notifier implements Simp
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
         try {
-            TeamStatus.createFromRun(run, listener);
+            TeamStatus.createFromRun(run, listener, getDisplayName());
         }
         catch (final IllegalArgumentException e) {
             listener.error(e.getMessage());
@@ -43,6 +45,11 @@ public class TeamCompletedStatusPostBuildAction extends Notifier implements Simp
         catch (final Exception e) {
             e.printStackTrace(listener.error("Error while trying to update completion status in TFS/Team Services"));
         }
+    }
+
+    String getDisplayName() {
+        final Descriptor<Builder> descriptor = getDescriptor();
+        return descriptor.getDisplayName();
     }
 
     @Override
