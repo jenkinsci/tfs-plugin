@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.util.TeamStatus;
@@ -33,7 +34,7 @@ public class TeamPendingStatusBuildStep extends Builder implements SimpleBuildSt
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
         try {
-            TeamStatus.createFromRun(run, listener);
+            TeamStatus.createFromRun(run, listener, getDisplayName());
         }
         catch (final IllegalArgumentException e) {
             listener.error(e.getMessage());
@@ -41,6 +42,11 @@ public class TeamPendingStatusBuildStep extends Builder implements SimpleBuildSt
         catch (final Exception e) {
             e.printStackTrace(listener.error("Error while trying to update pending status in TFS/Team Services"));
         }
+    }
+
+    String getDisplayName() {
+        final Descriptor<Builder> descriptor = getDescriptor();
+        return descriptor.getDisplayName();
     }
 
     @Extension

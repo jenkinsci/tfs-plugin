@@ -4,7 +4,6 @@ import hudson.model.Action;
 import hudson.model.InvisibleAction;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.tfs.model.BuildCommand;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
@@ -25,12 +24,7 @@ public class UnsupportedIntegrationAction extends InvisibleAction implements Ser
 
     public static boolean isSupported(@Nonnull final Run<?, ?> run, @Nonnull final TaskListener listener) {
         final UnsupportedIntegrationAction action = run.getAction(UnsupportedIntegrationAction.class);
-        if (action != null) {
-            final String message = BuildCommand.formatUnsupportedReason(action.reason);
-            listener.error(message);
-            return false;
-        }
-        return true;
+        return action == null;
     }
 
     public static void addToBuild(final List<Action> actions, final String reason) {

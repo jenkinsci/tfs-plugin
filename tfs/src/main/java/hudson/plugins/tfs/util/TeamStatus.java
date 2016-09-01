@@ -1,11 +1,9 @@
 package hudson.plugins.tfs.util;
 
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.PullRequestParameterAction;
-import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
@@ -13,12 +11,18 @@ import hudson.plugins.tfs.model.TeamGitStatus;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 
 public class TeamStatus {
-    public static void createFromRun(@Nonnull final Run<?, ?> run, @Nonnull final TaskListener listener) throws IOException {
+    public static void createFromRun(@Nonnull final Run<?, ?> run, @Nonnull final TaskListener listener, final String featureDisplayName) throws IOException {
 
         if (!UnsupportedIntegrationAction.isSupported(run, listener)) {
+            final PrintStream logger = listener.getLogger();
+            logger.print("NOTICE: ");
+            logger.print("You selected '");
+            logger.print(featureDisplayName);
+            logger.println("' on your Jenkins job, but this option has no effect when calling the job from the 'Jenkins Queue Job' task in TFS/Team Services.");
             return;
         }
 
