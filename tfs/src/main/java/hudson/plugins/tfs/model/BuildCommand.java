@@ -3,10 +3,6 @@ package hudson.plugins.tfs.model;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
@@ -26,8 +22,6 @@ import hudson.plugins.tfs.TeamBuildEndpoint;
 import hudson.plugins.tfs.TeamPullRequestMergedDetailsAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
-import hudson.plugins.tfs.TeamEventsEndpoint;
-import hudson.plugins.tfs.TeamPullRequestMergedDetailsAction;
 import hudson.plugins.tfs.util.ActionHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
@@ -119,7 +113,7 @@ public class BuildCommand extends AbstractCommand {
         final List<Action> actions = new ArrayList<Action>();
 
         if (teamBuildPayload.BuildVariables != null) {
-            contributeTeamBuildParameterActions(teamBuildPayload.BuildVariables, teamBuildPayload.TeamResults, actions);
+            contributeTeamBuildParameterActions(teamBuildPayload.BuildVariables, actions);
         }
         else if (teamBuildPayload.ServiceHookEvent != null) {
             final Event event = teamBuildPayload.ServiceHookEvent;
@@ -211,7 +205,7 @@ public class BuildCommand extends AbstractCommand {
         return innerPerform(project, delay, actions);
     }
 
-    static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<TeamResult> teamResults, final List<Action> actions) {
+    static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
         if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER)) {
             final String provider = teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER);
             final boolean isTeamGit = "TfGit".equalsIgnoreCase(provider)
@@ -237,7 +231,7 @@ public class BuildCommand extends AbstractCommand {
 
                 UnsupportedIntegrationAction.addToBuild(actions, "Posting build status is not supported for builds triggered by the 'Jenkins Queue Job' task.");
 
-                final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters, teamResults);
+                final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
                 actions.add(teamBuildDetails);
             }
             else {

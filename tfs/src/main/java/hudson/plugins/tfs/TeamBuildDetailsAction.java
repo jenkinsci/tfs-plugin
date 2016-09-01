@@ -1,7 +1,6 @@
 package hudson.plugins.tfs;
 
 import hudson.model.Run;
-import hudson.plugins.tfs.model.TeamResult;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.tfs.util.QueryString;
@@ -19,9 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +36,6 @@ public class TeamBuildDetailsAction implements RunAction2, Serializable {
     private static final Logger LOGGER = Logger.getLogger(TeamBuildDetailsAction.class.getName());
 
     public Map<String, String> buildVariables = new HashMap<String, String>();
-    public List<TeamResult> requestedResults = new ArrayList<TeamResult>();
     public String buildUrl;
     public transient Run<?, ?> run;
 
@@ -47,11 +43,8 @@ public class TeamBuildDetailsAction implements RunAction2, Serializable {
 
     }
 
-    public TeamBuildDetailsAction(final Map<String, String> buildVariables, final List<TeamResult> requestedResults) {
+    public TeamBuildDetailsAction(final Map<String, String> buildVariables) {
         this.buildVariables = new HashMap<String, String>(buildVariables);
-        if (requestedResults != null) {
-            this.requestedResults = new ArrayList<TeamResult>(requestedResults);
-        }
         this.buildUrl = determineBuildUrl(buildVariables).toString();
     }
 
@@ -141,11 +134,6 @@ public class TeamBuildDetailsAction implements RunAction2, Serializable {
     @Exported
     public String getBuildDefinitionName() {
         return buildVariables.get("Build.DefinitionName");
-    }
-
-    @Exported
-    public boolean hasRequestedResults() {
-        return requestedResults != null && requestedResults.size() > 0;
     }
 
     @Exported

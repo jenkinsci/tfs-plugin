@@ -16,7 +16,4 @@ public class TeamBuildPayload {
 
     @JsonProperty("team-event")
     public Event ServiceHookEvent;
-
-    @JsonProperty("team-results")
-    public List<TeamResult> TeamResults;
 }
