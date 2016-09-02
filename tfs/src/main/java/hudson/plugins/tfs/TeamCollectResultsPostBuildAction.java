@@ -78,7 +78,7 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             final File resultFolder = new File(resultsRoot, folderName);
             //noinspection ResultOfMethodCallIgnored
             resultFolder.mkdirs();
-            final String includes = StringUtils.join(requestedResult.getPatternList(), ",");
+            final String includes = requestedResult.getIncludes();
             final FilePath resultPath = new FilePath(resultFolder);
             final int numCopied = workspace.copyRecursiveTo(includes, resultPath);
             logger.print(" (" + numCopied + " file" + ((numCopied == 1) ? "" : "s") + ")");

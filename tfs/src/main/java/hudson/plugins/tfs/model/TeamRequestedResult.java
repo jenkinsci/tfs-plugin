@@ -31,10 +31,6 @@ public class TeamRequestedResult extends AbstractDescribableImpl<TeamRequestedRe
         return teamResultType;
     }
 
-    public List<String> getPatternList() {
-        return includes == null ? Collections.EMPTY_LIST : Arrays.asList(includes.split("\n"));
-    }
-
     public String getIncludes() {
         return includes;
     }
