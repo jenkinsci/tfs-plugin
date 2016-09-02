@@ -58,6 +58,12 @@ The following table indicates compatibility and support for versions of TFS and 
 > Microsoft Visual Studio Team System 2008 Team Foundation Server | :x: | :warning: [2013/04/09](https://support.microsoft.com/en-us/lifecycle?p1=13083)
 > Microsoft Visual Studio 2005 Team Foundation Server | :x: | :warning: [2011/07/12](https://support.microsoft.com/en-us/lifecycle?p1=10449)
 
+Whereas for **Trigger release in TFS/Team Services** post build action, only following table is supprted-
+
+> Version | Supported by the TFS plugin? | Mainstream Support End Date
+> ------- | ------ | ---------------------------
+> [Visual Studio Team Services] | :white_check_mark: | n/a
+
 ## Operating Systems
 
 The plugin has been tested against the following operating systems and versions, with the latest updates as of 2015/08/27.
@@ -238,17 +244,17 @@ This plugin makes use these APIs that lets you trigger a release in VS Team Serv
 
 ### Using the plugin
 
-Assuming that you have already [created the Release Definition](https://www.visualstudio.com/en-us/docs/release/author-release-definition/more-release-definition) and [linked the Jenkins as artifact source](https://www.visualstudio.com/en-us/docs/release/author-release-definition/understanding-artifacts#jenkins) in Vs Team Service - Release Manaegment, you need to follow the following steps at the Jenkins side to trigger releases automatically, upon build creation.
+Assuming that you have already [created the Release Definition](https://www.visualstudio.com/en-us/docs/release/author-release-definition/more-release-definition) and [linked the Jenkins as artifact source](https://www.visualstudio.com/en-us/docs/release/author-release-definition/understanding-artifacts#jenkins) in TFS/Team Services - Release Management, you need to follow the following steps at the Jenkins side to trigger releases automatically, upon build creation.
 
 **0. Setup Release Definition with Jenkins as artifact source**
 This document assumes that you have already set up the RM definition that uses Jenkins artifact to deploy. This means your build/job is configured properly and archives artifacts. If not, see the following video to set up Release Definition with Jenkins build
 
-[![Release Jenkins artifact](screenshots/rmWithJenkins-YT.png)](https://www.youtube.com/watch?v=ZC4hWYqdP_o&index=5&list=PLP3SfFPBD6cTJ2Jp5cHvjQ3flrbwQu-nN)
+[![Release Jenkins artifact](https://cloud.githubusercontent.com/assets/15227510/18209901/8bd5516e-7153-11e6-99ef-77531f2019ef.png)](https://www.youtube.com/watch?v=ZC4hWYqdP_o&index=5&list=PLP3SfFPBD6cTJ2Jp5cHvjQ3flrbwQu-nN)
 
 
 **1. Add the post build action**
 Go to the Job configuration and add the post build action - **Trigger release in TFS/Team Services**.
-![Add post build action](screenshots/addPostBuildAction.png)
+![Add post build action](https://cloud.githubusercontent.com/assets/15227510/18209824/2a28b078-7153-11e6-873f-fbba641f78b0.png)
 
 **2. Fill in the required fields**
 Fill in the details required for this post build action. You need the following details:
@@ -258,15 +264,11 @@ Fill in the details required for this post build action. You need the following 
 
 You need to now enter the credentials that lets Jenkins trigger a release with the latest completed build, on your behalf. If you are using VS Team Services, you just need to enter **PAT** with atleast "Release (read, write and execute)" scope. (Refer to this [link](https://www.visualstudio.com/en-us/get-started/setup/use-personal-access-tokens-to-authenticate) to understand how to create PAT). In case you are using TFS, you need to enter the **username** and **password**.
 
-![Add post build action](screenshots/fillFieldsForPostBuildAction.png)
+![Add post build action](https://cloud.githubusercontent.com/assets/15227510/18209903/8e94864a-7153-11e6-852d-c8ff28e38667.png)
 
 **3. All set. See CD in action**
 You have now automated your deployment trigger thereby enabling continuous deployment i.e. a checkin/commit would trigger a build and that will trigger a release.
 Go ahead and test your setup by manually triggering a build in Jenkins or by a code checkin/commit that kicks off Jenkins build which in turn will trigger the release in VS Team Services.
-
-### FAQs
-**1. If I have multiple artifacts linked in my Release Definition, will this plugin trigger a release?** <br>
-**A:** Yes, it is supported from 1.3 version onwards.
 
 
 # FAQ
@@ -288,6 +290,9 @@ The TF command line outputs date according to the locale and Microsofts own spec
 To fix this, do the following:
 * Change the locale by Windows Regional Settings to United States and English on the server and all hudson nodes. After that tf.exe should output dates in english, which can be parsed properly.
 * Start Hudson using the UnitedStates, English locale. Either set it using `-Duser.language=en -Duser.country=US` on the command line or check the documentation for the container that Hudson is running within.
+
+### If I have multiple artifacts linked in my Release Definition, will this plugin trigger a release?** <br>
+    Yes, it is supported from 1.3 version onwards.
 
 # Timeline
 
