@@ -206,6 +206,8 @@ public class BuildCommand extends AbstractCommand {
     }
 
     static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
+        final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
+        actions.add(teamBuildDetails);
         if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER)) {
             final String provider = teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER);
             final boolean isTeamGit = "TfGit".equalsIgnoreCase(provider)
@@ -230,9 +232,6 @@ public class BuildCommand extends AbstractCommand {
                 actions.add(action);
 
                 UnsupportedIntegrationAction.addToBuild(actions, "Posting build status is not supported for builds triggered by the 'Jenkins Queue Job' task.");
-
-                final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
-                actions.add(teamBuildDetails);
             }
             else {
                 final String reason = String.format(
