@@ -1,21 +1,25 @@
 package hudson.plugins.tfs.model;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.AbstractDescribableImpl;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 public class TeamRequestedResult extends AbstractDescribableImpl<TeamRequestedResult> {
     private final TeamResultType teamResultType;
-    private String patterns;
+    private String includes;
 
     @DataBoundConstructor
     public TeamRequestedResult(final TeamResultType teamResultType) {
@@ -28,16 +32,16 @@ public class TeamRequestedResult extends AbstractDescribableImpl<TeamRequestedRe
     }
 
     public List<String> getPatternList() {
-        return patterns == null ? Collections.EMPTY_LIST : Arrays.asList(patterns.split("\n"));
+        return includes == null ? Collections.EMPTY_LIST : Arrays.asList(includes.split("\n"));
     }
 
-    public String getPatterns() {
-        return patterns;
+    public String getIncludes() {
+        return includes;
     }
 
     @DataBoundSetter
-    public void setPatterns(final String patterns) {
-        this.patterns = patterns;
+    public void setIncludes(final String includes) {
+        this.includes = includes;
     }
 
     @Extension
@@ -57,6 +61,15 @@ public class TeamRequestedResult extends AbstractDescribableImpl<TeamRequestedRe
                 result.add(value.getDisplayName(), value.name());
             }
             return result;
+        }
+
+        public FormValidation doCheckIncludes(
+                @AncestorInPath final AbstractProject project,
+                @QueryParameter final String value) throws IOException {
+            if (project == null) {
+                return FormValidation.ok();
+            }
+            return FilePath.validateFileMask(project.getSomeWorkspace(), value);
         }
     }
 }
