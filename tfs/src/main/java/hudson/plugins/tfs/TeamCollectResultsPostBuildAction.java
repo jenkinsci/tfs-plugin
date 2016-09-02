@@ -101,6 +101,7 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             IOUtils.closeQuietly(outputStream);
         }
         FileUtils.deleteDirectory(resultsRoot);
+        TeamResultsAction.addToRun(run);
         logger.println(" Done.");
     }
 
