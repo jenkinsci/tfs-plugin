@@ -2,7 +2,11 @@ package hudson.plugins.tfs.model;
 
 public enum TeamResultType {
     JUNIT("junit", "JUnit"),
-    MAVEN("junit", "Maven"),
+    NUNIT("nunit", "NUnit"),
+    VS_TEST("vstest", "VSTest"),
+    XUNIT("xunit", "XUnit"),
+    COBERTURA("cobertura", "Cobertura"),
+    JACOCO("jacoco", "JaCoCo"),
     ;
 
     private final String folderName;
