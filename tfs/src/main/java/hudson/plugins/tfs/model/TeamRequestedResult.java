@@ -11,10 +11,11 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public class TeamRequestedResult extends AbstractDescribableImpl<TeamRequestedResult> {
     private final TeamResultType teamResultType;
-    private Collection<String> patterns;
+    private String patterns;
 
     @DataBoundConstructor
     public TeamRequestedResult(final TeamResultType teamResultType) {
@@ -26,17 +27,17 @@ public class TeamRequestedResult extends AbstractDescribableImpl<TeamRequestedRe
         return teamResultType;
     }
 
-    public Collection<String> getPatternList() {
-        return patterns == null ? Collections.EMPTY_LIST : patterns;
+    public List<String> getPatternList() {
+        return patterns == null ? Collections.EMPTY_LIST : Arrays.asList(patterns.split("\n"));
     }
 
     public String getPatterns() {
-        return patterns == null ? StringUtils.EMPTY : StringUtils.join(patterns, "\n");
+        return patterns;
     }
 
     @DataBoundSetter
     public void setPatterns(final String patterns) {
-        this.patterns = Arrays.asList(patterns.split("\n"));
+        this.patterns = patterns;
     }
 
     @Extension
