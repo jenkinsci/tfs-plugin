@@ -24,6 +24,18 @@ public class ModernHTTPClientFactory extends DefaultHTTPClientFactory {
     }
 
     @Override
+    protected String getUserAgentExtraString(final HttpClient httpClient, final ConnectionInstanceData connectionInstanceData) {
+        // https://stackoverflow.com/a/6773868/
+        final Class<? extends ModernHTTPClientFactory> me = this.getClass();
+        final Package us = me.getPackage();
+        String version = us.getImplementationVersion();
+        if (version == null) {
+            version = "devtest";
+        }
+        return "TFS Plugin for Jenkins " + version;
+    }
+
+    @Override
     public void configureClientProxy(final HttpClient httpClient, final HostConfiguration hostConfiguration,final HttpState httpState, final ConnectionInstanceData connectionInstanceData) {
         hostConfiguration.setProxyHost(proxyHost);
 

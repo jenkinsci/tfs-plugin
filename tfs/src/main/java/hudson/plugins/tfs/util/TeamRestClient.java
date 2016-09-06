@@ -3,6 +3,8 @@ package hudson.plugins.tfs.util;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.tfs.core.config.ConnectionInstanceData;
+import com.microsoft.tfs.util.GUID;
 import hudson.ProxyConfiguration;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
 import com.microsoft.visualstudio.services.webapi.patch.Operation;
@@ -10,6 +12,8 @@ import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.JsonPatchOperation;
 import hudson.plugins.tfs.model.Link;
+import hudson.plugins.tfs.model.ModernHTTPClientFactory;
+import hudson.plugins.tfs.model.NativeLibraryManager;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.TeamGitStatus;
 import hudson.plugins.tfs.model.WebProxySettings;
@@ -107,12 +111,17 @@ public class TeamRestClient {
         final WebProxySettings proxySettings = new WebProxySettings(proxyConfig);
         final String hostToProxy = requestUri.getHost();
         final Proxy proxy = proxySettings.toProxy(hostToProxy);
+        // To build the User-Agent string, we need the native libraries to read environment variables
+        NativeLibraryManager.initialize();
+        final ConnectionInstanceData cid = new ConnectionInstanceData(requestUri, GUID.EMPTY);
+        final ModernHTTPClientFactory modernHTTPClientFactory = new ModernHTTPClientFactory(cid, null);
+        final String userAgent = modernHTTPClientFactory.getUserAgent(null, cid);
         final HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection(proxy);
         try {
             if (authorization != null) {
                 connection.setRequestProperty(AUTHORIZATION, authorization);
             }
-            // TODO: add User-Agent
+            connection.setRequestProperty("User-Agent", userAgent);
 
             final String stringRequestBody;
             if (requestBody != null) {
