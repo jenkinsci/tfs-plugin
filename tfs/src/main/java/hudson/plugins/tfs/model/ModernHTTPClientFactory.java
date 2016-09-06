@@ -32,7 +32,7 @@ public class ModernHTTPClientFactory extends DefaultHTTPClientFactory {
         if (version == null) {
             version = "devtest";
         }
-        return "TFS Plugin for Jenkins " + version;
+        return "TFS-Jenkins " + version;
     }
 
     @Override
