@@ -3,10 +3,6 @@ package hudson.plugins.tfs.model;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
@@ -26,8 +22,6 @@ import hudson.plugins.tfs.TeamBuildEndpoint;
 import hudson.plugins.tfs.TeamPullRequestMergedDetailsAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
-import hudson.plugins.tfs.TeamEventsEndpoint;
-import hudson.plugins.tfs.TeamPullRequestMergedDetailsAction;
 import hudson.plugins.tfs.util.ActionHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
@@ -212,6 +206,8 @@ public class BuildCommand extends AbstractCommand {
     }
 
     static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {
+        final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
+        actions.add(teamBuildDetails);
         if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER)) {
             final String provider = teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER);
             final boolean isTeamGit = "TfGit".equalsIgnoreCase(provider)
@@ -236,9 +232,6 @@ public class BuildCommand extends AbstractCommand {
                 actions.add(action);
 
                 UnsupportedIntegrationAction.addToBuild(actions, "Posting build status is not supported for builds triggered by the 'Jenkins Queue Job' task.");
-
-                final Action teamBuildDetails = new TeamBuildDetailsAction(teamBuildParameters);
-                actions.add(teamBuildDetails);
             }
             else {
                 final String reason = String.format(
