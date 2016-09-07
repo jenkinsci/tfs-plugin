@@ -31,8 +31,11 @@ The plugin will automatically create a workspace in TFS/Team Services and map a 
 
 The TFS plug-in for Jenkins enhances the Git plug-in for Jenkins by adding some integration features:
 * A push trigger, to request builds of specific commits in Git repositories without needing to schedule SCM polling
+    * Instead of adding the **Build when a change is pushed to TFS/Team Services** trigger to every job, you can also check the checkbox next to **Enable Push Trigger for all jobs** in the Jenkins global configuration.  Individual jobs can still opt-out of this global opt-in by enabling the **Poll SCM** trigger and checking its **Ignore post-commit hooks** checkbox.
 * A build step that adds a "build pending" status to the associated pull request and/or commit in TFS/Team Services
+    * Instead of adding the **Set build pending status in TFS/Team Services** build step to every job, you can also check the checkbox next to **Enable Team Status for all jobs** in the Jenkins global configuration.
 * A post-build action that add a "build completed" status to the associated pull request and/or commit in TFS/Team Services
+    * Instead of adding the **Set build completion status in TFS/Team Services** post-build action to every job, you can also check the checkboxbox next to **Enable Team Status for all jobs** in the Jenkins global configuration.
 * A link to (and summary information about) the associated TFS/Team Services build that triggered the Jenkins build.
 * A link to (and summary information about) the associated TFS/Team Services pull request that triggered the Jenkins build.
     * Links to associated TFS/Team Services work items.
