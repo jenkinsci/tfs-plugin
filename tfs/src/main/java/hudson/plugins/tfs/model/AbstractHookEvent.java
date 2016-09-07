@@ -12,6 +12,7 @@ import hudson.plugins.git.GitStatus;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamHookCause;
+import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ActionHelper;
@@ -132,7 +133,27 @@ public abstract class AbstractHookEvent {
 
                                 boolean triggered = false;
                                 if (!triggered) {
-                                    // TODO: check global override here
+                                    final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
+                                    if (config.isEnableTeamPushTriggerForAllJobs()) {
+                                        triggered = true;
+                                        final SCMTrigger scmTrigger = TeamEventsEndpoint.findTrigger(job, SCMTrigger.class);
+                                        if (scmTrigger != null && scmTrigger.isIgnorePostCommitHooks()) {
+                                            // job has explicitly opted out of hooks
+                                            triggered = false;
+                                        }
+                                    }
+                                    if (triggered) {
+                                        final TeamPushTrigger trigger = new TeamPushTrigger(job);
+                                        trigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
+                                        final GitStatus.ResponseContributor response;
+                                        if (bypassPolling) {
+                                            response = new TeamEventsEndpoint.ScheduledResponseContributor(project);
+                                        }
+                                        else {
+                                            response = new TeamEventsEndpoint.PollingScheduledResponseContributor(project);
+                                        }
+                                        result.add(response);
+                                    }
                                 }
                                 if (!triggered) {
                                     final SCMTrigger scmTrigger = TeamEventsEndpoint.findTrigger(job, SCMTrigger.class);

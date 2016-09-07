@@ -43,6 +43,10 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
     public TeamPushTrigger() {
     }
 
+    public TeamPushTrigger(final Job<?, ?> job) {
+        this.job = job;
+    }
+
     public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling) {
         // TODO: Consider executing the poll + queue asynchronously
         final Runner runner = new Runner(gitCodePushedEventArgs, actions, bypassPolling);
