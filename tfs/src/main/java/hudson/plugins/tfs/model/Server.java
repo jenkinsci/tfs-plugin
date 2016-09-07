@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.microsoft.tfs.core.TFSConfigurationServer;
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
@@ -23,6 +24,7 @@ import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
@@ -53,6 +55,22 @@ public class Server implements ServerConfigurationProvider, Closable {
      */
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password) throws IOException {
         this(launcher, taskListener, url, username, password, null, null);
+    }
+
+    public static Server create(final Launcher launcher, final TaskListener taskListener, final String url, final StandardUsernamePasswordCredentials credentials, final WebProxySettings webProxySettings, final ExtraSettings extraSettings) throws IOException {
+
+        final String username;
+        final String userPassword;
+        if (credentials == null) {
+            username = null;
+            userPassword = null;
+        }
+        else {
+            username = credentials.getUsername();
+            final Secret password = credentials.getPassword();
+            userPassword = password.getPlainText();
+        }
+        return new Server(launcher, taskListener, url, username, userPassword, webProxySettings, extraSettings);
     }
 
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, final WebProxySettings webProxySettings, final ExtraSettings extraSettings) throws IOException {
