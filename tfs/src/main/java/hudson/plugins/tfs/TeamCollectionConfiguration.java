@@ -104,7 +104,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
             }
 
             try {
-                final StandardUsernamePasswordCredentials credential = findCredential(hostName, credentialsId);
+                final StandardUsernamePasswordCredentials credential = findCredentialsById(credentialsId);
                 if (isTeamServices(hostName)) {
                     if (credential == null) {
                         return FormValidation.error(errorTemplate, "Team Services accounts need credentials, preferably a Personal Access Token");
