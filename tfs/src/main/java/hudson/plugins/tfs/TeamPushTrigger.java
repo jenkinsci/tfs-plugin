@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -133,11 +132,17 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                 final String name = "#" + p.getNextBuildNumber();
                 final String pushedBy = gitCodePushedEventArgs.pushedBy;
                 TeamPushCause cause;
-                try {
-                    cause = new TeamPushCause(getLogFile(), pushedBy);
+                final File logFile = getLogFile();
+                if (logFile.isFile()) {
+                    try {
+                        cause = new TeamPushCause(logFile, pushedBy);
+                    }
+                    catch (IOException e) {
+                        LOGGER.log(Level.WARNING, "Failed to parse the polling log", e);
+                        cause = new TeamPushCause(pushedBy);
+                    }
                 }
-                catch (IOException e) {
-                    LOGGER.log(Level.WARNING, "Failed to parse the polling log", e);
+                else {
                     cause = new TeamPushCause(pushedBy);
                 }
                 final int quietPeriod = p.getQuietPeriod();
