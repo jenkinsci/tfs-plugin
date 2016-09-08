@@ -45,16 +45,7 @@ public class TeamRestClient {
     private final String authorization;
 
     public TeamRestClient(final URI collectionUri) {
-        this.collectionUri = collectionUri;
-        final String hostName = collectionUri.getHost();
-        isTeamServices = TeamCollectionConfiguration.isTeamServices(hostName);
-        final StandardUsernamePasswordCredentials credentials = TeamCollectionConfiguration.findCredentialsForCollection(collectionUri);
-        if (credentials != null) {
-            authorization = createAuthorization(credentials);
-        }
-        else {
-            authorization = null;
-        }
+        this(collectionUri, TeamCollectionConfiguration.findCredentialsForCollection(collectionUri));
     }
 
     public TeamRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) {
