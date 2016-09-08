@@ -69,6 +69,10 @@ public class TeamRestClient {
         }
     }
 
+    public TeamRestClient(final String collectionUri, final StandardUsernamePasswordCredentials credentials) {
+        this(URI.create(collectionUri), credentials);
+    }
+
     static String createAuthorization(final StandardUsernamePasswordCredentials credentials) {
         final String username = credentials.getUsername();
         final Secret secretPassword = credentials.getPassword();
