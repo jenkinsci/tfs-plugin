@@ -2,6 +2,7 @@ package hudson.plugins.tfs.model;
 
 import hudson.model.Computer;
 import hudson.plugins.tfs.TeamPluginGlobalConfig;
+import jenkins.model.Jenkins;
 
 import java.io.Serializable;
 
@@ -26,12 +27,13 @@ public class ExtraSettings implements Serializable {
     public ExtraSettings(final TeamPluginGlobalConfig teamPluginGlobalConfig) {
         if (teamPluginGlobalConfig != null) {
             this.configFolderPerNode = teamPluginGlobalConfig.isConfigFolderPerNode();
-            final Computer currentComputer = Computer.currentComputer();
-            if (currentComputer != null) {
-                this.nodeComputerName = currentComputer.getName();
-            }
-            else {
-                this.nodeComputerName = "";
+            final Jenkins instance = Jenkins.getInstance();
+            this.nodeComputerName = "";
+            if (instance != null) {
+                final Computer currentComputer = Computer.currentComputer();
+                if (currentComputer != null) {
+                    this.nodeComputerName = currentComputer.getName();
+                }
             }
         }
         else {
