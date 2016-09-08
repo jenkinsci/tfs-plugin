@@ -9,6 +9,7 @@ import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.JsonPatchOperation;
 import hudson.plugins.tfs.model.Link;
+import hudson.plugins.tfs.model.ListOfGitRepositories;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.TeamGitStatus;
@@ -140,7 +141,7 @@ public class TeamRestClient {
                 if (!StringUtil.isNullOrEmpty(responseText)) {
                     sb.append(": ").append(responseText);
                 }
-                throw new Error(sb.toString());
+                throw new IOException(sb.toString());
             }
             responseStream = clientMethod.getResponseBodyAsStream();
             stringResult = readResponseText(responseStream);
@@ -180,6 +181,19 @@ public class TeamRestClient {
         }
 
         return request(String.class, HttpMethod.GET, requestUri, null);
+    }
+
+    public ListOfGitRepositories getRepositories() throws IOException {
+        final QueryString qs = new QueryString(API_VERSION, "1.0");
+        final URI requestUri = UriHelper.join(
+                collectionUri,
+                "_apis",
+                "git",
+                "repositories",
+                qs
+        );
+
+        return request(ListOfGitRepositories.class, HttpMethod.GET, requestUri, null);
     }
 
     public TeamGitStatus addCommitStatus(final GitCodePushedEventArgs args, final TeamGitStatus status) throws IOException {
