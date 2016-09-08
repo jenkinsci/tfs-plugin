@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.model;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
 import hudson.model.AbstractProject;
@@ -20,8 +19,8 @@ import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.TeamBuildDetailsAction;
 import hudson.plugins.tfs.TeamBuildEndpoint;
 import hudson.plugins.tfs.TeamPullRequestMergedDetailsAction;
-import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
+import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ActionHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
@@ -57,12 +56,6 @@ public class BuildCommand extends AbstractCommand {
 
     public static String formatUnsupportedReason(final String reason) {
         return String.format(UNSUPPORTED_TEMPLATE, reason);
-    }
-    private static final ObjectMapper MAPPER;
-
-    static {
-        MAPPER = new ObjectMapper();
-        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     public static class Factory implements AbstractCommand.Factory {

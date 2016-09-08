@@ -1,6 +1,5 @@
 package hudson.plugins.tfs;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
 import hudson.model.AbstractProject;
@@ -52,7 +51,6 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
 
     private static final Logger LOGGER = Logger.getLogger(TeamBuildEndpoint.class.getName());
     private static final Map<String, AbstractCommand.Factory> COMMAND_FACTORIES_BY_NAME;
-    private static final ObjectMapper MAPPER;
     public static final String URL_NAME = "team-build";
     public static final String PARAMETER = "parameter";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
@@ -63,10 +61,6 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         map.put("build", new BuildCommand.Factory());
         map.put("buildWithParameters", new BuildWithParametersCommand.Factory());
         COMMAND_FACTORIES_BY_NAME = Collections.unmodifiableMap(map);
-
-        MAPPER = new ObjectMapper();
-        MAPPER.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
-        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     private String commandName;
@@ -221,8 +215,9 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         final AbstractCommand command = factory.create();
         final JSONObject response;
         final JSONObject formData = req.getSubmittedForm();
-        final TeamBuildPayload teamBuildPayload = MAPPER.convertValue(formData, TeamBuildPayload.class);
-        response = command.perform(project, req, formData, MAPPER, teamBuildPayload, actualDelay);
+        final ObjectMapper mapper = EndpointHelper.MAPPER;
+        final TeamBuildPayload teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
+        response = command.perform(project, req, formData, mapper, teamBuildPayload, actualDelay);
         return response;
     }
 

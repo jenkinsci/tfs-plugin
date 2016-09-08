@@ -1,13 +1,11 @@
 package hudson.plugins.tfs.util;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.tfs.core.config.ConnectionInstanceData;
 import com.microsoft.tfs.util.GUID;
+import com.microsoft.visualstudio.services.webapi.patch.Operation;
 import hudson.ProxyConfiguration;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
-import com.microsoft.visualstudio.services.webapi.patch.Operation;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.JsonPatchOperation;
@@ -41,12 +39,6 @@ public class TeamRestClient {
     private static final String AUTHORIZATION = "Authorization";
     private static final String API_VERSION = "api-version";
     private static final String NEW_LINE = System.getProperty("line.separator");
-    private static final ObjectMapper MAPPER;
-
-    static {
-        MAPPER = new ObjectMapper();
-        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    }
 
     private final URI collectionUri;
     private final boolean isTeamServices;
@@ -158,7 +150,7 @@ public class TeamRestClient {
 
     public static <TResponse> TResponse deserialize(final Class<TResponse> responseClass, final String stringResponseBody) {
         try {
-            return MAPPER.readValue(stringResponseBody, responseClass);
+            return EndpointHelper.MAPPER.readValue(stringResponseBody, responseClass);
         }
         catch (final IOException e) {
             throw new Error(e);
