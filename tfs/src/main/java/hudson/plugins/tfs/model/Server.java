@@ -11,6 +11,7 @@ import com.microsoft.tfs.core.config.persistence.DefaultPersistenceStoreProvider
 import com.microsoft.tfs.core.config.persistence.PersistenceStoreProvider;
 import com.microsoft.tfs.core.httpclient.Credentials;
 import com.microsoft.tfs.core.httpclient.DefaultNTCredentials;
+import com.microsoft.tfs.core.httpclient.HttpClient;
 import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
@@ -18,7 +19,6 @@ import com.microsoft.tfs.jni.helpers.LocalHost;
 import com.microsoft.tfs.util.Closable;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
-import hudson.Util;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 public class Server implements ServerConfigurationProvider, Closable {
 
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
-    private static final String nativeFolderPropertyName = "com.microsoft.tfs.jni.native.base-directory";
     private final String url;
     private final String userName;
     private final String userPassword;
@@ -211,6 +210,10 @@ public class Server implements ServerConfigurationProvider, Closable {
             }
         }
         return mockableVcc;
+    }
+
+    public HttpClient getHttpClient() {
+        return tpc.getHTTPClient();
     }
 
     public <T, E extends Exception> T execute(final Callable<T, E> callable) {

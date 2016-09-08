@@ -1,23 +1,19 @@
 package hudson.plugins.tfs.util;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.microsoft.tfs.core.config.ConnectionInstanceData;
-import com.microsoft.tfs.util.GUID;
+import com.microsoft.tfs.core.httpclient.HttpClient;
+import com.microsoft.tfs.util.StringUtil;
 import com.microsoft.visualstudio.services.webapi.patch.Operation;
-import hudson.ProxyConfiguration;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.JsonPatchOperation;
 import hudson.plugins.tfs.model.Link;
-import hudson.plugins.tfs.model.ModernHTTPClientFactory;
-import hudson.plugins.tfs.model.NativeLibraryManager;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
+import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.TeamGitStatus;
-import hudson.plugins.tfs.model.WebProxySettings;
 import hudson.plugins.tfs.model.WorkItem;
 import hudson.util.Secret;
-import jenkins.model.Jenkins;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -29,10 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URI;
-import java.net.URL;
 
 public class TeamRestClient {
 
@@ -43,16 +36,18 @@ public class TeamRestClient {
     private final URI collectionUri;
     private final boolean isTeamServices;
     private final String authorization;
+    private final Server server;
 
-    public TeamRestClient(final URI collectionUri) {
+    public TeamRestClient(final URI collectionUri) throws IOException {
         this(collectionUri, TeamCollectionConfiguration.findCredentialsForCollection(collectionUri));
     }
 
-    public TeamRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) {
+    public TeamRestClient(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {
         this.collectionUri = collectionUri;
         final String hostName = collectionUri.getHost();
+        this.server = Server.create(null, null, collectionUri.toString(), credentials, null, null);
         isTeamServices = TeamCollectionConfiguration.isTeamServices(hostName);
-        if (credentials != null) {
+        if (isTeamServices & credentials != null) {
             authorization = createAuthorization(credentials);
         }
         else {
@@ -60,7 +55,7 @@ public class TeamRestClient {
         }
     }
 
-    public TeamRestClient(final String collectionUri, final StandardUsernamePasswordCredentials credentials) {
+    public TeamRestClient(final String collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {
         this(URI.create(collectionUri), credentials);
     }
 
@@ -82,65 +77,40 @@ public class TeamRestClient {
         final TRequest requestBody
         ) throws IOException {
 
-        final URL requestUrl;
-        try {
-            requestUrl = requestUri.toURL();
-        }
-        catch (final MalformedURLException e) {
-            throw new Error(e);
-        }
+        final HttpClient httpClient = server.getHttpClient();
 
-        final Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins == null) {
-            throw new IllegalArgumentException("Unable to query Jenkins for proxy configuration");
-        }
-        final ProxyConfiguration proxyConfig = jenkins.proxy;
-        final WebProxySettings proxySettings = new WebProxySettings(proxyConfig);
-        final String hostToProxy = requestUri.getHost();
-        final Proxy proxy = proxySettings.toProxy(hostToProxy);
-        // To build the User-Agent string, we need the native libraries to read environment variables
-        NativeLibraryManager.initialize();
-        final ConnectionInstanceData cid = new ConnectionInstanceData(requestUri, GUID.EMPTY);
-        final ModernHTTPClientFactory modernHTTPClientFactory = new ModernHTTPClientFactory(cid, null);
-        final String userAgent = modernHTTPClientFactory.getUserAgent(null, cid);
-        final HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection(proxy);
-        try {
-            if (authorization != null) {
-                connection.setRequestProperty(AUTHORIZATION, authorization);
-            }
-            connection.setRequestProperty("User-Agent", userAgent);
-
-            final String stringRequestBody;
-            if (requestBody != null) {
-                final JSON jsonObject;
-                if (requestBody instanceof JSON) {
-                    jsonObject = (JSON) requestBody;
-                }
-                else {
-                    jsonObject = JSONObject.fromObject(requestBody);
-                }
-                stringRequestBody = jsonObject.toString(0);
+        final String stringRequestBody;
+        if (requestBody != null) {
+            final JSON jsonObject;
+            if (requestBody instanceof JSON) {
+                jsonObject = (JSON) requestBody;
             }
             else {
-                stringRequestBody = null;
+                jsonObject = JSONObject.fromObject(requestBody);
             }
-
-            final String stringResponseBody = innerRequest(httpMethod, connection, stringRequestBody);
-
-            if (responseClass == Void.class) {
-                return null;
-            }
-
-            if (responseClass == String.class) {
-                return (TResponse) stringResponseBody;
-            }
-
-            final TResponse result = deserialize(responseClass, stringResponseBody);
-            return result;
+            stringRequestBody = jsonObject.toString(0);
         }
-        finally {
-            connection.disconnect();
+        else {
+            stringRequestBody = null;
         }
+
+        final com.microsoft.tfs.core.httpclient.HttpMethod clientMethod = httpMethod.createClientMethod(requestUri.toString(), stringRequestBody);
+        if (authorization != null) {
+            clientMethod.addRequestHeader(AUTHORIZATION, authorization);
+        }
+
+        final String stringResponseBody = innerRequest(clientMethod, httpClient);
+
+        if (responseClass == Void.class) {
+            return null;
+        }
+
+        if (responseClass == String.class) {
+            return (TResponse) stringResponseBody;
+        }
+
+        final TResponse result = deserialize(responseClass, stringResponseBody);
+        return result;
     }
 
     public static <TResponse> TResponse deserialize(final Class<TResponse> responseClass, final String stringResponseBody) {
@@ -152,22 +122,27 @@ public class TeamRestClient {
         }
     }
 
-    static String innerRequest(final HttpMethod httpMethod, final HttpURLConnection connection, final String body) throws IOException {
-        httpMethod.sendRequest(connection, body);
+    static String innerRequest(final com.microsoft.tfs.core.httpclient.HttpMethod clientMethod, final HttpClient httpClient) throws IOException {
 
-        final int httpStatus = connection.getResponseCode();
+        final int httpStatus = httpClient.executeMethod(clientMethod);
+
         final String stringResult;
         InputStream responseStream = null;
         try {
             if (httpStatus >= HttpURLConnection.HTTP_BAD_REQUEST) {
-                responseStream = connection.getErrorStream();
-                if (responseStream == null) {
-                    responseStream = connection.getInputStream();
-                }
+                responseStream = clientMethod.getResponseBodyAsStream();
                 final String responseText = readResponseText(responseStream);
-                throw new Error(responseText);
+                final StringBuilder sb = new StringBuilder("HTTP ").append(httpStatus);
+                final String statusText = clientMethod.getStatusText();
+                if (statusText != null) {
+                    sb.append(" (").append(statusText).append(")");
+                }
+                if (!StringUtil.isNullOrEmpty(responseText)) {
+                    sb.append(": ").append(responseText);
+                }
+                throw new Error(sb.toString());
             }
-            responseStream = connection.getInputStream();
+            responseStream = clientMethod.getResponseBodyAsStream();
             stringResult = readResponseText(responseStream);
         }
         finally {
