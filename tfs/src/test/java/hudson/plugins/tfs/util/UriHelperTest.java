@@ -123,6 +123,24 @@ public class UriHelperTest {
     }
 
 
+    private static void assertSameGitRepo(final String a, final String b) {
+        areSameGitRepo(a, b, true);
+    }
+
+    private static void assertNotSameGitRepo(final String a, final String b) {
+        areSameGitRepo(a, b, false);
+    }
+
+    private static void areSameGitRepo(final String a, final String b, final boolean expected) {
+        final URI uriA = a == null ? null : URI.create(a);
+        final URI uriB = b == null ? null : URI.create(b);
+        final String template = "Expected '%s' and '%s' to be considered%s the same.";
+        final String message = String.format(template, a, b, expected ? "" : " NOT");
+        Assert.assertEquals(message, expected, UriHelper.areSameGitRepo(uriA, uriB) );
+        Assert.assertEquals(message, expected, UriHelper.areSameGitRepo(uriB, uriA));
+    }
+
+
     @Test public void hasPath_hostOnly() throws Exception {
         final URI input = URI.create("https://fabrikam-fiber-inc.visualstudio.com");
 

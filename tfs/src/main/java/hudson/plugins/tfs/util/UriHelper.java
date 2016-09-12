@@ -80,6 +80,10 @@ public class UriHelper {
         return true;
     }
 
+    public static boolean areSameGitRepo(final URI a, final URI b) {
+        return false;
+    }
+
     static int normalizePort(final URI uri) {
         int port = uri.getPort();
         if (port == -1) {
