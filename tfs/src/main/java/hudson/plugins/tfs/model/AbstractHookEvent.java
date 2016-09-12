@@ -18,6 +18,7 @@ import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.StringHelper;
 import hudson.plugins.tfs.util.ActionHelper;
+import hudson.plugins.tfs.util.UriHelper;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
@@ -115,8 +116,8 @@ public abstract class AbstractHookEvent {
 
                     for (final RemoteConfig repository : git.getRepositories()) {
                         boolean repositoryMatches = false;
-                        for (URIish remoteURL : repository.getURIs()) {
-                            if (GitStatus.looselyMatches(uri, remoteURL)) {
+                        for (final URIish remoteURL : repository.getURIs()) {
+                            if (UriHelper.areSameGitRepo(uri, remoteURL)) {
                                 repositoryMatches = true;
                                 totalRepositoryMatches++;
                                 break;
