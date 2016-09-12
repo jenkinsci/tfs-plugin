@@ -154,6 +154,13 @@ public class UriHelperTest {
         );
     }
 
+    @Test public void areSameGitRepo_withMixedCaseDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/Project/_git/Repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/defaultcollection/project/_git/repo"
+        );
+    }
+
     @Test public void areSameGitRepo_differentProject() throws Exception {
         assertNotSameGitRepo(
                 "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/myProject/_git/repo",
@@ -165,6 +172,20 @@ public class UriHelperTest {
         assertNotSameGitRepo(
                 "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/myRepo",
                 "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/otherRepo"
+        );
+    }
+
+    @Test public void areSameGitRepo_mixTeamServicesDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_mixTfsDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "http://tfs.example.com:8080/tfs/DefaultCollection/project/_git/repo",
+                "http://tfs.example.com:8080/tfs/project/_git/repo"
         );
     }
 
