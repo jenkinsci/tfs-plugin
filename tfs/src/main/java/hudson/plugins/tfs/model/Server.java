@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.microsoft.tfs.core.TFSConfigurationServer;
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
@@ -10,6 +11,7 @@ import com.microsoft.tfs.core.config.persistence.DefaultPersistenceStoreProvider
 import com.microsoft.tfs.core.config.persistence.PersistenceStoreProvider;
 import com.microsoft.tfs.core.httpclient.Credentials;
 import com.microsoft.tfs.core.httpclient.DefaultNTCredentials;
+import com.microsoft.tfs.core.httpclient.HttpClient;
 import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
@@ -17,12 +19,12 @@ import com.microsoft.tfs.jni.helpers.LocalHost;
 import com.microsoft.tfs.util.Closable;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
-import hudson.Util;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.commands.ServerConfigurationProvider;
 import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
@@ -35,7 +37,6 @@ import java.util.logging.Logger;
 public class Server implements ServerConfigurationProvider, Closable {
 
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
-    private static final String nativeFolderPropertyName = "com.microsoft.tfs.jni.native.base-directory";
     private final String url;
     private final String userName;
     private final String userPassword;
@@ -53,6 +54,22 @@ public class Server implements ServerConfigurationProvider, Closable {
      */
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password) throws IOException {
         this(launcher, taskListener, url, username, password, null, null);
+    }
+
+    public static Server create(final Launcher launcher, final TaskListener taskListener, final String url, final StandardUsernamePasswordCredentials credentials, final WebProxySettings webProxySettings, final ExtraSettings extraSettings) throws IOException {
+
+        final String username;
+        final String userPassword;
+        if (credentials == null) {
+            username = null;
+            userPassword = null;
+        }
+        else {
+            username = credentials.getUsername();
+            final Secret password = credentials.getPassword();
+            userPassword = password.getPlainText();
+        }
+        return new Server(launcher, taskListener, url, username, userPassword, webProxySettings, extraSettings);
     }
 
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, final WebProxySettings webProxySettings, final ExtraSettings extraSettings) throws IOException {
@@ -193,6 +210,10 @@ public class Server implements ServerConfigurationProvider, Closable {
             }
         }
         return mockableVcc;
+    }
+
+    public HttpClient getHttpClient() {
+        return tpc.getHTTPClient();
     }
 
     public <T, E extends Exception> T execute(final Callable<T, E> callable) {

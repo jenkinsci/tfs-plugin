@@ -438,10 +438,7 @@ public class TeamFoundationServerScm extends SCM {
         final CredentialsConfigurer credentialsConfigurer = getCredentialsConfigurer();
         final String collectionUri = getServerUrl(run);
         final StandardUsernamePasswordCredentials credentials = credentialsConfigurer.getCredentials(collectionUri);
-        final String username = credentials.getUsername();
-        final Secret password = credentials.getPassword();
-        final String userPassword = password.getPlainText();
-        return new Server(launcher, taskListener, collectionUri, username, userPassword);
+        return Server.create(launcher, taskListener, collectionUri, credentials, null, null);
     }
 
     @Override

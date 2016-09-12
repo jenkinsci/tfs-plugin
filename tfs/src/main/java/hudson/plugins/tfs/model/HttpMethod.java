@@ -1,32 +1,40 @@
 package hudson.plugins.tfs.model;
 
+import com.microsoft.tfs.core.httpclient.methods.GetMethod;
+import com.microsoft.tfs.core.httpclient.methods.HeadMethod;
+import com.microsoft.tfs.core.httpclient.methods.PostMethod;
+import com.microsoft.tfs.core.httpclient.methods.StringRequestEntity;
 import hudson.plugins.tfs.util.MediaType;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 
 public enum HttpMethod {
     GET {
         @Override
-        public void sendRequest(final HttpURLConnection connection, final String body) throws IOException{
-            // do nothing for GET
+        public com.microsoft.tfs.core.httpclient.HttpMethod createClientMethod(final String uri, final String body) {
+            return new GetMethod(uri);
         }
+
     },
     POST,
     HEAD {
         @Override
-        public void sendRequest(final HttpURLConnection connection, final String body) throws IOException{
-            // do nothing for HEAD
+        public com.microsoft.tfs.core.httpclient.HttpMethod createClientMethod(final String uri, final String body) {
+            return new HeadMethod(uri);
         }
+
     },
     PATCH {
         @Override
-        public void sendRequest(final HttpURLConnection connection, final String body) throws IOException{
-            innerSendRequest(connection, body, MediaType.APPLICATION_JSON_PATCH_JSON_UTF_8);
+        public com.microsoft.tfs.core.httpclient.HttpMethod createClientMethod(final String uri, final String body) {
+            return innerCreateClientMethod(uri, body, MediaType.APPLICATION_JSON_PATCH_JSON);
         }
+
     },
     OPTIONS,
     PUT,
@@ -34,36 +42,25 @@ public enum HttpMethod {
     TRACE,
     ;
 
-    public void sendRequest(final HttpURLConnection connection, final String body) throws IOException {
-        innerSendRequest(connection, body, MediaType.APPLICATION_JSON_UTF_8);
-
+    public com.microsoft.tfs.core.httpclient.HttpMethod createClientMethod(final String uri, final String body) {
+        return innerCreateClientMethod(uri, body, MediaType.APPLICATION_JSON);
     }
 
-    void innerSendRequest(final HttpURLConnection connection, final String body, final String contentType) throws IOException {
+    PostMethod innerCreateClientMethod(final String uri, final String body, final String contentType) {
+        final PostMethod method = new PostMethod(uri);
         // https://www.visualstudio.com/en-us/docs/integrate/get-started/rest/basics#http-method-override
+        method.addRequestHeader("X-HTTP-Method-Override", this.name());
+        final String charset = MediaType.UTF_8.toString();
+        final StringRequestEntity requestEntity;
         try {
-            connection.setRequestMethod("POST");
+            requestEntity = new StringRequestEntity(body, contentType, charset);
         }
-        catch (final ProtocolException e) {
-            // shouldn't happen
+        catch (final UnsupportedEncodingException e) {
+            // this shouldn't happen
             throw new Error(e);
         }
-        connection.setRequestProperty("X-HTTP-Method-Override", this.name());
-
-        if (body != null) {
-            final byte[] bytes = body.getBytes(MediaType.UTF_8);
-            connection.setRequestProperty("Content-Type", contentType);
-            connection.setRequestProperty("Content-Length", Integer.toString(bytes.length, 10));
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            OutputStream stream = null;
-            try {
-                stream = connection.getOutputStream();
-                stream.write(bytes);
-            }
-            finally {
-                IOUtils.closeQuietly(stream);
-            }
-        }
+        method.setRequestEntity(requestEntity);
+        return method;
     }
+
 }

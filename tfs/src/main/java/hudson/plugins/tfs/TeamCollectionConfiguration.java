@@ -7,9 +7,13 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import com.microsoft.tfs.core.exceptions.TFSUnauthorizedException;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import hudson.plugins.tfs.model.ListOfGitRepositories;
+import hudson.plugins.tfs.model.MockableVersionControlClient;
+import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.util.StringHelper;
 import hudson.plugins.tfs.util.TeamRestClient;
 import hudson.plugins.tfs.util.UriHelper;
@@ -26,8 +30,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCollectionConfiguration> {
+
+    private static final Logger LOGGER = Logger.getLogger(TeamCollectionConfiguration.class.getName());
 
     private final String collectionUrl;
     private final String credentialsId;
@@ -104,20 +111,17 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
             }
 
             try {
-                final StandardUsernamePasswordCredentials credential = findCredential(hostName, credentialsId);
+                final StandardUsernamePasswordCredentials credential = findCredentialsById(credentialsId);
                 if (isTeamServices(hostName)) {
                     if (credential == null) {
                         return FormValidation.error(errorTemplate, "Team Services accounts need credentials, preferably a Personal Access Token");
                     }
                 }
-                final URI collectionUri = URI.create(collectionUrl);
-                testConnection(collectionUri, credential);
+                return testConnection(collectionUrl, credential);
             }
             catch (final IOException e) {
                 return FormValidation.error(e, errorTemplate, e.getMessage());
             }
-
-            return FormValidation.ok("Success!");
         }
 
         @SuppressWarnings("unused")
@@ -173,10 +177,28 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         return StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
     }
 
-    static void testConnection(final URI collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {
+    static FormValidation testConnection(final String collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {
 
+        final Server server = Server.create(null, null, collectionUri, credentials, null, null);
+        try {
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            return FormValidation.ok("Success via SOAP API.");
+        }
+        catch (final TFSUnauthorizedException e) {
+            // performing TFVC requires All Scopes and someone might be setting up for Git only; ignore
+        }
         final TeamRestClient client = new TeamRestClient(collectionUri, credentials);
-        client.ping();
+
+        try {
+            final ListOfGitRepositories repositories = client.getRepositories();
+            if (repositories.count < 1) {
+                return FormValidation.warning("There does not seem to be any Git repositories");
+            }
+            return FormValidation.ok("Success via REST API.");
+        }
+        catch (final IOException e) {
+            return FormValidation.error("Error: " + e.getMessage());
+        }
     }
 
     static StandardUsernamePasswordCredentials findCredential(final String hostName, final String credentialsId) {

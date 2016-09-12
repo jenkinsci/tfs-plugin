@@ -1,7 +1,5 @@
 package hudson.plugins.tfs;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -51,7 +49,6 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
 
     private static final Logger LOGGER = Logger.getLogger(TeamEventsEndpoint.class.getName());
     private static final Map<String, AbstractHookEvent.Factory> HOOK_EVENT_FACTORIES_BY_NAME;
-    private static final ObjectMapper MAPPER;
 
     static {
         final Map<String, AbstractHookEvent.Factory> eventMap =
@@ -60,10 +57,6 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         eventMap.put("gitPullRequestMerged", new GitPullRequestMergedEvent.Factory());
         eventMap.put("gitPush", new GitPushEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
-
-        MAPPER = new ObjectMapper();
-        MAPPER.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
-        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     public static final String URL_NAME = "team-events";
@@ -167,11 +160,11 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         final String message = serviceHookEvent.getMessage().getText();
         final String detailedMessage = serviceHookEvent.getDetailedMessage().getText();
         final AbstractHookEvent hookEvent = factory.create();
-        return hookEvent.perform(MAPPER, serviceHookEvent, message, detailedMessage);
+        return hookEvent.perform(EndpointHelper.MAPPER, serviceHookEvent, message, detailedMessage);
     }
 
     public static Event deserializeEvent(final String input) throws IOException {
-        final Event serviceHookEvent = MAPPER.readValue(input, Event.class);
+        final Event serviceHookEvent = EndpointHelper.MAPPER.readValue(input, Event.class);
         final String eventType = serviceHookEvent.getEventType();
         if (StringUtils.isEmpty(eventType)) {
             throw new IllegalArgumentException("Payload did not contain 'eventType'.");
