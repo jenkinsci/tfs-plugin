@@ -1,6 +1,5 @@
 package hudson.plugins.tfs;
 
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.microsoft.visualstudio.services.webapi.model.ResourceRef;
 import hudson.Extension;
 import hudson.FilePath;
@@ -25,6 +24,7 @@ import java.util.ArrayList;
  * A _Post-Build Action_ that updates associated work items with a link back
  * to the Jenkins build.
  */
+@SuppressWarnings("unused" /* Jenkins extension */)
 public class TeamUpdateWorkItemPostBuildAction extends Notifier implements SimpleBuildStep {
 
     @DataBoundConstructor
@@ -44,9 +44,7 @@ public class TeamUpdateWorkItemPostBuildAction extends Notifier implements Simpl
             final ArrayList<ResourceRef> workItems = new ArrayList<ResourceRef>();
             final URI collectionUri = TeamPullRequestMergedDetailsAction.addWorkItemsForRun(run, workItems);
             if (collectionUri != null) {
-                // TODO: use the simpler TeamRestClient overload once pull request #110 is merged
-                final StandardUsernamePasswordCredentials credentials = TeamCollectionConfiguration.findCredentialsForCollection(collectionUri);
-                final TeamRestClient client = new TeamRestClient(collectionUri, credentials);
+                final TeamRestClient client = new TeamRestClient(collectionUri);
                 for (final ResourceRef workItem : workItems) {
                     final String workItemIdString = workItem.getId();
                     final Integer workItemId = Integer.valueOf(workItemIdString, 10);
