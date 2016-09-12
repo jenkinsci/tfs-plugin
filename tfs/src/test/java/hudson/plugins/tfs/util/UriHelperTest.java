@@ -140,6 +140,34 @@ public class UriHelperTest {
         Assert.assertEquals(message, expected, UriHelper.areSameGitRepo(uriB, uriA));
     }
 
+    @Test public void areSameGitRepo_withoutDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/project/_git/repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_withDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_differentProject() throws Exception {
+        assertNotSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/myProject/_git/repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/othePproject/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_differentRepo() throws Exception {
+        assertNotSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/myRepo",
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/otherRepo"
+        );
+    }
+
 
     @Test public void hasPath_hostOnly() throws Exception {
         final URI input = URI.create("https://fabrikam-fiber-inc.visualstudio.com");

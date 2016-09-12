@@ -81,7 +81,7 @@ public class UriHelper {
     }
 
     public static boolean areSameGitRepo(final URI a, final URI b) {
-        return false;
+        return UriHelper.areSame(a, b);
     }
 
     static int normalizePort(final URI uri) {
