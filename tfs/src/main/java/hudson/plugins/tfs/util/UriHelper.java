@@ -90,17 +90,15 @@ public class UriHelper {
             return false;
         }
 
-        if (!StringHelper.equalIgnoringCase(a.getScheme(), b.getScheme())) {
-            return false;
+        if (StringHelper.equalIgnoringCase(a.getScheme(), b.getScheme())) {
+            final int aPort = normalizePort(a);
+            final int bPort = normalizePort(b);
+            if (aPort != bPort) {
+                return false;
+            }
         }
 
         if (!StringHelper.equalIgnoringCase(a.getHost(), b.getHost())) {
-            return false;
-        }
-
-        final int aPort = normalizePort(a);
-        final int bPort = normalizePort(b);
-        if (aPort != bPort) {
             return false;
         }
 

@@ -189,6 +189,26 @@ public class UriHelperTest {
         );
     }
 
+    @Test public void areSameGitRepo_differentPorts() throws Exception {
+        assertNotSameGitRepo(
+                "http://tfs.example.com:8080/tfs/DefaultCollection/project/_git/repo",
+                "http://tfs.example.com:8081/tfs/DefaultCollection/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_teamServicesDifferentProtocols() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/repo",
+                "ssh://fabrikam-fiber-inc@fabrikam-fiber-inc.visualstudio.com/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_tfsDifferentProtocols() throws Exception {
+        assertSameGitRepo(
+                "http://tfs.example.com:8081/tfs/DefaultCollection/project/_git/repo",
+                "ssh://tfs.example.com:22/tfs/project/_git/repo"
+        );
+    }
 
     @Test public void hasPath_hostOnly() throws Exception {
         final URI input = URI.create("https://fabrikam-fiber-inc.visualstudio.com");
