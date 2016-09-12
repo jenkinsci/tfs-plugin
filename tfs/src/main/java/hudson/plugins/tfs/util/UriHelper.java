@@ -3,6 +3,8 @@
 
 package hudson.plugins.tfs.util;
 
+import org.eclipse.jgit.transport.URIish;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -80,6 +82,13 @@ public class UriHelper {
         }
 
         return true;
+    }
+
+    public static boolean areSameGitRepo(final URIish a, final URIish b) {
+        final URI uriA = a == null ? null : URI.create(a.toString());
+        final URI uriB = b == null ? null : URI.create(b.toString());
+
+        return areSameGitRepo(uriA, uriB);
     }
 
     public static boolean areSameGitRepo(final URI a, final URI b) {
