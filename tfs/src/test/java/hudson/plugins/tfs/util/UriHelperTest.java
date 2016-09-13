@@ -123,6 +123,93 @@ public class UriHelperTest {
     }
 
 
+    private static void assertSameGitRepo(final String a, final String b) {
+        areSameGitRepo(a, b, true);
+    }
+
+    private static void assertNotSameGitRepo(final String a, final String b) {
+        areSameGitRepo(a, b, false);
+    }
+
+    private static void areSameGitRepo(final String a, final String b, final boolean expected) {
+        final URI uriA = a == null ? null : URI.create(a);
+        final URI uriB = b == null ? null : URI.create(b);
+        final String template = "Expected '%s' and '%s' to be considered%s the same.";
+        final String message = String.format(template, a, b, expected ? "" : " NOT");
+        Assert.assertEquals(message, expected, UriHelper.areSameGitRepo(uriA, uriB) );
+        Assert.assertEquals(message, expected, UriHelper.areSameGitRepo(uriB, uriA));
+    }
+
+    @Test public void areSameGitRepo_withoutDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/project/_git/repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_withDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_withMixedCaseDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/Project/_git/Repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/defaultcollection/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_differentProject() throws Exception {
+        assertNotSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/myProject/_git/repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/othePproject/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_differentRepo() throws Exception {
+        assertNotSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/myRepo",
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/otherRepo"
+        );
+    }
+
+    @Test public void areSameGitRepo_mixTeamServicesDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/repo",
+                "https://fabrikam-fiber-inc.visualstudio.com/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_mixTfsDefaultCollection() throws Exception {
+        assertSameGitRepo(
+                "http://tfs.example.com:8080/tfs/DefaultCollection/project/_git/repo",
+                "http://tfs.example.com:8080/tfs/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_differentPorts() throws Exception {
+        assertNotSameGitRepo(
+                "http://tfs.example.com:8080/tfs/DefaultCollection/project/_git/repo",
+                "http://tfs.example.com:8081/tfs/DefaultCollection/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_teamServicesDifferentProtocols() throws Exception {
+        assertSameGitRepo(
+                "https://fabrikam-fiber-inc.visualstudio.com/DefaultCollection/project/_git/repo",
+                "ssh://fabrikam-fiber-inc@fabrikam-fiber-inc.visualstudio.com/project/_git/repo"
+        );
+    }
+
+    @Test public void areSameGitRepo_tfsDifferentProtocols() throws Exception {
+        assertSameGitRepo(
+                "http://tfs.example.com:8081/tfs/DefaultCollection/project/_git/repo",
+                "ssh://tfs.example.com:22/tfs/project/_git/repo"
+        );
+    }
+
     @Test public void hasPath_hostOnly() throws Exception {
         final URI input = URI.create("https://fabrikam-fiber-inc.visualstudio.com");
 

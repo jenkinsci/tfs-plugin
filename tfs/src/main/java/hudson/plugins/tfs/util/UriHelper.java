@@ -3,6 +3,8 @@
 
 package hudson.plugins.tfs.util;
 
+import org.eclipse.jgit.transport.URIish;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,12 +12,14 @@ import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.TreeMap;
 
 public class UriHelper {
 
     private static final Map<String, Integer> SCHEMES_TO_DEFAULT_PORTS;
     public static final String UTF_8 = "UTF-8";
+    private static final String DEFAULT_COLLECTION = "DefaultCollection";
 
     static {
         final Map<String, Integer> defaultPorts =
@@ -80,6 +84,63 @@ public class UriHelper {
         return true;
     }
 
+    public static boolean areSameGitRepo(final URIish a, final URIish b) {
+        final URI uriA = a == null ? null : URI.create(a.toString());
+        final URI uriB = b == null ? null : URI.create(b.toString());
+
+        return areSameGitRepo(uriA, uriB);
+    }
+
+    public static boolean areSameGitRepo(final URI a, final URI b) {
+        if (a == null) {
+            return b == null;
+        }
+        if (b == null) {
+            return false;
+        }
+
+        if (StringHelper.equalIgnoringCase(a.getScheme(), b.getScheme())) {
+            final int aPort = normalizePort(a);
+            final int bPort = normalizePort(b);
+            if (aPort != bPort) {
+                return false;
+            }
+        }
+
+        if (!StringHelper.equalIgnoringCase(a.getHost(), b.getHost())) {
+            return false;
+        }
+
+        final String aPath = normalizePath(a);
+        final String bPath = normalizePath(b);
+        if (StringHelper.equal(aPath, bPath)) {
+            return true;
+        }
+
+        final Iterator<String> aPathParts = decomposePath(aPath);
+        boolean aSeenDefaultCollection = false;
+        final Iterator<String> bPathParts = decomposePath(bPath);
+        boolean bSeenDefaultCollection = false;
+        while (aPathParts.hasNext() && bPathParts.hasNext()) {
+            String aPart = aPathParts.next();
+            String bPart = bPathParts.next();
+            if (StringHelper.equalIgnoringCase(DEFAULT_COLLECTION, aPart) && aPathParts.hasNext() && !aSeenDefaultCollection) {
+                aPart = aPathParts.next();
+                aSeenDefaultCollection = true;
+            }
+            if (StringHelper.equalIgnoringCase(DEFAULT_COLLECTION, bPart) && bPathParts.hasNext() && !bSeenDefaultCollection) {
+                bPart = bPathParts.next();
+                bSeenDefaultCollection = true;
+            }
+
+            if (!StringHelper.equalIgnoringCase(aPart, bPart)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     static int normalizePort(final URI uri) {
         int port = uri.getPort();
         if (port == -1) {
@@ -104,6 +165,10 @@ public class UriHelper {
             }
         }
         return path;
+    }
+
+    static Iterator<String> decomposePath(final String path) {
+        return new Scanner(path).useDelimiter("/");
     }
 
     public static boolean hasPath(final URI uri) {
