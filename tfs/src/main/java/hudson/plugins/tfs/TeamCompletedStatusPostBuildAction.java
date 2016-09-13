@@ -36,6 +36,12 @@ public class TeamCompletedStatusPostBuildAction extends Notifier implements Simp
             @Nonnull final Launcher launcher,
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
+        if (!TeamGlobalStatusAction.isApplicable(run)){
+            perform(run, listener);
+        }
+    }
+
+    public void perform(final @Nonnull Run<?, ?> run, final @Nonnull TaskListener listener) {
         try {
             TeamStatus.createFromRun(run, listener, getDisplayName());
         }

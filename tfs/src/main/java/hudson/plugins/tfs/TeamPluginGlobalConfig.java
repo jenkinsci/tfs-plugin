@@ -25,6 +25,8 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
     private List<TeamCollectionConfiguration> collectionConfigurations = new ArrayList<TeamCollectionConfiguration>();
 
     private boolean configFolderPerNode;
+    private boolean enableTeamPushTriggerForAllJobs;
+    private boolean enableTeamStatusForAllJobs;
 
     public TeamPluginGlobalConfig() {
         this(true);
@@ -64,6 +66,22 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
     public void setConfigFolderPerNode(final boolean configFolderPerNode) {
         this.configFolderPerNode = configFolderPerNode;
+    }
+
+    public boolean isEnableTeamPushTriggerForAllJobs() {
+        return enableTeamPushTriggerForAllJobs;
+    }
+
+    public void setEnableTeamPushTriggerForAllJobs(final boolean enableTeamPushTriggerForAllJobs) {
+        this.enableTeamPushTriggerForAllJobs = enableTeamPushTriggerForAllJobs;
+    }
+
+    public boolean isEnableTeamStatusForAllJobs() {
+        return enableTeamStatusForAllJobs;
+    }
+
+    public void setEnableTeamStatusForAllJobs(final boolean enableTeamStatusForAllJobs) {
+        this.enableTeamStatusForAllJobs = enableTeamStatusForAllJobs;
     }
 
     @Override
