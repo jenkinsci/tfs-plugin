@@ -170,7 +170,7 @@ If your source code is in a Git repository located on a TFS/Team Services server
 If you didn't have the Git plug-in for Jenkins already, installing the TFS plug-in for Jenkins should have brought it on as a dependency.
 
 1. Use the **Git** _Source Code Management_ and add the URL to your Git repository in TFS/Team Services, omitting the `/DefaultCollection` if you are using Team Services.
-2. If you haven't done so already, follow the instructions in the "User name and password" section to generate a Personal Access Token, and then add a "Credential" as specified in the "Global configuration" section.  You should then be able to select it in the _Credentials_ field.
+2. If you haven't done so already, follow the instructions in the "User name and password" section to generate a Personal Access Token, and then add a "Credentials" entry as specified in the "Global configuration" section.  You should then be able to select it in the _Credentials_ field.
 3. To be able to build the merge commits created for pull requests in TFS/Team Services, click the **Advanced...** button
     1. In the _Name_ field, enter **origin** (or some unique name if you already have other repositories)
     2. In the _Refspec_ field, enter `+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin-pull/*` (replacing "origin" as necessary)
