@@ -29,7 +29,7 @@ The plugin will automatically create a workspace in TFS/Team Services and map a 
 
 ### Git
 
-The TFS plug-in for Jenkins enhances the Git plug-in for Jenkins by adding some integration features:
+The TFS plug-in for Jenkins adds some features to better integrate with Git repositories hosted in TFS/Team Services:
 * A push trigger, to request builds of specific commits in Git repositories without needing to schedule SCM polling
     * Instead of adding the **Build when a change is pushed to TFS/Team Services** trigger to every job, you can also check the checkbox next to **Enable Push Trigger for all jobs** in the Jenkins global configuration.  Individual jobs can still opt-out of this global opt-in by enabling the **Poll SCM** trigger and checking its **Ignore post-commit hooks** checkbox.
 * A build step that adds a "build pending" status to the associated pull request and/or commit in TFS/Team Services
@@ -117,13 +117,22 @@ To make use of the Git integration with TFS/Team Services and/or to use automati
             2. `Code (status)`
         4. You can use the _Description_ field to record details about the PAT, such as its intended collection, the selected authorization scopes and expiration date.  For example: `fabrikam-fiber-inc, code read+status, expires 2017-08-05`
         5. Click **OK**   
-2. Add the collection URL and associate it with the right credential:
+2. Add the collection URL and associate it with the right credentials:
     1. Select **Jenkins** > **Manage Jenkins** > **Configure System**
     2. Scroll to **TFS/Team Services** and click **Add**
         1. If using Team Services, the value of the _Collection URL_ field should omit `/DefaultCollection`.
         2. Select the associated `Credentials` value created earlier.
         3. Click **Test Connection**.
     3. Click **Save**
+
+### Automatic integration
+
+To avoid having to configure every job to enable integration features, you can check the checkbox next to either or both of:
+
+* Enable Push Trigger for all jobs
+* Enable Team Status for all jobs
+
+![Automatic Integration](images/AutomaticIntegration.png)
 
 ### Advanced
 
@@ -152,21 +161,25 @@ Field | Description
 
 ### Git
 
-If your source code is in a Git repository located on a TFS/Team Services server, this section is for you.  **Make sure you first followed the instructions in "Global configuration" and added your team project collections, associated with credentials.**
+If your source code is in a Git repository located on a TFS/Team Services server, this section is for you.
+
+> :warning: Make sure you first followed the instructions in the **Global configuration** section and added your team project collection(s), associated with credentials. :warning:
 
 ![Git configuration](images/git-job-config.png)
 
 If you didn't have the Git plug-in for Jenkins already, installing the TFS plug-in for Jenkins should have brought it on as a dependency.
 
 1. Use the **Git** _Source Code Management_ and add the URL to your Git repository in TFS/Team Services, omitting the `/DefaultCollection` if you are using Team Services.
-2. If you haven't done so already, follow the instructions in the "User name and password" section to generate a Personal Access Token, and then add a "Credential" as specified in the "Global configuration" section.  You should then be able to select it in the _Credentials_ field.
+2. If you haven't done so already, follow the instructions in the "User name and password" section to generate a Personal Access Token, and then add a "Credentials" entry as specified in the "Global configuration" section.  You should then be able to select it in the _Credentials_ field.
 3. To be able to build the merge commits created for pull requests in TFS/Team Services, click the **Advanced...** button
     1. In the _Name_ field, enter **origin** (or some unique name if you already have other repositories)
     2. In the _Refspec_ field, enter `+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin-pull/*` (replacing "origin" as necessary)
-4. Scroll down to _Build Triggers_ and you can now check the **Build when a change is pushed to TFS/Team Services** checkbox.
-5. Scroll down to _Build_, select **Add build step** > **Set build pending status in TFS/Team Services**, moving it _first_ in the list of steps, to notify TFS/Team Services as early as possible that a Jenkins build has been started.
+4. If you haven't already enabled the Push Trigger for all jobs, scroll down to _Build Triggers_ and you can check the **Build when a change is pushed to TFS/Team Services** checkbox.
+5. If you haven't already enabled Team Status for all jobs, scroll down to _Build_, select **Add build step** > **Set build pending status in TFS/Team Services**, moving it _first_ in the list of steps, to notify TFS/Team Services as early as possible that a Jenkins build has been started.
 6. Add other build steps, as necessary. 
-7. Scroll down to _Post-build Actions_, select **Add post-build action** > **Set build completion status in TFS/Team Services**.
+7. If you haven't already enabled Team Status for all jobs, scroll down to _Post-build Actions_, select **Add post-build action** > **Set build completion status in TFS/Team Services**.
+8. If you would like to collect results for publication in TFS/Team Services, scroll down to _Post-build Actions_, select **Add post-build action** > **Collect results for TFS/Team Services** and then add one or more results to collect.
+9. If the Jenkins job will be used to validate pull requests in TFS/Team Services and you would like to add links from the associated work items back to the Jenkins build, select **Add post-build action** > **Add link to associated work items in TFS/Team Services**.
 
 ### User name and password
 
@@ -222,6 +235,42 @@ In the event Jenkins is deployed on a network with no direct access to other net
 > :information_source: Support for proxy servers requiring authentication was added in version 5.1.0. :information_source:
 
 Follow the instructions at [JenkinsBehindProxy](https://wiki.jenkins-ci.org/display/JENKINS/JenkinsBehindProxy) to configure Jenkins' use of a proxy server, which the TFS plugin also uses.
+
+## Integration with TFS/Team Services (New since version 5.0.0)
+
+There are some steps to perform in both Jenkins and in TFS/Team Services to activate the integration.  This section assumes you have already configured one or more team project collections, as described in the **Global configuration** section above and then configured the Jenkins jobs as described in the **Git** section above.
+
+### Trigger builds when code is pushed to a Git repository in TFS/Team Services
+
+1. Go to the team project's _Administration_ and then select **Service Hooks**
+2. Select the `+` button
+3. Select **Jenkins** and click **Next**
+4. Select **Code pushed**, configure the **Filters** and click **Next**
+5. You can now configure which action will be performed.  The choices are **Trigger generic build** and **Trigger Git build**.  Once you select the action, its _Settings_ must be configured
+    1. Enter the URL to your Jenkins server. (hint: it's the destination when you click the Jenkins logo in the top left)
+    2. Enter your _User name_
+    3. For the _User API token_, click on your user name in Jenkins (in the top-right corner), then **Configure** and finally click the **Show API Token...*** button.  Copy & paste the token back in TFS/Team Services
+    4. Once valid credentials have been provided, more fields will become available.  If you selected **Trigger generic build**, keep going with these fields
+        1. The _Build_ field should now be configurable as a drop-down list
+        2. Add any additional parameters, if any
+    5. Click **Test**, inspect the results of the test and click **Close**
+    6. If the test was successful, click **Finish**
+
+### Trigger builds when a pull request is created or updated in TFS/Team Services
+
+1. Go to the team project's _Administration_ and then select **Service Hooks**
+2. Select the `+` button
+3. Select **Jenkins** and click **Next**
+4. Select one of **Code pushed** or **Pull request merge commit created**, configure the **Filters** and click **Next**
+5. The only action available is **Trigger generic build**, its _Settings_ must be configured
+    1. Enter the URL to your Jenkins server. (hint: it's the destination when you click the Jenkins logo in the top left)
+    2. Enter your _User name_
+    3. For the _User API token_, click on your user name in Jenkins (in the top-right corner), then **Configure** and finally click the **Show API Token...*** button.  Copy & paste the token back in TFS/Team Services
+    4. Once valid credentials have been provided, more fields will become available
+    5. The _Build_ field should now be configurable as a drop-down list
+    6. Add any additional parameters, if any
+    7. Click **Test**, inspect the results of the test and click **Close**
+    8. If the test was successful, click **Finish**
 
 
 ## Build environment variables
