@@ -117,7 +117,7 @@ To make use of the Git integration with TFS/Team Services and/or to use automati
             2. `Code (status)`
         4. You can use the _Description_ field to record details about the PAT, such as its intended collection, the selected authorization scopes and expiration date.  For example: `fabrikam-fiber-inc, code read+status, expires 2017-08-05`
         5. Click **OK**   
-2. Add the collection URL and associate it with the right credential:
+2. Add the collection URL and associate it with the right credentials:
     1. Select **Jenkins** > **Manage Jenkins** > **Configure System**
     2. Scroll to **TFS/Team Services** and click **Add**
         1. If using Team Services, the value of the _Collection URL_ field should omit `/DefaultCollection`.
