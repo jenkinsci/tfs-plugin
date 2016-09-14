@@ -161,7 +161,9 @@ Field | Description
 
 ### Git
 
-If your source code is in a Git repository located on a TFS/Team Services server, this section is for you.  **Make sure you first followed the instructions in "Global configuration" and added your team project collections, associated with credentials.**
+If your source code is in a Git repository located on a TFS/Team Services server, this section is for you.
+
+> :warning: Make sure you first followed the instructions in the **Global configuration** section and added your team project collection(s), associated with credentials. :warning:
 
 ![Git configuration](images/git-job-config.png)
 
