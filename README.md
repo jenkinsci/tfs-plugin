@@ -174,10 +174,12 @@ If you didn't have the Git plug-in for Jenkins already, installing the TFS plug-
 3. To be able to build the merge commits created for pull requests in TFS/Team Services, click the **Advanced...** button
     1. In the _Name_ field, enter **origin** (or some unique name if you already have other repositories)
     2. In the _Refspec_ field, enter `+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin-pull/*` (replacing "origin" as necessary)
-4. Scroll down to _Build Triggers_ and you can now check the **Build when a change is pushed to TFS/Team Services** checkbox.
-5. Scroll down to _Build_, select **Add build step** > **Set build pending status in TFS/Team Services**, moving it _first_ in the list of steps, to notify TFS/Team Services as early as possible that a Jenkins build has been started.
+4. If you haven't already enabled the Push Trigger for all jobs, scroll down to _Build Triggers_ and you can check the **Build when a change is pushed to TFS/Team Services** checkbox.
+5. If you haven't already enabled Team Status for all jobs, scroll down to _Build_, select **Add build step** > **Set build pending status in TFS/Team Services**, moving it _first_ in the list of steps, to notify TFS/Team Services as early as possible that a Jenkins build has been started.
 6. Add other build steps, as necessary. 
-7. Scroll down to _Post-build Actions_, select **Add post-build action** > **Set build completion status in TFS/Team Services**.
+7. If you haven't already enabled Team Status for all jobs, scroll down to _Post-build Actions_, select **Add post-build action** > **Set build completion status in TFS/Team Services**.
+8. If you would like to collect results for publication in TFS/Team Services, scroll down to _Post-build Actions_, select **Add post-build action** > **Collect results for TFS/Team Services** and then add one or more results to collect.
+9. If the Jenkins job will be used to validate pull requests in TFS/Team Services and you would like to add links from the associated work items back to the Jenkins build, select **Add post-build action** > **Add link to associated work items in TFS/Team Services**.
 
 ### User name and password
 
