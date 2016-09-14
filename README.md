@@ -125,6 +125,15 @@ To make use of the Git integration with TFS/Team Services and/or to use automati
         3. Click **Test Connection**.
     3. Click **Save**
 
+### Automatic integration
+
+To avoid having to configure every job to enable integration features, you can check the checkbox next to either or both of:
+
+* Enable Push Trigger for all jobs
+* Enable Team Status for all jobs
+
+![Automatic Integration](images/AutomaticIntegration.png)
+
 ### Advanced
 
 In some environments, the "home" directory is mounted over a network and shared between many computers, including Jenkins servers and their associated build nodes, which eventually leads to corruption of the configuration directory used for TFVC workspaces.  If you have such an environment, check the box next to **Store TFVC configuration in computer-specific folders** to use a sub-directory for each computer. :warning: WARNING :warning: Turning this on is equivalent to setting the `TEE_PROFILE_DIRECTORY` environment variable and thus any manual operations performed using the Command-Line Client (CLC) will need to be performed with the `TEE_PROFILE_DIRECTORY` environment variable set accordingly.
