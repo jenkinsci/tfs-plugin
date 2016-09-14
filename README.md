@@ -115,7 +115,8 @@ To make use of the Git integration with TFS/Team Services and/or to use automati
         3. See the _User name and password_ section below for the values of the _Username_ and _Password_; a Personal Access Token (PAT) is strongly recommended.  If the credentials will be used for TFVC, select **All scopes**, otherwise select the following _Authorized Scopes_:
             1. `Code (read)`
             2. `Code (status)`
-        4. You can use the _Description_ field to record details about the PAT, such as its intended collection, the selected authorization scopes and expiration date.  For example: `fabrikam-fiber-inc, code read+status, expires 2017-08-05`
+            3. `Work items (read and write)`
+        4. You can use the _Description_ field to record details about the PAT, such as its intended collection, the selected authorization scopes and expiration date.  For example: `fabrikam-fiber-inc, code read+status, wit read+write, expires 2017-08-05`
         5. Click **OK**   
 2. Add the collection URL and associate it with the right credentials:
     1. Select **Jenkins** > **Manage Jenkins** > **Configure System**
