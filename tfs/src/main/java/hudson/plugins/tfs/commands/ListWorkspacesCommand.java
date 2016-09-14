@@ -19,7 +19,7 @@ import java.util.List;
 
 public class ListWorkspacesCommand extends AbstractCallableCommand implements Callable<List<Workspace>, Exception> {
 
-    private static final String ListingWorkspacesTemplate = "Listing workspaces from %s...";
+    private static final String ListingWorkspacesTemplate = "Downloading list of workspaces from %s...";
 
     private final String computer;
     private final boolean shouldLogWorkspaces;

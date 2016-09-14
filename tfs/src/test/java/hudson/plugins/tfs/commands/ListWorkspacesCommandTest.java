@@ -67,7 +67,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             callable.call();
 
             assertLog(
-                "Listing workspaces from http://tfs.invalid:8080/tfs/DefaultCollection/...",
+                "Downloading list of workspaces from http://tfs.invalid:8080/tfs/DefaultCollection/...",
                 "Workspace                Owner        Computer      Comment          ",
                 "------------------------ ------------ ------------- -----------------",
                 "Hudson.JOBXXXXXXXXXXXXXX First.LastXX XXXX-XXXX-007 This is a comment"
@@ -114,7 +114,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
             callable.call();
 
             assertLog(
-                    "Listing workspaces from http://tfs.invalid:8080/tfs/DefaultCollection/...",
+                    "Downloading list of workspaces from http://tfs.invalid:8080/tfs/DefaultCollection/...",
                     "Workspace                Owner        Computer      Comment          ",
                     "------------------------ ------------ ------------- -----------------",
                     "Hudson.JOBXXXXXXXXXXXXXX First.LastXX XXXX-XXXX-007 This is a comment"
