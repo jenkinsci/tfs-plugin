@@ -226,7 +226,9 @@ public class UriHelper {
                 }
                 try {
                     final String encodedComponent = URLEncoder.encode(component.toString(), UTF_8);
-                    sb.append(encodedComponent);
+                    // URLEncoder#encode() encodes spaces as "+" but they should be "%20"
+                    final String correctlyEncodedComponent = encodedComponent.replaceAll("\\+", "%20");
+                    sb.append(correctlyEncodedComponent);
                 }
                 catch (final UnsupportedEncodingException e) {
                     throw new Error(e);

@@ -302,9 +302,9 @@ public class UriHelperTest {
     @Test public void join_urlEncoding() throws Exception {
         final String collectionUrl = "https://fabrikam-fiber-inc.visualstudio.com/";
 
-        final URI actual = UriHelper.join(collectionUrl, "_git", "Repo Name With Spaces");
+        final URI actual = UriHelper.join(collectionUrl, "_git", "Repo Name+With Spaces");
 
-        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_git/Repo+Name+With+Spaces"), actual);
+        Assert.assertEquals(URI.create("https://fabrikam-fiber-inc.visualstudio.com/_git/Repo%20Name%2BWith%20Spaces"), actual);
     }
 
     @Test public void join_sampleApiCall() throws Exception {
