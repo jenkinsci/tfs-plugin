@@ -40,7 +40,13 @@ The TFS plug-in for Jenkins adds some features to better integrate with Git repo
 * A link to (and summary information about) the associated TFS/Team Services pull request that triggered the Jenkins build.
     * Links to associated TFS/Team Services work items.
     * Associated TFS/Team Services work items link back to the Jenkins build.
-* Some endpoints for TFS/Team Services to use to activate the integration.  Please refer to the [Jenkins with Visual Studio Team Services](https://www.visualstudio.com/en-us/docs/service-hooks/services/jenkins) page for instructions on configuring the integration.
+
+There are two possibilities to trigger a build with SCM Changeset:
+* TFS plugin  
+  Please refer to the [Webhooks with Visual Studio Team Services](https://www.visualstudio.com/en-us/docs/service-hooks/services/webhooks) page for instructions on configuring the integration in TFS. Available endpoints can be found under [http://yourJenkins/team-events](http://yourJenkins/team-events)
+* Git plugin  
+  You have to enable Git SCM polling to receive commit notifications  
+  Please refer to the [Jenkins with Visual Studio Team Services](https://www.visualstudio.com/en-us/docs/service-hooks/services/jenkins) page for instructions on configuring the integration in TFS.
 
 
 # Supported versions
