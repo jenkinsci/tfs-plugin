@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
@@ -17,17 +18,20 @@ public class TfsUserLookup implements UserLookup {
     private static final Logger LOGGER = Logger.getLogger(TfsUserLookup.class.getName());
 
     private final IIdentityManagementService ims;
-    
-    public TfsUserLookup(IIdentityManagementService ims) {
+    private final UserAccountMapper userAccountMapper;
+
+    public TfsUserLookup(final IIdentityManagementService ims, final UserAccountMapper userAccountMapper) {
         this.ims = ims;
+        this.userAccountMapper = userAccountMapper;
     }
 
     /**
      * @param accountName Windows NT account name: domain\alias.
      */
     public User find(String accountName) {
-        LOGGER.fine("Looking up Jenkins user for account '%s'.");
-        final User jenkinsUser = User.get(accountName);
+        final String mappedAccountName = userAccountMapper.mapUserAccount(accountName);
+        LOGGER.log(Level.FINE, "Looking up Jenkins user for account '%s'.", mappedAccountName);
+        final User jenkinsUser = User.get(mappedAccountName);
         Mailer.UserProperty mailerProperty = jenkinsUser.getProperty(Mailer.UserProperty.class);
         if (mailerProperty == null || mailerProperty.getAddress() == null || mailerProperty.getAddress().length() == 0) {
             final TeamFoundationIdentity tfsUser = ims.readIdentity(

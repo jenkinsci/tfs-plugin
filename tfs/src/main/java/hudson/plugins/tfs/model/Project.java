@@ -2,6 +2,7 @@ package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
 import hudson.model.User;
+import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet.Item;
@@ -110,7 +111,9 @@ public class Project {
             synchronized (this) {
                 if (userLookup == null) {
                     final IIdentityManagementService ims = server.createIdentityManagementService();
-                    userLookup = new TfsUserLookup(ims);
+                    final TeamPluginGlobalConfig teamPluginGlobalConfig = TeamPluginGlobalConfig.get();
+                    final UserAccountMapper mapper = teamPluginGlobalConfig.getUserAccountMapper();
+                    userLookup = new TfsUserLookup(ims, mapper);
                 }
             }
         }
