@@ -2,6 +2,9 @@ package hudson.plugins.tfs;
 
 import hudson.Extension;
 import hudson.ExtensionList;
+import hudson.plugins.tfs.model.DomainUserAccountMapper;
+import hudson.plugins.tfs.model.UserAccountMapper;
+import hudson.plugins.tfs.model.UserAccountMapperDescriptor;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -27,6 +30,7 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
     private boolean configFolderPerNode;
     private boolean enableTeamPushTriggerForAllJobs;
     private boolean enableTeamStatusForAllJobs;
+    private UserAccountMapper userAccountMapper;
 
     public TeamPluginGlobalConfig() {
         this(true);
@@ -82,6 +86,21 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
     public void setEnableTeamStatusForAllJobs(final boolean enableTeamStatusForAllJobs) {
         this.enableTeamStatusForAllJobs = enableTeamStatusForAllJobs;
+    }
+
+    public UserAccountMapper getUserAccountMapper() {
+        if (userAccountMapper == null) {
+            userAccountMapper = new DomainUserAccountMapper();
+        }
+        return userAccountMapper;
+    }
+
+    public void setUserAccountMapper(UserAccountMapper userAccountMapper) {
+        this.userAccountMapper = userAccountMapper;
+    }
+
+    public List<UserAccountMapperDescriptor> getUserAccountMapperDescriptors() {
+        return UserAccountMapper.all();
     }
 
     @Override
