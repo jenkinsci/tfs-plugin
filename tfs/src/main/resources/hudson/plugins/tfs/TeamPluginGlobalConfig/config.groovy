@@ -19,6 +19,13 @@ f.section(title: descriptor.displayName) {
             description: "Turning this on is equivalent to adding the 'Set build pending status in TFS/Team Services' build step and the 'Set build completion status in TFS/Team Services' post-build action to all jobs.") {
         f.checkbox (default: false)
     }
+    f.entry() {
+        f.dropdownDescriptorSelector(
+                title: _("User account name mapping strategy"),
+                field: "userAccountMapper",
+                descriptors: descriptor.getUserAccountMapperDescriptors()
+        )
+    }
     f.advanced() {
         f.entry(title: _("Store TFVC configuration in computer-specific folders"),
                 field: "configFolderPerNode",
