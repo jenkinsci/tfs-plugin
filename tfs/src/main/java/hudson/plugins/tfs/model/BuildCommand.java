@@ -29,6 +29,7 @@ import jenkins.util.TimeDuration;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
@@ -209,23 +210,27 @@ public class BuildCommand extends AbstractCommand {
             final boolean isTeamGit = "TfGit".equalsIgnoreCase(provider)
                     || "TfsGit".equalsIgnoreCase(provider);
             if (isTeamGit) {
-                final String collectionUriString = teamBuildParameters.get(SYSTEM_TEAM_FOUNDATION_COLLECTION_URI);
-                final URI collectionUri = URI.create(collectionUriString);
+            	// "Build.Repository.Uri" is null/whitespace/empty when the 'Jenkins Queue Job' task runs in TFS Release Management.
+            	// In this case, do not reference a CommitParameterAction in the actions reported as unsupported.
                 final String repoUriString = teamBuildParameters.get(BUILD_REPOSITORY_URI);
-                final URI repoUri = URI.create(repoUriString);
-                final String projectId = teamBuildParameters.get(SYSTEM_TEAM_PROJECT);
-                final String repoId = teamBuildParameters.get(BUILD_REPOSITORY_NAME);
-                final String commit = teamBuildParameters.get(BUILD_SOURCE_VERSION);
-                final String pushedBy = teamBuildParameters.get(BUILD_REQUESTED_FOR);
-                final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
-                args.collectionUri = collectionUri;
-                args.repoUri = repoUri;
-                args.projectId = projectId;
-                args.repoId = repoId;
-                args.commit = commit;
-                args.pushedBy = pushedBy;
-                final CommitParameterAction action = new CommitParameterAction(args);
-                actions.add(action);
+                if (StringUtils.isNotBlank(repoUriString)) {
+                    final URI repoUri = URI.create(repoUriString);
+                    final String collectionUriString = teamBuildParameters.get(SYSTEM_TEAM_FOUNDATION_COLLECTION_URI);
+                    final URI collectionUri = URI.create(collectionUriString);
+                    final String projectId = teamBuildParameters.get(SYSTEM_TEAM_PROJECT);
+                    final String repoId = teamBuildParameters.get(BUILD_REPOSITORY_NAME);
+                    final String commit = teamBuildParameters.get(BUILD_SOURCE_VERSION);
+                    final String pushedBy = teamBuildParameters.get(BUILD_REQUESTED_FOR);
+                    final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
+                    args.collectionUri = collectionUri;
+                    args.repoUri = repoUri;
+                    args.projectId = projectId;
+                    args.repoId = repoId;
+                    args.commit = commit;
+                    args.pushedBy = pushedBy;
+                    final CommitParameterAction action = new CommitParameterAction(args);
+                    actions.add(action);
+                }
 
                 UnsupportedIntegrationAction.addToBuild(actions, "Posting build status is not supported for builds triggered by the 'Jenkins Queue Job' task.");
             }
