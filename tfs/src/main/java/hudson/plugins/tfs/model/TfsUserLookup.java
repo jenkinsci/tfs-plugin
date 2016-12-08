@@ -34,6 +34,7 @@ public class TfsUserLookup implements UserLookup {
         final User jenkinsUser = User.get(mappedAccountName);
         Mailer.UserProperty mailerProperty = jenkinsUser.getProperty(Mailer.UserProperty.class);
         if (mailerProperty == null || mailerProperty.getAddress() == null || mailerProperty.getAddress().length() == 0) {
+            LOGGER.log(Level.FINE, "No Mailer.UserProperty defined for '%s', looking in TFS", mappedAccountName);
             final TeamFoundationIdentity tfsUser = ims.readIdentity(
                 IdentitySearchFactor.ACCOUNT_NAME,
                 accountName,
