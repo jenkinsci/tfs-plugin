@@ -1,0 +1,8 @@
+<div>
+    <p>
+    When interpreting changesets from TFVC, the TFS plugin will attempt to map domain accounts (i.e. <code>DOMAIN\alias</code>) to Jenkins accounts.
+    </p>
+    <p>
+    The default mapping strategy (<b>Resolve user using 'DOMAIN\alias'</b>) is to provide the string (received from TFVC) as-is to Jenkins, which causes Jenkins to convert the username from <code>DOMAIN\alias</code> to <code>DOMAIN_alias</code>.  If your Jenkins users are named with a different convention, try another user mapping strategy.
+    </p>
+</div>
