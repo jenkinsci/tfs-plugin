@@ -98,7 +98,7 @@ public class GitPushEvent extends AbstractHookEvent {
     static String determineCommit(final GitPush gitPush) {
         final List<GitCommitRef> commits = gitPush.getCommits();
         if (commits == null || commits.size() < 1) {
-            throw new IllegalArgumentException("No commits found");
+            return null;
         }
         final GitCommitRef commit = commits.get(0);
         return commit.getCommitId();
