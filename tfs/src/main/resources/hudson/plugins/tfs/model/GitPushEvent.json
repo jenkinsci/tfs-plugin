@@ -2,6 +2,7 @@
   "id": "03c164c2-8912-4d5e-8009-3707d5f83734",
   "eventType": "git.push",
   "publisherId": "tfs",
+  "scope": "all",
   "message": {
     "text": "Jamal Hartnett pushed updates to branch master of repository Fabrikam-Fiber-Git.",
     "html": "Jamal Hartnett pushed updates to branch master of repository Fabrikam-Fiber-Git.",
