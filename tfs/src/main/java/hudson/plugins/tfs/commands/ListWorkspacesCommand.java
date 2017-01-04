@@ -17,7 +17,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListWorkspacesCommand extends AbstractCallableCommand implements Callable<List<Workspace>, Exception> {
+public class ListWorkspacesCommand extends AbstractCallableCommand<List<Workspace>, Exception> {
 
     private static final String ListingWorkspacesTemplate = "Downloading list of workspaces from %s...";
 

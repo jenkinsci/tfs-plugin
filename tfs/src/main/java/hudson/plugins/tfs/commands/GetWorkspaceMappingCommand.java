@@ -9,7 +9,7 @@ import hudson.remoting.Callable;
 
 import java.io.PrintStream;
 
-public class GetWorkspaceMappingCommand extends AbstractCallableCommand implements Callable<String, Exception> {
+public class GetWorkspaceMappingCommand extends AbstractCallableCommand<String, Exception> {
 
     private static final String CheckingMappingTemplate = "Checking if there exists a mapping for %s...";
     private static final String FoundResultTemplate = "yes, in workspace '%s'.";
