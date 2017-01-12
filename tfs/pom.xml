@@ -266,6 +266,11 @@
         <artifactId>json</artifactId>
         <version>20090211</version>
     </dependency>
+    <dependency>
+        <groupId>org.jenkins-ci.plugins.workflow</groupId>
+        <artifactId>workflow-multibranch</artifactId>
+        <version>2.9.2</version>
+    </dependency>
   </dependencies>
 
 </project>

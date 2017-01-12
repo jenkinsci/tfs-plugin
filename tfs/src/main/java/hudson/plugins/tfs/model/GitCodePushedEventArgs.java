@@ -12,6 +12,7 @@ public class GitCodePushedEventArgs {
     public String projectId;
     public String repoId;
     public String commit;
+    public String branch;
     public String pushedBy;
 
     public URIish getRepoURIish() {
