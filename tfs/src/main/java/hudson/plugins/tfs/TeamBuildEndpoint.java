@@ -138,6 +138,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             IOUtils.closeQuietly(stream);
         }
     }
+
     static String describeCommands(final Map<String, AbstractCommand.Factory> commandMap, final String urlName) {
         final String newLine = System.getProperty("line.separator");
         final StringBuilder sb = new StringBuilder();
@@ -230,7 +231,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         		throw new IllegalArgumentException("Project not found");
         	}
 
-        	formData = JSONObject.fromObject(req.getParameterMap().toString());
+        	formData = req.getSubmittedForm();
         	teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
         	
         	if (teamBuildPayload.BuildVariables != null) {
@@ -244,10 +245,9 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             	}
             }
         	project = wmbp.getJob(branchName);
-        	
         } else {
         	checkPermission((AbstractProject) project, req, rsp);
-        	formData = req.getSubmittedForm();        	
+        	formData = req.getSubmittedForm();
         	teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
         }
 
