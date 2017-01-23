@@ -231,7 +231,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         		throw new IllegalArgumentException("Project not found");
         	}
 
-        	formData = req.getSubmittedForm();
+        	formData = JSONObject.fromObject(req.getParameterMap().toString());
         	teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
         	
         	if (teamBuildPayload.BuildVariables != null) {
