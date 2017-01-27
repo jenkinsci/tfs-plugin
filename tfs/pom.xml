@@ -222,7 +222,7 @@
     <dependency>
       <groupId>com.microsoft.tfs.sdk</groupId>
       <artifactId>com.microsoft.tfs.sdk</artifactId>
-      <version>14.0.3</version>
+      <version>14.111.1</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
