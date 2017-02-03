@@ -200,84 +200,87 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
     }
 
-    private JSONObject innerDispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) throws IOException, ServletException {
-        commandName = null;
-        jobName = null;
-        final String pathInfo = req.getPathInfo();
-        if (!decodeCommandAndJobNames(pathInfo)) {
-            if (commandName == null) {
-                throw new IllegalArgumentException("Command not provided");
-            }
-            if (jobName == null) {
-                throw new IllegalArgumentException("Job name not provided after command");
-            }
-        }
+	private JSONObject innerDispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay)
+			throws IOException, ServletException {
+		commandName = null;
+		jobName = null;
+		final String pathInfo = req.getPathInfo();
+		if (!decodeCommandAndJobNames(pathInfo)) {
+			if (commandName == null) {
+				throw new IllegalArgumentException("Command not provided");
+			}
+			if (jobName == null) {
+				throw new IllegalArgumentException("Job name not provided after command");
+			}
+		}
 
-        if (!COMMAND_FACTORIES_BY_NAME.containsKey(commandName)) {
-            throw new IllegalArgumentException("Command not implemented");
-        }
+		if (!COMMAND_FACTORIES_BY_NAME.containsKey(commandName)) {
+			throw new IllegalArgumentException("Command not implemented");
+		}
 
-        final Jenkins jenkins = Jenkins.getInstance();
-        final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
-        
-        Job project = jenkins.getItemByFullName(jobName, AbstractProject.class);
+		final Jenkins jenkins = Jenkins.getInstance();
+		final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
 
-        JSONObject response = null;
-        JSONObject formData = null;
-        final ObjectMapper mapper = EndpointHelper.MAPPER;
-        TeamBuildPayload teamBuildPayload;
-    	 
-        if (project == null) {
-        	String parent = jobName;
-        	String branchName = "master";
-        	WorkflowMultiBranchProject wmbp = (WorkflowMultiBranchProject) jenkins.getItemByFullName(parent);
+		Job project = jenkins.getItemByFullName(jobName, AbstractProject.class);
 
-        	if (jenkins.getItemByFullName(parent) == null || wmbp instanceof WorkflowMultiBranchProject == false) {
-        		throw new IllegalArgumentException("Project not found");
-        	}
+		JSONObject response = null;
+		JSONObject formData = null;
+		final ObjectMapper mapper = EndpointHelper.MAPPER;
+		TeamBuildPayload teamBuildPayload;
 
-        	formData = JSONObject.fromObject(req.getParameter("json"));
-        	teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
-        	
-        	String repoUrl = teamBuildPayload.BuildVariables.get("Build.Repository.Uri");
-        	branchName = teamBuildPayload.BuildVariables.get("Build.SourceBranch").replace("refs/heads/", "");       			
-        	
-        	for (final SCMSourceOwner owner : SCMSourceOwners.all()) {
-                for (SCMSource source : owner.getSCMSources()) {
-                    if (source instanceof GitSCMSource) {
-                        GitSCMSource git = (GitSCMSource) source;
-                        try {
-                        	URIish remote = new URIish(git.getRemote());
+		if (project == null) {
+			String parent = jobName;
+			String branchName = "master";
+			WorkflowMultiBranchProject wmbp = (WorkflowMultiBranchProject) jenkins.getItemByFullName(parent);
+
+			if (jenkins.getItemByFullName(parent) == null || wmbp instanceof WorkflowMultiBranchProject == false) {
+				throw new IllegalArgumentException("Project not found");
+			}
+
+			formData = JSONObject.fromObject(req.getParameter("json"));
+			teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
+
+			String repoUrl = teamBuildPayload.BuildVariables.get("Build.Repository.Uri");
+			branchName = teamBuildPayload.BuildVariables.get("Build.SourceBranch").replace("refs/heads/", "");
+
+			for (final SCMSourceOwner owner : SCMSourceOwners.all()) {
+				for (SCMSource source : owner.getSCMSources()) {
+					if (source instanceof GitSCMSource) {
+						GitSCMSource git = (GitSCMSource) source;
+						try {
+							URIish remote = new URIish(git.getRemote());
 							URIish uri = new URIish(repoUrl);
-	                        if (GitStatus.looselyMatches(uri, remote)) {
-	                            LOGGER.info("Triggering the indexing of " + owner.getFullDisplayName());
-	                            owner.onSCMSourceUpdated(source);                            
-	                        }
-                        } catch (URISyntaxException e) {
-                            continue;
-                        }
-                    }
-                }
-            }
-        	try {
-        		// Wait until branch indexing is ready to avoid triggering builds for jobs/branches that does not exist yet in Jenkins. 
+							if (GitStatus.looselyMatches(uri, remote)) {
+								LOGGER.info("Triggering the indexing of " + owner.getFullDisplayName());
+								owner.onSCMSourceUpdated(source);
+							}
+						} catch (URISyntaxException e) {
+							continue;
+						}
+					}
+				}
+			}
+			try {
+				// Wait until branch indexing is ready to avoid triggering
+				// builds for jobs/branches that does not exist yet in Jenkins.
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				LOGGER.log(Level.SEVERE, "InterruptedException", e);
 			}
-        	
-        	// This separate job-name lookup (and scheduling) is necessary for TFS in order to poll the build result.
-        	project = wmbp.getJob(branchName);
-        } else {
-        	checkPermission((AbstractProject) project, req, rsp);
-        	formData = req.getSubmittedForm();
-        	teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
-        }
 
-        final AbstractCommand command = factory.create();
-        response = command.perform(project, req, formData, mapper, teamBuildPayload, new TimeDuration(0));        
-        return response;
-    }
+			// This separate job-name lookup (and scheduling) is necessary for
+			// TFS in order to poll the build result.
+			project = wmbp.getJob(branchName);
+		} else {
+			checkPermission((AbstractProject) project, req, rsp);
+			formData = req.getSubmittedForm();
+			teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
+		}
+
+		final AbstractCommand command = factory.create();
+		response = command.perform(project, req, formData, mapper, teamBuildPayload, new TimeDuration(0));
+		return response;
+	}
 
     public void doPing(
             final StaplerRequest request,
