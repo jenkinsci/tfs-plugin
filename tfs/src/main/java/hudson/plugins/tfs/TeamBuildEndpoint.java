@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.Map;
@@ -21,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.eclipse.jgit.transport.URIish;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.kohsuke.stapler.ForwardToView;
 import org.kohsuke.stapler.HttpResponse;
@@ -35,9 +36,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.BuildAuthorizationToken;
-import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
+import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.BuildCommand;
 import hudson.plugins.tfs.model.BuildWithParametersCommand;
@@ -46,6 +47,10 @@ import hudson.plugins.tfs.model.TeamBuildPayload;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
+import jenkins.plugins.git.GitSCMSource;
+import jenkins.scm.api.SCMSource;
+import jenkins.scm.api.SCMSourceOwner;
+import jenkins.scm.api.SCMSourceOwners;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
 
@@ -234,16 +239,34 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         	formData = JSONObject.fromObject(req.getParameter("json"));
         	teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
         	
-        	if (teamBuildPayload.BuildVariables != null) {
-            	Map<String, String> teamBuildParameters = teamBuildPayload.BuildVariables;
-
-            	if (teamBuildParameters.containsKey(BUILD_REPOSITORY_PROVIDER)) {
-            	    String provider = teamBuildParameters.get(BUILD_REPOSITORY_PROVIDER);
-    	            if ("TfGit".equalsIgnoreCase(provider) || "TfsGit".equalsIgnoreCase(provider)) {
-    	            	branchName = teamBuildParameters.get(BUILD_SOURCE_BRANCHNAME);
-    	            }
-            	}
+        	String repoUrl = teamBuildPayload.BuildVariables.get("Build.Repository.Uri");
+        	branchName = teamBuildPayload.BuildVariables.get("Build.SourceBranch").replace("refs/heads/", "");       			
+        	
+        	for (final SCMSourceOwner owner : SCMSourceOwners.all()) {
+                for (SCMSource source : owner.getSCMSources()) {
+                    if (source instanceof GitSCMSource) {
+                        GitSCMSource git = (GitSCMSource) source;
+                        try {
+                        	URIish remote = new URIish(git.getRemote());
+							URIish uri = new URIish(repoUrl);
+	                        if (GitStatus.looselyMatches(uri, remote)) {
+	                            LOGGER.info("Triggering the indexing of " + owner.getFullDisplayName());
+	                            owner.onSCMSourceUpdated(source);                            
+	                        }
+                        } catch (URISyntaxException e) {
+                            continue;
+                        }
+                    }
+                }
             }
+        	try {
+        		// Wait until branch indexing is ready to avoid triggering builds for jobs/branches that does not exist yet in Jenkins. 
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				LOGGER.log(Level.SEVERE, "InterruptedException", e);
+			}
+        	
+        	// This separate job-name lookup (and scheduling) is necessary for TFS in order to poll the build result.
         	project = wmbp.getJob(branchName);
         } else {
         	checkPermission((AbstractProject) project, req, rsp);
