@@ -48,6 +48,8 @@ public class Server implements ServerConfigurationProvider, Closable {
     private final WebProxySettings webProxySettings;
     private final ExtraSettings extraSettings;
     private MockableVersionControlClient mockableVcc;
+    private static HashMap<String, PersistenceStoreProvider> persistenceStoreProviderCache = new HashMap<String, PersistenceStoreProvider>();
+
 
     /**
      * This constructor overload assumes a Jenkins instance is present.
@@ -115,7 +117,12 @@ public class Server implements ServerConfigurationProvider, Closable {
             final PersistenceStoreProvider provider;
             if (this.extraSettings.isConfigFolderPerNode()) {
                 final String hostName = LocalHost.getShortName();
-                provider = new ClonePersistenceStoreProvider(defaultProvider, hostName);
+                if(persistenceStoreProviderCache.containsKey(hostName)) {
+                	provider =  persistenceStoreProviderCache.get(hostName);
+                } else {
+                	provider = new ClonePersistenceStoreProvider(defaultProvider, hostName);
+                	persistenceStoreProviderCache.put(hostName, provider);
+                }
             }
             else {
                 provider = defaultProvider;
