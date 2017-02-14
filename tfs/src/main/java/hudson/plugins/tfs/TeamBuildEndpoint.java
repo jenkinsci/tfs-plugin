@@ -2,7 +2,7 @@ package hudson.plugins.tfs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
-import hudson.model.AbstractProject;
+import hudson.model.BuildableItem;
 import hudson.model.BuildAuthorizationToken;
 import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
@@ -14,6 +14,7 @@ import hudson.plugins.tfs.model.TeamBuildPayload;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
+import jenkins.model.ParameterizedJobMixIn;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
@@ -129,6 +130,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             IOUtils.closeQuietly(stream);
         }
     }
+
     static String describeCommands(final Map<String, AbstractCommand.Factory> commandMap, final String urlName) {
         final String newLine = System.getProperty("line.separator");
         final StringBuilder sb = new StringBuilder();
@@ -146,11 +148,11 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         return sb.toString();
     }
 
-
     @SuppressWarnings("deprecation" /* We want to do exactly what Jenkins does */)
-    void checkPermission(final AbstractProject project, final StaplerRequest req, final StaplerResponse rsp) throws IOException {
-        Job<?, ?> job = project;
-        final BuildAuthorizationToken authToken = project.getAuthToken();
+    void checkPermission(final Job job, final ParameterizedJobMixIn.ParameterizedJob jobMixin,
+                         final StaplerRequest req, final StaplerResponse rsp) throws IOException {
+
+        final BuildAuthorizationToken authToken = jobMixin.getAuthToken();
         hudson.model.BuildAuthorizationToken.checkPermission(job, authToken, req, rsp);
     }
 
@@ -203,13 +205,17 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
 
         final Jenkins jenkins = Jenkins.getInstance();
-        final AbstractProject project = jenkins.getItemByFullName(jobName, AbstractProject.class);
-        if (project == null) {
-            throw new IllegalArgumentException("Project not found");
+
+        final Job job = jenkins.getItemByFullName(jobName, Job.class);
+        if (job == null) {
+            throw new IllegalArgumentException("Job not found");
         }
-        checkPermission(project, req, rsp);
+
+        final ParameterizedJobMixIn.ParameterizedJob jobMixin = (ParameterizedJobMixIn.ParameterizedJob) job;
+
+        checkPermission(job, jobMixin, req, rsp);
         final TimeDuration actualDelay =
-                delay == null ? new TimeDuration(project.getQuietPeriod()) : delay;
+                delay == null ? new TimeDuration(jobMixin.getQuietPeriod()) : delay;
 
         final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
         final AbstractCommand command = factory.create();
@@ -217,7 +223,9 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         final JSONObject formData = req.getSubmittedForm();
         final ObjectMapper mapper = EndpointHelper.MAPPER;
         final TeamBuildPayload teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
-        response = command.perform(project, req, formData, mapper, teamBuildPayload, actualDelay);
+
+        final BuildableItem buildable = (BuildableItem) job;
+        response = command.perform(job, buildable, req, formData, mapper, teamBuildPayload, actualDelay);
         return response;
     }
 
