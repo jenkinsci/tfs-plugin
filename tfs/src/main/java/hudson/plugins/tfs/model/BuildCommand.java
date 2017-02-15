@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.BuildableItem;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Job;
@@ -55,7 +56,7 @@ public class BuildCommand extends AbstractCommand {
     private static final String PULL_REQUEST_ID = "pullRequestId";
     private static final String UNSUPPORTED_TEMPLATE =
             "The rich integration with TFS/Team Services is not supported. Reason: %s";
-
+    
     public static String formatUnsupportedReason(final String reason) {
         return String.format(UNSUPPORTED_TEMPLATE, reason);
     }
@@ -82,7 +83,7 @@ public class BuildCommand extends AbstractCommand {
         }
     }
 
-    protected JSONObject innerPerform(final AbstractProject project, final TimeDuration delay, final List<Action> extraActions) {
+    protected JSONObject innerPerform(Job project, final TimeDuration delay, final List<Action> extraActions) {
         final JSONObject result = new JSONObject();
 
         final Jenkins jenkins = Jenkins.getInstance();
@@ -90,7 +91,8 @@ public class BuildCommand extends AbstractCommand {
         final Cause cause = new Cause.UserIdCause();
         final CauseAction causeAction = new CauseAction(cause);
         final Action[] actionArray = ActionHelper.create(extraActions, causeAction);
-        final ScheduleResult scheduleResult = queue.schedule2(project, delay.getTime(), actionArray);
+        BuildableItem task = (BuildableItem) project;
+        final ScheduleResult scheduleResult = queue.schedule2(task, delay.getTime(), actionArray);
         final Queue.Item item = scheduleResult.getItem();
         if (item != null) {
             result.put("created", jenkins.getRootUrl() + item.getUrl());
@@ -99,7 +101,7 @@ public class BuildCommand extends AbstractCommand {
     }
 
     @Override
-    public JSONObject perform(final AbstractProject project, final StaplerRequest req, final JSONObject requestPayload, final ObjectMapper mapper, final TeamBuildPayload teamBuildPayload, final TimeDuration delay) {
+    public JSONObject perform(final Job project, final StaplerRequest req, final JSONObject requestPayload, final ObjectMapper mapper, final TeamBuildPayload teamBuildPayload, final TimeDuration delay) {
 
         // These values are for optional parameters of the same name, for the git.pullrequest.merged event
         String commitId = null;

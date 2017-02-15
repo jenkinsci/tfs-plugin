@@ -1,11 +1,45 @@
 package hudson.plugins.tfs;
 
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.eclipse.jgit.transport.URIish;
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
+import org.kohsuke.stapler.ForwardToView;
+import org.kohsuke.stapler.HttpResponse;
+import org.kohsuke.stapler.HttpResponses;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.BuildAuthorizationToken;
 import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
+import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.model.AbstractCommand;
 import hudson.plugins.tfs.model.BuildCommand;
 import hudson.plugins.tfs.model.BuildWithParametersCommand;
@@ -14,34 +48,12 @@ import hudson.plugins.tfs.model.TeamBuildPayload;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
+import jenkins.plugins.git.GitSCMSource;
+import jenkins.scm.api.SCMSource;
+import jenkins.scm.api.SCMSourceOwner;
+import jenkins.scm.api.SCMSourceOwners;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.kohsuke.stapler.ForwardToView;
-import org.kohsuke.stapler.HttpResponse;
-import org.kohsuke.stapler.HttpResponses;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_CREATED;
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 /**
  * The endpoint that TFS/Team Services will PUT to when it wants to schedule a build in Jenkins.
@@ -55,6 +67,9 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     public static final String PARAMETER = "parameter";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
 
+    private static final String BUILD_REPOSITORY_PROVIDER = "Build.Repository.Provider";
+    private static final String BUILD_SOURCE_BRANCHNAME = "Build.SourceBranchName";
+    
     static {
         final Map<String, AbstractCommand.Factory> map = new TreeMap<String, AbstractCommand.Factory>(String.CASE_INSENSITIVE_ORDER);
         map.put("ping", new PingCommand.Factory());
@@ -129,6 +144,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             IOUtils.closeQuietly(stream);
         }
     }
+
     static String describeCommands(final Map<String, AbstractCommand.Factory> commandMap, final String urlName) {
         final String newLine = System.getProperty("line.separator");
         final StringBuilder sb = new StringBuilder();
@@ -185,7 +201,8 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
     }
 
-    private JSONObject innerDispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) throws IOException, ServletException {
+    private JSONObject innerDispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay)
+            throws IOException, ServletException {
         commandName = null;
         jobName = null;
         final String pathInfo = req.getPathInfo();
@@ -203,22 +220,110 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
 
         final Jenkins jenkins = Jenkins.getInstance();
-        final AbstractProject project = jenkins.getItemByFullName(jobName, AbstractProject.class);
-        if (project == null) {
-            throw new IllegalArgumentException("Project not found");
-        }
-        checkPermission(project, req, rsp);
-        final TimeDuration actualDelay =
-                delay == null ? new TimeDuration(project.getQuietPeriod()) : delay;
-
         final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
-        final AbstractCommand command = factory.create();
-        final JSONObject response;
-        final JSONObject formData = req.getSubmittedForm();
+
+        Job project = jenkins.getItemByFullName(jobName, AbstractProject.class);
+
+        JSONObject response = null;
+        JSONObject formData = null;
         final ObjectMapper mapper = EndpointHelper.MAPPER;
-        final TeamBuildPayload teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
-        response = command.perform(project, req, formData, mapper, teamBuildPayload, actualDelay);
+        TeamBuildPayload teamBuildPayload;
+
+        if (project == null) {
+            String parent = jobName;
+            String branchName = "master";
+            WorkflowMultiBranchProject wmbp = (WorkflowMultiBranchProject) jenkins.getItemByFullName(parent);
+
+            if (jenkins.getItemByFullName(parent) == null || wmbp instanceof WorkflowMultiBranchProject == false) {
+                throw new IllegalArgumentException("Project not found");
+            }
+
+            formData = JSONObject.fromObject(req.getParameter("json"));
+            teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
+
+            String repoUrl = teamBuildPayload.BuildVariables.get("Build.Repository.Uri");
+            String buildSourceBranch = teamBuildPayload.BuildVariables.get("Build.SourceBranch");
+            
+            branchName = findBranchName(wmbp, buildSourceBranch);
+            project = wmbp.getJob(branchName);
+            
+            if (project == null) {
+                // If branch does not exist, execute branch indexing below.
+                startBranchIndexing(repoUrl);
+                
+                try {
+                    // Wait for branch indexing to avoid triggering builds for
+                    // jobs/branches that does not exist yet in Jenkins.
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    LOGGER.log(Level.SEVERE, "InterruptedException", e);
+                }
+
+                // After branch indexing, try to find branch name one more time.
+                branchName = findBranchName(wmbp, buildSourceBranch);
+                project = wmbp.getJob(branchName);
+            }
+        } else {
+            checkPermission((AbstractProject) project, req, rsp);
+            formData = req.getSubmittedForm();
+            teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
+        }
+
+        final AbstractCommand command = factory.create();
+        response = command.perform(project, req, formData, mapper, teamBuildPayload, new TimeDuration(0));
         return response;
+    }
+
+    /**
+     * Searches for a branch name in a WorkflowMultiBranchProject based on
+     * Build.SourceBranch from the BuildVariables of TeamBuildPayload.
+     * 
+     * @param wmbp
+     *            WorkflowMultiBranchProject where the branch name should be
+     *            searched for
+     * @param buildSourceBranch
+     *            Build.SourceBranch string retrieved from the BuildVariables of
+     *            payload
+     * @return the branch name found
+     * @throws UnsupportedEncodingException
+     *             If it is not possible to URLEncode the branch name
+     */
+    private String findBranchName(WorkflowMultiBranchProject wmbp, String buildSourceBranch)
+            throws UnsupportedEncodingException {
+        String branchName = buildSourceBranch.replace("refs/heads/", "");
+        
+        if (wmbp.getJob(branchName) == null) {
+            branchName = URLEncoder.encode(branchName, "UTF-8");
+        }
+        
+        return branchName;
+    }
+
+    /**
+     * Triggers a branch indexing for the jobs containing the same repository
+     * URL as the repoUrl parameter.
+     * 
+     * @param repoUrl
+     *            repository URL used for searching for jobs
+     */
+    private void startBranchIndexing(String repoUrl) {
+        for (final SCMSourceOwner owner : SCMSourceOwners.all()) {
+            for (SCMSource source : owner.getSCMSources()) {
+                if (source instanceof GitSCMSource) {
+                    GitSCMSource git = (GitSCMSource) source;
+                    try {
+                        URIish remote = new URIish(git.getRemote());
+                        URIish uri = new URIish(repoUrl);
+                        if (GitStatus.looselyMatches(uri, remote)) {
+                            LOGGER.info("Triggering the indexing of " + owner.getFullDisplayName());
+                            owner.onSCMSourceUpdated(source);
+                        }
+                    } catch (URISyntaxException e) {
+                        continue;
+                    }
+                }
+            }
+        }
     }
 
     public void doPing(
