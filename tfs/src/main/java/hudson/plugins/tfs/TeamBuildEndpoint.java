@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -200,87 +201,130 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
     }
 
-	private JSONObject innerDispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay)
-			throws IOException, ServletException {
-		commandName = null;
-		jobName = null;
-		final String pathInfo = req.getPathInfo();
-		if (!decodeCommandAndJobNames(pathInfo)) {
-			if (commandName == null) {
-				throw new IllegalArgumentException("Command not provided");
-			}
-			if (jobName == null) {
-				throw new IllegalArgumentException("Job name not provided after command");
-			}
-		}
+    private JSONObject innerDispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay)
+            throws IOException, ServletException {
+        commandName = null;
+        jobName = null;
+        final String pathInfo = req.getPathInfo();
+        if (!decodeCommandAndJobNames(pathInfo)) {
+            if (commandName == null) {
+                throw new IllegalArgumentException("Command not provided");
+            }
+            if (jobName == null) {
+                throw new IllegalArgumentException("Job name not provided after command");
+            }
+        }
 
-		if (!COMMAND_FACTORIES_BY_NAME.containsKey(commandName)) {
-			throw new IllegalArgumentException("Command not implemented");
-		}
+        if (!COMMAND_FACTORIES_BY_NAME.containsKey(commandName)) {
+            throw new IllegalArgumentException("Command not implemented");
+        }
 
-		final Jenkins jenkins = Jenkins.getInstance();
-		final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
+        final Jenkins jenkins = Jenkins.getInstance();
+        final AbstractCommand.Factory factory = COMMAND_FACTORIES_BY_NAME.get(commandName);
 
-		Job project = jenkins.getItemByFullName(jobName, AbstractProject.class);
+        Job project = jenkins.getItemByFullName(jobName, AbstractProject.class);
 
-		JSONObject response = null;
-		JSONObject formData = null;
-		final ObjectMapper mapper = EndpointHelper.MAPPER;
-		TeamBuildPayload teamBuildPayload;
+        JSONObject response = null;
+        JSONObject formData = null;
+        final ObjectMapper mapper = EndpointHelper.MAPPER;
+        TeamBuildPayload teamBuildPayload;
 
-		if (project == null) {
-			String parent = jobName;
-			String branchName = "master";
-			WorkflowMultiBranchProject wmbp = (WorkflowMultiBranchProject) jenkins.getItemByFullName(parent);
+        if (project == null) {
+            String parent = jobName;
+            String branchName = "master";
+            WorkflowMultiBranchProject wmbp = (WorkflowMultiBranchProject) jenkins.getItemByFullName(parent);
 
-			if (jenkins.getItemByFullName(parent) == null || wmbp instanceof WorkflowMultiBranchProject == false) {
-				throw new IllegalArgumentException("Project not found");
-			}
+            if (jenkins.getItemByFullName(parent) == null || wmbp instanceof WorkflowMultiBranchProject == false) {
+                throw new IllegalArgumentException("Project not found");
+            }
 
-			formData = JSONObject.fromObject(req.getParameter("json"));
-			teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
+            formData = JSONObject.fromObject(req.getParameter("json"));
+            teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
 
-			String repoUrl = teamBuildPayload.BuildVariables.get("Build.Repository.Uri");
-			branchName = teamBuildPayload.BuildVariables.get("Build.SourceBranch").replace("refs/heads/", "");
+            String repoUrl = teamBuildPayload.BuildVariables.get("Build.Repository.Uri");
+            String buildSourceBranch = teamBuildPayload.BuildVariables.get("Build.SourceBranch");
+            
+            branchName = findBranchName(wmbp, buildSourceBranch);
+            project = wmbp.getJob(branchName);
+            
+            if (project == null) {
+                // If branch does not exist, execute branch indexing below.
+                startBranchIndexing(repoUrl);
+                
+                try {
+                    // Wait for branch indexing to avoid triggering builds for
+                    // jobs/branches that does not exist yet in Jenkins.
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    LOGGER.log(Level.SEVERE, "InterruptedException", e);
+                }
 
-			for (final SCMSourceOwner owner : SCMSourceOwners.all()) {
-				for (SCMSource source : owner.getSCMSources()) {
-					if (source instanceof GitSCMSource) {
-						GitSCMSource git = (GitSCMSource) source;
-						try {
-							URIish remote = new URIish(git.getRemote());
-							URIish uri = new URIish(repoUrl);
-							if (GitStatus.looselyMatches(uri, remote)) {
-								LOGGER.info("Triggering the indexing of " + owner.getFullDisplayName());
-								owner.onSCMSourceUpdated(source);
-							}
-						} catch (URISyntaxException e) {
-							continue;
-						}
-					}
-				}
-			}
-			try {
-				// Wait until branch indexing is ready to avoid triggering
-				// builds for jobs/branches that does not exist yet in Jenkins.
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				LOGGER.log(Level.SEVERE, "InterruptedException", e);
-			}
+                // After branch indexing, try to find branch name one more time.
+                branchName = findBranchName(wmbp, buildSourceBranch);
+                project = wmbp.getJob(branchName);
+            }
+        } else {
+            checkPermission((AbstractProject) project, req, rsp);
+            formData = req.getSubmittedForm();
+            teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
+        }
 
-			// This separate job-name lookup (and scheduling) is necessary for
-			// TFS in order to poll the build result.
-			project = wmbp.getJob(branchName);
-		} else {
-			checkPermission((AbstractProject) project, req, rsp);
-			formData = req.getSubmittedForm();
-			teamBuildPayload = mapper.convertValue(formData, TeamBuildPayload.class);
-		}
+        final AbstractCommand command = factory.create();
+        response = command.perform(project, req, formData, mapper, teamBuildPayload, new TimeDuration(0));
+        return response;
+    }
 
-		final AbstractCommand command = factory.create();
-		response = command.perform(project, req, formData, mapper, teamBuildPayload, new TimeDuration(0));
-		return response;
-	}
+    /**
+     * Searches for a branch name in a WorkflowMultiBranchProject based on
+     * Build.SourceBranch from the BuildVariables of TeamBuildPayload.
+     * 
+     * @param wmbp
+     *            WorkflowMultiBranchProject where the branch name should be
+     *            searched for
+     * @param buildSourceBranch
+     *            Build.SourceBranch string retrieved from the BuildVariables of
+     *            payload
+     * @return the branch name found
+     * @throws UnsupportedEncodingException
+     *             If it is not possible to URLEncode the branch name
+     */
+    private String findBranchName(WorkflowMultiBranchProject wmbp, String buildSourceBranch)
+            throws UnsupportedEncodingException {
+        String branchName = buildSourceBranch.replace("refs/heads/", "");
+        
+        if (wmbp.getJob(branchName) == null) {
+            branchName = URLEncoder.encode(branchName, "UTF-8");
+        }
+        
+        return branchName;
+    }
+
+    /**
+     * Triggers a branch indexing for the jobs containing the same repository
+     * URL as the repoUrl parameter.
+     * 
+     * @param repoUrl
+     *            repository URL used for searching for jobs
+     */
+    private void startBranchIndexing(String repoUrl) {
+        for (final SCMSourceOwner owner : SCMSourceOwners.all()) {
+            for (SCMSource source : owner.getSCMSources()) {
+                if (source instanceof GitSCMSource) {
+                    GitSCMSource git = (GitSCMSource) source;
+                    try {
+                        URIish remote = new URIish(git.getRemote());
+                        URIish uri = new URIish(repoUrl);
+                        if (GitStatus.looselyMatches(uri, remote)) {
+                            LOGGER.info("Triggering the indexing of " + owner.getFullDisplayName());
+                            owner.onSCMSourceUpdated(source);
+                        }
+                    } catch (URISyntaxException e) {
+                        continue;
+                    }
+                }
+            }
+        }
+    }
 
     public void doPing(
             final StaplerRequest request,
