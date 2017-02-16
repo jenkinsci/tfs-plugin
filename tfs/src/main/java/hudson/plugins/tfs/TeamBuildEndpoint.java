@@ -2,8 +2,9 @@ package hudson.plugins.tfs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.Extension;
-import hudson.model.BuildableItem;
 import hudson.model.BuildAuthorizationToken;
+import hudson.model.BuildableItem;
+import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.tfs.model.AbstractCommand;
@@ -33,6 +34,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -54,6 +56,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     private static final Map<String, AbstractCommand.Factory> COMMAND_FACTORIES_BY_NAME;
     public static final String URL_NAME = "team-build";
     public static final String PARAMETER = "parameter";
+    public static final String BUILD_SOURCE_BRANCH = "Build.SourceBranch";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
 
     static {
@@ -187,6 +190,41 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
     }
 
+    private String getBranch(final StaplerRequest req) {
+        final String json = req.getParameter("json");
+        final JSONObject formData = JSONObject.fromObject(json);
+        final TeamBuildPayload payload = EndpointHelper.MAPPER.convertValue(formData, TeamBuildPayload.class);
+
+        final String sourceBranch = payload.BuildVariables.get(BUILD_SOURCE_BRANCH);
+
+        return sourceBranch.replace("refs/heads/", "");
+    }
+
+    private Job getJob(final String jobName, final StaplerRequest req) {
+        final Jenkins jenkins = Jenkins.getInstance();
+
+        Job job = jenkins.getItemByFullName(jobName, Job.class);
+
+        if (job == null) {
+            final Item item = jenkins.getItemByFullName(jobName);
+            final Collection<? extends Job> allJobs = item.getAllJobs();
+            final String sourceBranch = getBranch(req);
+
+            for (final Job j : allJobs) {
+                if (j.getName().equals(sourceBranch)) {
+                    job = j;
+                    break;
+                }
+            }
+        }
+
+        if (job == null) {
+            throw new IllegalArgumentException("Job not found");
+        }
+
+        return job;
+    }
+
     private JSONObject innerDispatch(final StaplerRequest req, final StaplerResponse rsp, final TimeDuration delay) throws IOException, ServletException {
         commandName = null;
         jobName = null;
@@ -204,12 +242,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             throw new IllegalArgumentException("Command not implemented");
         }
 
-        final Jenkins jenkins = Jenkins.getInstance();
-
-        final Job job = jenkins.getItemByFullName(jobName, Job.class);
-        if (job == null) {
-            throw new IllegalArgumentException("Job not found");
-        }
+        final Job job = getJob(jobName, req);
 
         final ParameterizedJobMixIn.ParameterizedJob jobMixin = (ParameterizedJobMixIn.ParameterizedJob) job;
 
