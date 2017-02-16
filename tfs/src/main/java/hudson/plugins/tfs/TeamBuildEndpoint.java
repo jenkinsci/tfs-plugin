@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -190,14 +191,48 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         }
     }
 
-    private String getBranch(final StaplerRequest req) {
-        final String json = req.getParameter("json");
-        final JSONObject formData = JSONObject.fromObject(json);
-        final TeamBuildPayload payload = EndpointHelper.MAPPER.convertValue(formData, TeamBuildPayload.class);
+    /**
+     * If we are calling this method, it means we didn't find any job or project with jobName. Assuming we are building
+     * multibranch pipeline projects in this case.
+     *
+     * We will try to determine the branch name in the following sequence:
+     * 1. Check if the jobName is composed from ${multibranch_pipeline}/${branch_name}
+     * 2. Check if the payload has BuildSource variable defined (for PR builds)
+     *
+     * If we can't determine the branch name, throw.
+     */
+    private String getBranch(final String jobName, final StaplerRequest req) {
+        String sourceBranch = null;
 
-        final String sourceBranch = payload.BuildVariables.get(BUILD_SOURCE_BRANCH);
+        if (jobName.indexOf('/') > 0) {
+            sourceBranch = jobName.substring(jobName.indexOf('/') + 1);
+        } else {
+            final String json = req.getParameter("json");
+            final JSONObject formData = JSONObject.fromObject(json);
+            final TeamBuildPayload payload = EndpointHelper.MAPPER.convertValue(formData, TeamBuildPayload.class);
 
-        return sourceBranch.replace("refs/heads/", "");
+            sourceBranch = payload.BuildVariables.get(BUILD_SOURCE_BRANCH);
+        }
+
+        if (sourceBranch == null || sourceBranch.trim().isEmpty()) {
+            throw new IllegalArgumentException("Could not find branch from job name.  If building a multibranch"
+                    + "pipeline job, the job name should be in the format of '${multibranch pipeline name}/${branch}.'");
+        }
+
+        try {
+            return URLEncoder.encode(sourceBranch.replace("refs/heads/", ""), "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            throw new RuntimeException("Failed to encode branch: " + sourceBranch, e);
+        }
+    }
+
+    private String getJobNameFromNestedFolder(final String jobName) {
+        final int idx = jobName.indexOf('/');
+        if (idx > 0) {
+            return jobName.substring(0, idx);
+        }
+
+        return jobName;
     }
 
     private Job getJob(final String jobName, final StaplerRequest req) {
@@ -206,20 +241,23 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         Job job = jenkins.getItemByFullName(jobName, Job.class);
 
         if (job == null) {
-            final Item item = jenkins.getItemByFullName(jobName);
-            final Collection<? extends Job> allJobs = item.getAllJobs();
-            final String sourceBranch = getBranch(req);
+            final Item item = jenkins.getItemByFullName(getJobNameFromNestedFolder(jobName));
 
-            for (final Job j : allJobs) {
-                if (j.getName().equals(sourceBranch)) {
-                    job = j;
-                    break;
+            if (item != null) {
+                final Collection<? extends Job> allJobs = item.getAllJobs();
+                final String sourceBranch = getBranch(jobName, req);
+
+                for (final Job j : allJobs) {
+                    if (j.getName().equals(sourceBranch)) {
+                        job = j;
+                        break;
+                    }
                 }
             }
         }
 
         if (job == null) {
-            throw new IllegalArgumentException("Job not found");
+            throw new IllegalArgumentException("Job: " + jobName + " not found");
         }
 
         return job;
