@@ -21,12 +21,6 @@
 
   <developers>
     <developer>
-      <id>olivierdagenais</id>
-      <name>Olivier Dagenais</name>
-      <email>olivier.dagenais@gmail.com</email>
-      <timezone>-5</timezone>
-    </developer>
-    <developer>
       <id>dastahel</id>
       <name>David Staheli</name>
       <email>dastahel@microsoft.com</email>
