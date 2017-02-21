@@ -62,7 +62,7 @@ public class CheckoutAction {
         project.getFiles(normalizedFolder, versionSpecString, useOverwrite);
 
         if (lastBuildVersionSpec != null) {
-            return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true, Integer.MAX_VALUE);
+            return project.getDetailedHistoryWithoutCloakedPaths(lastBuildVersionSpec, currentBuildVersionSpec, cloakedPaths);
         }
 
         return new ArrayList<ChangeSet>();

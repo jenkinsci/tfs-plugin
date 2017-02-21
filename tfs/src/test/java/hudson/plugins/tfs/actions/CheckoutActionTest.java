@@ -224,16 +224,16 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
-        
+        when(project.getDetailedHistoryWithoutCloakedPaths(isA(VersionSpec.class), isA(VersionSpec.class), anyCollection())).thenReturn(list);
+
         CheckoutAction action = new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false);
         final Calendar startDate = Util.getCalendar(2008, 9, 24);
         final Calendar endDate = Util.getCalendar(2008, 10, 24);
         List<ChangeSet> actualList = action.checkout(server, hudsonWs, startDate, endDate);
-        assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
+        assertEquals("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
         final DateVersionSpec startDateVersionSpec = new DateVersionSpec(startDate);
-        verify(project).getVCCHistory(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(true), anyInt());
+        verify(project).getDetailedHistoryWithoutCloakedPaths(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(EMPTY_CLOAKED_PATHS_LIST));
     }
     
     @Test
@@ -403,21 +403,20 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
+        when(project.getDetailedHistoryWithoutCloakedPaths(isA(VersionSpec.class), isA(VersionSpec.class), anyCollection())).thenReturn(list);
         
         CheckoutAction action = new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false);
         final Calendar startDate = Util.getCalendar(2008, 9, 24);
         final Calendar endDate = Util.getCalendar(2009, 9, 24);
         List<ChangeSet> actualList = action.checkout(server, hudsonWs, startDate, endDate);
-        assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
+        assertEquals("The list from the detailed history, was not the same as returned from checkout", list, actualList);
 
         final DateVersionSpec startDateVersionSpec = new DateVersionSpec(startDate);
         final DateVersionSpec endDateVersionSpec = new DateVersionSpec(endDate);
-        verify(project).getVCCHistory(
+        verify(project).getDetailedHistoryWithoutCloakedPaths(
                 argThat(new DateVersionSpecMatcher(startDateVersionSpec)),
                 argThat(new DateVersionSpecMatcher(endDateVersionSpec)),
-                eq(true),
-                anyInt());
+                eq(EMPTY_CLOAKED_PATHS_LIST));
         verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
     }
 

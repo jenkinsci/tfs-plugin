@@ -217,6 +217,10 @@ public class Project {
     public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final Calendar fromTimestamp, final Calendar toTimestamp, final Collection<String> cloakedPaths) {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
+        return getDetailedHistoryWithoutCloakedPaths(fromVersion, toVersion, cloakedPaths);
+    }
+
+    public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final VersionSpec fromVersion, final VersionSpec toVersion, final Collection<String> cloakedPaths) {
         final List<ChangeSet> changeSets = getVCCHistory(fromVersion, toVersion, true, Integer.MAX_VALUE);
         final ArrayList<ChangeSet> changeSetNoCloaked = new ArrayList<ChangeSet>();
         for (final ChangeSet changeset : changeSets) {
