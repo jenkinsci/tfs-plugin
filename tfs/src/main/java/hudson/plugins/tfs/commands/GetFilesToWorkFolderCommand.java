@@ -66,7 +66,7 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand<Void, E
         final Workspace workspace = vcc.getWorkspace(workFolder);
         final VersionControlEventEngine eventEngine = vcc.getEventEngine();
         eventEngine.addGetListener(this);
-        workspace.get(getVersionSpec, GetOptions.NONE);
+        workspace.get(getVersionSpec, GetOptions.OVERWRITE);
         eventEngine.removeGetListener(this);
 
         final String gotMessage = String.format(GotTemplate, versionSpecString, getCount);
