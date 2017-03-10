@@ -58,6 +58,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     public static final String URL_NAME = "team-build";
     public static final String PARAMETER = "parameter";
     public static final String BUILD_SOURCE_BRANCH = "Build.SourceBranch";
+    public static final String QUEUEJOBTASK_MULTIBRANCH_JOB_BRANCH = "QueueJobTask.MultibranchPipelineBranch";
     static final String URL_PREFIX = "/" + URL_NAME + "/";
 
     static {
@@ -196,22 +197,26 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
      * multibranch pipeline projects in this case.
      *
      * We will try to determine the branch name in the following sequence:
-     * 1. Check if the jobName is composed from ${multibranch_pipeline}/${branch_name}
-     * 2. Check if the payload has BuildSource variable defined (for PR builds)
+     * 1. For JenkinsQueueJob task 1.115.0+, we send the branch in "QueueJobTask.MultibranchPipelineBranch".
+     * 2. Check if the jobName is composed from ${multibranch_pipeline}/${branch_name}
+     * 3. Check if the payload has BuildSource variable defined (for PR builds)
      *
      * If we can't determine the branch name, throw.
      */
     private String getBranch(final String jobName, final StaplerRequest req) {
-        String sourceBranch = null;
+        final String json = req.getParameter("json");
+        final JSONObject formData = JSONObject.fromObject(json);
+        final TeamBuildPayload payload = EndpointHelper.MAPPER.convertValue(formData, TeamBuildPayload.class);
 
-        if (jobName.indexOf('/') > 0) {
-            sourceBranch = jobName.substring(jobName.indexOf('/') + 1);
-        } else {
-            final String json = req.getParameter("json");
-            final JSONObject formData = JSONObject.fromObject(json);
-            final TeamBuildPayload payload = EndpointHelper.MAPPER.convertValue(formData, TeamBuildPayload.class);
+        String sourceBranch = payload.BuildVariables.get(QUEUEJOBTASK_MULTIBRANCH_JOB_BRANCH);
 
-            sourceBranch = payload.BuildVariables.get(BUILD_SOURCE_BRANCH);
+        if (sourceBranch == null || sourceBranch.trim().isEmpty()) {
+            final int idx = jobName.indexOf('/');
+            if (idx > 0) {
+                sourceBranch = jobName.substring(idx + 1);
+            } else {
+                sourceBranch = payload.BuildVariables.get(BUILD_SOURCE_BRANCH);
+            }
         }
 
         if (sourceBranch == null || sourceBranch.trim().isEmpty()) {
@@ -241,7 +246,14 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
         Job job = jenkins.getItemByFullName(jobName, Job.class);
 
         if (job == null) {
-            final Item item = jenkins.getItemByFullName(getJobNameFromNestedFolder(jobName));
+            /* For jobs queued by JenkinsQueueJob task 1.115.0+, the jobname sent over the wire is the real job name
+             * without branch name tagged at the end.
+             * Try get the job as it was specified first, if there is no such job, fall back to existing logic and
+             * assume the jobname is in the format of ${multibranchPipelineJobname}/${branchName].
+             */
+            final Item mbPipelineJobItem = jenkins.getItemByFullName(jobName);
+            final Item item = (mbPipelineJobItem != null) ?
+                    mbPipelineJobItem : jenkins.getItemByFullName(getJobNameFromNestedFolder(jobName));
 
             if (item != null) {
                 final Collection<? extends Job> allJobs = item.getAllJobs();
