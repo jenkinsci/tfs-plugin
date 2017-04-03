@@ -85,6 +85,10 @@ public abstract class AbstractHookEvent {
     List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling) {
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
         final String commit = gitCodePushedEventArgs.commit;
+        if (commit == null) {
+            result.add(new GitStatus.MessageResponseContributor("No commits were pushed, skipping further event processing."));
+            return result;
+        }
         final URIish uri = gitCodePushedEventArgs.getRepoURIish();
 
         TeamGlobalStatusAction.addIfApplicable(actions);

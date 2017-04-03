@@ -2,8 +2,8 @@ package hudson.plugins.tfs.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.BuildableItem;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Job;
@@ -82,7 +82,7 @@ public class BuildCommand extends AbstractCommand {
         }
     }
 
-    protected JSONObject innerPerform(final AbstractProject project, final TimeDuration delay, final List<Action> extraActions) {
+    protected JSONObject innerPerform(final BuildableItem buildableItem, final TimeDuration delay, final List<Action> extraActions) {
         final JSONObject result = new JSONObject();
 
         final Jenkins jenkins = Jenkins.getInstance();
@@ -90,7 +90,7 @@ public class BuildCommand extends AbstractCommand {
         final Cause cause = new Cause.UserIdCause();
         final CauseAction causeAction = new CauseAction(cause);
         final Action[] actionArray = ActionHelper.create(extraActions, causeAction);
-        final ScheduleResult scheduleResult = queue.schedule2(project, delay.getTime(), actionArray);
+        final ScheduleResult scheduleResult = queue.schedule2(buildableItem, delay.getTime(), actionArray);
         final Queue.Item item = scheduleResult.getItem();
         if (item != null) {
             result.put("created", jenkins.getRootUrl() + item.getUrl());
@@ -99,7 +99,9 @@ public class BuildCommand extends AbstractCommand {
     }
 
     @Override
-    public JSONObject perform(final AbstractProject project, final StaplerRequest req, final JSONObject requestPayload, final ObjectMapper mapper, final TeamBuildPayload teamBuildPayload, final TimeDuration delay) {
+    public JSONObject perform(final Job<?, ?> job, final BuildableItem buildableItem, final StaplerRequest req,
+                              final JSONObject requestPayload, final ObjectMapper mapper,
+                              final TeamBuildPayload teamBuildPayload, final TimeDuration delay) {
 
         // These values are for optional parameters of the same name, for the git.pullrequest.merged event
         String commitId = null;
@@ -138,7 +140,6 @@ public class BuildCommand extends AbstractCommand {
         }
 
         //noinspection UnnecessaryLocalVariable
-        final Job<?, ?> job = project;
         final ParametersDefinitionProperty pp = job.getProperty(ParametersDefinitionProperty.class);
         if (pp != null && requestPayload.containsKey(TeamBuildEndpoint.PARAMETER)) {
             final List<ParameterValue> values = new ArrayList<ParameterValue>();
@@ -199,7 +200,7 @@ public class BuildCommand extends AbstractCommand {
             actions.add(action);
         }
 
-        return innerPerform(project, delay, actions);
+        return innerPerform(buildableItem, delay, actions);
     }
 
     static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {

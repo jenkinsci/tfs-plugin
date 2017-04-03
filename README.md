@@ -60,6 +60,7 @@ The following table indicates compatibility and support for versions of TFS and 
 > Version | Supported by the TFS plugin? | Mainstream Support End Date
 > ------- | ------ | ---------------------------
 > [Visual Studio Team Services] | :white_check_mark: | n/a
+> Visual Studio Team Foundation Server 2017 | :white_check_mark: | [2022/01/11](https://support.microsoft.com/en-us/lifecycle/search?alpha=Visual%20Studio%20Team%20Foundation%20Server%202017)
 > Visual Studio Team Foundation Server 2015 | :white_check_mark: | [2020/10/13](https://support.microsoft.com/en-us/lifecycle?p1=18576)
 > Microsoft Visual Studio Team Foundation Server 2013 | :white_check_mark: | [2019/04/09](https://support.microsoft.com/en-us/lifecycle?p1=17358)
 > Microsoft Visual Studio Team Foundation Server 2012 | :white_check_mark: | [2018/01/09](https://support.microsoft.com/en-us/lifecycle?p1=16804)
