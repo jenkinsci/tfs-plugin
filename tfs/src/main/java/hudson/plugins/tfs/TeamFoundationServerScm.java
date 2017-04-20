@@ -127,7 +127,7 @@ public class TeamFoundationServerScm extends SCM {
     public TeamFoundationServerScm(String serverUrl, String projectPath, String workspaceName, String userName, Secret password) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
-        this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
+        this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Jenkins-${JOB_NAME}" : workspaceName);
         this.userName = userName;
         this.password = password;
     }
