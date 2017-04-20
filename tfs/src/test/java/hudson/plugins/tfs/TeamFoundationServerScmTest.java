@@ -65,7 +65,7 @@ public class TeamFoundationServerScmTest {
                     "    <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
                     "    <projectPath>$/example/path</projectPath>\n" +
                     "    <localPath>.</localPath>\n" +
-                    "    <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
+                    "    <workspaceName>Jenkins-${JOB_NAME}</workspaceName>\n" +
                     "    <userPassword>ZXhhbXBsZVBhc3N3b3Jk</userPassword>\n" +
                     "    <userName>example\\tfsbuilder</userName>\n" +
                     "    <useUpdate>false</useUpdate>\n" +
@@ -83,7 +83,7 @@ public class TeamFoundationServerScmTest {
                             "  <serverUrl>http://example.tfs.server.invalid:8080/tfs</serverUrl>\n" +
                             "  <projectPath>$/example/path</projectPath>\n" +
                             "  <localPath>.</localPath>\n" +
-                            "  <workspaceName>Hudson-${JOB_NAME}-${NODE_NAME}</workspaceName>\n" +
+                            "  <workspaceName>Jenkins-${JOB_NAME}</workspaceName>\n" +
                             "  <password>GZ3wK9L4iJXsMwXnJ4NieiVpOlxj0AVrthfe7MIr9w0=</password>\n" +
                             "  <userName>example\\tfsbuilder</userName>\n" +
                             "  <credentialsConfigurer class=\"hudson.plugins.tfs.model.ManualCredentialsConfigurer\"/>\n" +
@@ -269,7 +269,7 @@ public class TeamFoundationServerScmTest {
     @Test
     public void assertDefaultValueIsUsedForEmptyWorkspaceName() {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "");
-        assertEquals("Default value for workspace was incorrect", "Hudson-${JOB_NAME}-${NODE_NAME}", scm.getWorkspaceName());
+        assertEquals("Default value for workspace was incorrect", "Jenkins-${JOB_NAME}", scm.getWorkspaceName());
     }
     
     @Test
