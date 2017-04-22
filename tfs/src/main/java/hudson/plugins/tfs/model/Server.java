@@ -49,16 +49,25 @@ public class Server implements ServerConfigurationProvider, Closable {
     private final ExtraSettings extraSettings;
     private MockableVersionControlClient mockableVcc;
     private static HashMap<String, PersistenceStoreProvider> persistenceStoreProviderCache = new HashMap<String, PersistenceStoreProvider>();
+    private boolean shouldLogWorkspaces;
 
 
     /**
      * This constructor overload assumes a Jenkins instance is present.
      */
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password) throws IOException {
-        this(launcher, taskListener, url, username, password, null, null);
+        this(launcher, taskListener, url, username, password, null, null,false);
+    }
+
+    public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, boolean shouldLogWorkspaces) throws IOException {
+        this(launcher, taskListener, url, username, password, null, null, shouldLogWorkspaces);
     }
 
     public static Server create(final Launcher launcher, final TaskListener taskListener, final String url, final StandardUsernamePasswordCredentials credentials, final WebProxySettings webProxySettings, final ExtraSettings extraSettings) throws IOException {
+        return create(launcher, taskListener, url, credentials, webProxySettings, extraSettings, false);
+    }
+
+    public static Server create(final Launcher launcher, final TaskListener taskListener, final String url, final StandardUsernamePasswordCredentials credentials, final WebProxySettings webProxySettings, final ExtraSettings extraSettings, boolean shouldLogWorkspaces) throws IOException {
 
         final String username;
         final String userPassword;
@@ -71,15 +80,21 @@ public class Server implements ServerConfigurationProvider, Closable {
             final Secret password = credentials.getPassword();
             userPassword = password.getPlainText();
         }
-        return new Server(launcher, taskListener, url, username, userPassword, webProxySettings, extraSettings);
+        return new Server(launcher, taskListener, url, username, userPassword, webProxySettings, extraSettings, shouldLogWorkspaces);
     }
 
     public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, final WebProxySettings webProxySettings, final ExtraSettings extraSettings) throws IOException {
+        this(launcher, taskListener, url, username, password, webProxySettings, extraSettings, false) ;
+    }
+
+    public Server(final Launcher launcher, final TaskListener taskListener, final String url, final String username, final String password, final WebProxySettings webProxySettings, final ExtraSettings extraSettings, boolean shouldLogWorkspaces) throws IOException {
         this.launcher = launcher;
         this.taskListener = taskListener;
         this.url = url;
         this.userName = username;
         this.userPassword = password;
+        this.shouldLogWorkspaces = shouldLogWorkspaces;
+
         final URI uri = URIUtils.newURI(url);
 
         NativeLibraryManager.initialize();
@@ -256,6 +271,10 @@ public class Server implements ServerConfigurationProvider, Closable {
 
     public ExtraSettings getExtraSettings() {
         return extraSettings;
+    }
+
+    public boolean getShouldLogWorkspaces() {
+        return this.shouldLogWorkspaces;
     }
 
     public TaskListener getListener() {
