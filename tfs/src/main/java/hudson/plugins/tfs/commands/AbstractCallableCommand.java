@@ -10,11 +10,12 @@ import hudson.plugins.tfs.model.ExtraSettings;
 import hudson.plugins.tfs.model.Server;
 import hudson.plugins.tfs.model.WebProxySettings;
 import hudson.remoting.Callable;
+import jenkins.security.MasterToSlaveCallable;
 
 import java.io.IOException;
 import java.io.Serializable;
 
-public abstract class AbstractCallableCommand implements Serializable {
+public abstract class AbstractCallableCommand<V, T extends Throwable> extends MasterToSlaveCallable<V, T> implements Serializable {
 
     private final String url;
     private final String userName;

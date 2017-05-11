@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 
-public class NewWorkspaceCommand extends AbstractCallableCommand implements Callable<Void, Exception> {
+public class NewWorkspaceCommand extends AbstractCallableCommand<Void, Exception> {
 
     private static final WorkingFolder[] EMPTY_WORKING_FOLDER_ARRAY = new WorkingFolder[0];
     private static final String CloakingTemplate = "Cloaking '%s' in workspace '%s'...";

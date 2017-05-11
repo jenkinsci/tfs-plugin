@@ -14,7 +14,7 @@ import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.remoting.Callable;
 
-public class GetFilesToWorkFolderCommand extends AbstractCallableCommand implements Callable<Void, Exception>, GetListener {
+public class GetFilesToWorkFolderCommand extends AbstractCallableCommand<Void, Exception> implements GetListener {
 
     private static final String GettingTemplate = "Getting version '%s' to '%s'...";
     private static final String GotTemplate = "Finished getting version '%s'. Retrieved %d resources.";
