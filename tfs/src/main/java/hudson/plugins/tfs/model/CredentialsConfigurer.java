@@ -16,14 +16,14 @@ public abstract class CredentialsConfigurer implements ExtensionPoint, Describab
     }
 
     public CredentialsConfigurerDescriptor getDescriptor() {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getActiveInstance();
         return (CredentialsConfigurerDescriptor) jenkins.getDescriptorOrDie(getClass());
     }
 
     public abstract StandardUsernamePasswordCredentials getCredentials(final String collectionUri);
 
     public static DescriptorExtensionList<CredentialsConfigurer, CredentialsConfigurerDescriptor> all() {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getActiveInstance();
         return jenkins.getDescriptorList(CredentialsConfigurer.class);
     }
 }

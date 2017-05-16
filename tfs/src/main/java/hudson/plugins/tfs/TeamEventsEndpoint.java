@@ -80,7 +80,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
     public HttpResponse doIndex(final HttpServletRequest request) throws IOException {
         final Class<? extends TeamEventsEndpoint> me = this.getClass();
         final InputStream stream = me.getResourceAsStream("TeamEventsEndpoint.html");
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.getActiveInstance();
         final String rootUrl = instance.getRootUrl();
         final String eventRows = describeEvents(HOOK_EVENT_FACTORIES_BY_NAME, URL_NAME);
         try {

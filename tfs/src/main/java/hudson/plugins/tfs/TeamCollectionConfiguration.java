@@ -251,7 +251,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
                 return null;
             }
         }
-        final String template = "There is no team project collection configured for the URL '%1$s'.\n" +
+        final String template = "There is no team project collection configured for the URL '%1$s'.%n" +
                 "Please go to Jenkins > Manage Jenkins > Configure System and then " +
                 "add a Team Project Collection with a Collection URL of '%1$s'.";
         final String message = String.format(template, collectionUri);

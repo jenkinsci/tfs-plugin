@@ -1,6 +1,7 @@
 package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.User;
 import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
@@ -106,6 +107,7 @@ public class Project {
         return result;
     }
 
+    @SuppressFBWarnings(value = "DC_DOUBLECHECK", justification = "Only synchronize if not null")
     public UserLookup getOrCreateUserLookup() {
         if (userLookup == null) {
             synchronized (this) {

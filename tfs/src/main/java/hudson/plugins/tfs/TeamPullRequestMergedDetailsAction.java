@@ -45,7 +45,6 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
         if (action != null && action.hasWorkItems()) {
             Collections.addAll(destination, action.getWorkItems());
             final GitPullRequestEx gitPullRequest = action.gitPullRequest;
-            final GitRepository repository = gitPullRequest.getRepository();
             final URI collectionUri = URI.create(action.collectionUri);
             return collectionUri;
         }

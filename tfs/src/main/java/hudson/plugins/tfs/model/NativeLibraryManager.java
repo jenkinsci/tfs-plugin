@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class NativeLibraryManager implements NativeLibraryExtractor {
@@ -190,12 +191,12 @@ public class NativeLibraryManager implements NativeLibraryExtractor {
     }
 
     static void extractFiles(final NativeLibraryExtractor extractor) throws IOException {
-        for (final String operatingSystem : NATIVE_LIBRARIES.keySet()) {
-            final TreeMap<String, List<String>> architecturesToFileNames = NATIVE_LIBRARIES.get(operatingSystem);
-            for (final String architecture : architecturesToFileNames.keySet()) {
-                final List<String> fileNames = architecturesToFileNames.get(architecture);
+        for (final Map.Entry<String, TreeMap<String, List<String>>> nativeLibrary : NATIVE_LIBRARIES.entrySet()) {
+            final TreeMap<String, List<String>> architecturesToFileNames = nativeLibrary.getValue();
+            for (final Map.Entry<String, List<String>> architectureToFilename : architecturesToFileNames.entrySet()) {
+                final List<String> fileNames = architectureToFilename.getValue();
                 for (final String fileName : fileNames) {
-                    extractor.extractFile(operatingSystem, architecture, fileName);
+                    extractor.extractFile(nativeLibrary.getKey(), architectureToFilename.getKey(), fileName);
                 }
             }
         }
