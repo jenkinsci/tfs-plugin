@@ -48,7 +48,7 @@ public class TeamRestClient {
         final String hostName = collectionUri.getHost();
         this.server = Server.create(null, null, collectionUri.toString(), credentials, null, null);
         isTeamServices = TeamCollectionConfiguration.isTeamServices(hostName);
-        if (isTeamServices & credentials != null) {
+        if (isTeamServices && credentials != null) {
             authorization = createAuthorization(credentials);
         }
         else {

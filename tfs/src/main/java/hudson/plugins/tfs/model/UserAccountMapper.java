@@ -15,14 +15,14 @@ public abstract class UserAccountMapper implements ExtensionPoint, Describable<U
     }
 
     public UserAccountMapperDescriptor getDescriptor() {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getActiveInstance();
         return (UserAccountMapperDescriptor) jenkins.getDescriptorOrDie(getClass());
     }
 
     public abstract String mapUserAccount(final String input);
 
     public static DescriptorExtensionList<UserAccountMapper, UserAccountMapperDescriptor> all() {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getActiveInstance();
         return jenkins.getDescriptorList(UserAccountMapper.class);
     }
 }

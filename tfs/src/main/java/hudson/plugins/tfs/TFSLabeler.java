@@ -64,8 +64,6 @@ public class TFSLabeler extends Notifier {
             return false;
         }
 
-        FilePath workspace = build.getRootBuild().getWorkspace();
-
         TeamFoundationServerScm tfsScm = (TeamFoundationServerScm) scm;
 
         boolean buildSuccess = Result.SUCCESS.equals(build.getResult());

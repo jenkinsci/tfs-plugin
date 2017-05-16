@@ -66,9 +66,7 @@ public class TeamStatus {
                 client.addPullRequestIterationStatus(pullRequestMergeCommitCreatedEventArgs, status);
             }
         }
-        if (gitCodePushedEventArgs != null) {
-            client.addCommitStatus(gitCodePushedEventArgs, status);
-        }
+        client.addCommitStatus(gitCodePushedEventArgs, status);
 
         // TODO: we could contribute an Action to the run, recording the ID of the status we created
     }

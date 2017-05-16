@@ -391,7 +391,7 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public boolean processWorkspaceBeforeDeletion(AbstractProject<?, ?> project, FilePath workspace, Node node) throws IOException, InterruptedException {
         Run<?,?> lastRun = project.getLastBuild();
-        if ((lastRun == null) || !(lastRun instanceof AbstractBuild<?, ?>)) {
+        if (lastRun == null) {
             return true;
         }
         
@@ -515,7 +515,6 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern WORKSPACE_NAME_REGEX = Pattern.compile("[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         public static final Pattern CLOAKED_PATHS_REGEX = Pattern.compile("\\s*\\$[^\\n;]+(\\s*[\\n]\\s*\\$[^\\n;]+){0,}\\s*", Pattern.CASE_INSENSITIVE);
-        private transient String tfExecutable;
         
         public DescriptorImpl() {
             super(TeamFoundationServerScm.class, TeamFoundationServerRepositoryBrowser.class);

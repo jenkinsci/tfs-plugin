@@ -106,7 +106,7 @@ public abstract class AbstractHookEvent {
                 return result;
             }
             int totalRepositoryMatches = 0;
-            for (final Item project : Jenkins.getInstance().getAllItems()) {
+            for (final Item project : Jenkins.getActiveInstance().getAllItems()) {
                 final SCMTriggerItem scmTriggerItem = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(project);
                 if (scmTriggerItem == null) {
                     continue;
