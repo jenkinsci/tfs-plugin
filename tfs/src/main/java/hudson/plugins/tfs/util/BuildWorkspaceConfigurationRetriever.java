@@ -45,17 +45,23 @@ public class BuildWorkspaceConfigurationRetriever {
     
     public static class BuildWorkspaceConfiguration extends WorkspaceConfiguration {
         private static final long serialVersionUID = 1L;
-        private final AbstractBuild<?, ?> build;
+        private final transient AbstractBuild<?, ?> build;
         
         public BuildWorkspaceConfiguration(WorkspaceConfiguration configuration, AbstractBuild<?, ?> build) {
             super(configuration);
             this.build = build;
         }
+
         public void save() throws IOException {
             if (!workspaceExists()) {
                 build.getAction(WorkspaceConfiguration.class).setWorkspaceWasRemoved();
             }
             build.save();
-        }        
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return super.equals(o);
+        }
     }
 }

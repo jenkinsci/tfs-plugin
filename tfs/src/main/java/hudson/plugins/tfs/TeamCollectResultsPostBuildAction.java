@@ -1,5 +1,6 @@
 package hudson.plugins.tfs;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -51,6 +52,7 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
         this.requestedResults = requestedResults;
     }
 
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_BAD_PRACTICE", justification = "No matter the result of mkdirs")
     @Override
     public void perform(
             @Nonnull final Run<?, ?> run,
@@ -76,7 +78,6 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             final String folderName = teamResultType.getFolderName();
             logger.print(" " + teamResultType.getDisplayName());
             final File resultFolder = new File(resultsRoot, folderName);
-            //noinspection ResultOfMethodCallIgnored
             resultFolder.mkdirs();
             final String includes = requestedResult.getIncludes();
             final FilePath resultPath = new FilePath(resultFolder);
