@@ -24,7 +24,7 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
     private static final long serialVersionUID = 1L;
     private static final String URL_NAME = "team-pullRequestMergedDetails";
 
-    public GitPullRequestEx gitPullRequest;
+    public transient GitPullRequestEx gitPullRequest;
     public String message;
     public String detailedMessage;
     public String collectionUri;
