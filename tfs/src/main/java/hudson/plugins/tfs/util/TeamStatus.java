@@ -8,6 +8,7 @@ import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.TeamGitStatus;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -48,6 +49,14 @@ public class TeamStatus {
         final TeamRestClient client = new TeamRestClient(collectionUri);
 
         final TeamGitStatus status = TeamGitStatus.fromRun(run);
+
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-status", new TelemetryHelper.PropertyMapBuilder()
+                .serverContext(collectionUri.toString(), collectionUri.toString())
+                .pair("feature", featureDisplayName)
+                .pair("status", status.state.toString())
+                .build());
+
         // TODO: when code is pushed and polling happens, are we sure we built against the requested commit?
         if (pullRequestMergeCommitCreatedEventArgs != null) {
             if (pullRequestMergeCommitCreatedEventArgs.iterationId == -1) {

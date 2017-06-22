@@ -63,7 +63,7 @@ public class TelemetryHelper {
         InternalLogger.INSTANCE.initialize(InternalLogger.LoggerOutputType.FILE.toString(), loggerData);
 
         // Initialize the active TelemetryConfiguration
-        final String isDeveloperModeProperty = System.getProperty("telemetry.instrumentation.is_developer_mode", "false");
+        final String isDeveloperModeProperty = System.getProperty("hudson.plugins.tfs.telemetry.isDeveloperMode", "false");
         boolean isDeveloperMode = StringUtils.equalsIgnoreCase(isDeveloperModeProperty, "true");
         ContextInitializer initializer = new TelemetryContextInitializer(isDeveloperMode);
         TelemetryConfiguration.getActive().getContextInitializers().add(initializer);

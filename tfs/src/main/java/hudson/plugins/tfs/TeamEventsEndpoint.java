@@ -10,6 +10,7 @@ import hudson.plugins.tfs.model.GitPullRequestMergedEvent;
 import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
 import hudson.plugins.tfs.model.servicehooks.Event;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.tfs.util.StringBodyParameter;
@@ -190,6 +191,10 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
             final StaplerRequest request,
             final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-events-git-pr-merged", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+
         dispatch(request, response, body);
     }
 
@@ -198,6 +203,9 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
             final StaplerRequest request,
             final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-events-git-push", new TelemetryHelper.PropertyMapBuilder()
+                .build());
         dispatch(request, response, body);
     }
 

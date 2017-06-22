@@ -8,6 +8,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.TeamRequestedResult;
 import hudson.plugins.tfs.model.TeamResultType;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -57,6 +58,9 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             @Nonnull final FilePath workspace,
             @Nonnull final Launcher launcher,
             @Nonnull final TaskListener listener) throws InterruptedException, IOException {
+        TelemetryHelper.sendEvent("team-collect-results", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+
         // TODO: do we want to emit an error or warning like the following?
         /*
         if (requestedResults == null || requestedResults.size() == 0) {
