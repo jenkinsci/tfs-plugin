@@ -7,17 +7,12 @@ import com.microsoft.applicationinsights.extensibility.context.DeviceContext;
 import com.microsoft.applicationinsights.extensibility.context.SessionContext;
 import com.microsoft.applicationinsights.extensibility.context.UserContext;
 import com.microsoft.applicationinsights.telemetry.TelemetryContext;
-import hudson.PluginManager;
-import hudson.plugins.tfs.TeamFoundationServerScm;
 import jenkins.model.Jenkins;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.MessageFormat;
@@ -37,7 +32,7 @@ public class TelemetryContextInitializer implements ContextInitializer {
     private static final String SYS_PROP_USER_NAME = "user.name";
     private static final String SYS_PROP_JAVA_RUNTIME = "java.runtime.name";
     private static final String SYS_PROP_JAVA_VERSION = "java.version";
-    private static final String USER_AGENT_FORMAT = "{0}/{1} {2}/{3} {4}/{5} {6}/{7} ({9})";
+    private static final String USER_AGENT_FORMAT = "{0}/{1} {2}/{3} {4}/{5} {6}/{7} ({8})";
 
     private static final String PROPERTY_USER_ID = "User.Id";
     private static final String PROPERTY_JENKINS_VERSION = "Jenkins.Version";
