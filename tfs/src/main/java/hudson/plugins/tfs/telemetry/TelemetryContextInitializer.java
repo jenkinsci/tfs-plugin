@@ -183,6 +183,10 @@ public class TelemetryContextInitializer implements ContextInitializer {
     }
 
     private String getPluginVersion() {
-        return Jenkins.getInstance().getPluginManager().getPlugin("tfs").getVersion();
+        final Jenkins instance = Jenkins.getInstance();
+        if (instance != null && instance.getPluginManager() != null) {
+            return instance.getPluginManager().getPlugin("tfs").getVersion();
+        }
+        return StringUtils.EMPTY;
     }
 }
