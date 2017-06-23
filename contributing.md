@@ -1,7 +1,7 @@
 Contributing to the Team Foundation Server plugin for Jenkins
 =============================================================
 
-##Building Sources
+## Building Sources
 This is a Maven project with Java sources. The mvn package command will produce an HPI file that is the Jenkins Plugin file that will need to be installed on your Jenkins Server.
 - SET JAVA_HOME to the location of the JRE to build with (JRE 1.8 works)
 - Clone the repo from https://github.com/jenkinsci/tfs-plugin.git
@@ -10,7 +10,7 @@ This is a Maven project with Java sources. The mvn package command will produce 
     - Initial build will have to download lots of libraries. This could take a few minutes.
 - This produces tfs-plugin\tfs\target\tfs.hpi
 
-##Using IntelliJ IDEA
+## Using IntelliJ IDEA
 To use Intellij IDEA as the editor for this project simply do the following after getting sources:
 1) Open the tfs-plugin folder (root folder) in IntelliJ (I installed IntelliJ 17 community edition from https://www.jetbrains.com/idea/)
 2) Go to File->Project Structure and click on Project
@@ -21,7 +21,7 @@ You should now be able to build from within IntelliJ
     - bring up the Maven Projects tool window (View->Tool Windows->Maven Projects) and click the "run maven goal" button
     - Then type in "package" in the goal text box
 
-##Debugging the Plugin
+## Debugging the Plugin
 See https://wiki.jenkins-ci.org/display/JENKINS/Plugin+tutorial for information on how to debug the plugin.
 From within IntelliJ:
 1) Create a new Run configuration
@@ -43,7 +43,7 @@ From within IntelliJ:
 
 Note: this runs Jenkins on your local OS not in a docker image. As such, any configurations you make are preserved between runs.
 
-##Installing Jenkins Locally for Manual Testing
+## Installing Jenkins Locally for Manual Testing
 The easiest method is to run Jenkins in a docker image.
 1) Install Docker for your OS (https://www.docker.com/community-edition)
 1) Install and run the jenkins image
