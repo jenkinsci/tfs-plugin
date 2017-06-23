@@ -12,6 +12,7 @@ import hudson.plugins.tfs.model.BuildCommand;
 import hudson.plugins.tfs.model.BuildWithParametersCommand;
 import hudson.plugins.tfs.model.PingCommand;
 import hudson.plugins.tfs.model.TeamBuildPayload;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
@@ -325,6 +326,10 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final StaplerResponse response,
             @QueryParameter final TimeDuration delay
     ) throws IOException {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-build", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+
         dispatch(request, response, delay);
     }
 
@@ -333,6 +338,10 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final StaplerResponse response,
             @QueryParameter final TimeDuration delay
     ) throws IOException {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-build-parameters", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+
         dispatch(request, response, delay);
     }
 

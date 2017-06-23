@@ -8,6 +8,7 @@ import hudson.Util;
 import hudson.model.*;
 import hudson.plugins.tfs.commands.LabelCommand;
 import hudson.plugins.tfs.model.Server;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.plugins.tfs.util.BuildVariableResolver;
 import hudson.scm.SCM;
 import hudson.tasks.BuildStepDescriptor;
@@ -84,6 +85,12 @@ public class TFSLabeler extends Notifier {
                 logger.info(String.format("Create label '%s' on workspace '%s' with project path '%s' ", normalizedLabelName, tfsWorkspace, tfsProjectPath));
                 LabelCommand labelCommand = new LabelCommand(server, normalizedLabelName, tfsWorkspace, tfsProjectPath);
                 server.execute(labelCommand.getCallable());
+
+                // Send telemetry
+                TelemetryHelper.sendEvent("team-label", new TelemetryHelper.PropertyMapBuilder()
+                        .serverContext(server.getUrl(), server.getUrl())
+                        .build());
+
             } finally {
                 server.close();
             }
