@@ -91,7 +91,8 @@ public class TeamFoundationServerScm extends SCM {
     private String userName;
     private CredentialsConfigurer credentialsConfigurer;
     private boolean useUpdate;
-    
+    private boolean useOverwrite;
+
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
@@ -173,6 +174,15 @@ public class TeamFoundationServerScm extends SCM {
     @DataBoundSetter
     public void setUseUpdate(final boolean useUpdate) {
         this.useUpdate = useUpdate;
+    }
+
+    public boolean isUseOverwrite() {
+        return useOverwrite;
+    }
+
+    @DataBoundSetter
+    public void setUseOverwrite(final boolean useOverwrite) {
+        this.useOverwrite = useOverwrite;
     }
 
     public String getUserPassword() {
@@ -307,7 +317,7 @@ public class TeamFoundationServerScm extends SCM {
             final Project project = server.getProject(projectPath);
             final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
 
-            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
             List<ChangeSet> list;
             if (StringUtils.isNotEmpty(singleVersionSpec)) {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
