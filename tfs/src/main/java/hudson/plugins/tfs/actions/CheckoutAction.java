@@ -27,13 +27,15 @@ public class CheckoutAction {
     private final Collection<String> cloakedPaths;
     private final String localFolder;
     private final boolean useUpdate;
+    private final boolean useOverwrite;
 
-    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakedPaths, String localFolder, boolean useUpdate) {
+    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakedPaths, String localFolder, boolean useUpdate, boolean useOverwrite) {
         this.workspaceName = workspaceName;
         this.projectPath = projectPath;
         this.cloakedPaths = cloakedPaths;
         this.localFolder = localFolder;
         this.useUpdate = useUpdate;
+        this.useOverwrite = useOverwrite;
     }
 
     public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp, Calendar currentBuildTimestamp) throws IOException, InterruptedException, ParseException {
@@ -57,7 +59,7 @@ public class CheckoutAction {
 
         final String versionSpecString = RemoteChangesetVersionCommand.toString(currentBuildVersionSpec);
         final String normalizedFolder = determineCheckoutPath(workspacePath, localFolder);
-        project.getFiles(normalizedFolder, versionSpecString);
+        project.getFiles(normalizedFolder, versionSpecString, useOverwrite);
 
         if (lastBuildVersionSpec != null) {
             return project.getVCCHistory(lastBuildVersionSpec, currentBuildVersionSpec, true, Integer.MAX_VALUE);
@@ -69,7 +71,7 @@ public class CheckoutAction {
     public List<ChangeSet> checkoutBySingleVersionSpec(Server server, FilePath workspacePath, String singleVersionSpec) throws IOException, InterruptedException {
         Project project = getProject(server, workspacePath);
         final String normalizedFolder = determineCheckoutPath(workspacePath, localFolder);
-        project.getFiles(normalizedFolder, singleVersionSpec);
+        project.getFiles(normalizedFolder, singleVersionSpec, useOverwrite);
 
         return project.getDetailedHistory(singleVersionSpec);
     }
