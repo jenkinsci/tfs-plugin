@@ -390,7 +390,7 @@ public class TeamFoundationServerScm extends SCM {
     
     @Override
     public boolean processWorkspaceBeforeDeletion(AbstractProject<?, ?> project, FilePath workspace, Node node) throws IOException, InterruptedException {
-        Run<?,?> lastRun = project.getLastBuild();
+        AbstractBuild<?, ?> lastRun = project.getLastBuild();
         if (lastRun == null) {
             return true;
         }
@@ -399,7 +399,7 @@ public class TeamFoundationServerScm extends SCM {
         // Therefore we try to work around the problem, and see if its only built on one node or not. 
         if (node == null) { 
             while (lastRun != null) {
-                AbstractBuild<?,?> build = (AbstractBuild<?, ?>) lastRun;
+                AbstractBuild<?,?> build = lastRun;
                 Node buildNode = build.getBuiltOn();
                 if (node == null) {
                     node = buildNode;

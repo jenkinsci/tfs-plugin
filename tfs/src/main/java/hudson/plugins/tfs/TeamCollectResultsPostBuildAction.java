@@ -1,6 +1,5 @@
 package hudson.plugins.tfs;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -20,7 +19,6 @@ import hudson.util.io.ArchiverFactory;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -29,6 +27,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +52,6 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
         this.requestedResults = requestedResults;
     }
 
-    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_BAD_PRACTICE", justification = "No matter the result of mkdirs")
     @Override
     public void perform(
             @Nonnull final Run<?, ?> run,
@@ -82,7 +80,7 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             final String folderName = teamResultType.getFolderName();
             logger.print(" " + teamResultType.getDisplayName());
             final File resultFolder = new File(resultsRoot, folderName);
-            resultFolder.mkdirs();
+            Files.createDirectory(resultFolder.toPath());
             final String includes = requestedResult.getIncludes();
             final FilePath resultPath = new FilePath(resultFolder);
             final int numCopied = workspace.copyRecursiveTo(includes, resultPath);
