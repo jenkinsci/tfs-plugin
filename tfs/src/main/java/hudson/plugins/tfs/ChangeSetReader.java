@@ -1,15 +1,15 @@
 package hudson.plugins.tfs;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.digester.Digester;
-import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
 import hudson.model.AbstractBuild;
@@ -26,13 +26,9 @@ import hudson.util.Digester2;
 public class ChangeSetReader extends ChangeLogParser {
 
     @Override
-    @SuppressFBWarnings(value = "DM_DEFAULT_ENCODING", justification = "Better mot modify charset in case it might raise errors")
     public ChangeLogSet parse(AbstractBuild build, File changelogFile) throws IOException, SAXException {
-        FileReader reader = new FileReader(changelogFile);
-        try {
+        try (FileInputStream stream = new FileInputStream(changelogFile); Reader reader = new InputStreamReader(stream, Charset.defaultCharset())) {
             return parse(build, reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
         }
     }
 

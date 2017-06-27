@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class GitCodePushedEventArgs implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     public URI collectionUri;
     public URI repoUri;
