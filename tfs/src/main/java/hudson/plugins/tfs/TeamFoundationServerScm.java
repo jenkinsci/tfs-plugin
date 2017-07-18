@@ -494,6 +494,21 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
         super.buildEnvVars(build, env);
+
+        final TeamBuildDetailsAction buildDetailsAction = build.getAction(TeamBuildDetailsAction.class);
+        if (buildDetailsAction != null) {
+            //Add the TFS build variables as environment variables in the Jenkins environment
+            //https://www.visualstudio.com/en-us/docs/build/define/variables
+            for (Map.Entry<String, String> entry : buildDetailsAction.buildVariables.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if (value != null) {
+                    //Replace . with _ and ensure they're UPPERCASE to match Team Services pattern
+                    env.put(key.replace('.', '_').toUpperCase(), value);
+                }
+            }
+        }
+
         if (normalizedWorkspaceName != null) {
             env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
         }
