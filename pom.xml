@@ -28,6 +28,18 @@
       <timezone>-5</timezone>
     </developer>
     <developer>
+      <id>jpricketmsft</id>
+      <name>Jason Prickett</name>
+      <email>jpricket@microsoft.com</email>
+      <timezone>-5</timezone>
+    </developer>
+    <developer>
+      <id>jeffyoung</id>
+      <name>Jeff Young</name>
+      <email>jeyou@microsoft.com</email>
+      <timezone>-5</timezone>
+    </developer>
+    <developer>
       <id>mosabua</id>
       <name>Manfred Moser</name>
       <email>manfred@simpligility.com</email>
