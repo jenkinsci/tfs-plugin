@@ -6,6 +6,7 @@ import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.model.AbstractHookEvent;
+import hudson.plugins.tfs.model.ConnectHookEvent;
 import hudson.plugins.tfs.model.GitPullRequestMergedEvent;
 import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
@@ -57,6 +58,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         eventMap.put("ping", new PingHookEvent.Factory());
         eventMap.put("gitPullRequestMerged", new GitPullRequestMergedEvent.Factory());
         eventMap.put("gitPush", new GitPushEvent.Factory());
+        eventMap.put("connect", new ConnectHookEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
     }
 
@@ -158,8 +160,8 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         }
         final AbstractHookEvent.Factory factory = factoriesByName.get(eventName);
         final Event serviceHookEvent = deserializeEvent(body);
-        final String message = serviceHookEvent.getMessage().getText();
-        final String detailedMessage = serviceHookEvent.getDetailedMessage().getText();
+        final String message = serviceHookEvent.getMessage() != null ? serviceHookEvent.getMessage().getText() : "";
+        final String detailedMessage = serviceHookEvent.getDetailedMessage() != null ? serviceHookEvent.getDetailedMessage().getText() : "";
         final AbstractHookEvent hookEvent = factory.create();
         return hookEvent.perform(EndpointHelper.MAPPER, serviceHookEvent, message, detailedMessage);
     }
@@ -205,6 +207,17 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
             @StringBodyParameter @Nonnull final String body) {
         // Send telemetry
         TelemetryHelper.sendEvent("team-events-git-push", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+        dispatch(request, response, body);
+    }
+
+    @RequirePOST
+    public void doConnect(
+            final StaplerRequest request,
+            final StaplerResponse response,
+            @StringBodyParameter @Nonnull final String body) {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-events-connect", new TelemetryHelper.PropertyMapBuilder()
                 .build());
         dispatch(request, response, body);
     }

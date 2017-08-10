@@ -11,6 +11,7 @@ import com.microsoft.tfs.core.exceptions.TFSUnauthorizedException;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import hudson.plugins.tfs.model.ConnectionParameters;
 import hudson.plugins.tfs.model.ListOfGitRepositories;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
@@ -28,6 +29,7 @@ import org.kohsuke.stapler.QueryParameter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -38,6 +40,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
     private final String collectionUrl;
     private final String credentialsId;
+    private ConnectionParameters connectionParameters;
 
     @DataBoundConstructor
     public TeamCollectionConfiguration(final String collectionUrl, final String credentialsId) {
@@ -51,6 +54,13 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
     public String getCredentialsId() {
         return credentialsId;
+    }
+
+    public ConnectionParameters getConnectionParameters() {
+        if (connectionParameters == null) {
+            connectionParameters = new ConnectionParameters();
+        }
+        return connectionParameters;
     }
 
     @Override
@@ -256,5 +266,31 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
                 "add a Team Project Collection with a Collection URL of '%1$s'.";
         final String message = String.format(template, collectionUri);
         throw new IllegalArgumentException(message);
+    }
+
+    public static TeamCollectionConfiguration findCollection(final URI collectionUri) {
+        final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
+        // TODO: consider using a different data structure to speed up this look-up
+        final List<TeamCollectionConfiguration> pairs = config.getCollectionConfigurations();
+        for (final TeamCollectionConfiguration pair : pairs) {
+            final String candidateCollectionUrlString = pair.getCollectionUrl();
+            final URI candidateCollectionUri = URI.create(candidateCollectionUrlString);
+            if (areSameCollectionUri(candidateCollectionUri, collectionUri)) {
+                return pair;
+            }
+        }
+        return null;
+    }
+
+    public static List<TeamCollectionConfiguration> getConnectedCollections() {
+        final List<TeamCollectionConfiguration> connectedCollections = new ArrayList<>();
+        final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
+        final List<TeamCollectionConfiguration> collections = config.getCollectionConfigurations();
+        for (final TeamCollectionConfiguration c : collections) {
+            if (c.getConnectionParameters().isSendJobCompletionEvents() && StringUtils.isNotEmpty(c.getConnectionParameters().getTeamCollectionUrl())) {
+                connectedCollections.add(c);
+            }
+        }
+        return connectedCollections;
     }
 }
