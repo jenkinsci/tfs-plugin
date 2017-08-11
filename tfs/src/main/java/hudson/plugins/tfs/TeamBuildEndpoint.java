@@ -124,7 +124,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     public HttpResponse doIndex(final HttpServletRequest request) throws IOException {
         final Class<? extends TeamBuildEndpoint> me = this.getClass();
         final InputStream stream = me.getResourceAsStream("TeamBuildEndpoint.html");
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.getActiveInstance();
         final String rootUrl = instance.getRootUrl();
         final String commandRows = describeCommands(COMMAND_FACTORIES_BY_NAME, URL_NAME);
         try {
@@ -242,7 +242,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     }
 
     private Job getJob(final String jobName, final StaplerRequest req) {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getActiveInstance();
 
         Job job = jenkins.getItemByFullName(jobName, Job.class);
 

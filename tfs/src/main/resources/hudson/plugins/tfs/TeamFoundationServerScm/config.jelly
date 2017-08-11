@@ -21,6 +21,10 @@
 			<f:checkbox default="true"/>
 		</f:entry>
     
+		<f:entry field="useOverwrite" title="Use overwrite" description="If checked, all changed files in workspace will be overwritten by files from the server.">
+			<f:checkbox default="true"/>
+		</f:entry>
+
 	    <f:entry field="localPath" title="Local workfolder">
 	        <f:textbox default="."
 	             clazz="required" checkMessage="${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}"/>

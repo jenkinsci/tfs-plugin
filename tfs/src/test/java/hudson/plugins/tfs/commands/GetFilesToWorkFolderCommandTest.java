@@ -18,7 +18,7 @@ public class GetFilesToWorkFolderCommandTest extends AbstractCallableCommandTest
         when(vcc.queryWorkspace(
                 isA(String.class),
                 isA(String.class))).thenReturn(null);
-        final GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, "c:/jenkins/jobs/newJob/workspace", "C618");
+        final GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, "c:/jenkins/jobs/newJob/workspace", "C618", false);
         final Callable<Void, Exception> callable = command.getCallable();
 
         callable.call();
@@ -33,7 +33,7 @@ public class GetFilesToWorkFolderCommandTest extends AbstractCallableCommandTest
         final GetEvent getEvent = mock(GetEvent.class);
         final String pathToFile = "C:\\.jenkins\\jobs\\typical\\workspace\\TODO.txt";
         when(getEvent.getTargetLocalItem()).thenReturn(pathToFile);
-        final GetFilesToWorkFolderCommand cut = new GetFilesToWorkFolderCommand(server, null, null, true);
+        final GetFilesToWorkFolderCommand cut = new GetFilesToWorkFolderCommand(server, null, null, false, true);
         cut.setLogger(new PrintStream(this.outputStream));
 
         cut.onGet(getEvent);
@@ -44,6 +44,6 @@ public class GetFilesToWorkFolderCommandTest extends AbstractCallableCommandTest
     }
 
     @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
-        return new GetFilesToWorkFolderCommand(serverConfig, "workFolder", "versionSpec");
+        return new GetFilesToWorkFolderCommand(serverConfig, "workFolder", "versionSpec", false);
     }
 }

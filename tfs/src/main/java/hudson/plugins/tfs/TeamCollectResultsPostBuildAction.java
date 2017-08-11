@@ -19,7 +19,6 @@ import hudson.util.io.ArchiverFactory;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -28,6 +27,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,8 +80,7 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             final String folderName = teamResultType.getFolderName();
             logger.print(" " + teamResultType.getDisplayName());
             final File resultFolder = new File(resultsRoot, folderName);
-            //noinspection ResultOfMethodCallIgnored
-            resultFolder.mkdirs();
+            Files.createDirectories(resultFolder.toPath());
             final String includes = requestedResult.getIncludes();
             final FilePath resultPath = new FilePath(resultFolder);
             final int numCopied = workspace.copyRecursiveTo(includes, resultPath);

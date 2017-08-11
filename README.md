@@ -8,7 +8,7 @@ This plugin integrates [Team Foundation Version Control] (also known as TFVC) an
 
 ## Quick links
 * The legacy [wiki] page on the Jenkins Confluence instance
-* Build status of master and pull requests: [![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/tfs-plugin)](https://jenkins.ci.cloudbees.com/job/plugins/job/tfs-plugin) (thanks to [CloudBees]!)
+* CI build status - [![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/tfs-plugin/master)](https://ci.jenkins.io/job/Plugins/job/tfs-plugin/job/master/)
 * Issues are tracked by the [Jenkins JIRA]
 * Download the latest release [from the Jenkins CDN](http://updates.jenkins-ci.org/latest/tfs.hpi) or [from the GitHub Releases page](https://github.com/jenkinsci/tfs-plugin/releases)
 

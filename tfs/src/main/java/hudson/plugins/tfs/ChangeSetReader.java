@@ -1,14 +1,15 @@
 package hudson.plugins.tfs;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.digester.Digester;
-import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
 import hudson.model.AbstractBuild;
@@ -26,11 +27,8 @@ public class ChangeSetReader extends ChangeLogParser {
 
     @Override
     public ChangeLogSet parse(AbstractBuild build, File changelogFile) throws IOException, SAXException {
-        FileReader reader = new FileReader(changelogFile);
-        try {
+        try (FileInputStream stream = new FileInputStream(changelogFile); Reader reader = new InputStreamReader(stream, Charset.defaultCharset())) {
             return parse(build, reader);
-        } finally {
-            IOUtils.closeQuietly(reader);
         }
     }
 
