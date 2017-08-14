@@ -1,6 +1,5 @@
 package hudson.plugins.tfs.util;
 
-import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.AnnotationHandler;
 import org.kohsuke.stapler.InjectedParameter;
@@ -26,6 +25,10 @@ import java.util.logging.Logger;
 @Documented
 @InjectedParameter(StringBodyParameter.StringBodyHandler.class)
 public @interface StringBodyParameter {
+
+    /**
+     * Webmethod parameter annotation that extracts the body of the request.
+     */
     class StringBodyHandler extends AnnotationHandler<StringBodyParameter> {
 
         private static final Logger LOGGER = Logger.getLogger(StringBodyHandler.class.getName());
@@ -45,8 +48,7 @@ public @interface StringBodyParameter {
             final String characterEncoding = request.getCharacterEncoding();
             try {
                 return IOUtils.toString(request.getInputStream(), characterEncoding);
-            }
-            catch (final IOException e) {
+            } catch (final IOException e) {
                 LOGGER.log(Level.SEVERE, "Unable to obtain request body: {}", e.getMessage());
             }
             return null;

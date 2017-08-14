@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Workaround for missing classes in vso-httpclient-java
+ * Workaround for missing classes in vso-httpclient-java.
  */
 public class WorkItem
     extends WorkItemTrackingResource {

@@ -17,8 +17,14 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A Git push event corresponding to the merge of a pull request on VSTS/TFS.
+ */
 public class GitPullRequestMergedEvent extends GitPushEvent {
 
+    /**
+     * Factory for creating a GitPullRequestMergedEvent.
+     */
     public static class Factory implements AbstractHookEvent.Factory {
 
         @Override

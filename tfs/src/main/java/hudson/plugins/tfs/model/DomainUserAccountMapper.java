@@ -3,9 +3,15 @@ package hudson.plugins.tfs.model;
 import hudson.Extension;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Mapper for Domain User accounts.
+ */
 public class DomainUserAccountMapper extends UserAccountMapper {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor for data binding.
+     */
     @DataBoundConstructor
     public DomainUserAccountMapper() {
 
@@ -16,6 +22,9 @@ public class DomainUserAccountMapper extends UserAccountMapper {
         return input;
     }
 
+    /**
+     * Class descriptor.
+     */
     @Extension
     public static final class DescriptorImpl extends UserAccountMapperDescriptor {
         @Override

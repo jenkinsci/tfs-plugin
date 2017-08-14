@@ -8,6 +8,9 @@ import hudson.Extension;
 import hudson.util.Secret;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Manual credentials configurer.
+ */
 @SuppressFBWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "Maintain compatibility")
 public class ManualCredentialsConfigurer extends CredentialsConfigurer {
     private static final long serialVersionUID = 1L;
@@ -15,6 +18,9 @@ public class ManualCredentialsConfigurer extends CredentialsConfigurer {
     private final transient String userName;
     private final transient Secret password;
 
+    /**
+     * Constructor for data binding.
+     */
     @DataBoundConstructor
     public ManualCredentialsConfigurer(final String userName, final Secret password) {
         this.userName = userName;
@@ -41,6 +47,9 @@ public class ManualCredentialsConfigurer extends CredentialsConfigurer {
         return credentials;
     }
 
+    /**
+     * Class descriptor.
+     */
     @Extension
     public static final class DescriptorImpl extends CredentialsConfigurerDescriptor {
 

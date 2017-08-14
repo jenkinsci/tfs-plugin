@@ -1,13 +1,16 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
+/**
+ * Enum to represent the type of build result (junit tests, cobertura report, etc.).
+ */
 public enum TeamResultType {
     JUNIT("junit", "JUnit"),
     NUNIT("nunit", "NUnit"),
     VS_TEST("vstest", "VSTest"),
     XUNIT("xunit", "XUnit"),
     COBERTURA("cobertura", "Cobertura"),
-    JACOCO("jacoco", "JaCoCo"),
-    ;
+    JACOCO("jacoco", "JaCoCo");
 
     private final String folderName;
     private final String displayName;

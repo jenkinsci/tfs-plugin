@@ -65,8 +65,7 @@ public class WebProxySettings implements Serializable {
             this.proxyUser = proxyConfiguration.getUserName();
             this.noProxyHostPatterns = copyNoProxyHostPatterns(proxyConfiguration.getNoProxyHostPatterns());
             this.proxySecret = Secret.fromString(proxyConfiguration.getEncryptedPassword());
-        }
-        else {
+        } else {
             this.hostName = null;
             this.port = -1;
             this.proxyUser = null;
@@ -100,13 +99,15 @@ public class WebProxySettings implements Serializable {
             } else {
                 proxyHost = null;
             }
-        }
-        else {
+        } else {
             proxyHost = null;
         }
         return proxyHost;
     }
 
+    /**
+     * Convert the host to the proxy information.
+     */
     public Proxy toProxy(final String hostToProxy) {
         final Proxy proxy;
         if (this.hostName != null) {
@@ -126,12 +127,10 @@ public class WebProxySettings implements Serializable {
                     };
                     Authenticator.setDefault(authenticator);
                 }
-            }
-            else {
+            } else {
                 proxy = Proxy.NO_PROXY;
             }
-        }
-        else {
+        } else {
             proxy = Proxy.NO_PROXY;
         }
         return proxy;

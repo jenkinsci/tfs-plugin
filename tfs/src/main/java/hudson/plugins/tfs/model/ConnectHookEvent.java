@@ -8,8 +8,14 @@ import net.sf.json.JSONObject;
 
 import java.net.URI;
 
+/**
+ * This HookEvent is for the TeamEventsEndpoint "Connect" event.
+ */
 public class ConnectHookEvent extends AbstractHookEvent {
 
+    /**
+     * Factory to create ConnectHookEvent.
+     */
     public static class Factory implements AbstractHookEvent.Factory {
         @Override
         public AbstractHookEvent create() {
@@ -18,16 +24,16 @@ public class ConnectHookEvent extends AbstractHookEvent {
 
         @Override
         public String getSampleRequestPayload() {
-            return "{\n" +
-                    "    \"eventType\": \"connect\",\n" +
-                    "    \"resource\":\n" +
-                    "    {\n" +
-                    "        \"teamCollectionUrl\": \"https://xplatalm.visualstudio.com\"\n" +
-                    "        \"connectionKey\": \"MyJenkinsServer\"\n" +
-                    "        \"connectionSignature\": \"ABC13ABC123ABC13ABC123ABC13ABC123\"\n" +
-                    "        \"sendJobCompletionEvents\": true\n" +
-                    "    }\n" +
-                    "}";
+            return "{\n"
+                 + "    \"eventType\": \"connect\",\n"
+                 + "    \"resource\":\n"
+                 + "    {\n"
+                 + "        \"teamCollectionUrl\": \"https://xplatalm.visualstudio.com\"\n"
+                 + "        \"connectionKey\": \"MyJenkinsServer\"\n"
+                 + "        \"connectionSignature\": \"ABC13ABC123ABC13ABC123ABC13ABC123\"\n"
+                 + "        \"sendJobCompletionEvents\": true\n"
+                 + "    }\n"
+                 + "}";
         }
     }
 

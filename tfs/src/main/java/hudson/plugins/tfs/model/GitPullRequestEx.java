@@ -12,6 +12,9 @@ import java.util.Arrays;
 public class GitPullRequestEx extends GitPullRequest {
     private ResourceRef[] workItemRefs;
 
+    /**
+     * Returns the work item references.
+     */
     public ResourceRef[] getWorkItemRefs() {
         if (workItemRefs != null) {
             return Arrays.copyOf(workItemRefs, workItemRefs.length);
@@ -19,6 +22,9 @@ public class GitPullRequestEx extends GitPullRequest {
         return null;
     }
 
+    /**
+     * Sets the work item references.
+     */
     public void setWorkItemRefs(final ResourceRef[] workItemRefs) {
         this.workItemRefs = (workItemRefs != null) ? Arrays.copyOf(workItemRefs, workItemRefs.length) : null;
     }

@@ -29,12 +29,17 @@ import java.util.logging.Logger;
  * Current list of events:
  * - Job Completion event
  */
-public class JenkinsEventNotifier {
-    protected final static Logger log = Logger.getLogger(JenkinsEventNotifier.class.getName());
+public final class JenkinsEventNotifier {
+    private static final Logger log = Logger.getLogger(JenkinsEventNotifier.class.getName());
     private static final String ENCODING = "UTF-8";
 
     /**
-     * Send the Job Completion event to connected TFS/VSTS servers
+     * Hiding the constructor for this Utility class.
+     */
+    private JenkinsEventNotifier() { }
+
+    /**
+     * Send the Job Completion event to connected TFS/VSTS servers.
      */
     public static void sendJobCompletionEvent(final JSONObject payload) {
         final List<TeamCollectionConfiguration> connectedCollections = TeamCollectionConfiguration.getConnectedCollections();

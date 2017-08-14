@@ -17,7 +17,6 @@ import java.util.logging.Logger;
  */
 @Extension
 public class JenkinsRunListener extends RunListener<Run> {
-
     protected static final Logger log = Logger.getLogger(JenkinsRunListener.class.getName());
 
     public JenkinsRunListener() {
@@ -37,7 +36,8 @@ public class JenkinsRunListener extends RunListener<Run> {
     }
 
     @Override
-    public void onCompleted(final Run run, final @Nonnull TaskListener listener) {
+    public void onCompleted(final Run run, @Nonnull final TaskListener listener) {
+        log.info("onCompleted: " + run.toString());
         final String payload = JenkinsEventNotifier.getApiJson(run.getUrl());
         final JSONObject json = JSONObject.fromObject(payload);
         json.put("name", run.getParent().getDisplayName());

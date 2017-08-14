@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 public class PullRequestMergeCommitCreatedEventArgs extends GitCodePushedEventArgs {
