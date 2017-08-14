@@ -48,12 +48,10 @@ public class JenkinsRunListener extends RunListener<Run> {
 
     private String getStartedBy(final Run run) {
         final Cause.UserIdCause cause = (Cause.UserIdCause) run.getCause(Cause.UserIdCause.class);
-        final String startedBy;
-        if (cause != null) {
+        String startedBy = "";
+        if (cause != null && cause.getUserId() != null) {
             startedBy = cause.getUserId();
-        } else {
-            startedBy = null;
         }
-        return startedBy == null ? "" : startedBy;
+        return startedBy;
     }
 }

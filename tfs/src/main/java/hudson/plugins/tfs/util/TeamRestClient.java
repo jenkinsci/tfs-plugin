@@ -309,7 +309,7 @@ public class TeamRestClient {
 
     public void sendJobCompletionEvent(final JobCompletionEventArgs args) throws IOException {
         final QueryString qs = new QueryString(
-                API_VERSION, "3.0-preview.1",
+                API_VERSION, "3.2",
                 "publisherId", "jenkins",
                 "channelId", args.getServerKey());
 

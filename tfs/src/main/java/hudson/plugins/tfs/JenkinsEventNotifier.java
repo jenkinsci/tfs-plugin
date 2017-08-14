@@ -40,19 +40,16 @@ public class JenkinsEventNotifier {
             try {
                 // Check to see if there are any collections "connected" to this Jenkins server
                 final ConnectionParameters connectionParameters = c.getConnectionParameters();
-                if (connectionParameters == null || !connectionParameters.isSendJobCompletionEvents()) {
-                    // This server isn't accepting events
-                    continue;
-                }
                 final TeamRestClient client = new TeamRestClient(URI.create(c.getCollectionUrl()));
                 payload.put("server", connectionParameters.getConnectionKey());
                 final String jsonPayload = payload.toString();
                 final JobCompletionEventArgs args = new JobCompletionEventArgs(
-                        connectionParameters.getConnectionKey(), jsonPayload,
+                        connectionParameters.getConnectionKey(),
+                        jsonPayload,
                         getPayloadSignature(connectionParameters, jsonPayload));
                 client.sendJobCompletionEvent(args);
             } catch (final Exception e) {
-                log.info("ERROR: sendJobCompletionEvent: (collection=" + c.getCollectionUrl() + ") " + e.getMessage());
+                log.warning("ERROR: sendJobCompletionEvent: (collection=" + c.getCollectionUrl() + ") " + e.getMessage());
             }
         }
     }
@@ -85,20 +82,22 @@ public class JenkinsEventNotifier {
             }
             return result.toString();
         } catch (final IOException e) {
-            log.info("ERROR: getApiJson: (url=" + url + ") " + e.getMessage());
+            log.warning("ERROR: getApiJson: (url=" + url + ") " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
     private static String urlCombine(final String url, final String... parts) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(url);
-        for(final String s : parts) {
-            if (StringUtils.isNotBlank(s)) {
-                if (sb.charAt(sb.length() - 1) != '/') {
-                    sb.append("/");
+        if (url != null) {
+            sb.append(url);
+            for (final String s : parts) {
+                if (StringUtils.isNotBlank(s)) {
+                    if (sb.length() > 0 && sb.charAt(sb.length() - 1) != '/') {
+                        sb.append("/");
+                    }
+                    sb.append(s);
                 }
-                sb.append(s);
             }
         }
         return sb.toString();
