@@ -17,6 +17,7 @@ import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.jni.helpers.LocalHost;
 import com.microsoft.tfs.util.Closable;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
@@ -26,6 +27,7 @@ import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import jenkins.security.MasterToSlaveCallable;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -158,7 +160,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         if (jenkins == null) {
             if (channel != null) {
                 try {
-                    result = channel.call(new Callable<TeamPluginGlobalConfig, Throwable>() {
+                    result = channel.call(new MasterToSlaveCallable<TeamPluginGlobalConfig, Throwable>() {
                         @Override
                         public TeamPluginGlobalConfig call() throws Throwable {
                             final Jenkins jenkins = Jenkins.getInstance();
@@ -187,7 +189,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         if (jenkins == null) {
             if (channel != null) {
                 try {
-                    proxyConfiguration = channel.call(new Callable<ProxyConfiguration, Throwable>() {
+                    proxyConfiguration = channel.call(new MasterToSlaveCallable<ProxyConfiguration, Throwable>() {
                         public ProxyConfiguration call() throws Throwable {
                             final Jenkins jenkins = Jenkins.getInstance();
                             final ProxyConfiguration result = jenkins != null ? jenkins.proxy : null;
@@ -222,6 +224,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         return workspaces;
     }
 
+    @SuppressFBWarnings(value = { "DC_DOUBLECHECK", "IS2_INCONSISTENT_SYNC"}, justification = "Only synchronize if not null")
     public MockableVersionControlClient getVersionControlClient() {
         if (mockableVcc == null) {
             synchronized (this) {

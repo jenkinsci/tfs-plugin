@@ -91,7 +91,12 @@ public class TeamFoundationServerScm extends SCM {
     private String userName;
     private CredentialsConfigurer credentialsConfigurer;
     private boolean useUpdate;
+
     private boolean showWorkspaceInBuildLog;
+
+    private boolean useOverwrite;
+
+
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
@@ -179,9 +184,18 @@ public class TeamFoundationServerScm extends SCM {
         this.useUpdate = useUpdate;
     }
 
+
     @DataBoundSetter
     public void setShowWorkspaceInBuildLog(final boolean showWorkspaceInBuildLog) {
         this.showWorkspaceInBuildLog = showWorkspaceInBuildLog;
+    }
+    public boolean isUseOverwrite() {
+        return useOverwrite;
+    }
+
+    @DataBoundSetter
+    public void setUseOverwrite(final boolean useOverwrite) {
+        this.useOverwrite = useOverwrite;
     }
 
     public String getUserPassword() {
@@ -316,7 +330,7 @@ public class TeamFoundationServerScm extends SCM {
             final Project project = server.getProject(projectPath);
             final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
 
-            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate());
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
             List<ChangeSet> list;
             if (StringUtils.isNotEmpty(singleVersionSpec)) {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
@@ -399,8 +413,8 @@ public class TeamFoundationServerScm extends SCM {
 
     @Override
     public boolean processWorkspaceBeforeDeletion(AbstractProject<?, ?> project, FilePath workspace, Node node) throws IOException, InterruptedException {
-        Run<?,?> lastRun = project.getLastBuild();
-        if ((lastRun == null) || !(lastRun instanceof AbstractBuild<?, ?>)) {
+        AbstractBuild<?, ?> lastRun = project.getLastBuild();
+        if (lastRun == null) {
             return true;
         }
 
@@ -408,7 +422,7 @@ public class TeamFoundationServerScm extends SCM {
         // Therefore we try to work around the problem, and see if its only built on one node or not. 
         if (node == null) {
             while (lastRun != null) {
-                AbstractBuild<?,?> build = (AbstractBuild<?, ?>) lastRun;
+                AbstractBuild<?,?> build = lastRun;
                 Node buildNode = build.getBuiltOn();
                 if (node == null) {
                     node = buildNode;
@@ -497,6 +511,21 @@ public class TeamFoundationServerScm extends SCM {
     @Override
     public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
         super.buildEnvVars(build, env);
+
+        final TeamBuildDetailsAction buildDetailsAction = build.getAction(TeamBuildDetailsAction.class);
+        if (buildDetailsAction != null) {
+            //Add the TFS build variables as environment variables in the Jenkins environment
+            //https://www.visualstudio.com/en-us/docs/build/define/variables
+            for (Map.Entry<String, String> entry : buildDetailsAction.buildVariables.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if (value != null) {
+                    //Replace . with _ and ensure they're UPPERCASE to match Team Services pattern
+                    env.put(key.replace('.', '_').toUpperCase(), value);
+                }
+            }
+        }
+
         if (normalizedWorkspaceName != null) {
             env.put(WORKSPACE_ENV_STR, normalizedWorkspaceName);
         }
@@ -528,6 +557,7 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern WORKSPACE_NAME_REGEX = Pattern.compile("[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         public static final Pattern CLOAKED_PATHS_REGEX = Pattern.compile("\\s*\\$[^\\n;]+(\\s*[\\n]\\s*\\$[^\\n;]+){0,}\\s*", Pattern.CASE_INSENSITIVE);
+
         private transient String tfExecutable;
 
         public DescriptorImpl() {

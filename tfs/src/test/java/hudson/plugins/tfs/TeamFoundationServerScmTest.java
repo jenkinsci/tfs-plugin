@@ -72,6 +72,7 @@ public class TeamFoundationServerScmTest {
                             "  <credentialsConfigurer class=\"hudson.plugins.tfs.model.ManualCredentialsConfigurer\"/>\n" +
                             "  <useUpdate>false</useUpdate>\n" +
                             "  <showWorkspaceInBuildLog>false</showWorkspaceInBuildLog>\n" +
+                            "  <useOverwrite>false</useOverwrite>\n" +
                             "</hudson.plugins.tfs.TeamFoundationServerScm>";
 
             final String actualUpgradedXml = serializer.toXML(tfsScmObject);
@@ -275,7 +276,35 @@ public class TeamFoundationServerScmTest {
                 moduleRoot.exists());
         assertEquals("The module root was not the same as workspace", moduleRoot.lastModified(), workspace.lastModified());
     }
-    
+
+    @Test
+    public void assertTeamServicesBuildVariablesAreAddedToEnvVars() throws Exception {
+        //Add a couple of variables that will be present during a TFS/Team Services build
+        Map<String, String> buildVariables = new HashMap<String, String>();
+        buildVariables.put("System.DefaultWorkingDirectory", "C:\\build-agent\\_work\\1\\s");
+        buildVariables.put("Build.Repository.Git.SubmoduleCheckout", "false");
+        //These three are needed to create the action's buildUrl
+        buildVariables.put("System.TeamFoundationCollectionUri", "https://RESOLVED.com");
+        buildVariables.put("System.TeamProject", "TEAM_PROJECT");
+        buildVariables.put("Build.BuildId", "42");
+        TeamBuildDetailsAction action = new TeamBuildDetailsAction(buildVariables);
+
+        AbstractBuild build = mock(AbstractBuild.class);
+        when(build.getAction(TeamBuildDetailsAction.class)).thenReturn(action);
+        TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "WORKSPACE_SAMPLE");
+        AbstractProject project = mock(AbstractProject.class);
+        when(build.getProject()).thenReturn(project);
+        Map<String, String> env = new HashMap<String, String>();
+        scm.buildEnvVars(build, env);
+
+        //Ensure . is replaced with _, keys are UPPERCASE
+        assertEquals("The key or value for System.DefaultWorkingDirectory was incorrect", "C:\\build-agent\\_work\\1\\s", env.get("SYSTEM_DEFAULTWORKINGDIRECTORY"));
+        assertEquals("The key or value for Build.Repository.Git.SubmoduleCheckout was incorrect", "false", env.get("BUILD_REPOSITORY_GIT_SUBMODULECHECKOUT"));
+        assertEquals("The key or value for System.TeamFoundationCollectionUri was incorrect", "https://RESOLVED.com", env.get("SYSTEM_TEAMFOUNDATIONCOLLECTIONURI"));
+        assertEquals("The key or value for System.TeamProject was incorrect", "TEAM_PROJECT", env.get("SYSTEM_TEAMPROJECT"));
+        assertEquals("The key or value for Build.BuildId was incorrect", "42", env.get("BUILD_BUILDID"));
+    }
+
     @Test
     public void assertWorkspaceNameIsAddedToEnvVars() throws Exception {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "WORKSPACE_SAMPLE");

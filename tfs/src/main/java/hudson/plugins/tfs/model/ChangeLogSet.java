@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.AbstractBuild;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
  * 
  * @author Erik Ramfelt
  */
+@SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS", justification = "Public so shouldn't be changed")
 public class ChangeLogSet extends hudson.scm.ChangeLogSet<ChangeSet> {
 
     private final List<ChangeSet> changesets;

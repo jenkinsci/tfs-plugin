@@ -4,6 +4,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.microsoft.tfs.core.httpclient.HttpClient;
 import com.microsoft.tfs.util.StringUtil;
 import com.microsoft.visualstudio.services.webapi.patch.Operation;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
@@ -48,7 +49,7 @@ public class TeamRestClient {
         final String hostName = collectionUri.getHost();
         this.server = Server.create(null, null, collectionUri.toString(), credentials, null, null);
         isTeamServices = TeamCollectionConfiguration.isTeamServices(hostName);
-        if (isTeamServices & credentials != null) {
+        if (isTeamServices && credentials != null) {
             authorization = createAuthorization(credentials);
         }
         else {
@@ -152,6 +153,7 @@ public class TeamRestClient {
         return stringResult;
     }
 
+    @SuppressFBWarnings(value = "DM_DEFAULT_ENCODING", justification = "Better mot modify charset in case it might raise errors")
     static String readResponseText(final InputStream inputStream) throws IOException {
         final InputStreamReader isr = new InputStreamReader(inputStream);
         final BufferedReader reader = new BufferedReader(isr);

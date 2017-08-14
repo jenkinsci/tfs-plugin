@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:entry field="serverUrl" title="Collection URL" description="The URL to the team project collection">
         <f:combobox clazz="required" checkMessage="${%Collection URL is mandatory.}"/>
@@ -20,6 +21,10 @@
 			<f:checkbox default="true"/>
 		</f:entry>
     
+		<f:entry field="useOverwrite" title="Use overwrite" description="If checked, all changed files in workspace will be overwritten by files from the server.">
+			<f:checkbox default="true"/>
+		</f:entry>
+
 	    <f:entry field="localPath" title="Local workfolder">
 	        <f:textbox default="."
 	             clazz="required" checkMessage="${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}"/>

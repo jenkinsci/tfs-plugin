@@ -69,10 +69,10 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
     	when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
     	
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
-    	verify(project).getFiles(isA(String.class), eq(MY_LABEL));
+    	verify(project).getFiles(isA(String.class), eq(MY_LABEL), eq(false));
     	verify(workspaces).deleteWorkspace(workspace);    	
     }
     
@@ -84,10 +84,10 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
-        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
+        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
         verify(workspaces).deleteWorkspace(workspace);
     }
 
@@ -98,10 +98,10 @@ public class CheckoutActionTest {
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
-        verify(project).getFiles(isA(String.class), eq(MY_LABEL));
+        verify(project).getFiles(isA(String.class), eq(MY_LABEL), eq(false));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
 
@@ -112,10 +112,10 @@ public class CheckoutActionTest {
     	when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
     	
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
     	
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
-    	verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
+    	verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
     	verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
     
@@ -126,9 +126,9 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
-        verify(project).getFiles(isA(String.class), eq(MY_LABEL));
+        verify(project).getFiles(isA(String.class), eq(MY_LABEL), eq(false));
         verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
@@ -140,9 +140,9 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
-        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
+        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
         verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
@@ -155,10 +155,10 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
-        verify(project).getFiles(isA(String.class), eq(MY_LABEL));
+        verify(project).getFiles(isA(String.class), eq(MY_LABEL), eq(false));
         verify(workspaces).deleteWorkspace(workspace);
     }
 
@@ -170,10 +170,10 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
         verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
-        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
+        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
         verify(workspaces).deleteWorkspace(workspace);
     }
    
@@ -184,7 +184,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(project, never()).getDetailedHistory(isA(Calendar.class), isA(Calendar.class));
     }
@@ -196,7 +196,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(project, never()).getDetailedHistory(isA(Calendar.class), isA(Calendar.class));
     }
@@ -210,7 +210,7 @@ public class CheckoutActionTest {
         when(workspace.getComputer()).thenReturn("LocalComputer");
         when(project.getDetailedHistory(isA(String.class))).thenReturn(list);
         
-        CheckoutAction action = new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true);
+        CheckoutAction action = new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false);
         List<ChangeSet> actualList = action.checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
@@ -224,16 +224,16 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
-        
-        CheckoutAction action = new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true);
+        when(project.getDetailedHistoryWithoutCloakedPaths(isA(VersionSpec.class), isA(VersionSpec.class), anyCollection())).thenReturn(list);
+
+        CheckoutAction action = new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false);
         final Calendar startDate = Util.getCalendar(2008, 9, 24);
         final Calendar endDate = Util.getCalendar(2008, 10, 24);
         List<ChangeSet> actualList = action.checkout(server, hudsonWs, startDate, endDate);
-        assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
+        assertEquals("The list from the detailed history, was not the same as returned from checkout", list, actualList);
         
         final DateVersionSpec startDateVersionSpec = new DateVersionSpec(startDate);
-        verify(project).getVCCHistory(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(true), anyInt());
+        verify(project).getDetailedHistoryWithoutCloakedPaths(argThat(new DateVersionSpecMatcher(startDateVersionSpec)), isA(VersionSpec.class), eq(EMPTY_CLOAKED_PATHS_LIST));
     }
     
     @Test
@@ -247,7 +247,7 @@ public class CheckoutActionTest {
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, "tfs-ws", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, "tfs-ws", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The local TFS folder was not cleaned", 0, tfsWs.list((FileFilter)null).size());
@@ -265,7 +265,7 @@ public class CheckoutActionTest {
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, "tfs-ws", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, "tfs-ws", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The local TFS folder was not cleaned", 0, tfsWs.list((FileFilter)null).size());
@@ -283,7 +283,7 @@ public class CheckoutActionTest {
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, "tfs-ws", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, "tfs-ws", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
         assertTrue("The local folder was removed", tfsWs.exists());
         assertEquals("The TFS workspace path was cleaned", 1, hudsonWs.list((FileFilter)null).size());
@@ -298,7 +298,7 @@ public class CheckoutActionTest {
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -318,7 +318,7 @@ public class CheckoutActionTest {
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -336,7 +336,7 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -352,7 +352,7 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -369,7 +369,7 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         when(project.getProjectPath()).thenReturn("project");
 
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -386,7 +386,7 @@ public class CheckoutActionTest {
         when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
         when(project.getProjectPath()).thenReturn("project");
 
-        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
+        new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
@@ -403,22 +403,21 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(workspace.getComputer()).thenReturn("LocalComputer");
-        when(project.getVCCHistory(isA(VersionSpec.class), isA(VersionSpec.class), anyBoolean(), anyInt())).thenReturn(list);
+        when(project.getDetailedHistoryWithoutCloakedPaths(isA(VersionSpec.class), isA(VersionSpec.class), anyCollection())).thenReturn(list);
         
-        CheckoutAction action = new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true);
+        CheckoutAction action = new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, ".", true, false);
         final Calendar startDate = Util.getCalendar(2008, 9, 24);
         final Calendar endDate = Util.getCalendar(2009, 9, 24);
         List<ChangeSet> actualList = action.checkout(server, hudsonWs, startDate, endDate);
-        assertSame("The list from the detailed history, was not the same as returned from checkout", list, actualList);
+        assertEquals("The list from the detailed history, was not the same as returned from checkout", list, actualList);
 
         final DateVersionSpec startDateVersionSpec = new DateVersionSpec(startDate);
         final DateVersionSpec endDateVersionSpec = new DateVersionSpec(endDate);
-        verify(project).getVCCHistory(
+        verify(project).getDetailedHistoryWithoutCloakedPaths(
                 argThat(new DateVersionSpecMatcher(startDateVersionSpec)),
                 argThat(new DateVersionSpecMatcher(endDateVersionSpec)),
-                eq(true),
-                anyInt());
-        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"));
+                eq(EMPTY_CLOAKED_PATHS_LIST));
+        verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
     }
 
     private static class DateVersionSpecMatcher extends CustomMatcher<DateVersionSpec> {

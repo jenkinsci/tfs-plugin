@@ -17,6 +17,7 @@ import hudson.util.StreamTaskListener;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import org.apache.commons.jelly.XMLOutput;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
@@ -119,13 +120,15 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
             boolean shouldSchedule = bypassPolling;
             String changesDetected = "";
             if (!bypassPolling) {
-                if (runPolling()) {
+                // pipeline jobs might have runPolling() returned as false, while still should be scheduled.
+                // we should schedule them as long as they are associated with a valid commit.
+                if (runPolling() || StringUtils.isNotBlank(gitCodePushedEventArgs.commit)) {
                     changesDetected = "SCM changes detected in " + job.getFullDisplayName() + ". ";
                     shouldSchedule = true;
                 }
             }
             else {
-                changesDetected = "Polling bypassed for " + job.getFullDisplayName() + ". ";;
+                changesDetected = "Polling bypassed for " + job.getFullDisplayName() + ". ";
             }
             if (shouldSchedule) {
                 final SCMTriggerItem p = job();

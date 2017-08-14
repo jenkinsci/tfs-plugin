@@ -12,6 +12,7 @@ import hudson.plugins.tfs.model.BuildCommand;
 import hudson.plugins.tfs.model.BuildWithParametersCommand;
 import hudson.plugins.tfs.model.PingCommand;
 import hudson.plugins.tfs.model.TeamBuildPayload;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import jenkins.model.Jenkins;
@@ -123,7 +124,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     public HttpResponse doIndex(final HttpServletRequest request) throws IOException {
         final Class<? extends TeamBuildEndpoint> me = this.getClass();
         final InputStream stream = me.getResourceAsStream("TeamBuildEndpoint.html");
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.getActiveInstance();
         final String rootUrl = instance.getRootUrl();
         final String commandRows = describeCommands(COMMAND_FACTORIES_BY_NAME, URL_NAME);
         try {
@@ -241,7 +242,7 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
     }
 
     private Job getJob(final String jobName, final StaplerRequest req) {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getActiveInstance();
 
         Job job = jenkins.getItemByFullName(jobName, Job.class);
 
@@ -325,6 +326,10 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final StaplerResponse response,
             @QueryParameter final TimeDuration delay
     ) throws IOException {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-build", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+
         dispatch(request, response, delay);
     }
 
@@ -333,6 +338,10 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
             final StaplerResponse response,
             @QueryParameter final TimeDuration delay
     ) throws IOException {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-build-parameters", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+
         dispatch(request, response, delay);
     }
 

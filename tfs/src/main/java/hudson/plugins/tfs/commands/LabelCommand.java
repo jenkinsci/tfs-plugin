@@ -19,7 +19,7 @@ import java.io.PrintStream;
  * Command to create a label on TFS.
  * @author Rodrigo Lopes (rodrigolopes)
  */
-public class LabelCommand extends AbstractCallableCommand implements Callable<Void, Exception> {
+public class LabelCommand extends AbstractCallableCommand<Void, Exception> {
 
     private static final String CreatingTemplate = "Creating label '%s' on '%s' as of the current version in workspace '%s'...";
     private static final String CreatedTemplate = "Created label '%s'.";
