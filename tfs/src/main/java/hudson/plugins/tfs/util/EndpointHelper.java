@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.util;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;

@@ -1,7 +1,7 @@
 package hudson.plugins.tfs.model.servicehooks;
 
 /**
- * Provides different formats of an event message
+ * Provides different formats of an event message.
  */
 public class FormattedEventMessage {
     private String text;

@@ -1,11 +1,18 @@
 package hudson.plugins.tfs.model;
 
+/**
+ * These parameters are stored and modified from outside Jenkins through the TeamEventsEndpoint "connect" event.
+ * An instance of this class is owned by every TeamCollectionConfiguration instance.
+ */
 public class ConnectionParameters {
     private String teamCollectionUrl;
     private String connectionKey;
     private String connectionSignature;
     private boolean sendJobCompletionEvents;
 
+    /**
+     * Constructor.
+     */
     public ConnectionParameters() {
     }
 

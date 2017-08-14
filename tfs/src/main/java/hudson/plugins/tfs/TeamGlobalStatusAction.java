@@ -13,6 +13,9 @@ import java.util.List;
  */
 public class TeamGlobalStatusAction extends InvisibleAction implements Serializable {
 
+    /**
+     * Add the passed in actions if EnableTeamStatusForAllJobs is configured.
+     */
     public static void addIfApplicable(final List<Action> actions) {
         final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
         if (config.isEnableTeamStatusForAllJobs()) {
@@ -20,6 +23,9 @@ public class TeamGlobalStatusAction extends InvisibleAction implements Serializa
         }
     }
 
+    /**
+     * Returns true if the run already contains a TeamGlobalStatusAction.
+     */
     public static boolean isApplicable(final Run<?, ?> run) {
         final TeamGlobalStatusAction action = run.getAction(TeamGlobalStatusAction.class);
         return action != null;

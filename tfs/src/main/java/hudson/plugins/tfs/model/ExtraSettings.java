@@ -24,6 +24,10 @@ public class ExtraSettings implements Serializable {
     private ExtraSettings() {
     }
 
+    /**
+     * Construtor.
+     * @param teamPluginGlobalConfig
+     */
     public ExtraSettings(final TeamPluginGlobalConfig teamPluginGlobalConfig) {
         if (teamPluginGlobalConfig != null) {
             this.configFolderPerNode = teamPluginGlobalConfig.isConfigFolderPerNode();
@@ -35,8 +39,7 @@ public class ExtraSettings implements Serializable {
                     this.nodeComputerName = currentComputer.getName();
                 }
             }
-        }
-        else {
+        } else {
             this.configFolderPerNode = false;
             this.nodeComputerName = null;
         }

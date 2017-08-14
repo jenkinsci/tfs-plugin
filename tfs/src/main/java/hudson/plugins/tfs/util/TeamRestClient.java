@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.util;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
