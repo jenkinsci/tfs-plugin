@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 @Extension
 public class JenkinsRunListener extends RunListener<Run> {
 
-    protected static Logger log = Logger.getLogger(JenkinsRunListener.class.getName());
+    protected static final Logger log = Logger.getLogger(JenkinsRunListener.class.getName());
 
     public JenkinsRunListener() {
         log.fine("JenkinsRunListener: constructor");

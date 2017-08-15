@@ -16,6 +16,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +31,7 @@ import java.util.logging.Logger;
  */
 public class JenkinsEventNotifier {
     protected final static Logger log = Logger.getLogger(JenkinsEventNotifier.class.getName());
+    private static final String ENCODING = "UTF-8";
 
     /**
      * Send the Job Completion event to connected TFS/VSTS servers
@@ -61,7 +63,11 @@ public class JenkinsEventNotifier {
      */
     public static String getApiJson(final String url) {
         try {
-            final String rootUrl = Jenkins.getInstance().getRootUrl();
+            Jenkins jenkins = Jenkins.getInstance();
+            if (jenkins == null) {
+                return "";
+            }
+            final String rootUrl = jenkins.getRootUrl();
             final String fullUrl = urlCombine(rootUrl, url, "api", "json");
             final HttpClient client = HttpClientBuilder.create().build();
             final HttpGet request = new HttpGet(fullUrl);
@@ -71,16 +77,17 @@ public class JenkinsEventNotifier {
 
             final HttpResponse response = client.execute(request);
 
-            final BufferedReader rd = new BufferedReader(
-                    new InputStreamReader(response.getEntity().getContent()));
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(response.getEntity().getContent(), ENCODING))) {
 
-            final StringBuilder result = new StringBuilder();
-            String line;
-            while ((line = rd.readLine()) != null) {
-                result.append(line);
-                result.append("\n");
+                final StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                    result.append("\n");
+                }
+                return result.toString();
             }
-            return result.toString();
         } catch (final IOException e) {
             log.warning("ERROR: getApiJson: (url=" + url + ") " + e.getMessage());
             throw new RuntimeException(e);
@@ -104,12 +111,12 @@ public class JenkinsEventNotifier {
     }
 
     private static String getPayloadSignature(final ConnectionParameters connectionParameters, final String payload)
-            throws NoSuchAlgorithmException, InvalidKeyException {
+            throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
         final String key = connectionParameters.getConnectionSignature();
-        final SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(), "HmacSHA1");
+        final SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(ENCODING), "HmacSHA1");
         final Mac mac = Mac.getInstance("HmacSHA1");
         mac.init(signingKey);
-        return toHexString(mac.doFinal(payload.getBytes()));
+        return toHexString(mac.doFinal(payload.getBytes(ENCODING)));
     }
 
     private static String toHexString(final byte[] bytes) {
