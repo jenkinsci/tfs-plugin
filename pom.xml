@@ -9,7 +9,7 @@
   <artifactId>tfs-parent</artifactId>
   <packaging>pom</packaging>
   <name>Team Foundation Server Plug-in parent</name>
-  <version>5.3.5-SNAPSHOT</version>
+  <version>5.121.0</version>
   <properties>
     <jenkins.version>1.625.1</jenkins.version>
     <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
@@ -49,7 +49,7 @@
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/tfs-plugin.git</connection>
     <developerConnection>scm:git:https://github.com/jenkinsci/tfs-plugin.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>tfs-5.121.0</tag>
   </scm>
 
   <distributionManagement>
