@@ -47,8 +47,8 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:ssh://github.com/jenkinsci/tfs-plugin.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/tfs-plugin.git</developerConnection>
+    <connection>scm:git:https://github.com/jenkinsci/tfs-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/jenkinsci/tfs-plugin.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
