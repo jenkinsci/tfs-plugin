@@ -40,6 +40,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 
 public abstract class AbstractHookEvent {
 
@@ -117,18 +118,26 @@ public abstract class AbstractHookEvent {
                 }
 
                 boolean shouldRun = false;
-                FlowDefinition jobDef = ((WorkflowJob)job).getDefinition();
-                if (jobDef instanceof CpsScmFlowDefinition)
+                
+                if (job instanceof WorkflowJob)
                 {
-                    GitSCM jobSCM = (GitSCM)((CpsScmFlowDefinition) jobDef).getScm();
-                    final URIish uri = gitCodePushedEventArgs.getRepoURIish();
-                            
-                    for (final UserRemoteConfig remoteConfig : jobSCM.getUserRemoteConfigs()) {
-                        String jobRepoUrl = remoteConfig.getUrl();
+                    final FlowDefinition jobDef = ((WorkflowJob)job).getDefinition();
+                    if (jobDef instanceof CpsScmFlowDefinition)
+                    {
+                        final SCM jobSCM = ((CpsScmFlowDefinition) jobDef).getScm();
+                        if (jobSCM instanceof GitSCM)
+                        {
+                            final GitSCM gitJobSCM = (GitSCM)jobSCM;
+                            final URIish uri = gitCodePushedEventArgs.getRepoURIish();
 
-                        if (jobRepoUrl.equals(uri.toString())) {
-                            shouldRun = true;
-                            break;
+                            for (final UserRemoteConfig remoteConfig : gitJobSCM.getUserRemoteConfigs()) {
+                                final String jobRepoUrl = remoteConfig.getUrl();
+                                
+                                if (StringUtils.equals(jobRepoUrl, uri.toString())) {
+                                    shouldRun = true;
+                                    break;
+                                }
+                            }                            
                         }
                     }
                 }
