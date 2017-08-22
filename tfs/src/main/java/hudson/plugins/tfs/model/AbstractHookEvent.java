@@ -10,6 +10,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
+import hudson.plugins.git.UserRemoteConfig;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamGlobalStatusAction;
@@ -31,12 +32,16 @@ import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
+import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 
 public abstract class AbstractHookEvent {
 
@@ -86,8 +91,8 @@ public abstract class AbstractHookEvent {
         if (!(project instanceof AbstractProject && ((AbstractProject) project).isDisabled())) {
             if (project instanceof Job) {
                 final Job job = (Job) project;
-                final int quietPeriod = scmTriggerItem.getQuietPeriod();                
-                
+                final int quietPeriod = scmTriggerItem.getQuietPeriod();
+
                 final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
                 final SCMTrigger scmTrigger = TeamEventsEndpoint.findTrigger(job, SCMTrigger.class);                
                 if (config.isEnableTeamPushTriggerForAllJobs()) {
@@ -113,7 +118,35 @@ public abstract class AbstractHookEvent {
                     return new TeamEventsEndpoint.ScheduledResponseContributor(project);
                 }
 
-                final TeamPushTrigger pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPushTrigger.class);
+                boolean shouldRun = false;
+                
+                if (job instanceof WorkflowJob)
+                {
+                    final FlowDefinition jobDef = ((WorkflowJob)job).getDefinition();
+                    if (jobDef instanceof CpsScmFlowDefinition)
+                    {
+                        final SCM jobSCM = ((CpsScmFlowDefinition) jobDef).getScm();
+                        if (jobSCM instanceof GitSCM)
+                        {
+                            final GitSCM gitJobSCM = (GitSCM)jobSCM;
+                            final URIish uri = gitCodePushedEventArgs.getRepoURIish();
+
+                            for (final UserRemoteConfig remoteConfig : gitJobSCM.getUserRemoteConfigs()) {
+                                final String jobRepoUrl = remoteConfig.getUrl();
+                                
+                                if (StringUtils.equals(jobRepoUrl, uri.toString())) {
+                                    shouldRun = true;
+                                    break;
+                                }
+                            }                            
+                        }
+                    }
+                }
+                
+                TeamPushTrigger pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPushTrigger.class);               
+                if (shouldRun && pushTrigger == null)
+                    pushTrigger = new TeamPushTrigger(job);                            
+
                 if (pushTrigger != null) {
                     pushTrigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
                     if (bypassPolling) {
@@ -167,8 +200,8 @@ public abstract class AbstractHookEvent {
                         result.add(triggerResult);
                     }
                     continue;
-                }                
-                
+                }
+
                 for (final SCM scm : scmTriggerItem.getSCMs()) {
                     if (!(scm instanceof GitSCM)) {
                         continue;

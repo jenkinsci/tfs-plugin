@@ -206,6 +206,18 @@
       <version>1.25</version>
     </dependency>
     <dependency>
+      <!-- Used for configuring collections globally -->
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-job</artifactId>
+      <version>2.10</version>
+    </dependency>
+    <dependency>
+      <!-- Used for configuring collections globally -->
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-cps</artifactId>
+      <version>2.30</version>
+    </dependency>
+    <dependency>
       <!-- Used for augmenting Git-related activities, like commit status -->
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>git</artifactId>
