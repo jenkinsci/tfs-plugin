@@ -13,9 +13,12 @@ import com.microsoft.tfs.core.clients.webservices.TeamFoundationIdentity;
 import hudson.model.User;
 import hudson.tasks.Mailer;
 
+/**
+ * Finds user information via the UserAccountMappers that it knows about.
+ */
 public class TfsUserLookup implements UserLookup {
 
-    private static final Logger LOGGER = Logger.getLogger(TfsUserLookup.class.getName());
+    private static final Logger logger = Logger.getLogger(TfsUserLookup.class.getName());
 
     private final IIdentityManagementService ims;
     private final UserAccountMapper userAccountMapper;
@@ -26,15 +29,16 @@ public class TfsUserLookup implements UserLookup {
     }
 
     /**
+     * Finds the User instance for the account name provided.
      * @param accountName Windows NT account name: domain\alias.
      */
-    public User find(String accountName) {
+    public User find(final String accountName) {
         final String mappedAccountName = userAccountMapper.mapUserAccount(accountName);
-        LOGGER.log(Level.FINE, "Looking up Jenkins user for account '%s'.", mappedAccountName);
+        logger.log(Level.FINE, "Looking up Jenkins user for account '%s'.", mappedAccountName);
         final User jenkinsUser = User.get(mappedAccountName);
         Mailer.UserProperty mailerProperty = jenkinsUser.getProperty(Mailer.UserProperty.class);
         if (mailerProperty == null || mailerProperty.getAddress() == null || mailerProperty.getAddress().length() == 0) {
-            LOGGER.log(Level.FINE, "No Mailer.UserProperty defined for '%s', looking in TFS", mappedAccountName);
+            logger.log(Level.FINE, "No Mailer.UserProperty defined for '%s', looking in TFS", mappedAccountName);
             final TeamFoundationIdentity tfsUser = ims.readIdentity(
                 IdentitySearchFactor.ACCOUNT_NAME,
                 accountName,
@@ -50,15 +54,13 @@ public class TfsUserLookup implements UserLookup {
                     try {
                         jenkinsUser.addProperty(mailerProperty);
                     } catch (IOException e) {
-                        LOGGER.warning(String.format("Unable to save Jenkins account for  user '%s'.", accountName));
+                        logger.warning(String.format("Unable to save Jenkins account for  user '%s'.", accountName));
                     }
+                } else {
+                    logger.info(String.format("User '%s' did not have an e-mail address configured.", accountName));
                 }
-                else {
-                    LOGGER.info(String.format("User '%s' did not have an e-mail address configured.", accountName));
-                }
-            }
-            else {
-                LOGGER.warning(String.format("Unable to find user '%s'.", accountName));
+            } else {
+                logger.warning(String.format("Unable to find user '%s'.", accountName));
             }
         }
         return jenkinsUser;

@@ -393,9 +393,9 @@ public class FunctionalTest {
         // finally, delete the project, which should first remove the workspace
         final TeamFoundationServerScm scm = (TeamFoundationServerScm) project.getScm();
         final Computer computer = Computer.currentComputer();
-        final String workspaceName = scm.getWorkspaceName(thirdBuild, computer);
-        Assert.assertTrue(jenkinsWorkspace.exists());
         final String hostName = LocalHost.getShortName();
+        final String workspaceName = scm.getWorkspaceName(thirdBuild, computer).replace("${COMPUTERNAME}", hostName);
+        Assert.assertTrue(jenkinsWorkspace.exists());
         final Workspace[] workspacesBeforeDeletion = vcc.queryWorkspaces(workspaceName, VersionControlConstants.AUTHENTICATED_USER, hostName, WorkspacePermissions.NONE_OR_NOT_SUPPORTED);
         Assert.assertEquals(1, workspacesBeforeDeletion.length);
 

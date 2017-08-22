@@ -22,11 +22,17 @@ public class UnsupportedIntegrationAction extends InvisibleAction implements Ser
         this.reason = reason;
     }
 
+    /**
+     * Returns true if the run does not contain an UnsupportedIntegrationAction.
+     */
     public static boolean isSupported(@Nonnull final Run<?, ?> run, @Nonnull final TaskListener listener) {
         final UnsupportedIntegrationAction action = run.getAction(UnsupportedIntegrationAction.class);
         return action == null;
     }
 
+    /**
+     * Adds this action to the build with the given reason.
+     */
     public static void addToBuild(final List<Action> actions, final String reason) {
         final UnsupportedIntegrationAction action = new UnsupportedIntegrationAction(reason);
         actions.add(action);

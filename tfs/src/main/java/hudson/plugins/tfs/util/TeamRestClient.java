@@ -1,13 +1,16 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.util;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.microsoft.tfs.core.httpclient.HttpClient;
+import com.microsoft.tfs.core.httpclient.NameValuePair;
 import com.microsoft.tfs.util.StringUtil;
 import com.microsoft.visualstudio.services.webapi.patch.Operation;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.HttpMethod;
+import hudson.plugins.tfs.model.JobCompletionEventArgs;
 import hudson.plugins.tfs.model.JsonPatchOperation;
 import hudson.plugins.tfs.model.Link;
 import hudson.plugins.tfs.model.ListOfGitRepositories;
@@ -73,11 +76,21 @@ public class TeamRestClient {
     }
 
     protected <TRequest, TResponse> TResponse request(
-        final Class<TResponse> responseClass,
-        final HttpMethod httpMethod,
-        final URI requestUri,
-        final TRequest requestBody
-        ) throws IOException {
+            final Class<TResponse> responseClass,
+            final HttpMethod httpMethod,
+            final URI requestUri,
+            final TRequest requestBody
+    ) throws IOException {
+        return request(responseClass, httpMethod, requestUri, requestBody, null);
+    }
+
+    protected <TRequest, TResponse> TResponse request(
+            final Class<TResponse> responseClass,
+            final HttpMethod httpMethod,
+            final URI requestUri,
+            final TRequest requestBody,
+            final NameValuePair[] additionalRequestHeaders
+            ) throws IOException {
 
         final HttpClient httpClient = server.getHttpClient();
 
@@ -99,6 +112,12 @@ public class TeamRestClient {
         final com.microsoft.tfs.core.httpclient.HttpMethod clientMethod = httpMethod.createClientMethod(requestUri.toString(), stringRequestBody);
         if (authorization != null) {
             clientMethod.addRequestHeader(AUTHORIZATION, authorization);
+        }
+
+        if (additionalRequestHeaders != null && additionalRequestHeaders.length > 0){
+            for(NameValuePair pair : additionalRequestHeaders) {
+                clientMethod.addRequestHeader(pair.getName(), pair.getValue());
+            }
         }
 
         final String stringResponseBody = innerRequest(clientMethod, httpClient);
@@ -287,4 +306,27 @@ public class TeamRestClient {
 
         return request(TeamGitStatus.class, HttpMethod.POST, requestUri, status);
     }
+
+
+    public void sendJobCompletionEvent(final JobCompletionEventArgs args) throws IOException {
+        final QueryString qs = new QueryString(
+                API_VERSION, "3.2",
+                "publisherId", "jenkins",
+                "channelId", args.getServerKey());
+
+        final URI requestUri = UriHelper.join(
+                collectionUri,
+                "_apis", "public", "hooks", "externalEvents",
+                qs);
+
+        final JSONObject json = JSONObject.fromObject(args.getPayload());
+
+        final NameValuePair[] headers = new NameValuePair[3];
+        headers[0] = new NameValuePair("X-Event-Key", "job:completion");
+        headers[1] = new NameValuePair("X-Jenkins-Signature", args.getPayloadSignature());
+        headers[2] = new NameValuePair("X-Jenkins-ServerKey", args.getServerKey());
+
+        request(Void.class, HttpMethod.POST, requestUri, json, headers);
+    }
+
 }

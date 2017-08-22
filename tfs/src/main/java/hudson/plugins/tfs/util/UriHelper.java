@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See sibling License.txt file
 

@@ -7,11 +7,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Inspired by http://stackoverflow.com/a/20885974
+ * Inspired by http://stackoverflow.com/a/20885974.
  */
 public class UserHomePersistenceStore extends FilesystemPersistenceStore {
     public UserHomePersistenceStore(final File subDirectory) {
-        // TODO: improve with LocalAppData on Windows and a folder starting with '.' on the rest
         super(new File(System.getProperty("user.home"), subDirectory.getPath()));
     }
 

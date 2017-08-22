@@ -2,7 +2,12 @@ package hudson.plugins.tfs.util;
 
 import java.nio.charset.Charset;
 
-public class MediaType {
+/**
+ * Media Type constants.
+ */
+public final class MediaType {
+    private MediaType() { }
+
     public static final Charset UTF_8 = Charset.forName("UTF-8");
     public static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String APPLICATION_JSON = "application/json";
