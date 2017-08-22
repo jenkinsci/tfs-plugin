@@ -3,9 +3,15 @@ package hudson.plugins.tfs.model;
 import hudson.Extension;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Maps user accounts without using the DOMAIN.
+ */
 public class AliasOnlyUserAccountMapper extends UserAccountMapper {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor.
+     */
     @DataBoundConstructor
     public AliasOnlyUserAccountMapper() {
 
@@ -23,6 +29,9 @@ public class AliasOnlyUserAccountMapper extends UserAccountMapper {
         return result;
     }
 
+    /**
+     * A descriptor for the class.
+     */
     @Extension
     public static final class DescriptorImpl extends UserAccountMapperDescriptor {
         @Override

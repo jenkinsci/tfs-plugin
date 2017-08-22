@@ -24,6 +24,7 @@ public class IntegrationTestHelper {
 
     public IntegrationTestHelper() throws URISyntaxException {
         this(
+                propertyOrFail("tfs_collection_url"),
                 propertyOrFail("tfs_server_name"),
                 propertyOrNull("tfs_user_name"),
                 propertyOrNull("tfs_user_password")
@@ -32,20 +33,21 @@ public class IntegrationTestHelper {
 
     public IntegrationTestHelper(final String tfsServerName) throws URISyntaxException {
         this(
-                tfsServerName,
-                null,
-                null
+            (TeamCollectionConfiguration.isTeamServices(tfsServerName)) ?
+                new URI("https", null, tfsServerName, 443, "/", null, null).toString() :
+                new URI("http", null, tfsServerName, 8080, "/tfs/" + "jenkins-tfs-plugin", null, null).toString(),
+            tfsServerName,
+            null,
+            null
         );
     }
 
-    public IntegrationTestHelper(final String tfsServerName, final String tfsUserName, final String tfsUserPassword) throws URISyntaxException {
-        final URI serverUri;
+    public IntegrationTestHelper(final String tfsServerUrl, final String tfsServerName, final String tfsUserName, final String tfsUserPassword) throws URISyntaxException {
+        final URI serverUri = new URI(tfsServerUrl);
         if (TeamCollectionConfiguration.isTeamServices(tfsServerName)) {
-            serverUri = new URI("https", null, tfsServerName, 443, "/", null, null);
             this.userName = tfsUserName;
             this.userPassword = tfsUserPassword;
         } else {
-            serverUri = new URI("http", null, tfsServerName, 8080, "/tfs/" + "jenkins-tfs-plugin", null, null);
             this.userName = (tfsUserName != null) ? tfsUserName : "jenkins-tfs-plugin";
             this.userPassword = (tfsUserPassword != null) ? tfsUserPassword : "for-test-only";
         }

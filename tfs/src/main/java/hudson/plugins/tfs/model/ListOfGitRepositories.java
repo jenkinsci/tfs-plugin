@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;

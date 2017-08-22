@@ -17,7 +17,7 @@ import java.util.Map;
  * The TelemetryHelper class is a singleton that allows the plugin to capture
  * telemetry data when the user initiates events.
  */
-public class TelemetryHelper {
+public final class TelemetryHelper {
     public static final String UNKNOWN = "unknown";
     private static final String UNIQUE_PREFIX = "ai-log";
     private static final String BASE_FOLDER = "AppInsights";
@@ -33,7 +33,9 @@ public class TelemetryHelper {
     // Instance members
     private TelemetryClient telemetryClient;
 
-    // A private static class to allow safe lazy initialization of the singleton
+    /**
+     * A private static class to allow safe lazy initialization of the singleton.
+     */
     private static class TfsTelemetryHelperHolder {
         private static final TelemetryHelper INSTANCE = new TelemetryHelper();
     }
@@ -157,6 +159,9 @@ public class TelemetryHelper {
         }
     }
 
+    /**
+     * Builder class to gather all properties to be sent to AppInsights into a Map.
+     */
     public static class PropertyMapBuilder {
         public static final Map<String, String> EMPTY = new PropertyMapBuilder().build();
 
@@ -174,11 +179,17 @@ public class TelemetryHelper {
             }
         }
 
+        /**
+         * Returns the map of all key value pairs that were added to the builder.
+         */
         public Map<String, String> build() {
             // Make a copy and return it
             return new HashMap<String, String>(properties);
         }
 
+        /**
+         * Adds server context information to the properties sent to AppInsights.
+         */
         public PropertyMapBuilder serverContext(final String serverUrl, final String collectionUrl) {
             if (serverUrl != null) {
                 final boolean isHosted = StringUtils.containsIgnoreCase(serverUrl, ".visualstudio.com");
@@ -189,6 +200,9 @@ public class TelemetryHelper {
             return this;
         }
 
+        /**
+         * Adds a key value pair to the properties sent to AppInsights.
+         */
         public PropertyMapBuilder pair(final String key, final String value) {
             if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(value)) {
                 add(key, value);
@@ -201,7 +215,7 @@ public class TelemetryHelper {
                 if (serverUrl != null) {
                     return URI.create(serverUrl).getHost();
                 }
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 logger.error("failed to get server URI", ex);
             }
             return UNKNOWN;
@@ -212,7 +226,7 @@ public class TelemetryHelper {
                 if (collectionUrl != null) {
                     return URI.create(collectionUrl).getPath();
                 }
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 logger.error("failed to get server URI", ex);
             }
 

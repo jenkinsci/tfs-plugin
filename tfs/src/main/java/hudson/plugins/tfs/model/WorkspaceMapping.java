@@ -3,12 +3,12 @@ package hudson.plugins.tfs.model;
 /**
  * Mapping between a working folder and a project path that exists in a workspace.
  */
-public class WorkspaceMapping {        
+public class WorkspaceMapping {
 
     private final String projectPath;
     private final String localPath;
 
-    public WorkspaceMapping(String projectPath, String localPath) {
+    public WorkspaceMapping(final String projectPath, final String localPath) {
         this.projectPath = projectPath;
         this.localPath = localPath;
     }

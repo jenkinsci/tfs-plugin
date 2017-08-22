@@ -1,7 +1,7 @@
 package hudson.plugins.tfs.model;
 
 /**
- * Workaround for missing classes in vso-httpclient-java
+ * Workaround for missing classes in vso-httpclient-java.
  */
 public class WorkItemTrackingResourceReference {
 

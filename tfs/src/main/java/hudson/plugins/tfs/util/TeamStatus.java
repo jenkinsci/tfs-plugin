@@ -15,7 +15,15 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 
-public class TeamStatus {
+/**
+ * Creates and adds a TeamGitStatus to the run.
+ */
+public final class TeamStatus {
+    private TeamStatus() { }
+
+    /**
+     * Creates and adds a TeamGitStatus to the run.
+     */
     public static void createFromRun(@Nonnull final Run<?, ?> run, @Nonnull final TaskListener listener, final String featureDisplayName) throws IOException {
 
         if (!UnsupportedIntegrationAction.isSupported(run, listener)) {
@@ -35,12 +43,10 @@ public class TeamStatus {
             if (commitParameter instanceof PullRequestParameterAction) {
                 final PullRequestParameterAction prpa = (PullRequestParameterAction) commitParameter;
                 pullRequestMergeCommitCreatedEventArgs = prpa.getPullRequestMergeCommitCreatedEventArgs();
-            }
-            else {
+            } else {
                 pullRequestMergeCommitCreatedEventArgs = null;
             }
-        }
-        else {
+        } else {
             // TODO: try to guess based on what we _do_ have (i.e. RevisionParameterAction)
             return;
         }
@@ -61,8 +67,7 @@ public class TeamStatus {
         if (pullRequestMergeCommitCreatedEventArgs != null) {
             if (pullRequestMergeCommitCreatedEventArgs.iterationId == -1) {
                 client.addPullRequestStatus(pullRequestMergeCommitCreatedEventArgs, status);
-            }
-            else {
+            } else {
                 client.addPullRequestIterationStatus(pullRequestMergeCommitCreatedEventArgs, status);
             }
         }

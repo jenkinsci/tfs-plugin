@@ -21,8 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A Git push event corresponding to the push of a set of commits on VSTS/TFS.
+ */
 public class GitPushEvent extends AbstractHookEvent {
 
+    /**
+     * Factory for creating a GitPushEvent.
+     */
     public static class Factory implements AbstractHookEvent.Factory {
 
         @Override
@@ -61,8 +67,7 @@ public class GitPushEvent extends AbstractHookEvent {
         final URI uri;
         try {
             uri = new URI(repoApiUri.getScheme(), repoApiUri.getAuthority(), pathBeforeApis, repoApiUri.getQuery(), repoApiUri.getFragment());
-        }
-        catch (final URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new Error(e);
         }
         return uri;

@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.commands;
 
 import com.microsoft.tfs.core.clients.versioncontrol.WorkspacePermissions;

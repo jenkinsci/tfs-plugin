@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

@@ -10,14 +10,26 @@ import com.microsoft.tfs.core.httpclient.UsernamePasswordCredentials;
 import com.microsoft.tfs.core.httpclient.auth.AuthScope;
 import hudson.util.Secret;
 
+/**
+ * Extends the default Http client factory to properly handle Proxy configurations.
+ */
 public class ModernHTTPClientFactory extends DefaultHTTPClientFactory {
 
     private final ProxyHostEx proxyHost;
 
+    /**
+     * Constructor.
+     * @param connectionInstanceData
+     */
     public ModernHTTPClientFactory(final ConnectionInstanceData connectionInstanceData) {
         this(connectionInstanceData,  null);
     }
 
+    /**
+     * Constructor.
+     * @param connectionInstanceData
+     * @param proxyHost
+     */
     public ModernHTTPClientFactory(final ConnectionInstanceData connectionInstanceData, final ProxyHostEx proxyHost) {
         super(connectionInstanceData);
         this.proxyHost = proxyHost;
@@ -36,7 +48,7 @@ public class ModernHTTPClientFactory extends DefaultHTTPClientFactory {
     }
 
     @Override
-    public void configureClientProxy(final HttpClient httpClient, final HostConfiguration hostConfiguration,final HttpState httpState, final ConnectionInstanceData connectionInstanceData) {
+    public void configureClientProxy(final HttpClient httpClient, final HostConfiguration hostConfiguration, final HttpState httpState, final ConnectionInstanceData connectionInstanceData) {
         hostConfiguration.setProxyHost(proxyHost);
 
         if (proxyHost != null) {
@@ -47,8 +59,7 @@ public class ModernHTTPClientFactory extends DefaultHTTPClientFactory {
                         AuthScope.ANY,
                         new UsernamePasswordCredentials(proxyUser, proxySecret.getPlainText())
                 );
-            }
-            else {
+            } else {
                 httpState.setProxyCredentials(
                         AuthScope.ANY,
                         new DefaultNTCredentials()

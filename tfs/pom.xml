@@ -3,13 +3,13 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>tfs-parent</artifactId>
-    <version>5.3.5-SNAPSHOT</version>
+    <version>5.122.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
   <name>Team Foundation Server Plug-in</name>
-  <version>5.3.5-SNAPSHOT</version>
+  <version>5.122.0-SNAPSHOT</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
   <licenses>
     <license><name>MIT license</name><comments>All source code is under the MIT license.</comments></license>
@@ -104,6 +104,26 @@
         <configuration>
           <excludedGroups>hudson.plugins.tfs.IntegrationTests</excludedGroups>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.17</version>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <configuration>
+              <configLocation>checkstyle.xml</configLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+            </configuration>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -246,5 +266,4 @@
         <version>20090211</version>
     </dependency>
   </dependencies>
-
 </project>

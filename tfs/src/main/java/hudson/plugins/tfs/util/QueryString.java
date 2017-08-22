@@ -5,6 +5,9 @@ package hudson.plugins.tfs.util;
 
 import java.util.LinkedHashMap;
 
+/**
+ * Helper to construct query strings for urls.
+ */
 public class QueryString extends LinkedHashMap<String, String> {
 
     public QueryString() {
@@ -16,7 +19,7 @@ public class QueryString extends LinkedHashMap<String, String> {
             final String message = "This QueryString constructor needs an even number of parameters";
             throw new IllegalArgumentException(message);
         }
-        for (int i = 0; i < length; i+=2) {
+        for (int i = 0; i < length; i += 2) {
             put(nameValuePairs[i], nameValuePairs[i + 1]);
         }
     }

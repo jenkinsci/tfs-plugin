@@ -26,7 +26,7 @@ import java.util.UUID;
 public class TelemetryContextInitializer implements ContextInitializer {
     private static final Logger logger = LoggerFactory.getLogger(TelemetryContextInitializer.class);
 
-    private static final String PRODUCT_NAME= "TFS-Jenkins";
+    private static final String PRODUCT_NAME = "TFS-Jenkins";
     private static final String SYS_PROP_OS_NAME = "os.name";
     private static final String SYS_PROP_OS_VERSION = "os.version";
     private static final String SYS_PROP_USER_NAME = "user.name";
@@ -67,6 +67,9 @@ public class TelemetryContextInitializer implements ContextInitializer {
         }
     }
 
+    /**
+     * Gets the full User Agent used to make requests to TFS/Team Services.
+     */
     public String getUserAgent(final String defaultUserAgent) {
         try {
             return MessageFormat.format(USER_AGENT_FORMAT,

@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.actions;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;

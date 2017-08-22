@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
