@@ -156,7 +156,7 @@ If your source code is in a TFVC repository, this section is for you.
 
 Field | Description
 ----- | -----------
-`Collection URL` | The URL to the [Team Project Collection](https://msdn.microsoft.com/en-us/library/dd236915(v=vs.120).aspx). If you added your team project collection(s) in the global configuration, the field will show you a list to pick from. Examples: `https://tfs02.codeplex.com`, `https://fabrikam-fiber-inc.visualstudio.com`, `http://tfs:8080/tfs/DefaultCollection`
+`Collection URL` | The URL to the [Team Project Collection](https://msdn.microsoft.com/en-us/library/dd236915(v=vs.120).aspx). If you added your team project collection(s) in the global configuration, the field will show you a list to pick from. Examples: `https://fabrikam-fiber-inc.visualstudio.com`, `http://tfs:8080/tfs/DefaultCollection`
 `Project path` | The Team Project and path to retrieve from the server. The project path must start with `$/`, and contain any sub path that exists in the project repository. Example: `$/Fabrikam-Fiber-TFVC/AuthSample-dev`
 `Credentials` | If you added your team project collection(s) in the global configuration, select **Automatic** and the credentials will be looked up automatically, otherwise you can select **Manual** and configure the `User name` and `User password` fields.
 `Manual` > `User name` | The name of the user that will be connecting to TFS/Team Services to query history, checkout files, etc. See _User name and password_ below for a full description.
@@ -333,14 +333,6 @@ Go ahead and test your setup by manually triggering a build in Jenkins or by a c
 
 
 # FAQ
-
-### How should I set up the plugin for my CodePlex project?
-
-* Find out the server for your project, which is displayed in the source code page for your project at codeplex.com.
-* The user name must be suffixed with `_cp` and the domain is `snd`. If your user name is redsolo, then enter "`snd\redsolo_cp`" as the user name in the plugin configuration.
-* Note that the user must be a member of the project to be able to create a workspace on the CodePlex server.
-
-That's all you need to do to start retrieving files from your project at codeplex.com.
 
 ### The plugin is having problems parsing the dates that TF outputs, what can I do?
 
