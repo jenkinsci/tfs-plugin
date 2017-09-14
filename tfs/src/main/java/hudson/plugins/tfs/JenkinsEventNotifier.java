@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -81,17 +82,22 @@ public final class JenkinsEventNotifier {
             request.addHeader("User-Agent", "Jenkins-Self");
 
             final HttpResponse response = client.execute(request);
+            final int statusCode = response.getStatusLine().getStatusCode();
 
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(response.getEntity().getContent(), ENCODING))) {
-
-                final StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                    result.append("\n");
+            if (statusCode <= HttpURLConnection.HTTP_ACCEPTED) {
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(response.getEntity().getContent(), ENCODING))) {
+                    final StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                        result.append("\n");
+                    }
+                    return result.toString();
                 }
-                return result.toString();
+            } else {
+                log.warning("ERROR: getApiJson: (url=" + url + ") failed due to Http error #" + statusCode);
+                return null;
             }
         } catch (final IOException e) {
             log.warning("ERROR: getApiJson: (url=" + url + ") " + e.getMessage());

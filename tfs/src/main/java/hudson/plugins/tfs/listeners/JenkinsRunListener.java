@@ -2,10 +2,18 @@ package hudson.plugins.tfs.listeners;
 
 import hudson.Extension;
 import hudson.model.Cause;
+import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.tfs.JenkinsEventNotifier;
+import hudson.plugins.tfs.model.GitStatusContext;
+import hudson.plugins.tfs.model.GitStatusState;
+import hudson.plugins.tfs.model.TeamGitStatus;
+import hudson.plugins.tfs.util.TeamRestClient;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import net.sf.json.JSONObject;
 
 import javax.annotation.Nonnull;
@@ -29,6 +37,9 @@ public class JenkinsRunListener extends RunListener<Run> {
 
     @Override
     public void onStarted(final Run run, final TaskListener listener) {
+        Job currJob = run.getParent();
+        final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
+        setPullRequestStatus(run, GitStatusState.Pending, "Jenkins CI build started", targetUrl);
     }
 
     @Override
@@ -38,8 +49,17 @@ public class JenkinsRunListener extends RunListener<Run> {
     @Override
     public void onCompleted(final Run run, @Nonnull final TaskListener listener) {
         log.info("onCompleted: " + run.toString());
+
+        Job currJob = run.getParent();
+        final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
+        setPullRequestStatus(run, GitStatusState.Pending, "Jenkins CI build completed", targetUrl);
+
         final String payload = JenkinsEventNotifier.getApiJson(run.getUrl());
-        final JSONObject json = JSONObject.fromObject(payload);
+        JSONObject json = new JSONObject();
+        if (payload != null) {
+            json = JSONObject.fromObject(payload);
+        }
+
         json.put("name", run.getParent().getDisplayName());
         json.put("startedBy", getStartedBy(run));
 
@@ -53,5 +73,23 @@ public class JenkinsRunListener extends RunListener<Run> {
             startedBy = cause.getUserId();
         }
         return startedBy;
+    }
+
+    private TeamGitStatus setPullRequestStatus(final Run run, final GitStatusState buildState, final String buildDescription, final String targetUrl) {
+        try {
+            final TeamGitStatus status = new TeamGitStatus();
+            status.state = buildState;
+            status.description = buildDescription;
+            status.targetUrl = targetUrl;
+            status.context = new GitStatusContext("ci-build", "jenkins-plugin");
+
+            final TeamRestClient client = new TeamRestClient(URI.create("https://mseng.visualstudio.com/"));
+            return client.addPullRequestStatus(URI.create("https://mseng.visualstudio.com/Tools/_apis/git/repositories/Vsts-Git-Integration/pullRequests/232289/statuses"), status);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

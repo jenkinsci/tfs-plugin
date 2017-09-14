@@ -19,10 +19,12 @@ import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ActionHelper;
+import hudson.plugins.tfs.util.TeamRestClient;
 import hudson.plugins.tfs.util.UriHelper;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
+import java.io.IOException;
 import jenkins.model.Jenkins;
 import jenkins.triggers.SCMTriggerItem;
 import net.sf.json.JSONArray;
@@ -38,6 +40,8 @@ import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -76,8 +80,7 @@ public abstract class AbstractHookEvent {
             try {
                 contributor.writeBody(printWriter);
                 printWriter.flush();
-            }
-            finally {
+            } finally {
                 IOUtils.closeQuietly(printWriter);
             }
             final String contributorMessage = stringWriter.toString();
@@ -87,14 +90,15 @@ public abstract class AbstractHookEvent {
         return result;
     }
 
-    GitStatus.ResponseContributor triggerJob(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling, final Item project, final SCMTriggerItem scmTriggerItem) {       
+    GitStatus.ResponseContributor triggerJob(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling, final Item project, final SCMTriggerItem scmTriggerItem) {
         if (!(project instanceof AbstractProject && ((AbstractProject) project).isDisabled())) {
             if (project instanceof Job) {
                 final Job job = (Job) project;
                 final int quietPeriod = scmTriggerItem.getQuietPeriod();
+                final String targetUrl = job.getAbsoluteUrl() + job.getNextBuildNumber();
 
                 final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
-                final SCMTrigger scmTrigger = TeamEventsEndpoint.findTrigger(job, SCMTrigger.class);                
+                final SCMTrigger scmTrigger = TeamEventsEndpoint.findTrigger(job, SCMTrigger.class);
                 if (config.isEnableTeamPushTriggerForAllJobs()) {
                     if (scmTrigger == null || !scmTrigger.isIgnorePostCommitHooks()) {
                         // trigger is null OR job does NOT have explicitly opted out of hooks
@@ -102,8 +106,7 @@ public abstract class AbstractHookEvent {
                         trigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
                         if (bypassPolling) {
                             return new TeamEventsEndpoint.ScheduledResponseContributor(project);
-                        }
-                        else {
+                        } else {
                             return new TeamEventsEndpoint.PollingScheduledResponseContributor(project);
                         }
                     }
@@ -115,52 +118,78 @@ public abstract class AbstractHookEvent {
                     final CauseAction causeAction = new CauseAction(cause);
                     final Action[] actionArray = ActionHelper.create(actions, causeAction);
                     scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
+                    if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
+                        setPullRequestStatus((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins CI build queued", targetUrl);
+                    }
+
                     return new TeamEventsEndpoint.ScheduledResponseContributor(project);
                 }
 
                 boolean shouldRun = false;
-                
-                if (job instanceof WorkflowJob)
-                {
-                    final FlowDefinition jobDef = ((WorkflowJob)job).getDefinition();
-                    if (jobDef instanceof CpsScmFlowDefinition)
-                    {
+
+                if (job instanceof WorkflowJob) {
+                    final FlowDefinition jobDef = ((WorkflowJob) job).getDefinition();
+                    if (jobDef instanceof CpsScmFlowDefinition) {
                         final SCM jobSCM = ((CpsScmFlowDefinition) jobDef).getScm();
-                        if (jobSCM instanceof GitSCM)
-                        {
-                            final GitSCM gitJobSCM = (GitSCM)jobSCM;
+                        if (jobSCM instanceof GitSCM) {
+                            final GitSCM gitJobSCM = (GitSCM) jobSCM;
                             final URIish uri = gitCodePushedEventArgs.getRepoURIish();
 
                             for (final UserRemoteConfig remoteConfig : gitJobSCM.getUserRemoteConfigs()) {
                                 final String jobRepoUrl = remoteConfig.getUrl();
-                                
-                                if (StringUtils.equals(jobRepoUrl, uri.toString())) {
+
+                                if (StringUtils.equalsIgnoreCase(jobRepoUrl, uri.toString())) {
                                     shouldRun = true;
                                     break;
                                 }
-                            }                            
+                            }
                         }
                     }
                 }
-                
-                TeamPushTrigger pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPushTrigger.class);               
-                if (shouldRun && pushTrigger == null)
-                    pushTrigger = new TeamPushTrigger(job);                            
+
+                TeamPushTrigger pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPushTrigger.class);
+                if (shouldRun && pushTrigger == null) {
+                    pushTrigger = new TeamPushTrigger(job);
+                }
 
                 if (pushTrigger != null) {
                     pushTrigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
                     if (bypassPolling) {
                         return new TeamEventsEndpoint.ScheduledResponseContributor(project);
-                    }
-                    else {
+                    } else {
                         return  new TeamEventsEndpoint.PollingScheduledResponseContributor(project);
                     }
                 }
+
+                if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
+                    setPullRequestStatus((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Failed, "Fail to launch Jenkins CI build", targetUrl);
+                }
             }
         }
+
         return null;
-    }    
-    
+    }
+
+    public TeamGitStatus setPullRequestStatus(final PullRequestMergeCommitCreatedEventArgs gitCodePushedEventArgs, final GitStatusState buildState, final String buildDescription, final String targetUrl) {
+        try {
+            final TeamGitStatus status = new TeamGitStatus();
+            status.state = buildState;
+            status.description = buildDescription;
+            status.targetUrl = targetUrl;
+            status.context = new GitStatusContext("ci-build", "jenkins-plugin");
+
+            final URI collectionUri = gitCodePushedEventArgs.collectionUri;
+            final TeamRestClient client = new TeamRestClient(collectionUri);
+
+            return client.addPullRequestStatus(gitCodePushedEventArgs, status);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // TODO: it would be easiest if pollOrQueueFromEvent built a JSONObject directly
     List<GitStatus.ResponseContributor> pollOrQueueFromEvent(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling) {
         List<GitStatus.ResponseContributor> result = new ArrayList<GitStatus.ResponseContributor>();
@@ -193,8 +222,7 @@ public abstract class AbstractHookEvent {
                     continue;
                 }
 
-                if (scmTriggerItem.getSCMs().isEmpty())
-                {
+                if (scmTriggerItem.getSCMs().isEmpty()) {
                     GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actions, bypassPolling, project, scmTriggerItem);
                     if (triggerResult != null) {
                         result.add(triggerResult);
@@ -219,7 +247,7 @@ public abstract class AbstractHookEvent {
                             }
                         }
 
-                        if (!repositoryMatches || git.getExtensions().get(IgnoreNotifyCommit.class)!=null) {
+                        if (!repositoryMatches || git.getExtensions().get(IgnoreNotifyCommit.class) != null) {
                             continue;
                         }
 
@@ -233,16 +261,14 @@ public abstract class AbstractHookEvent {
             }
             if (!scmFound) {
                 result.add(new GitStatus.MessageResponseContributor("No Git jobs found"));
-            }
-            else if (totalRepositoryMatches == 0) {
+            } else if (totalRepositoryMatches == 0) {
                 final String template = "No Git jobs matched the remote URL '%s' requested by an event.";
                 final String message = String.format(template, uri);
                 LOGGER.warning(message);
             }
 
             return result;
-        }
-        finally {
+        } finally {
             SecurityContextHolder.setContext(old);
         }
     }
