@@ -1,7 +1,11 @@
 package hudson.plugins.tfs;
 
 import hudson.plugins.tfs.model.ConnectionParameters;
+import hudson.plugins.tfs.model.GitStatusContext;
+import hudson.plugins.tfs.model.GitStatusState;
 import hudson.plugins.tfs.model.JobCompletionEventArgs;
+import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
+import hudson.plugins.tfs.model.TeamGitStatus;
 import hudson.plugins.tfs.util.TeamRestClient;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -18,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -60,6 +65,46 @@ public final class JenkinsEventNotifier {
                 log.warning("ERROR: sendJobCompletionEvent: (collection=" + c.getCollectionUrl() + ") " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Send the build status of VSTS pull request back to connected TFS/VSTS servers only for those jobs kicked off by PRs.
+     */
+    public static void sendPullRequestBuildStatusEvent(final CommitParameterAction commitParameter, final GitStatusState buildState, final String buildDescription, final String targetUrl, final String jobFullPath) {
+        try {
+            if (commitParameter != null) {
+                if (commitParameter instanceof PullRequestParameterAction) {
+                    final PullRequestParameterAction prpa = (PullRequestParameterAction) commitParameter;
+                    final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs = prpa.getPullRequestMergeCommitCreatedEventArgs();
+                    sendPullRequestBuildStatusEvent(pullRequestMergeCommitCreatedEventArgs, buildState, buildDescription, targetUrl, jobFullPath);
+                }
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+        return;
+    }
+
+    /**
+     * Send the build status of VSTS pull request back to connected TFS/VSTS servers.
+     */
+    public static void sendPullRequestBuildStatusEvent(final PullRequestMergeCommitCreatedEventArgs gitCodePushedEventArgs, final GitStatusState buildState, final String buildDescription, final String targetUrl, final String jobFullPath) {
+        try {
+            final TeamGitStatus status = new TeamGitStatus();
+            status.state = buildState;
+            status.description = buildDescription;
+            status.targetUrl = targetUrl;
+            status.context = new GitStatusContext(" ", StringUtils.stripEnd(jobFullPath, "/"));
+
+            final URI collectionUri = gitCodePushedEventArgs.collectionUri;
+            final TeamRestClient client = new TeamRestClient(collectionUri);
+            client.addPullRequestStatus(gitCodePushedEventArgs, status);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return;
     }
 
     /**

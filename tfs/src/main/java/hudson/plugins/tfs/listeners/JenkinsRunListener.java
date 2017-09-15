@@ -9,18 +9,8 @@ import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.JenkinsEventNotifier;
-import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
-import hudson.plugins.tfs.model.GitCodePushedEventArgs;
-import hudson.plugins.tfs.model.GitStatusContext;
 import hudson.plugins.tfs.model.GitStatusState;
-import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
-import hudson.plugins.tfs.model.TeamGitStatus;
-import hudson.plugins.tfs.util.TeamRestClient;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.net.URI;
 import net.sf.json.JSONObject;
 
 import javax.annotation.Nonnull;
@@ -44,9 +34,12 @@ public class JenkinsRunListener extends RunListener<Run> {
 
     @Override
     public void onStarted(final Run run, final TaskListener listener) {
-        Job currJob = run.getParent();
-        final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
-        trySetPullRequestStatus(run, listener, GitStatusState.Pending, "Jenkins CI build started", targetUrl);
+        if (UnsupportedIntegrationAction.isSupported(run, listener)) {
+            Job currJob = run.getParent();
+            final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
+            final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
+            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, GitStatusState.Pending, "Jenkins CI build started", targetUrl, currJob.getAbsoluteUrl());
+        }
     }
 
     @Override
@@ -64,9 +57,13 @@ public class JenkinsRunListener extends RunListener<Run> {
         } else {
             runGitState = GitStatusState.Failed;
         }
-        Job currJob = run.getParent();
-        final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
-        trySetPullRequestStatus(run, listener, runGitState, "Jenkins CI build completed", targetUrl);
+
+        if (UnsupportedIntegrationAction.isSupported(run, listener)) {
+            Job currJob = run.getParent();
+            final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
+            final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
+            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, runGitState, "Jenkins CI build completed", targetUrl, currJob.getAbsoluteUrl());
+        }
 
         JSONObject json = createJsonFromRun(run);
         final String payload = JenkinsEventNotifier.getApiJson(run.getUrl());
@@ -87,44 +84,6 @@ public class JenkinsRunListener extends RunListener<Run> {
             startedBy = cause.getUserId();
         }
         return startedBy;
-    }
-
-    private TeamGitStatus trySetPullRequestStatus(final Run run, @Nonnull final TaskListener listener, final GitStatusState buildState, final String buildDescription, final String targetUrl) {
-        try {
-            final TeamGitStatus status = new TeamGitStatus();
-            status.state = buildState;
-            status.description = buildDescription;
-            status.targetUrl = targetUrl;
-            status.context = new GitStatusContext("ci-build", "jenkins-plugin");
-
-            if (!UnsupportedIntegrationAction.isSupported(run, listener)) {
-                final PrintStream logger = listener.getLogger();
-                logger.print("NOTICE: ");
-                logger.print("You selected '");
-                logger.print(targetUrl);
-                logger.println("' on your Jenkins job, but this option has no effect when calling the job from the 'Jenkins Queue Job' task in TFS/Team Services.");
-                return null;
-            }
-
-            final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
-            final GitCodePushedEventArgs gitCodePushedEventArgs;
-            final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs;
-            if (commitParameter != null) {
-                gitCodePushedEventArgs = commitParameter.getGitCodePushedEventArgs();
-                if (commitParameter instanceof PullRequestParameterAction) {
-                    final PullRequestParameterAction prpa = (PullRequestParameterAction) commitParameter;
-                    pullRequestMergeCommitCreatedEventArgs = prpa.getPullRequestMergeCommitCreatedEventArgs();
-                    final URI collectionUri = gitCodePushedEventArgs.collectionUri;
-                    final TeamRestClient client = new TeamRestClient(collectionUri);
-                    return client.addPullRequestStatus(pullRequestMergeCommitCreatedEventArgs, status);
-                }
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     private JSONObject createJsonFromRun(final Run run) {

@@ -1,4 +1,3 @@
-//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +11,7 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.git.UserRemoteConfig;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
+import hudson.plugins.tfs.JenkinsEventNotifier;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamGlobalStatusAction;
 import hudson.plugins.tfs.TeamHookCause;
@@ -19,12 +19,10 @@ import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ActionHelper;
-import hudson.plugins.tfs.util.TeamRestClient;
 import hudson.plugins.tfs.util.UriHelper;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import hudson.triggers.SCMTrigger;
-import java.io.IOException;
 import jenkins.model.Jenkins;
 import jenkins.triggers.SCMTriggerItem;
 import net.sf.json.JSONArray;
@@ -40,19 +38,30 @@ import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * This class abstracts the hook event.
+ */
 public abstract class AbstractHookEvent {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractHookEvent.class.getName());
 
+    /**
+    * Interface of hook event factory.
+    */
     public interface Factory {
+        /**
+        * Create the factory.
+        */
         AbstractHookEvent create();
+
+        /**
+        * Get sample request payload.
+        */
         String getSampleRequestPayload();
     }
 
@@ -119,7 +128,7 @@ public abstract class AbstractHookEvent {
                     final Action[] actionArray = ActionHelper.create(actions, causeAction);
                     scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
                     if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
-                        setPullRequestStatus((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins CI build queued", targetUrl);
+                        JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins CI build queued", targetUrl, job.getAbsoluteUrl());
                     }
 
                     return new TeamEventsEndpoint.ScheduledResponseContributor(project);
@@ -162,31 +171,11 @@ public abstract class AbstractHookEvent {
                 }
 
                 if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
-                    setPullRequestStatus((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Failed, "Fail to launch Jenkins CI build", targetUrl);
+                    JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Failed, "Fail to launch Jenkins CI build", targetUrl, job.getAbsoluteUrl());
                 }
             }
         }
 
-        return null;
-    }
-
-    public TeamGitStatus setPullRequestStatus(final PullRequestMergeCommitCreatedEventArgs gitCodePushedEventArgs, final GitStatusState buildState, final String buildDescription, final String targetUrl) {
-        try {
-            final TeamGitStatus status = new TeamGitStatus();
-            status.state = buildState;
-            status.description = buildDescription;
-            status.targetUrl = targetUrl;
-            status.context = new GitStatusContext("ci-build", "jenkins-plugin");
-
-            final URI collectionUri = gitCodePushedEventArgs.collectionUri;
-            final TeamRestClient client = new TeamRestClient(collectionUri);
-
-            return client.addPullRequestStatus(gitCodePushedEventArgs, status);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return null;
     }
 
