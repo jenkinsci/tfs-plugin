@@ -1,4 +1,3 @@
-//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
 import hudson.Extension;
@@ -8,6 +7,9 @@ import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
+import hudson.model.JobProperty;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParametersDefinitionProperty;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.util.ActionHelper;
@@ -32,6 +34,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 /**
  * Triggers a build when we receive a TFS/Team Services Git code push event.
@@ -48,6 +51,9 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
         this.job = job;
     }
 
+    /**
+    * Execute function.
+    */
     public void execute(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling) {
         // TODO: Consider executing the poll + queue asynchronously
         final Runner runner = new Runner(gitCodePushedEventArgs, actions, bypassPolling);
@@ -58,6 +64,9 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
         return new File(job.getRootDir(), "team-polling.log");
     }
 
+    /**
+     * Runner class for TeamPushTrigger.
+     */
     // TODO: This was inspired by SCMTrigger.Runner; it would be worth extracting something for re-use
     public class Runner implements Runnable {
 
@@ -84,33 +93,28 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                     final PrintStream logger = listener.getLogger();
                     final long startTimeMillis = System.currentTimeMillis();
                     final Date date = new Date(startTimeMillis);
-                    logger.println("Started on "+ DateFormat.getDateTimeInstance().format(date));
+                    logger.println("Started on " + DateFormat.getDateTimeInstance().format(date));
                     final boolean result = job().poll(listener).hasChanges();
                     final long endTimeMillis = System.currentTimeMillis();
-                    logger.println("Done. Took "+ Util.getTimeSpanString(endTimeMillis - startTimeMillis));
+                    logger.println("Done. Took " + Util.getTimeSpanString(endTimeMillis - startTimeMillis));
                     if (result) {
                         logger.println("Changes found");
-                    }
-                    else {
+                    } else {
                         logger.println("No changes");
                     }
                     return result;
-                }
-                catch (final Error e) {
+                } catch (final Error e) {
                     e.printStackTrace(listener.error(failedToRecord));
-                    LOGGER.log(Level.SEVERE, failedToRecord,e);
+                    LOGGER.log(Level.SEVERE, failedToRecord, e);
                     throw e;
-                }
-                catch (final RuntimeException e) {
+                } catch (final RuntimeException e) {
                     e.printStackTrace(listener.error(failedToRecord));
-                    LOGGER.log(Level.SEVERE, failedToRecord,e);
+                    LOGGER.log(Level.SEVERE, failedToRecord, e);
                     throw e;
-                }
-                finally {
+                } finally {
                     listener.close();
                 }
-            }
-            catch (final IOException e) {
+            } catch (final IOException e) {
                 LOGGER.log(Level.SEVERE, failedToRecord, e);
                 return false;
             }
@@ -127,27 +131,46 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                     changesDetected = "SCM changes detected in " + job.getFullDisplayName() + ". ";
                     shouldSchedule = true;
                 }
-            }
-            else {
+            } else {
                 changesDetected = "Polling bypassed for " + job.getFullDisplayName() + ". ";
             }
             if (shouldSchedule) {
                 final SCMTriggerItem p = job();
                 final String name = "#" + p.getNextBuildNumber();
                 final String pushedBy = gitCodePushedEventArgs.pushedBy;
+
+                String archGroup = "";
+                String configGroup = "";
+                if (p instanceof WorkflowJob) {
+                    final List<JobProperty<? super WorkflowJob>> jobProperties = ((WorkflowJob) p).getAllProperties();
+                    for (final JobProperty<? super WorkflowJob> jobProperty : ((WorkflowJob) p).getAllProperties()) {
+                        if (jobProperty instanceof ParametersDefinitionProperty) {
+                            ParametersDefinitionProperty pDefProp = (ParametersDefinitionProperty) jobProperty;
+                            for (final ParameterDefinition currParam : pDefProp.getParameterDefinitions()) {
+                                final String paramName = currParam.getName();
+                                if (paramName.equalsIgnoreCase("CGroup") || paramName.equalsIgnoreCase("Configuration")) {
+                                    configGroup = currParam.getDefaultParameterValue().getValue().toString();
+                                }
+                                if (paramName.equalsIgnoreCase("AGroup")) {
+                                    archGroup = currParam.getDefaultParameterValue().getValue().toString();
+                                }
+                            }
+                        }
+                    }
+                }
+                final String runConfig = archGroup + " " + configGroup + " build";
+
                 TeamPushCause cause;
                 final File logFile = getLogFile();
                 if (logFile.isFile()) {
                     try {
-                        cause = new TeamPushCause(logFile, pushedBy);
-                    }
-                    catch (IOException e) {
+                        cause = new TeamPushCause(logFile, pushedBy, runConfig);
+                    } catch (IOException e) {
                         LOGGER.log(Level.WARNING, "Failed to parse the polling log", e);
-                        cause = new TeamPushCause(pushedBy);
+                        cause = new TeamPushCause(pushedBy, runConfig);
                     }
-                }
-                else {
-                    cause = new TeamPushCause(pushedBy);
+                } else {
+                    cause = new TeamPushCause(pushedBy, runConfig);
                 }
                 final int quietPeriod = p.getQuietPeriod();
                 final CauseAction causeAction = new CauseAction(cause);
@@ -155,8 +178,7 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                 final QueueTaskFuture<?> queueTaskFuture = p.scheduleBuild2(quietPeriod, actionArray);
                 if (queueTaskFuture != null) {
                     LOGGER.info(changesDetected + "Triggering " + name);
-                }
-                else {
+                } else {
                     LOGGER.info(changesDetected + "Job is already in the queue");
                 }
             }
@@ -168,6 +190,9 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    /**
+     * This class extends trigger descriptor class.
+     */
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
@@ -193,6 +218,9 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
         return Collections.singleton(new TeamPollingAction());
     }
 
+    /**
+     * This class defines team polling action.
+     */
     public final class TeamPollingAction implements Action {
 
         @Override
@@ -217,13 +245,19 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
             return job;
         }
 
+        /**
+        * Get log.
+        */
         @SuppressWarnings("unused")
         public String getLog() throws IOException {
             return Util.loadFile(getLogFile());
         }
 
+        /**
+        * Write log.
+        */
         @SuppressWarnings("unused")
-        public void writeLogTo(XMLOutput out) throws IOException {
+        public void writeLogTo(final XMLOutput out) throws IOException {
             final File logFile = getLogFile();
             final AnnotatedLargeText<TeamPollingAction> text =
                     new AnnotatedLargeText<TeamPollingAction>(logFile, MediaType.UTF_8, true, this);

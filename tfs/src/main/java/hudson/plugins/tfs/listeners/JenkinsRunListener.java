@@ -1,7 +1,9 @@
 package hudson.plugins.tfs.listeners;
 
 import hudson.Extension;
+import hudson.model.Action;
 import hudson.model.Cause;
+import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -9,12 +11,15 @@ import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.tfs.CommitParameterAction;
 import hudson.plugins.tfs.JenkinsEventNotifier;
+import hudson.plugins.tfs.TeamPushCause;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.model.GitStatusState;
+import java.util.List;
 import net.sf.json.JSONObject;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Logger;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
 /**
  * This class listens to the events of every Jenkins run instance.
@@ -38,7 +43,8 @@ public class JenkinsRunListener extends RunListener<Run> {
             Job currJob = run.getParent();
             final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
             final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
-            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, GitStatusState.Pending, "Jenkins CI build started", targetUrl, currJob.getAbsoluteUrl());
+            final String runConfig = getRunConfig(run) + " started";
+            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, GitStatusState.Pending, runConfig, targetUrl, currJob.getAbsoluteUrl());
         }
     }
 
@@ -60,9 +66,11 @@ public class JenkinsRunListener extends RunListener<Run> {
 
         if (UnsupportedIntegrationAction.isSupported(run, listener)) {
             Job currJob = run.getParent();
+            final String runDescription = run.getDescription();
             final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
             final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
-            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, runGitState, "Jenkins CI build completed", targetUrl, currJob.getAbsoluteUrl());
+            final String runConfig = getRunConfig(run) + " started";
+            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, runGitState, runConfig, targetUrl, currJob.getAbsoluteUrl());
         }
 
         JSONObject json = createJsonFromRun(run);
@@ -88,5 +96,21 @@ public class JenkinsRunListener extends RunListener<Run> {
 
     private JSONObject createJsonFromRun(final Run run) {
         return new JSONObject();
+    }
+
+    private String getRunConfig(final Run run) {
+        if (run instanceof WorkflowRun) {
+            List<? extends Action> actionList = ((WorkflowRun) run).getAllActions();
+            for (final Action currAction : actionList) {
+                if (currAction instanceof CauseAction) {
+                    for (final Cause currCause : ((CauseAction) currAction).getCauses()) {
+                        if (currCause instanceof TeamPushCause) {
+                            return ((TeamPushCause) currCause).getRunConfig();
+                        }
+                    }
+                }
+            }
+        }
+        return "Jenkins CI build";
     }
 }
