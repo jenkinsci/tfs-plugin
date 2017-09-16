@@ -9,6 +9,7 @@ import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.ParameterDefinition;
+import hudson.model.ParameterValue;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
@@ -149,10 +150,16 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                             for (final ParameterDefinition currParam : pDefProp.getParameterDefinitions()) {
                                 final String paramName = currParam.getName();
                                 if (paramName.equalsIgnoreCase("CGroup") || paramName.equalsIgnoreCase("Configuration")) {
-                                    configGroup = currParam.getDefaultParameterValue().getValue().toString();
+                                    ParameterValue pValue = currParam.getDefaultParameterValue();
+                                    if (pValue != null && pValue.getValue() != null) {
+                                        configGroup = pValue.getValue().toString();
+                                    }
                                 }
                                 if (paramName.equalsIgnoreCase("AGroup")) {
-                                    archGroup = currParam.getDefaultParameterValue().getValue().toString();
+                                    ParameterValue pValue = currParam.getDefaultParameterValue();
+                                    if (pValue != null && pValue.getValue() != null) {
+                                        archGroup = pValue.getValue().toString();
+                                    }
                                 }
                             }
                         }

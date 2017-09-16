@@ -58,7 +58,7 @@ public class JenkinsRunListener extends RunListener<Run> {
 
         GitStatusState runGitState;
         final Result runResult = run.getResult();
-        if (runResult.isBetterOrEqualTo(Result.SUCCESS)) {
+        if (runResult != null && runResult.isBetterOrEqualTo(Result.SUCCESS)) {
             runGitState = GitStatusState.Succeeded;
         } else {
             runGitState = GitStatusState.Failed;
