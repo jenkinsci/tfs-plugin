@@ -69,7 +69,7 @@ public class JenkinsRunListener extends RunListener<Run> {
             final String runDescription = run.getDescription();
             final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
             final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
-            final String runConfig = getRunConfig(run) + " started";
+            final String runConfig = getRunConfig(run) + " completed";
             JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, runGitState, runConfig, targetUrl, currJob.getAbsoluteUrl());
         }
 
