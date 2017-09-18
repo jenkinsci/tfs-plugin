@@ -169,10 +169,6 @@ public abstract class AbstractHookEvent {
                         return  new TeamEventsEndpoint.PollingScheduledResponseContributor(project);
                     }
                 }
-
-                if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
-                    JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Failed, "Fail to launch Jenkins CI build", targetUrl, job.getAbsoluteUrl());
-                }
             }
         }
 
