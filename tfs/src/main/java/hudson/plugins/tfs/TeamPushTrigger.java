@@ -7,10 +7,6 @@ import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
-import hudson.model.JobProperty;
-import hudson.model.ParameterDefinition;
-import hudson.model.ParameterValue;
-import hudson.model.ParametersDefinitionProperty;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.util.ActionHelper;
@@ -35,7 +31,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 /**
  * Triggers a build when we receive a TFS/Team Services Git code push event.
@@ -43,13 +38,16 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
     private static final Logger LOGGER = Logger.getLogger(TeamPushTrigger.class.getName());
+    private final String jobContext;
 
     @DataBoundConstructor
     public TeamPushTrigger() {
+        this.jobContext = "";
     }
 
-    public TeamPushTrigger(final Job<?, ?> job) {
+    public TeamPushTrigger(final Job<?, ?> job, final String jobContext) {
         this.job = job;
+        this.jobContext = jobContext;
     }
 
     /**
@@ -63,6 +61,10 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
     public File getLogFile() {
         return new File(job.getRootDir(), "team-polling.log");
+    }
+
+    public String getJobContext() {
+        return jobContext;
     }
 
     /**
@@ -140,44 +142,17 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                 final String name = "#" + p.getNextBuildNumber();
                 final String pushedBy = gitCodePushedEventArgs.pushedBy;
 
-                String archGroup = "";
-                String configGroup = "";
-                if (p instanceof WorkflowJob) {
-                    final List<JobProperty<? super WorkflowJob>> jobProperties = ((WorkflowJob) p).getAllProperties();
-                    for (final JobProperty<? super WorkflowJob> jobProperty : ((WorkflowJob) p).getAllProperties()) {
-                        if (jobProperty instanceof ParametersDefinitionProperty) {
-                            ParametersDefinitionProperty pDefProp = (ParametersDefinitionProperty) jobProperty;
-                            for (final ParameterDefinition currParam : pDefProp.getParameterDefinitions()) {
-                                final String paramName = currParam.getName();
-                                if (paramName.equalsIgnoreCase("CGroup") || paramName.equalsIgnoreCase("Configuration")) {
-                                    ParameterValue pValue = currParam.getDefaultParameterValue();
-                                    if (pValue != null && pValue.getValue() != null) {
-                                        configGroup = pValue.getValue().toString();
-                                    }
-                                }
-                                if (paramName.equalsIgnoreCase("AGroup")) {
-                                    ParameterValue pValue = currParam.getDefaultParameterValue();
-                                    if (pValue != null && pValue.getValue() != null) {
-                                        archGroup = pValue.getValue().toString();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                final String runConfig = archGroup + " " + configGroup + " build";
-
                 TeamPushCause cause;
                 final File logFile = getLogFile();
                 if (logFile.isFile()) {
                     try {
-                        cause = new TeamPushCause(logFile, pushedBy, runConfig);
+                        cause = new TeamPushCause(logFile, pushedBy, getJobContext());
                     } catch (IOException e) {
                         LOGGER.log(Level.WARNING, "Failed to parse the polling log", e);
-                        cause = new TeamPushCause(pushedBy, runConfig);
+                        cause = new TeamPushCause(pushedBy, getJobContext());
                     }
                 } else {
-                    cause = new TeamPushCause(pushedBy, runConfig);
+                    cause = new TeamPushCause(pushedBy, getJobContext());
                 }
                 final int quietPeriod = p.getQuietPeriod();
                 final CauseAction causeAction = new CauseAction(cause);
@@ -203,6 +178,13 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
+//        private String jobContext;
+
+        public DescriptorImpl() {
+            super(TeamPushTrigger.class);
+            load();
+        }
+
         @Override
         public boolean isApplicable(final Item item) {
             return item instanceof Job
@@ -212,8 +194,31 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public String getDisplayName() {
+            load();
             return "Build when a change is pushed to TFS/Team Services";
         }
+
+//        @Override
+//        public Trigger<?> newInstance(final StaplerRequest req, final JSONObject formData)
+//                        throws FormException {
+//                req.bindParameters(this);
+//                this.jobContext = formData.getString("jobContext");
+//                super.save();
+//                return super.newInstance(req, formData);
+//        }
+
+//        @Override
+//        public boolean configure(final StaplerRequest req, final JSONObject formData)
+//                        throws FormException {
+//                req.bindParameters(this);
+//                this.jobContext = formData.getString("jobContext");
+//                save();
+//                return super.configure(req, formData);
+//        }
+
+//        public String getJobContext() {
+//            return jobContext;
+//        }
     }
 
     @Override

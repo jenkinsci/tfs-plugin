@@ -225,6 +225,7 @@
     </dependency>
 
     <dependency>
+    <dependency>
       <groupId>com.microsoft.tfs.sdk</groupId>
       <artifactId>com.microsoft.tfs.sdk</artifactId>
       <version>14.0.3</version>

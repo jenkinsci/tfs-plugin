@@ -111,7 +111,7 @@ public abstract class AbstractHookEvent {
                 if (config.isEnableTeamPushTriggerForAllJobs()) {
                     if (scmTrigger == null || !scmTrigger.isIgnorePostCommitHooks()) {
                         // trigger is null OR job does NOT have explicitly opted out of hooks
-                        final TeamPushTrigger trigger = new TeamPushTrigger(job);
+                        final TeamPushTrigger trigger = new TeamPushTrigger(job, "");
                         trigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
                         if (bypassPolling) {
                             return new TeamEventsEndpoint.ScheduledResponseContributor(project);
@@ -158,7 +158,7 @@ public abstract class AbstractHookEvent {
 
                 TeamPushTrigger pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPushTrigger.class);
                 if (shouldRun && pushTrigger == null) {
-                    pushTrigger = new TeamPushTrigger(job);
+                    pushTrigger = new TeamPushTrigger(job, "");
                 }
 
                 if (pushTrigger != null) {
