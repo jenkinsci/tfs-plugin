@@ -28,6 +28,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 @Extension
 public class JenkinsRunListener extends RunListener<Run> {
     protected static final Logger log = Logger.getLogger(JenkinsRunListener.class.getName());
+    private static final String DEFAULT_RUN_CONTEXT = "Jenkins PR build";
 
     public JenkinsRunListener() {
         log.fine("JenkinsRunListener: constructor");
@@ -43,8 +44,8 @@ public class JenkinsRunListener extends RunListener<Run> {
             Job currJob = run.getParent();
             final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
             final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
-            final String runConfig = getRunConfig(run) + " started";
-            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, GitStatusState.Pending, runConfig, targetUrl, currJob.getAbsoluteUrl());
+            final String context = getRunContext(run) + " started";
+            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, GitStatusState.Pending, context, targetUrl, currJob.getAbsoluteUrl());
         }
     }
 
@@ -69,8 +70,8 @@ public class JenkinsRunListener extends RunListener<Run> {
             final String runDescription = run.getDescription();
             final String targetUrl = currJob.getAbsoluteUrl() + (currJob.getNextBuildNumber() - 1);
             final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
-            final String runConfig = getRunConfig(run) + " completed";
-            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, runGitState, runConfig, targetUrl, currJob.getAbsoluteUrl());
+            final String context = getRunContext(run) + " completed";
+            JenkinsEventNotifier.sendPullRequestBuildStatusEvent(commitParameter, runGitState, context, targetUrl, currJob.getAbsoluteUrl());
         }
 
         JSONObject json = createJsonFromRun(run);
@@ -98,19 +99,19 @@ public class JenkinsRunListener extends RunListener<Run> {
         return new JSONObject();
     }
 
-    private String getRunConfig(final Run run) {
+    private String getRunContext(final Run run) {
         if (run instanceof WorkflowRun) {
             List<? extends Action> actionList = ((WorkflowRun) run).getAllActions();
             for (final Action currAction : actionList) {
                 if (currAction instanceof CauseAction) {
                     for (final Cause currCause : ((CauseAction) currAction).getCauses()) {
                         if (currCause instanceof TeamPushCause) {
-                            return ((TeamPushCause) currCause).getRunConfig();
+                            return ((TeamPushCause) currCause).getRunContext();
                         }
                     }
                 }
             }
         }
-        return "Jenkins CI build";
+        return DEFAULT_RUN_CONTEXT;
     }
 }

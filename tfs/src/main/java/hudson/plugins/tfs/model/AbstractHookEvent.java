@@ -100,7 +100,7 @@ public abstract class AbstractHookEvent {
         return result;
     }
 
-    GitStatus.ResponseContributor triggerJob(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling, final Item project, final SCMTriggerItem scmTriggerItem) {
+    GitStatus.ResponseContributor triggerJob(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling, final Item project, final SCMTriggerItem scmTriggerItem, final Boolean repoMatch) {
         if (!(project instanceof AbstractProject && ((AbstractProject) project).isDisabled())) {
             if (project instanceof Job) {
                 final Job job = (Job) project;
@@ -129,13 +129,13 @@ public abstract class AbstractHookEvent {
                     final Action[] actionArray = ActionHelper.create(actions, causeAction);
                     scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
                     if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
-                        JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins CI build queued", targetUrl, job.getAbsoluteUrl());
+                        JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins PR build queued", targetUrl, job.getAbsoluteUrl());
                     }
 
                     return new TeamEventsEndpoint.ScheduledResponseContributor(project);
                 }
 
-                if (repoMatch(gitCodePushedEventArgs, job)) {
+                if (repoMatch || repoMatch(gitCodePushedEventArgs, job)) {
                     TeamPushTrigger pushTrigger = null;
                     if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
                         pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPRPushTrigger.class);
@@ -220,7 +220,7 @@ public abstract class AbstractHookEvent {
                 }
 
                 if (scmTriggerItem.getSCMs().isEmpty()) {
-                    GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actions, bypassPolling, project, scmTriggerItem);
+                    GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actions, bypassPolling, project, scmTriggerItem, false);
                     if (triggerResult != null) {
                         result.add(triggerResult);
                     }
@@ -248,7 +248,7 @@ public abstract class AbstractHookEvent {
                             continue;
                         }
 
-                        GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actions, bypassPolling, project, scmTriggerItem);
+                        GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actions, bypassPolling, project, scmTriggerItem, true);
                         if (triggerResult != null) {
                             result.add(triggerResult);
                             break;

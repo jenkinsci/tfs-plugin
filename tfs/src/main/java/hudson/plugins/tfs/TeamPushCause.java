@@ -12,22 +12,22 @@ import java.io.IOException;
 public class TeamPushCause extends SCMTriggerCause {
 
     private final String pushedBy;
-    private final String runConfig;
+    private final String context;
 
-    public TeamPushCause(final String pushedBy, final String runConfig) {
-        this("", pushedBy, runConfig);
+    public TeamPushCause(final String pushedBy, final String context) {
+        this("", pushedBy, context);
     }
 
-    public TeamPushCause(final File logFile, final String pushedBy, final String runConfig) throws IOException {
+    public TeamPushCause(final File logFile, final String pushedBy, final String context) throws IOException {
         super(logFile);
         this.pushedBy = pushedBy;
-        this.runConfig = runConfig;
+        this.context = context;
     }
 
-    public TeamPushCause(final String pollingLog, final String pushedBy, final String runConfig) {
+    public TeamPushCause(final String pollingLog, final String pushedBy, final String context) {
         super(pollingLog);
         this.pushedBy = pushedBy;
-        this.runConfig = runConfig;
+        this.context = context;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class TeamPushCause extends SCMTriggerCause {
         return super.hashCode();
     }
 
-    public String getRunConfig() {
-        return this.runConfig;
+    public String getRunContext() {
+        return this.context;
     }
 }
