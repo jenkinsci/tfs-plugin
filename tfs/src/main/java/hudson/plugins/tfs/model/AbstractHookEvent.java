@@ -15,6 +15,7 @@ import hudson.plugins.tfs.JenkinsEventNotifier;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamGlobalStatusAction;
 import hudson.plugins.tfs.TeamHookCause;
+import hudson.plugins.tfs.TeamPRPushTrigger;
 import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
@@ -111,7 +112,7 @@ public abstract class AbstractHookEvent {
                 if (config.isEnableTeamPushTriggerForAllJobs()) {
                     if (scmTrigger == null || !scmTrigger.isIgnorePostCommitHooks()) {
                         // trigger is null OR job does NOT have explicitly opted out of hooks
-                        final TeamPushTrigger trigger = new TeamPushTrigger(job, "");
+                        final TeamPushTrigger trigger = new TeamPushTrigger(job);
                         trigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
                         if (bypassPolling) {
                             return new TeamEventsEndpoint.ScheduledResponseContributor(project);
@@ -134,45 +135,56 @@ public abstract class AbstractHookEvent {
                     return new TeamEventsEndpoint.ScheduledResponseContributor(project);
                 }
 
-                boolean shouldRun = false;
-
-                if (job instanceof WorkflowJob) {
-                    final FlowDefinition jobDef = ((WorkflowJob) job).getDefinition();
-                    if (jobDef instanceof CpsScmFlowDefinition) {
-                        final SCM jobSCM = ((CpsScmFlowDefinition) jobDef).getScm();
-                        if (jobSCM instanceof GitSCM) {
-                            final GitSCM gitJobSCM = (GitSCM) jobSCM;
-                            final URIish uri = gitCodePushedEventArgs.getRepoURIish();
-
-                            for (final UserRemoteConfig remoteConfig : gitJobSCM.getUserRemoteConfigs()) {
-                                final String jobRepoUrl = remoteConfig.getUrl();
-
-                                if (StringUtils.equalsIgnoreCase(jobRepoUrl, uri.toString())) {
-                                    shouldRun = true;
+                if (repoMatch(gitCodePushedEventArgs, job)) {
+                    TeamPushTrigger pushTrigger = null;
+                    if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
+                        pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPRPushTrigger.class);
+                    } else { // Check whether current job has an EXACT TeamPushTrigger instead of a TeamPRPushTrigger whose type is also TeamPushTrigger.
+                        final List<TeamPushTrigger> listTriggers = TeamEventsEndpoint.findTriggers(job, TeamPushTrigger.class);
+                        if (!listTriggers.isEmpty()) {
+                            for (TeamPushTrigger trigger : listTriggers) {
+                                if (!(trigger instanceof TeamPRPushTrigger)) {
+                                    pushTrigger = trigger;
                                     break;
                                 }
                             }
                         }
                     }
-                }
-
-                TeamPushTrigger pushTrigger = TeamEventsEndpoint.findTrigger(job, TeamPushTrigger.class);
-                if (shouldRun && pushTrigger == null) {
-                    pushTrigger = new TeamPushTrigger(job, "");
-                }
-
-                if (pushTrigger != null) {
-                    pushTrigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
-                    if (bypassPolling) {
-                        return new TeamEventsEndpoint.ScheduledResponseContributor(project);
-                    } else {
-                        return  new TeamEventsEndpoint.PollingScheduledResponseContributor(project);
+                    if (pushTrigger != null) {
+                        pushTrigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
+                        if (bypassPolling) {
+                            return new TeamEventsEndpoint.ScheduledResponseContributor(project);
+                        } else {
+                            return  new TeamEventsEndpoint.PollingScheduledResponseContributor(project);
+                        }
                     }
                 }
             }
         }
 
         return null;
+    }
+
+    private Boolean repoMatch(final GitCodePushedEventArgs gitCodePushedEventArgs, final Job job) {
+        if (job instanceof WorkflowJob) {
+            final FlowDefinition jobDef = ((WorkflowJob) job).getDefinition();
+            if (jobDef instanceof CpsScmFlowDefinition) {
+                final SCM jobSCM = ((CpsScmFlowDefinition) jobDef).getScm();
+                if (jobSCM instanceof GitSCM) {
+                    final GitSCM gitJobSCM = (GitSCM) jobSCM;
+                    final URIish uri = gitCodePushedEventArgs.getRepoURIish();
+
+                    for (final UserRemoteConfig remoteConfig : gitJobSCM.getUserRemoteConfigs()) {
+                        final String jobRepoUrl = remoteConfig.getUrl();
+
+                        if (StringUtils.equalsIgnoreCase(jobRepoUrl, uri.toString())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     // TODO: it would be easiest if pollOrQueueFromEvent built a JSONObject directly

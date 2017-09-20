@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Triggers a build when we receive a TFS/Team Services Git code push event.
@@ -38,16 +39,14 @@ import java.util.logging.Logger;
 public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
     private static final Logger LOGGER = Logger.getLogger(TeamPushTrigger.class.getName());
-    private final String jobContext;
+    private String jobContext;
 
     @DataBoundConstructor
     public TeamPushTrigger() {
-        this.jobContext = "";
     }
 
-    public TeamPushTrigger(final Job<?, ?> job, final String jobContext) {
+    public TeamPushTrigger(final Job<?, ?> job) {
         this.job = job;
-        this.jobContext = jobContext;
     }
 
     /**
@@ -65,6 +64,11 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
     public String getJobContext() {
         return jobContext;
+    }
+
+    @DataBoundSetter
+    public void setJobContext(final String jobContext) {
+        this.jobContext = jobContext;
     }
 
     /**
@@ -178,13 +182,6 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
 
-//        private String jobContext;
-
-        public DescriptorImpl() {
-            super(TeamPushTrigger.class);
-            load();
-        }
-
         @Override
         public boolean isApplicable(final Item item) {
             return item instanceof Job
@@ -194,31 +191,8 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
 
         @Override
         public String getDisplayName() {
-            load();
             return "Build when a change is pushed to TFS/Team Services";
         }
-
-//        @Override
-//        public Trigger<?> newInstance(final StaplerRequest req, final JSONObject formData)
-//                        throws FormException {
-//                req.bindParameters(this);
-//                this.jobContext = formData.getString("jobContext");
-//                super.save();
-//                return super.newInstance(req, formData);
-//        }
-
-//        @Override
-//        public boolean configure(final StaplerRequest req, final JSONObject formData)
-//                        throws FormException {
-//                req.bindParameters(this);
-//                this.jobContext = formData.getString("jobContext");
-//                save();
-//                return super.configure(req, formData);
-//        }
-
-//        public String getJobContext() {
-//            return jobContext;
-//        }
     }
 
     @Override
