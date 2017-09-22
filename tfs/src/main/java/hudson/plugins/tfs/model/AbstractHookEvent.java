@@ -7,11 +7,16 @@ import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersDefinitionProperty;
+import hudson.model.StringParameterValue;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.git.UserRemoteConfig;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
 import hudson.plugins.tfs.JenkinsEventNotifier;
+import hudson.plugins.tfs.SafeParametersAction;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamGlobalStatusAction;
 import hudson.plugins.tfs.TeamHookCause;
@@ -40,6 +45,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
@@ -107,13 +113,21 @@ public abstract class AbstractHookEvent {
                 final int quietPeriod = scmTriggerItem.getQuietPeriod();
                 final String targetUrl = job.getAbsoluteUrl() + job.getNextBuildNumber();
 
+                final ArrayList<ParameterValue> values = getDefaultParameters(job);
+                final String vstsRefspec = getVstsRefspec(gitCodePushedEventArgs);
+                values.add(new StringParameterValue("vstsRefspec", vstsRefspec));
+                values.add(new StringParameterValue("vstsBranch", gitCodePushedEventArgs.commit));
+                SafeParametersAction paraAction = new SafeParametersAction(values);
+                final Action[] actionsNew = ActionHelper.create(actions, paraAction);
+                final List<Action> actionsWithSafeParams = new ArrayList<Action>(Arrays.asList(actionsNew));
+
                 final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
                 final SCMTrigger scmTrigger = TeamEventsEndpoint.findTrigger(job, SCMTrigger.class);
                 if (config.isEnableTeamPushTriggerForAllJobs()) {
                     if (scmTrigger == null || !scmTrigger.isIgnorePostCommitHooks()) {
                         // trigger is null OR job does NOT have explicitly opted out of hooks
                         final TeamPushTrigger trigger = new TeamPushTrigger(job);
-                        trigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
+                        trigger.execute(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling);
                         if (bypassPolling) {
                             return new TeamEventsEndpoint.ScheduledResponseContributor(project);
                         } else {
@@ -126,7 +140,7 @@ public abstract class AbstractHookEvent {
                     // queue build without first polling
                     final Cause cause = new TeamHookCause(gitCodePushedEventArgs.commit);
                     final CauseAction causeAction = new CauseAction(cause);
-                    final Action[] actionArray = ActionHelper.create(actions, causeAction);
+                    final Action[] actionArray = ActionHelper.create(actionsWithSafeParams, causeAction);
                     scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
                     if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
                         JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins PR build queued", targetUrl, job.getAbsoluteUrl());
@@ -151,7 +165,7 @@ public abstract class AbstractHookEvent {
                         }
                     }
                     if (pushTrigger != null) {
-                        pushTrigger.execute(gitCodePushedEventArgs, actions, bypassPolling);
+                        pushTrigger.execute(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling);
                         if (bypassPolling) {
                             return new TeamEventsEndpoint.ScheduledResponseContributor(project);
                         } else {
@@ -270,4 +284,26 @@ public abstract class AbstractHookEvent {
         }
     }
 
+    private ArrayList<ParameterValue> getDefaultParameters(final Job<?, ?> job) {
+        ArrayList<ParameterValue> values = new ArrayList<ParameterValue>();
+        ParametersDefinitionProperty pdp = job.getProperty(ParametersDefinitionProperty.class);
+        if (pdp != null) {
+            for (ParameterDefinition pd : pdp.getParameterDefinitions()) {
+                if (pd.getName().equals("sha1")) {
+                    continue;
+                }
+                values.add(pd.getDefaultParameterValue());
+            }
+        }
+        return values;
+    }
+
+    private String getVstsRefspec(final GitCodePushedEventArgs gitCodePushedEventArgs) {
+        if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
+            int prId = ((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs).pullRequestId;
+            return String.format("+refs/pull/%d/merge:refs/remotes/pull/%d/merge", prId, prId);
+        } else {
+            return "+refs/heads/*:refs/remotes/origin/*";
+        }
+    }
 }
