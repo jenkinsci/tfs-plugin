@@ -28,7 +28,7 @@ public class ChangeSetReaderTest {
                         "</changelog>");
         
         ChangeSetReader changesetReader = new ChangeSetReader();
-        ChangeLogSet logset = changesetReader.parse(null, reader);
+        ChangeLogSet logset = changesetReader.parse(null, null, reader);
         
         ChangeSet changeset = logset.iterator().next();
         assertEquals("User is incorrect", "user", changeset.getUser());
@@ -62,7 +62,7 @@ public class ChangeSetReaderTest {
                         "</changelog>");
         
         ChangeSetReader changesetReader = new ChangeSetReader();
-        ChangeLogSet logset = changesetReader.parse(null, reader);
+        ChangeLogSet logset = changesetReader.parse(null, null, reader);
         
         ChangeSet changeset = logset.iterator().next();
         Item item = changeset.getItems().get(0);
@@ -84,7 +84,7 @@ public class ChangeSetReaderTest {
             "</changelog>");
 
         ChangeSetReader changesetReader = new ChangeSetReader();
-        ChangeLogSet logset = changesetReader.parse(null, reader);
+        ChangeLogSet logset = changesetReader.parse(null, null, reader);
         
         ChangeSet changeset = logset.iterator().next();
         assertEquals("The chage set's comment is incorrect", "Just <testing> \"what\" happens when I use the & character...Hudson does not seem to like it!", changeset.getComment());
@@ -106,7 +106,7 @@ public class ChangeSetReaderTest {
                         "</changelog>");
         
         ChangeSetReader changesetReader = new ChangeSetReader();
-        ChangeLogSet logset = changesetReader.parse(null, reader);
+        ChangeLogSet logset = changesetReader.parse(null, null, reader);
         
         ChangeSet changeset = logset.iterator().next();
         assertEquals("Checked in by user is incorrect", "other_user", changeset.getCheckedInBy());
