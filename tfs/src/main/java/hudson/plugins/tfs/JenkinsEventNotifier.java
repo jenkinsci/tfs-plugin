@@ -80,7 +80,7 @@ public final class JenkinsEventNotifier {
                 }
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to exception: " + e.getMessage());
         }
         return;
     }
@@ -100,9 +100,9 @@ public final class JenkinsEventNotifier {
             final TeamRestClient client = new TeamRestClient(collectionUri);
             client.addPullRequestStatus(gitCodePushedEventArgs, status);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to MalformedURLException: " + e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to IOException: " + e.getMessage());
         }
         return;
     }

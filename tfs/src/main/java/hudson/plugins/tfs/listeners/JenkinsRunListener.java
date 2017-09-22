@@ -19,7 +19,6 @@ import net.sf.json.JSONObject;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Logger;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
 /**
  * This class listens to the events of every Jenkins run instance.
@@ -100,14 +99,12 @@ public class JenkinsRunListener extends RunListener<Run> {
     }
 
     private String getRunContext(final Run run) {
-        if (run instanceof WorkflowRun) {
-            List<? extends Action> actionList = ((WorkflowRun) run).getAllActions();
-            for (final Action currAction : actionList) {
-                if (currAction instanceof CauseAction) {
-                    for (final Cause currCause : ((CauseAction) currAction).getCauses()) {
-                        if (currCause instanceof TeamPushCause) {
-                            return ((TeamPushCause) currCause).getRunContext();
-                        }
+        List<? extends Action> actionList = run.getAllActions();
+        for (final Action currAction : actionList) {
+            if (currAction instanceof CauseAction) {
+                for (final Cause currCause : ((CauseAction) currAction).getCauses()) {
+                    if (currCause instanceof TeamPushCause) {
+                        return ((TeamPushCause) currCause).getRunContext();
                     }
                 }
             }

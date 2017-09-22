@@ -7,6 +7,11 @@ import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.Job;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
+import hudson.model.ParametersDefinitionProperty;
+import hudson.model.StringParameterValue;
 import hudson.model.queue.QueueTaskFuture;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.util.ActionHelper;
@@ -25,6 +30,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -127,6 +133,20 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
             }
         }
 
+        private ArrayList<ParameterValue> getDefaultParameters() {
+            ArrayList<ParameterValue> values = new ArrayList<ParameterValue>();
+            ParametersDefinitionProperty pdp = job.getProperty(ParametersDefinitionProperty.class);
+            if (pdp != null) {
+                for (ParameterDefinition pd : pdp.getParameterDefinitions()) {
+                    if (pd.getName().equals("sha1")) {
+                        continue;
+                    }
+                    values.add(pd.getDefaultParameterValue());
+                }
+            }
+            return values;
+        }
+
         @Override
         public void run() {
             boolean shouldSchedule = bypassPolling;
@@ -159,8 +179,14 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
                     cause = new TeamPushCause(pushedBy, getJobContext());
                 }
                 final int quietPeriod = p.getQuietPeriod();
+
+                //Testing code, to be removed once testing is done.
+                ArrayList<ParameterValue> values = getDefaultParameters();
+                final String vstsRefspec = "+refs/pull/258770/merge:refs/remotes/pull/258770/merge";
+                values.add(new StringParameterValue("vstsRefspec", vstsRefspec));
+
                 final CauseAction causeAction = new CauseAction(cause);
-                final Action[] actionArray = ActionHelper.create(actions, causeAction);
+                final Action[] actionArray = ActionHelper.create(actions, new ParametersAction(values), causeAction);
                 final QueueTaskFuture<?> queueTaskFuture = p.scheduleBuild2(quietPeriod, actionArray);
                 if (queueTaskFuture != null) {
                     LOGGER.info(changesDetected + "Triggering " + name);
