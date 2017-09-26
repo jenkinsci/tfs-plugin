@@ -49,6 +49,11 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
         this.job = job;
     }
 
+    public TeamPushTrigger(final Job<?, ?> job, final String jobContext) {
+        this.job = job;
+        this.jobContext = jobContext;
+    }
+
     /**
     * Execute function.
     */
