@@ -140,7 +140,6 @@ public class BuildCommand extends AbstractCommand {
             }
         }
 
-        //noinspection UnnecessaryLocalVariable
         final ParametersDefinitionProperty pp = job.getProperty(ParametersDefinitionProperty.class);
         if (pp != null && requestPayload.containsKey(TeamBuildEndpoint.PARAMETER)) {
             final List<ParameterValue> values = new ArrayList<ParameterValue>();
@@ -182,7 +181,7 @@ public class BuildCommand extends AbstractCommand {
             }
 
             //Pick up default build parameters that have not been overridden
-            for(ParameterDefinition paramDef : pp.getParameterDefinitions()) {
+            for(final ParameterDefinition paramDef : pp.getParameterDefinitions()) {
                 if(!parameterNames.contains(paramDef.getName()) && paramDef instanceof SimpleParameterDefinition){
                     values.add(paramDef.getDefaultParameterValue());
                 }
