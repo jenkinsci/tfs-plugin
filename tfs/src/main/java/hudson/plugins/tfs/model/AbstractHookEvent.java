@@ -62,6 +62,7 @@ public abstract class AbstractHookEvent {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractHookEvent.class.getName());
     private static final String TRIGGER_ANY_BRANCH = "**";
+    private static final String TESTING_COLLECTION = "https://fabrikam.visualstudio.com/DefaultCollection/";
 
     private EnvVars envVars;
 
@@ -142,7 +143,7 @@ public abstract class AbstractHookEvent {
                     final CauseAction causeAction = new CauseAction(cause);
                     final Action[] actionArray = ActionHelper.create(actionsWithSafeParams, causeAction);
                     scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
-                    if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
+                    if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs && !gitCodePushedEventArgs.collectionUri.toString().equalsIgnoreCase(TESTING_COLLECTION)) {
                         JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins PR build queued", targetUrl, job.getAbsoluteUrl());
                     }
 
@@ -278,7 +279,7 @@ public abstract class AbstractHookEvent {
 
                 this.envVars = project instanceof Job ? buildEnv((Job) project) : new EnvVars();
                 List<Action> actionsWithSafeParams = actions;
-                if (!(project instanceof AbstractProject && ((AbstractProject) project).isDisabled()) && project instanceof Job) {
+                if (project instanceof Job) {
                     // Add job-specific additional varaiables to current run.
                     final ArrayList<ParameterValue> values = getDefaultParameters((Job) project);
                     final String vstsRefspec = getVstsRefspec(gitCodePushedEventArgs);
