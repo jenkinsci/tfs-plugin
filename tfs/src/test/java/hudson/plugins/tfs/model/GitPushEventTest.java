@@ -2,6 +2,7 @@ package hudson.plugins.tfs.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.core.webapi.model.TeamProjectReference;
+import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRefUpdate;
 import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.model.servicehooks.ResourceContainer;
@@ -12,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -55,10 +57,15 @@ public class GitPushEventTest {
         final IdentityRef pushedBy = new IdentityRef() {{
             setDisplayName("Jamal Hartnett");
         }};
+        final ArrayList<GitRefUpdate> refUpdates = new ArrayList<GitRefUpdate>();
+        final GitRefUpdate gitRefUpdate = new GitRefUpdate();
+        gitRefUpdate.setName("master");
+        refUpdates.add(gitRefUpdate);
         final Map<String, Object> resource = new LinkedHashMap<String, Object>() {{
             put("commits", null);
             put("repository", repository);
             put("pushedBy", pushedBy);
+            put("refUpdates", refUpdates);
         }};
         event.setResource(resource);
 

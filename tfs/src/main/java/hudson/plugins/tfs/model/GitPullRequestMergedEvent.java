@@ -76,6 +76,13 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         return result;
     }
 
+    static String determineTargetBranch(final GitPullRequest gitPullRequest) {
+        // In the form of ref/heads/master
+        final String targetRefName = gitPullRequest.getTargetRefName();
+        String[] items = targetRefName.split("/");
+        return items[items.length - 1];
+    }
+
     @Override
     public JSONObject perform(final ObjectMapper mapper, final Event serviceHookEvent, final String message, final String detailedMessage) {
         final Object resource = serviceHookEvent.getResource();
@@ -102,6 +109,7 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         final String commit = determineMergeCommit(gitPullRequest);
         final String pushedBy = determineCreatedBy(gitPullRequest);
         final int pullRequestId = gitPullRequest.getPullRequestId();
+        final String targetBranch = determineTargetBranch(gitPullRequest);
 
         final PullRequestMergeCommitCreatedEventArgs args = new PullRequestMergeCommitCreatedEventArgs();
         args.collectionUri = collectionUri;
@@ -111,6 +119,7 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         args.commit = commit;
         args.pushedBy = pushedBy;
         args.pullRequestId = pullRequestId;
+        args.targetBranch = targetBranch;
         return args;
     }
 }

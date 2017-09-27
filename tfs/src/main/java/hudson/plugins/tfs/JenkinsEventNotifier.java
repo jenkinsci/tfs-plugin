@@ -1,7 +1,11 @@
 package hudson.plugins.tfs;
 
 import hudson.plugins.tfs.model.ConnectionParameters;
+import hudson.plugins.tfs.model.GitStatusContext;
+import hudson.plugins.tfs.model.GitStatusState;
 import hudson.plugins.tfs.model.JobCompletionEventArgs;
+import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
+import hudson.plugins.tfs.model.TeamGitStatus;
 import hudson.plugins.tfs.util.TeamRestClient;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -17,6 +21,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -62,6 +68,46 @@ public final class JenkinsEventNotifier {
     }
 
     /**
+     * Send the build status of VSTS pull request back to connected TFS/VSTS servers only for those jobs kicked off by PRs.
+     */
+    public static void sendPullRequestBuildStatusEvent(final CommitParameterAction commitParameter, final GitStatusState buildState, final String buildDescription, final String targetUrl, final String jobFullPath) {
+        try {
+            if (commitParameter != null) {
+                if (commitParameter instanceof PullRequestParameterAction) {
+                    final PullRequestParameterAction prpa = (PullRequestParameterAction) commitParameter;
+                    final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs = prpa.getPullRequestMergeCommitCreatedEventArgs();
+                    sendPullRequestBuildStatusEvent(pullRequestMergeCommitCreatedEventArgs, buildState, buildDescription, targetUrl, jobFullPath);
+                }
+            }
+        } catch (final Exception e) {
+            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to exception: " + e.getMessage());
+        }
+        return;
+    }
+
+    /**
+     * Send the build status of VSTS pull request back to connected TFS/VSTS servers.
+     */
+    public static void sendPullRequestBuildStatusEvent(final PullRequestMergeCommitCreatedEventArgs gitCodePushedEventArgs, final GitStatusState buildState, final String buildDescription, final String targetUrl, final String jobFullPath) {
+        try {
+            final TeamGitStatus status = new TeamGitStatus();
+            status.state = buildState;
+            status.description = buildDescription;
+            status.targetUrl = targetUrl;
+            status.context = new GitStatusContext(" ", StringUtils.stripEnd(jobFullPath, "/"));
+
+            final URI collectionUri = gitCodePushedEventArgs.collectionUri;
+            final TeamRestClient client = new TeamRestClient(collectionUri);
+            client.addPullRequestStatus(gitCodePushedEventArgs, status);
+        } catch (MalformedURLException e) {
+            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to MalformedURLException: " + e.getMessage());
+        } catch (IOException e) {
+            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to IOException: " + e.getMessage());
+        }
+        return;
+    }
+
+    /**
      * This is a helper method to get the JSON for a Jenkins object.
      * @param url
      * @return
@@ -81,17 +127,22 @@ public final class JenkinsEventNotifier {
             request.addHeader("User-Agent", "Jenkins-Self");
 
             final HttpResponse response = client.execute(request);
+            final int statusCode = response.getStatusLine().getStatusCode();
 
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(response.getEntity().getContent(), ENCODING))) {
-
-                final StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                    result.append("\n");
+            if (statusCode <= HttpURLConnection.HTTP_ACCEPTED) {
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(response.getEntity().getContent(), ENCODING))) {
+                    final StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                        result.append("\n");
+                    }
+                    return result.toString();
                 }
-                return result.toString();
+            } else {
+                log.warning("ERROR: getApiJson: (url=" + url + ") failed due to Http error #" + statusCode);
+                return null;
             }
         } catch (final IOException e) {
             log.warning("ERROR: getApiJson: (url=" + url + ") " + e.getMessage());

@@ -280,7 +280,7 @@ public class TeamRestClient {
 
     public TeamGitStatus addPullRequestStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
 
-        final QueryString qs = new QueryString(API_VERSION, "3.0-preview.1");
+        final QueryString qs = new QueryString(API_VERSION, "4.1-preview");
         final URI requestUri = UriHelper.join(
             collectionUri, args.projectId,
             "_apis", "git",
@@ -294,7 +294,7 @@ public class TeamRestClient {
 
     public TeamGitStatus addPullRequestIterationStatus(final PullRequestMergeCommitCreatedEventArgs args, final TeamGitStatus status) throws IOException {
 
-        final QueryString qs = new QueryString(API_VERSION, "3.0-preview.1");
+        final QueryString qs = new QueryString(API_VERSION, "4.1-preview");
         final URI requestUri = UriHelper.join(
             collectionUri, args.projectId,
             "_apis", "git",
