@@ -140,15 +140,16 @@ public class BuildCommand extends AbstractCommand {
             }
         }
 
-        //noinspection UnnecessaryLocalVariable
         final ParametersDefinitionProperty pp = job.getProperty(ParametersDefinitionProperty.class);
         if (pp != null && requestPayload.containsKey(TeamBuildEndpoint.PARAMETER)) {
             final List<ParameterValue> values = new ArrayList<ParameterValue>();
             final JSONArray a = requestPayload.getJSONArray(TeamBuildEndpoint.PARAMETER);
+            final List<String> parameterNames = new ArrayList<>();
 
             for (final Object o : a) {
                 final JSONObject jo = (JSONObject) o;
                 final String name = jo.getString("name");
+                parameterNames.add(name);
 
                 final ParameterDefinition d = pp.getParameterDefinition(name);
                 if (d == null)
@@ -176,6 +177,13 @@ public class BuildCommand extends AbstractCommand {
                 }
                 else {
                     throw new IllegalArgumentException("Cannot retrieve the parameter value: " + name);
+                }
+            }
+
+            //Pick up default build parameters that have not been overridden
+            for(final ParameterDefinition paramDef : pp.getParameterDefinitions()) {
+                if(!parameterNames.contains(paramDef.getName()) && paramDef instanceof SimpleParameterDefinition){
+                    values.add(paramDef.getDefaultParameterValue());
                 }
             }
 
