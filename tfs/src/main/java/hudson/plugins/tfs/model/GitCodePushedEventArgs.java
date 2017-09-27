@@ -16,6 +16,7 @@ public class GitCodePushedEventArgs implements Serializable {
     public String repoId;
     public String commit;
     public String pushedBy;
+    public String targetBranch;
 
     public URIish getRepoURIish() {
         final String repoUriString = repoUri.toString();

@@ -34,7 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -233,6 +235,20 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
             }
         }
         return null;
+    }
+
+    // A job may have multiple triggers of the same type. For example, both TeamPRPushTrigger and TeamPushTrigger are TeamPushTrigger type.
+    public static <T extends Trigger> List<T> findTriggers(final Job<?, ?> job, final Class<T> tClass) {
+        List<T> triggerList = new ArrayList<>();
+        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+            final ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
+            for (final Trigger trigger : pJob.getTriggers().values()) {
+                if (tClass.isInstance(trigger)) {
+                    triggerList.add(tClass.cast(trigger));
+                }
+            }
+        }
+        return triggerList;
     }
 
     /**

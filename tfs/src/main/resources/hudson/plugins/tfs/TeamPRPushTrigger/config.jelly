@@ -1,0 +1,9 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">>
+  <f:entry title="Job Context" field="jobContext">
+    <f:textbox default="Jenkins PR build" />
+  </f:entry>
+  <f:entry title="Target Branches" field="targetBranches">
+    <f:textbox default="*/master" />
+  </f:entry>
+</j:jelly>
