@@ -115,6 +115,13 @@ public class GitPushEvent extends AbstractHookEvent {
         return result;
     }
 
+    static String determineTargetBranch(final GitPush gitPush) {
+        // In the form of ref/heads/master
+        final String targetBranch = gitPush.getRefUpdates().get(0).getName();
+        String[] items = targetBranch.split("/");
+        return items[items.length - 1];
+    }
+
     static GitCodePushedEventArgs decodeGitPush(final GitPush gitPush, final Event serviceHookEvent) {
         final GitRepository repository = gitPush.getRepository();
         final URI collectionUri = determineCollectionUri(repository, serviceHookEvent);
@@ -124,6 +131,7 @@ public class GitPushEvent extends AbstractHookEvent {
         final String repoId = repository.getName();
         final String commit = determineCommit(gitPush);
         final String pushedBy = determinePushedBy(gitPush);
+        final String targetBranch = GitPushEvent.determineTargetBranch(gitPush);
 
         final GitCodePushedEventArgs args = new GitCodePushedEventArgs();
         args.collectionUri = collectionUri;
@@ -132,6 +140,7 @@ public class GitPushEvent extends AbstractHookEvent {
         args.repoId = repoId;
         args.commit = commit;
         args.pushedBy = pushedBy;
+        args.targetBranch = targetBranch;
         return args;
     }
 }

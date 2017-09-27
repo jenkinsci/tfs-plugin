@@ -3,4 +3,7 @@
   <f:entry title="Job Context" field="jobContext">
     <f:textbox default="Jenkins PR build" />
   </f:entry>
+  <f:entry title="Target Branches" field="targetBranches">
+    <f:textbox default="*/master" />
+  </f:entry>
 </j:jelly>
