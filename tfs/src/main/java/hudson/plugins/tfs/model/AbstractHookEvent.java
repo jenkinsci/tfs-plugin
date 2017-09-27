@@ -1,16 +1,19 @@
 package hudson.plugins.tfs.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hudson.EnvVars;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import hudson.model.EnvironmentContributor;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.StringParameterValue;
+import hudson.model.TaskListener;
 import hudson.plugins.git.BranchSpec;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
@@ -45,6 +48,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,6 +62,8 @@ public abstract class AbstractHookEvent {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractHookEvent.class.getName());
     private static final String TRIGGER_ANY_BRANCH = "**";
+
+    private EnvVars envVars;
 
     /**
     * Interface of hook event factory.
@@ -108,20 +114,12 @@ public abstract class AbstractHookEvent {
         return result;
     }
 
-    GitStatus.ResponseContributor triggerJob(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actions, final boolean bypassPolling, final Item project, final SCMTriggerItem scmTriggerItem, final Boolean repoMatches, final Boolean branchMatches) {
+    GitStatus.ResponseContributor triggerJob(final GitCodePushedEventArgs gitCodePushedEventArgs, final List<Action> actionsWithSafeParams, final boolean bypassPolling, final Item project, final SCMTriggerItem scmTriggerItem, final Boolean repoMatches, final Boolean branchMatches) {
         if (!(project instanceof AbstractProject && ((AbstractProject) project).isDisabled())) {
             if (project instanceof Job) {
                 final Job job = (Job) project;
                 final int quietPeriod = scmTriggerItem.getQuietPeriod();
                 final String targetUrl = job.getAbsoluteUrl() + job.getNextBuildNumber();
-
-                final ArrayList<ParameterValue> values = getDefaultParameters(job);
-                final String vstsRefspec = getVstsRefspec(gitCodePushedEventArgs);
-                values.add(new StringParameterValue("vstsRefspec", vstsRefspec));
-                values.add(new StringParameterValue("vstsBranchOrCommit", gitCodePushedEventArgs.commit));
-                SafeParametersAction paraAction = new SafeParametersAction(values);
-                final Action[] actionsNew = ActionHelper.create(actions, paraAction);
-                final List<Action> actionsWithSafeParams = new ArrayList<Action>(Arrays.asList(actionsNew));
 
                 final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
                 final SCMTrigger scmTrigger = TeamEventsEndpoint.findTrigger(job, SCMTrigger.class);
@@ -167,6 +165,9 @@ public abstract class AbstractHookEvent {
                         }
                     }
                     if (pushTrigger != null) {
+                        if (pushTrigger.getJob() == null) {
+                            pushTrigger.setJob(job);
+                        }
                         pushTrigger.execute(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling);
                         if (bypassPolling) {
                             return new TeamEventsEndpoint.ScheduledResponseContributor(project);
@@ -191,7 +192,7 @@ public abstract class AbstractHookEvent {
                     final URIish uri = gitCodePushedEventArgs.getRepoURIish();
 
                     for (final UserRemoteConfig remoteConfig : gitJobSCM.getUserRemoteConfigs()) {
-                        final String jobRepoUrl = remoteConfig.getUrl();
+                        final String jobRepoUrl = this.envVars.expand(remoteConfig.getUrl());
 
                         if (StringUtils.equalsIgnoreCase(jobRepoUrl, uri.toString())) {
                             return true;
@@ -214,7 +215,7 @@ public abstract class AbstractHookEvent {
                     if (branches != null) {
                         for (String branchFullName : branches) {
                             // branchFullName could be in the format of */pr_status
-                            String[] items = branchFullName.split("/");
+                            String[] items = this.envVars.expand(branchFullName).split("/");
                             if (StringUtils.equalsIgnoreCase(items[items.length - 1], gitCodePushedEventArgs.targetBranch)) {
                                 return true;
                             }
@@ -231,7 +232,7 @@ public abstract class AbstractHookEvent {
                         final GitSCM gitJobSCM = (GitSCM) jobSCM;
                         for (final BranchSpec branchFullName : gitJobSCM.getBranches()) {
                             // branchFullName could be in the format of */pr_status
-                            String[] items = branchFullName.getName().split("/");
+                            String[] items = this.envVars.expand(branchFullName.getName()).split("/");
                             if (StringUtils.equalsIgnoreCase(items[items.length - 1], gitCodePushedEventArgs.targetBranch)) {
                                 return true;
                             }
@@ -275,15 +276,32 @@ public abstract class AbstractHookEvent {
                     continue;
                 }
 
+                this.envVars = project instanceof Job ? buildEnv((Job) project) : new EnvVars();
+                List<Action> actionsWithSafeParams = actions;
+                if (!(project instanceof AbstractProject && ((AbstractProject) project).isDisabled()) && project instanceof Job) {
+                    // Add job-specific additional varaiables to current run.
+                    final ArrayList<ParameterValue> values = getDefaultParameters((Job) project);
+                    final String vstsRefspec = getVstsRefspec(gitCodePushedEventArgs);
+                    values.add(new StringParameterValue("vstsRefspec", vstsRefspec));
+                    values.add(new StringParameterValue("vstsBranchOrCommit", gitCodePushedEventArgs.commit));
+                    SafeParametersAction paraAction = new SafeParametersAction(values);
+                    final Action[] actionsNew = ActionHelper.create(actions, paraAction);
+                    actionsWithSafeParams = new ArrayList<Action>(Arrays.asList(actionsNew));
+
+                    // Add job-specific additional varaiables to the build environment.
+                    this.envVars = addVarsToBuildEnv(this.envVars, values);
+                } else {
+                    LOGGER.warning(String.format("Current Jenkins item '%s' is NOT a job, therefore not adding job-specific variables to its run and build environment.", project.getFullName()));
+                }
+
                 // Pipeline job
                 if (scmTriggerItem.getSCMs().isEmpty()) {
-                    GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actions, bypassPolling, project, scmTriggerItem, false, false);
+                    GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling, project, scmTriggerItem, false, false);
                     if (triggerResult != null) {
                         result.add(triggerResult);
                     }
                     continue;
                 }
-
                 for (final SCM scm : scmTriggerItem.getSCMs()) {
                     if (!(scm instanceof GitSCM)) {
                         continue;
@@ -294,7 +312,16 @@ public abstract class AbstractHookEvent {
                     for (final RemoteConfig repository : git.getRepositories()) {
                         boolean repositoryMatches = false;
                         for (final URIish remoteURL : repository.getURIs()) {
-                            if (UriHelper.areSameGitRepo(uri, remoteURL)) {
+                            String url = this.envVars.expand(remoteURL.toString());
+                            URIish urlWithExpandedParams = null;
+                            try {
+                                urlWithExpandedParams = new URIish(url);
+                            } catch (URISyntaxException e) {
+                                LOGGER.warning(String.format("Remote URL '%s' fails to be re-created post build env expansion due to error: '%s'", url, e.toString()));
+                                continue;
+                            }
+
+                            if (UriHelper.areSameGitRepo(uri, urlWithExpandedParams)) {
                                 repositoryMatches = true;
                                 break;
                             }
@@ -302,7 +329,7 @@ public abstract class AbstractHookEvent {
 
                         // Jobs triggered by PR merge need to check whether its target branch matches the one specified in the parameter of PR trigger UI
                         if (repositoryMatches && gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
-                            GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actions, bypassPolling, project, scmTriggerItem, true, false);
+                            GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling, project, scmTriggerItem, true, false);
                             if (triggerResult != null) {
                                 result.add(triggerResult);
                             }
@@ -312,7 +339,7 @@ public abstract class AbstractHookEvent {
                         boolean branchMatches = false;
                         // Jobs triggered by code push need to check whether its target branch matches the one in its Git parameter
                         for (final BranchSpec branch : git.getBranches()) {
-                            final String branchString = branch.toString();
+                            final String branchString = this.envVars.expand(branch.toString());
                             // Might be in the form of */master
                             final String[] items = branchString.split("/");
                             final String branchName = items[items.length - 1];
@@ -327,7 +354,7 @@ public abstract class AbstractHookEvent {
                             continue;
                         }
 
-                        GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actions, bypassPolling, project, scmTriggerItem, true, true);
+                        GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling, project, scmTriggerItem, true, true);
                         if (triggerResult != null) {
                             result.add(triggerResult);
                             break;
@@ -370,5 +397,24 @@ public abstract class AbstractHookEvent {
         } else {
             return "+refs/heads/*:refs/remotes/origin/*";
         }
+    }
+
+    private EnvVars buildEnv(final Job<?, ?> job) {
+        EnvVars env = new EnvVars();
+        for (EnvironmentContributor contributor : EnvironmentContributor.all()) {
+            try {
+                contributor.buildEnvironmentFor(job, env, TaskListener.NULL);
+            } catch (Exception e) {
+                LOGGER.warning("failed to build env, skipping");
+            }
+        }
+        return env;
+    }
+
+    private EnvVars addVarsToBuildEnv(final EnvVars envs, final ArrayList<ParameterValue> vars) {
+        for (ParameterValue p : vars) {
+            envs.putIfNotNull(p.getName(), String.valueOf(p.getValue()));
+        }
+        return envs;
     }
 }
