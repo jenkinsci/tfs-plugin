@@ -166,9 +166,6 @@ public abstract class AbstractHookEvent {
                         }
                     }
                     if (pushTrigger != null) {
-                        if (pushTrigger.getJob() == null) {
-                            pushTrigger.setJob(job);
-                        }
                         pushTrigger.execute(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling);
                         if (bypassPolling) {
                             return new TeamEventsEndpoint.ScheduledResponseContributor(project);
@@ -285,7 +282,7 @@ public abstract class AbstractHookEvent {
                     final String vstsRefspec = getVstsRefspec(gitCodePushedEventArgs);
                     values.add(new StringParameterValue("vstsRefspec", vstsRefspec));
                     values.add(new StringParameterValue("vstsBranchOrCommit", gitCodePushedEventArgs.commit));
-                    SafeParametersAction paraAction = new SafeParametersAction(values);
+                    final SafeParametersAction paraAction = new SafeParametersAction(values);
                     final Action[] actionsNew = ActionHelper.create(actions, paraAction);
                     actionsWithSafeParams = new ArrayList<Action>(Arrays.asList(actionsNew));
 
@@ -313,13 +310,12 @@ public abstract class AbstractHookEvent {
                     for (final RemoteConfig repository : git.getRepositories()) {
                         boolean repositoryMatches = false;
                         for (final URIish remoteURL : repository.getURIs()) {
-                            String url = this.envVars.expand(remoteURL.toString());
+                            final String url = this.envVars.expand(remoteURL.toString());
                             URIish urlWithExpandedParams = null;
                             try {
                                 urlWithExpandedParams = new URIish(url);
                             } catch (URISyntaxException e) {
-                                LOGGER.warning(String.format("Remote URL '%s' fails to be re-created post build env expansion due to error: '%s'", url, e.toString()));
-                                continue;
+                                LOGGER.warning(String.format("urlWithExpandedParams = '%s' fais due to: '%s'", url, e.toString()));
                             }
 
                             if (UriHelper.areSameGitRepo(uri, urlWithExpandedParams)) {
@@ -401,8 +397,8 @@ public abstract class AbstractHookEvent {
     }
 
     private EnvVars buildEnv(final Job<?, ?> job) {
-        EnvVars env = new EnvVars();
-        for (EnvironmentContributor contributor : EnvironmentContributor.all()) {
+        final EnvVars env = new EnvVars();
+        for (final EnvironmentContributor contributor : EnvironmentContributor.all()) {
             try {
                 contributor.buildEnvironmentFor(job, env, TaskListener.NULL);
             } catch (Exception e) {
@@ -413,7 +409,7 @@ public abstract class AbstractHookEvent {
     }
 
     private EnvVars addVarsToBuildEnv(final EnvVars envs, final ArrayList<ParameterValue> vars) {
-        for (ParameterValue p : vars) {
+        for (final ParameterValue p : vars) {
             envs.putIfNotNull(p.getName(), String.valueOf(p.getValue()));
         }
         return envs;

@@ -76,14 +76,6 @@ public class TeamPushTrigger extends Trigger<Job<?, ?>> {
         this.jobContext = jobContext;
     }
 
-    public Job<?, ?> getJob() {
-        return this.job;
-    }
-
-    public void setJob(final Job<?, ?> job) {
-        this.job = job;
-    }
-
     /**
      * Runner class for TeamPushTrigger.
      */
