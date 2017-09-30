@@ -62,7 +62,6 @@ public abstract class AbstractHookEvent {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractHookEvent.class.getName());
     private static final String TRIGGER_ANY_BRANCH = "**";
-    private static final String TESTING_COLLECTION = "https://fabrikam.visualstudio.com/DefaultCollection/";
 
     private EnvVars envVars;
 
@@ -143,10 +142,6 @@ public abstract class AbstractHookEvent {
                     final CauseAction causeAction = new CauseAction(cause);
                     final Action[] actionArray = ActionHelper.create(actionsWithSafeParams, causeAction);
                     scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
-                    if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs && !gitCodePushedEventArgs.collectionUri.toString().equalsIgnoreCase(TESTING_COLLECTION)) {
-                        JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins PR build queued", targetUrl, job.getAbsoluteUrl());
-                    }
-
                     return new TeamEventsEndpoint.ScheduledResponseContributor(project);
                 }
 
@@ -166,6 +161,10 @@ public abstract class AbstractHookEvent {
                         }
                     }
                     if (pushTrigger != null) {
+                        if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
+                            final String context = pushTrigger.getJobContext() + " queued";
+                            JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, context, targetUrl, job.getAbsoluteUrl());
+                        }
                         pushTrigger.execute(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling);
                         if (bypassPolling) {
                             return new TeamEventsEndpoint.ScheduledResponseContributor(project);
@@ -292,7 +291,6 @@ public abstract class AbstractHookEvent {
                     LOGGER.warning(String.format("Current Jenkins item '%s' is NOT a job, therefore not adding job-specific variables to its run and build environment.", project.getFullName()));
                 }
 
-                // Pipeline job
                 if (scmTriggerItem.getSCMs().isEmpty()) {
                     GitStatus.ResponseContributor triggerResult = triggerJob(gitCodePushedEventArgs, actionsWithSafeParams, bypassPolling, project, scmTriggerItem, false, false);
                     if (triggerResult != null) {
