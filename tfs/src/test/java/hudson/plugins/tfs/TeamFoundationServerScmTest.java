@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -239,7 +240,7 @@ public class TeamFoundationServerScmTest {
 
     @Test
     public void serializeMappedPathCollectionToString_two() {
-        final Map<String, String> pathCollection = new HashMap<String, String>();
+        final Map<String, String> pathCollection = new TreeMap<String, String>();
         pathCollection.put("$/foo", "foo");
         pathCollection.put("$/bar", "bar");
 
@@ -250,7 +251,7 @@ public class TeamFoundationServerScmTest {
 
     @Test
     public void serializeMappedPathCollectionToString_many() {
-        final Map<String, String> pathCollection = new HashMap<String, String>();
+        final Map<String, String> pathCollection = new TreeMap<String, String>();
         pathCollection.put("$/foo/", "foo");
         pathCollection.put("$/bar/", "bar");
         pathCollection.put("$/baz/", "baz");
@@ -302,7 +303,7 @@ public class TeamFoundationServerScmTest {
 
         final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
 
-        final Map<String, String> expected = new HashMap<String, String>();
+        final Map<String, String> expected = new TreeMap<String, String>();
         expected.put("$/foo/", "foo");
         areEqual(actual, expected);
     }
@@ -313,7 +314,7 @@ public class TeamFoundationServerScmTest {
 
         final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
 
-        final Map<String, String> expected = new HashMap<String, String>();
+        final Map<String, String> expected = new TreeMap<String, String>();
         expected.put("$/foo/", "foo");
         expected.put("$/bar/", "bar");
         expected.put("$/baz/", "baz");
@@ -326,7 +327,7 @@ public class TeamFoundationServerScmTest {
 
         final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
 
-        final Map<String, String> expected = new HashMap<String, String>();
+        final Map<String, String> expected = new TreeMap<String, String>();
         expected.put("$/foo/", "foo");
         expected.put("$/bar/", "bar");
         expected.put("$/baz/", "baz");
@@ -339,7 +340,7 @@ public class TeamFoundationServerScmTest {
 
         final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
 
-        final Map<String, String> expected = new HashMap<String, String>();
+        final Map<String, String> expected = new TreeMap<String, String>();
         expected.put("$/foo/", "foo");
         expected.put("$/bar/", "bar");
         expected.put("$/baz/", "baz");

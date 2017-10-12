@@ -311,6 +311,24 @@ public class TeamFoundationServerScm extends SCM {
         return paths;
     }
 
+    Map<String, String> getMappedPaths(final Run<?, ?> run) {
+        final Map<String, String> paths = new TreeMap<String, String>();
+        if (mappedPaths != null) {
+            final BuildVariableResolver resolver = new BuildVariableResolver(run.getParent());
+            
+            Iterator<Entry<String, String>> iter = mappedPaths.entrySet().iterator();
+            while (iter.hasNext()) {
+                Entry<String, String> entry = iter.next();
+                final String serverPath = Util.replaceMacro(substituteBuildParameter(run, entry.getKey()), resolver);
+                final String localPath = Util.replaceMacro(substituteBuildParameter(run, entry.getValue()), resolver);
+                
+                paths.put(serverPath, localPath);
+            }
+        }
+
+        return paths;
+    }
+
     private String substituteBuildParameter(final Run<?, ?> run, final String text) {
         if (run instanceof AbstractBuild<?, ?>) {
             AbstractBuild<?, ?> build = (AbstractBuild<?, ?>) run;
