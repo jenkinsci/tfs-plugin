@@ -13,12 +13,15 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -29,6 +32,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 import java.util.List;
 import java.util.logging.Logger;
+
+import static org.apache.http.conn.ssl.SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
 
 /**
  * This class sends Jenkins events to all "connected" team collections.
@@ -120,6 +125,17 @@ public final class JenkinsEventNotifier {
             }
             final String rootUrl = jenkins.getRootUrl();
             final String fullUrl = urlCombine(rootUrl, url, "api", "json");
+            SSLContext sslContext = SSLContexts.custom()
+                    .useTLS()
+                    .build();
+
+            SSLConnectionSocketFactory f = new SSLConnectionSocketFactory(
+                    sslContext,
+                    new String[]{"TLSv1.1", "TLSv1.2"},
+                    null,
+                    BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+
+
             final HttpClient client = HttpClientBuilder.create().build();
             final HttpGet request = new HttpGet(fullUrl);
 
@@ -144,7 +160,10 @@ public final class JenkinsEventNotifier {
                 log.warning("ERROR: getApiJson: (url=" + url + ") failed due to Http error #" + statusCode);
                 return null;
             }
-        } catch (final IOException e) {
+        } catch (final HttpHostConnectException e) {
+            log.warning("ERROR: getApiJson: (url=" + url + ") " + e.getMessage());
+            return null;
+        } catch (final Exception e) {
             log.warning("ERROR: getApiJson: (url=" + url + ") " + e.getMessage());
             throw new RuntimeException(e);
         }
