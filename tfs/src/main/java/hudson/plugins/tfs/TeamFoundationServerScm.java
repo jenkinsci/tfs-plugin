@@ -429,7 +429,7 @@ public class TeamFoundationServerScm extends SCM {
             final Project project = server.getProject(projPath);
             final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projPath, singleVersionSpec);
 
-            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getMappedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
             List<ChangeSet> list;
             if (StringUtils.isNotEmpty(singleVersionSpec)) {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
@@ -502,7 +502,8 @@ public class TeamFoundationServerScm extends SCM {
                 return (server.getProject(getProjectPath(lastRun)).getDetailedHistoryWithoutCloakedPaths(
                             lastRun.getTimestamp(),
                             Calendar.getInstance(),
-                            getCloakedPaths(lastRun)
+                            getCloakedPaths(lastRun),
+                            getMappedPaths(lastRun).keySet()
                         ).size() > 0);
             } finally {
                 server.close();
@@ -823,7 +824,7 @@ public class TeamFoundationServerScm extends SCM {
         }
         final Project tfsProject = server.getProject(projectPath);
         try {
-            final ChangeSet latest = tfsProject.getLatestUncloakedChangeset(tfsBaseline.changesetVersion, cloakedPaths);
+            final ChangeSet latest = tfsProject.getLatestUncloakedChangeset(tfsBaseline.changesetVersion, cloakedPaths, mappedPaths.keySet());
             final TFSRevisionState tfsRemote =
                     (latest != null)
                     ? new TFSRevisionState(latest.getVersion(), projectPath)
