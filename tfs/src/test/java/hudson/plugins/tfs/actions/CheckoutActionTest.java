@@ -73,12 +73,12 @@ public class CheckoutActionTest {
         prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
     	when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
     	when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
     	
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
     	verify(project).getFiles(isA(String.class), eq(MY_LABEL), eq(false));
     	verify(workspaces).deleteWorkspace(workspace);    	
     }
@@ -88,12 +88,12 @@ public class CheckoutActionTest {
         prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
         verify(workspaces).deleteWorkspace(workspace);
     }
@@ -103,11 +103,11 @@ public class CheckoutActionTest {
         prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", true, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(project).getFiles(isA(String.class), eq(MY_LABEL), eq(false));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
@@ -117,11 +117,11 @@ public class CheckoutActionTest {
         prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
     	when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
     	
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
     	
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
     	verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
     	verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
@@ -136,7 +136,7 @@ public class CheckoutActionTest {
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", true, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
         verify(project).getFiles(isA(String.class), eq(MY_LABEL), eq(false));
-        verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
     
@@ -150,7 +150,7 @@ public class CheckoutActionTest {
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", true, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
         verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
-        verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces, never()).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(workspaces, never()).deleteWorkspace(isA(Workspace.class));
     }
 
@@ -159,12 +159,12 @@ public class CheckoutActionTest {
         prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
 
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(project).getFiles(isA(String.class), eq(MY_LABEL), eq(false));
         verify(workspaces).deleteWorkspace(workspace);
     }
@@ -174,12 +174,12 @@ public class CheckoutActionTest {
         prepareCommonMocks();
         when(project.getProjectPath()).thenReturn("project");
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
 
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(project).getFiles(isA(String.class), eq("D2009-09-24T00:00:00Z"), eq(false));
         verify(workspaces).deleteWorkspace(workspace);
     }
@@ -252,7 +252,7 @@ public class CheckoutActionTest {
         
         prepareCommonMocks();
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, "tfs-ws", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
@@ -270,7 +270,7 @@ public class CheckoutActionTest {
         
         prepareCommonMocks();
         when(workspaces.exists(new Workspace("workspace"))).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, "tfs-ws", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
@@ -303,7 +303,7 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(project.getProjectPath()).thenReturn("project");
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
@@ -311,7 +311,7 @@ public class CheckoutActionTest {
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).getWorkspace("workspace");
         verify(workspaces).deleteWorkspace(workspace);
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
@@ -323,7 +323,7 @@ public class CheckoutActionTest {
         when(workspaces.exists("workspace")).thenReturn(true).thenReturn(false);
         when(workspaces.getWorkspace("workspace")).thenReturn(workspace);
         when(project.getProjectPath()).thenReturn("project");
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
@@ -331,7 +331,7 @@ public class CheckoutActionTest {
         verify(workspaces, times(2)).exists("workspace");
         verify(workspaces).getWorkspace("workspace");
         verify(workspaces).deleteWorkspace(workspace);
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
@@ -373,14 +373,14 @@ public class CheckoutActionTest {
     public void assertCheckoutDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
         prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         when(project.getProjectPath()).thenReturn("project");
 
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", false, false).checkout(server, hudsonWs, null, Util.getCalendar(2009, 9, 24));
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }
@@ -390,14 +390,14 @@ public class CheckoutActionTest {
     public void assertCheckoutBySingleVersionSpecDoesNotDeleteWorkspaceIfNotUsingUpdateAndThereIsNoWorkspace() throws Exception {
         prepareCommonMocks();
         when(workspaces.exists("workspace")).thenReturn(false).thenReturn(false);
-        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class))).thenReturn(workspace);
+        when(workspaces.newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class))).thenReturn(workspace);
         when(project.getProjectPath()).thenReturn("project");
 
         new CheckoutAction("workspace", "project", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPED_PATHS_MAP, ".", false, false).checkoutBySingleVersionSpec(server, hudsonWs, MY_LABEL);
         
         verify(server).getWorkspaces();
         verify(workspaces, times(2)).exists("workspace");
-        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), isA(String.class));
+        verify(workspaces).newWorkspace(eq("workspace"), eq("project"), eq(EMPTY_CLOAKED_PATHS_LIST), eq(EMPTY_MAPPED_PATHS_MAP), isA(String.class));
         verify(workspaces).getWorkspaceMapping(anyString());
         verifyNoMoreInteractions(workspaces);
     }

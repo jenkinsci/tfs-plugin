@@ -144,7 +144,7 @@ public class CheckoutAction {
                 localFolderPath.deleteContents();
             }
             final String serverPath = project.getProjectPath();
-            workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakedPaths, localPath);
+            workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakedPaths, mappedPaths, localPath);
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }
