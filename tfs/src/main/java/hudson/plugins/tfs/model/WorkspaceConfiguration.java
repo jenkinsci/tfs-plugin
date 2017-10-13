@@ -149,8 +149,15 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
                 }
 
                 final String expectedItem = other.mappedPaths.get(key);
-                if (!actualItem.getValue().equals(expectedItem)) {
-                    return false;
+                final String actualMappedPath = actualItem.getValue();
+                if (actualMappedPath == null) {
+                    if (expectedItem != null)
+                        return false;
+                }
+                else {
+                    if (!actualMappedPath.equals(expectedItem)) {
+                        return false;
+                    }
                 }
             }
         }

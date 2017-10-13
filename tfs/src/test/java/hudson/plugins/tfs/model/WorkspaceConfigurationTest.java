@@ -27,11 +27,25 @@ public class WorkspaceConfigurationTest {
         mappings.put("$/bar/", "bar");
         mappings.put("$/baz/", "baz");
 
+        final Map<String, String> nullMappings = new TreeMap<String, String>();
+        mappings.put("$/foo/", null);
+        mappings.put("$/bar/", null);
+        mappings.put("$/baz/", null);
+
         WorkspaceConfiguration one = new WorkspaceConfiguration("server", "workspace", "project", cloakList, mappings, "workfolder");
         WorkspaceConfiguration two = new WorkspaceConfiguration("server", "workspace", "project", cloakList, mappings, "workfolder");
+        WorkspaceConfiguration three = new WorkspaceConfiguration("server", "workspace", "project", cloakList, almostSimilarMappings, "workfolder");
+        WorkspaceConfiguration four = new WorkspaceConfiguration("server", "workspace", "project", cloakList, nullMappings, "workfolder");
+        
         assertThat(one, is(two));
         assertThat(two, is(one));
         assertThat(one, is(one));
+
+        assertThat(one, not(three));
+        assertThat(one, not(four));
+
+        assertThat(three, is(three));
+        assertThat(four, is(four));
         
         assertThat(one, not(new WorkspaceConfiguration("aserver", "workspace", "project", cloakList, mappings, "workfolder")));
         assertThat(one, not(new WorkspaceConfiguration("server", "aworkspace", "project", cloakList, mappings, "workfolder")));
@@ -43,6 +57,5 @@ public class WorkspaceConfigurationTest {
 
         assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", cloakList, null, "workfolder")));
         assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", cloakList, EMPTY_MAPPING_PATHS_LIST, "workfolder")));
-        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", cloakList, almostSimilarMappings, "workfolder")));
     }
 }

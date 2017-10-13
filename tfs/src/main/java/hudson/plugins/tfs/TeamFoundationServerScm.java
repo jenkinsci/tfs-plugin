@@ -266,8 +266,12 @@ public class TeamFoundationServerScm extends SCM {
         while (iter.hasNext()) {
             Entry<String, String> entry = iter.next();
             sb.append(entry.getKey());
-            sb.append(' ').append(':').append(' ');
-            sb.append(entry.getValue());
+            
+            final String mappedPath = entry.getValue();
+            if (mappedPath != null) {
+                sb.append(' ').append(':').append(' ');
+                sb.append(entry.getValue());
+            }
             if (iter.hasNext()) {
                 sb.append('\n');
             }
@@ -320,8 +324,13 @@ public class TeamFoundationServerScm extends SCM {
             while (iter.hasNext()) {
                 Entry<String, String> entry = iter.next();
                 final String serverPath = Util.replaceMacro(substituteBuildParameter(run, entry.getKey()), resolver);
-                final String localPath = Util.replaceMacro(substituteBuildParameter(run, entry.getValue()), resolver);
-                
+
+                String localPath = null;
+                String storedLocalPath = entry.getValue();
+                if (storedLocalPath != null) {
+                    localPath = Util.replaceMacro(substituteBuildParameter(run, storedLocalPath), resolver);
+                }
+
                 paths.put(serverPath, localPath);
             }
         }
@@ -385,7 +394,13 @@ public class TeamFoundationServerScm extends SCM {
 
             if (path.length() > 0) {
                 String[] combinedPaths = splitMappedPath(path.toString());
-                mappedPathsCollection.put(combinedPaths[0].trim(), combinedPaths[1].trim());
+
+                final String serverPath = combinedPaths[0].trim();
+                String localPath = null;
+                if (combinedPaths.length > 1) {
+                    localPath = combinedPaths[1].trim();
+                }
+                mappedPathsCollection.put(serverPath, localPath);
             }
         }
         return mappedPathsCollection;
