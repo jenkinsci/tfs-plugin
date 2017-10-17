@@ -22,7 +22,7 @@ Allows you to use a TFVC repository as an SCM in Jenkins jobs. At the moment, th
 * Retrieving read-only copies of files and folders from a TFVC repository.
 * Polling a TFVC repository to automatically start builds when there are changes.
 * Links from the Jenkins change sets to the TFVC repository web interface. _(Also known as a repository browser)_
-* Creating a label in the TFVC repository
+* Creating a label in the TFVC repository 
 
 The plugin will automatically create a workspace in TFS/Team Services and map a work folder (in the Jenkins workspace) to it.
 
