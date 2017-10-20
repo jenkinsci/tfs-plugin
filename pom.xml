@@ -40,6 +40,12 @@
       <timezone>-5</timezone>
     </developer>
     <developer>
+      <id>kelliejos</id>
+      <name>Kellie Jos</name>
+      <email>kej@microsoft.com</email>
+      <timezone>-5</timezone>
+    </developer>
+    <developer>
       <id>mosabua</id>
       <name>Manfred Moser</name>
       <email>manfred@simpligility.com</email>
