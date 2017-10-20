@@ -35,6 +35,10 @@
              checkUrl="'${rootURL}/scm/TeamFoundationServerScm/workspaceNameCheck?value='+escape(this.value)"/>
         </f:entry>
 
+        <f:entry field="showWorkspaceInBuildLog" title="Show all workspaces" description="If checked, all workspaces from server will be shown in the build log.">
+			<f:checkbox default="false"/>
+		</f:entry>
+
         <f:entry field="cloakedPaths" title="Cloaked paths" description="A collection of server paths to cloak to exclude from the workspace and from the build trigger.  Multiple entries must be placed onto separate lines.">
             <f:textarea checkUrl="'${rootURL}/scm/TeamFoundationServerScm/cloakedPathsCheck?value='+escape(this.value)"/>
         </f:entry>

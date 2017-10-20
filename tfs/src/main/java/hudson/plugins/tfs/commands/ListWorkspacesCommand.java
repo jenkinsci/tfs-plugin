@@ -29,9 +29,8 @@ public class ListWorkspacesCommand extends AbstractCallableCommand<List<Workspac
         Workspace createWorkspace(String name, String computer, String owner, String comment);
     }
     
-    public ListWorkspacesCommand(final ServerConfigurationProvider server) {
-        // TODO: shouldLogWorkspaces could be controlled by a property
-        this(server, null, false);
+    public ListWorkspacesCommand(final Server server) {
+        this(server, null, server.getShouldLogWorkspaces());
     }
 
     ListWorkspacesCommand(final ServerConfigurationProvider server, final String computer, final boolean shouldLogWorkspaces) {
