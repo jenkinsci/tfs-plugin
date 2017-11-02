@@ -414,7 +414,7 @@ public class TeamFoundationServerScm extends SCM {
     public void checkout(final Run<?, ?> build, final Launcher launcher, final FilePath workspaceFilePath, final TaskListener listener, final File changelogFile, final SCMRevisionState baseline) throws IOException, InterruptedException {
         Server server = createServer(launcher, listener, build);
         try {
-            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, workspaceFilePath.toComputer()), getProjectPath(build), getCloakedPaths(build), getLocalPath());
+            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, workspaceFilePath.toComputer()), getProjectPath(build), getCloakedPaths(build), getMappedPaths(build), getLocalPath());
             final Run<?, ?> previousBuild = build.getPreviousBuild();
             // Check if the configuration has changed
             if (previousBuild != null) {
@@ -824,7 +824,8 @@ public class TeamFoundationServerScm extends SCM {
                         return (server.getProject(getProjectPath(build)).getDetailedHistoryWithoutCloakedPaths(
                                 build.getTimestamp(),
                                 Calendar.getInstance(),
-                                getCloakedPaths(build)
+                                getCloakedPaths(build),
+                                getMappedPaths(build).keySet()
                         ).size() > 0) ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
                     } finally {
                         server.close();
