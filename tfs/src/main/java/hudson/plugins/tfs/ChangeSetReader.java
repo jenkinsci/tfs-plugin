@@ -1,4 +1,3 @@
-//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
 import java.io.File;
@@ -10,10 +9,11 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.model.Run;
+import hudson.scm.RepositoryBrowser;
 import org.apache.commons.digester.Digester;
 import org.xml.sax.SAXException;
 
-import hudson.model.AbstractBuild;
 import hudson.plugins.tfs.model.ChangeLogSet;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.scm.ChangeLogParser;
@@ -21,19 +21,20 @@ import hudson.util.Digester2;
 
 /**
  * TeamFoundation change log reader.
- * 
+ *
  * @author Erik Ramfelt
- */ 
+ */
 public class ChangeSetReader extends ChangeLogParser {
 
     @Override
-    public ChangeLogSet parse(AbstractBuild build, File changelogFile) throws IOException, SAXException {
+    public ChangeLogSet parse(final Run build, final RepositoryBrowser<?> browser, final File changelogFile) throws IOException, SAXException {
         try (FileInputStream stream = new FileInputStream(changelogFile); Reader reader = new InputStreamReader(stream, Charset.defaultCharset())) {
-            return parse(build, reader);
+            return parse(build, browser, reader);
         }
     }
 
-    public ChangeLogSet parse(AbstractBuild<?,?> build, Reader reader) throws IOException, SAXException {
+    /** Performs the actual parsing. */
+    public ChangeLogSet parse(final Run build, final RepositoryBrowser<?> browser, final Reader reader) throws IOException, SAXException {
         List<ChangeSet> changesetList = new ArrayList<ChangeSet>();
         Digester digester = new Digester2();
         digester.push(changesetList);
@@ -50,9 +51,9 @@ public class ChangeSetReader extends ChangeLogParser {
         digester.addSetProperties("*/changeset/items/item");
         digester.addBeanPropertySetter("*/changeset/items/item", "path");
         digester.addSetNext("*/changeset/items/item", "add");
-        
+
         digester.parse(reader);
 
-        return new ChangeLogSet(build, changesetList);
+        return new ChangeLogSet(build, browser, changesetList);
     }
 }

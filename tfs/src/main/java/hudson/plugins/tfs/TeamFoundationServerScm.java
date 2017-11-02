@@ -1,4 +1,3 @@
-//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
@@ -11,7 +10,7 @@ import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
+import hudson.model.Job;
 import hudson.model.Computer;
 import hudson.model.Node;
 import hudson.model.ParametersAction;
@@ -68,7 +67,7 @@ import static hudson.Util.fixEmpty;
 
 /**
  * SCM for Microsoft Team Foundation Server.
- * 
+ *
  * @author Erik Ramfelt
  */
 public class TeamFoundationServerScm extends SCM {
@@ -79,26 +78,28 @@ public class TeamFoundationServerScm extends SCM {
     public static final String SERVERURL_ENV_STR = "TFS_SERVERURL";
     public static final String USERNAME_ENV_STR = "TFS_USERNAME";
     public static final String WORKSPACE_CHANGESET_ENV_STR = "TFS_CHANGESET";
-    
+
     private static final String VERSION_SPEC = "VERSION_SPEC";
+    private static final int RADIX_10 = 10;
 
     private final String serverUrl;
     private final String projectPath;
     private Collection<String> cloakedPaths;
     private String localPath;
     private final String workspaceName;
-    private @Deprecated String userPassword;
+    @Deprecated private String userPassword;
     private Secret password;
     private String userName;
     private CredentialsConfigurer credentialsConfigurer;
     private boolean useUpdate;
     private boolean useOverwrite;
+    private String versionSpec;
 
     private TeamFoundationServerRepositoryBrowser repositoryBrowser;
 
     private transient String normalizedWorkspaceName;
     private transient String workspaceChangesetVersion;
-    
+
     private static final Logger logger = Logger.getLogger(TeamFoundationServerScm.class.getName());
 
     /**
@@ -108,7 +109,7 @@ public class TeamFoundationServerScm extends SCM {
      * @param projectPath the path in TFVC to download from
      * @param workspaceName the name (or expression) to use when mapping the workspace
      */
-    TeamFoundationServerScm(String serverUrl, String projectPath, String workspaceName) {
+    TeamFoundationServerScm(final String serverUrl, final String projectPath, final String workspaceName) {
         this(serverUrl, projectPath, workspaceName, null, null);
     }
 
@@ -126,7 +127,7 @@ public class TeamFoundationServerScm extends SCM {
      * @param password the password or personal access token to use to talk to TFS/Team Services
      */
     @DataBoundConstructor
-    public TeamFoundationServerScm(String serverUrl, String projectPath, String workspaceName, String userName, Secret password) {
+    public TeamFoundationServerScm(final String serverUrl, final String projectPath, final String workspaceName, final String userName, final Secret password) {
         this.serverUrl = serverUrl;
         this.projectPath = projectPath;
         this.workspaceName = (Util.fixEmptyAndTrim(workspaceName) == null ? "Hudson-${JOB_NAME}-${NODE_NAME}" : workspaceName);
@@ -168,6 +169,15 @@ public class TeamFoundationServerScm extends SCM {
         this.localPath = localPath;
     }
 
+    public String getVersionSpec() {
+        return versionSpec;
+    }
+
+    @DataBoundSetter
+    public void setVersionSpec(final String versionSpec) {
+        this.versionSpec = versionSpec;
+    }
+
     public boolean isUseUpdate() {
         return useUpdate;
     }
@@ -198,6 +208,10 @@ public class TeamFoundationServerScm extends SCM {
         return userName;
     }
 
+    /**
+     *
+     * @return a ManualCredentialsConfigurer object with the supplied userName/password
+     */
     public CredentialsConfigurer getCredentialsConfigurer() {
         if (credentialsConfigurer == null) {
             credentialsConfigurer = new ManualCredentialsConfigurer(userName, password);
@@ -225,22 +239,25 @@ public class TeamFoundationServerScm extends SCM {
         return cloakedPaths == null ? StringUtils.EMPTY : StringUtils.join(cloakedPaths, "\n");
     }
 
-    String getWorkspaceName(AbstractBuild<?,?> build, Computer computer) {
+    String getWorkspaceName(final Run<?, ?> build, final Computer computer) {
         normalizedWorkspaceName = workspaceName;
         if (build != null) {
             normalizedWorkspaceName = substituteBuildParameter(build, normalizedWorkspaceName);
-            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build.getProject(), computer));
+            normalizedWorkspaceName = Util.replaceMacro(normalizedWorkspaceName, new BuildVariableResolver(build.getParent(), computer));
         }
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\"/:<>\\|\\*\\?]+", "_");
         normalizedWorkspaceName = normalizedWorkspaceName.replaceAll("[\\.\\s]+$", "_");
         return normalizedWorkspaceName;
     }
 
-    public String getServerUrl(Run<?,?> run) {
+    /**
+     * Returns the URL to the team project collection.
+     */
+    public String getServerUrl(final Run<?, ?> run) {
         return substituteBuildParameter(run, serverUrl);
     }
 
-    String getProjectPath(Run<?,?> run) {
+    String getProjectPath(final Run<?, ?> run) {
         return Util.replaceMacro(substituteBuildParameter(run, projectPath), new BuildVariableResolver(run.getParent()));
     }
 
@@ -257,16 +274,16 @@ public class TeamFoundationServerScm extends SCM {
         return paths;
     }
 
-    private String substituteBuildParameter(Run<?,?> run, String text) {
-        if (run instanceof AbstractBuild<?, ?>){
-            AbstractBuild<?,?> build = (AbstractBuild<?, ?>) run;
+    private String substituteBuildParameter(final Run<?, ?> run, final String text) {
+        if (run instanceof AbstractBuild<?, ?>) {
+            AbstractBuild<?, ?> build = (AbstractBuild<?, ?>) run;
             if (build.getAction(ParametersAction.class) != null) {
                 return build.getAction(ParametersAction.class).substitute(build, text);
             }
         }
         return text;
     }
-    
+
     static Collection<String> splitCloakedPaths(final String cloakedPaths) {
         final List<String> cloakedPathsList = new ArrayList<String>();
         if (cloakedPaths != null && cloakedPaths.length() > 0) {
@@ -292,51 +309,59 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public boolean checkout(AbstractBuild<?, ?> build, Launcher launcher, FilePath workspaceFilePath, BuildListener listener, File changelogFile) throws IOException, InterruptedException {
+    public void checkout(final Run<?, ?> build, final Launcher launcher, final FilePath workspaceFilePath, final TaskListener listener, final File changelogFile, final SCMRevisionState baseline) throws IOException, InterruptedException {
         Server server = createServer(launcher, listener, build);
         try {
-            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, Computer.currentComputer()), getProjectPath(build), getCloakedPaths(build), getLocalPath());
-            
-            final AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
+            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, workspaceFilePath.toComputer()), getProjectPath(build), getCloakedPaths(build), getLocalPath());
+            final Run<?, ?> previousBuild = build.getPreviousBuild();
             // Check if the configuration has changed
             if (previousBuild != null) {
-                BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(build.getBuiltOn(), previousBuild);
-                if ((nodeConfiguration != null) &&
-                        nodeConfiguration.workspaceExists() 
-                        && (! workspaceConfiguration.equals(nodeConfiguration))) {
-                    listener.getLogger().println("Deleting workspace as the configuration has changed since a build was performed on this computer.");
-                    new RemoveWorkspaceAction(workspaceConfiguration.getWorkspaceName()).remove(server);
-                    nodeConfiguration.setWorkspaceWasRemoved();
-                    nodeConfiguration.save();
+                Computer computer = workspaceFilePath.toComputer();
+                if (computer != null) {
+                    BuildWorkspaceConfiguration nodeConfiguration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(computer.getNode(), previousBuild);
+                    if ((nodeConfiguration != null)
+                            && nodeConfiguration.workspaceExists()
+                            && (!workspaceConfiguration.equals(nodeConfiguration))) {
+                        listener.getLogger().println("Deleting workspace as the configuration has changed since a build was performed on this computer.");
+                        new RemoveWorkspaceAction(workspaceConfiguration.getWorkspaceName()).remove(server);
+                        nodeConfiguration.setWorkspaceWasRemoved();
+                        nodeConfiguration.save();
+                    }
                 }
             }
-            
+
             build.addAction(workspaceConfiguration);
-            VariableResolver<String> buildVariableResolver = build.getBuildVariableResolver();
-            String singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
-            final String projectPath = workspaceConfiguration.getProjectPath();
-            final Project project = server.getProject(projectPath);
-            final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projectPath, singleVersionSpec);
+            String singleVersionSpec = versionSpec;
+
+            if (build instanceof AbstractBuild) {
+                VariableResolver<String> buildVariableResolver = ((AbstractBuild<?, ?>) build).getBuildVariableResolver();
+                singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
+            }
+
+            final String projPath = workspaceConfiguration.getProjectPath();
+            final Project project = server.getProject(projPath);
+            final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projPath, singleVersionSpec);
 
             CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
             List<ChangeSet> list;
             if (StringUtils.isNotEmpty(singleVersionSpec)) {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
-            }
-            else {
+            } else {
                 final VersionSpec previousBuildVersionSpec = determineVersionSpecFromBuild(previousBuild, 1, changeSet);
                 final ChangesetVersionSpec currentBuildVersionSpec = new ChangesetVersionSpec(changeSet);
                 list = action.checkout(server, workspaceFilePath, previousBuildVersionSpec, currentBuildVersionSpec);
             }
-            ChangeSetWriter writer = new ChangeSetWriter();
-            writer.write(list, changelogFile);
+
+            if (changelogFile != null) {
+                ChangeSetWriter writer = new ChangeSetWriter();
+                writer.write(list, changelogFile);
+            }
         } finally {
             server.close();
         }
-        return true;
     }
 
-    static VersionSpec determineVersionSpecFromBuild(final AbstractBuild<?, ?> build, final int offset, final int maximumChangeSetNumber) {
+    static VersionSpec determineVersionSpecFromBuild(final Run<?, ?> build, final int offset, final int maximumChangeSetNumber) {
         final VersionSpec result;
         if (build != null) {
             final TFSRevisionState revisionState = build.getAction(TFSRevisionState.class);
@@ -350,25 +375,24 @@ public class TeamFoundationServerScm extends SCM {
             } else {
                 result = null;
             }
-        }
-        else {
+        } else {
             result = null;
         }
         return result;
     }
 
-    int recordWorkspaceChangesetVersion(final AbstractBuild<?, ?> build, final BuildListener listener, final Project project, final String projectPath, final String singleVersionSpec) throws IOException, InterruptedException {
+    int recordWorkspaceChangesetVersion(final Run<?, ?> build, final TaskListener listener, final Project project, final String projectPath, final String singleVersionSpec) throws IOException, InterruptedException {
         final VersionSpec workspaceVersion;
+
         if (!StringUtils.isEmpty(singleVersionSpec)) {
             workspaceVersion = VersionSpec.parseSingleVersionFromSpec(singleVersionSpec, null);
-        }
-        else {
+        } else {
             workspaceVersion = new DateVersionSpec(build.getTimestamp());
         }
         int buildChangeset;
         setWorkspaceChangesetVersion(null);
         buildChangeset = project.getRemoteChangesetVersion(workspaceVersion);
-        setWorkspaceChangesetVersion(Integer.toString(buildChangeset, 10));
+        setWorkspaceChangesetVersion(Integer.toString(buildChangeset, RADIX_10));
 
         // by adding this action, we prevent calcRevisionsFromBuild() from being called
         build.addAction(new TFSRevisionState(buildChangeset, projectPath));
@@ -376,13 +400,13 @@ public class TeamFoundationServerScm extends SCM {
         return buildChangeset;
     }
 
-    void setWorkspaceChangesetVersion(String workspaceChangesetVersion) {
+    void setWorkspaceChangesetVersion(final String workspaceChangesetVersion) {
         this.workspaceChangesetVersion = workspaceChangesetVersion;
     }
 
     @Override
-    public boolean pollChanges(AbstractProject hudsonProject, Launcher launcher, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
-        Run<?,?> lastRun = hudsonProject.getLastBuild();
+    public boolean pollChanges(final AbstractProject hudsonProject, final Launcher launcher, final FilePath workspace, final TaskListener listener) throws IOException, InterruptedException {
+        Run<?, ?> lastRun = hudsonProject.getLastBuild();
         if (lastRun == null) {
             return true;
         } else {
@@ -398,40 +422,44 @@ public class TeamFoundationServerScm extends SCM {
             }
         }
     }
-    
+
     @Override
-    public boolean processWorkspaceBeforeDeletion(AbstractProject<?, ?> project, FilePath workspace, Node node) throws IOException, InterruptedException {
-        AbstractBuild<?, ?> lastRun = project.getLastBuild();
+    public boolean processWorkspaceBeforeDeletion(final Job<?, ?> project, final FilePath workspace, final Node node) throws IOException, InterruptedException {
+        Node nodeIter = node;
+        Run<?, ?> lastRun = project.getLastBuild();
         if (lastRun == null) {
             return true;
         }
-        
+
         // Due to an error in Hudson core (pre 1.321), null was sent in for all invocations of this method
-        // Therefore we try to work around the problem, and see if its only built on one node or not. 
-        if (node == null) { 
+        // Therefore we try to work around the problem, and see if its only built on one node or not.
+        if (nodeIter == null) {
             while (lastRun != null) {
-                AbstractBuild<?,?> build = lastRun;
+                if (!(lastRun instanceof AbstractBuild<?, ?>)) {
+                    return false;
+                }
+                AbstractBuild<?, ?> build = (AbstractBuild) lastRun;
                 Node buildNode = build.getBuiltOn();
-                if (node == null) {
-                    node = buildNode;
+                if (nodeIter == null) {
+                    nodeIter = buildNode;
                 } else {
-                    if (!buildNode.getNodeName().equals(node.getNodeName())) {
+                    if (!buildNode.getNodeName().equals(nodeIter.getNodeName())) {
                         logger.warning("Could not wipe out workspace as there is no way of telling what Node the request is for. Please upgrade Hudson to a newer version.");
                         return false;
                     }
-                }                
+                }
                 lastRun = lastRun.getPreviousBuild();
             }
-            if (node == null) {
+            if (nodeIter == null) {
                 return true;
             }
             lastRun = project.getLastBuild();
         }
-        
-        BuildWorkspaceConfiguration configuration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(node, lastRun);
+
+        BuildWorkspaceConfiguration configuration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(nodeIter, lastRun);
         if ((configuration != null) && configuration.workspaceExists()) {
             LogTaskListener listener = new LogTaskListener(logger, Level.INFO);
-            Launcher launcher = node.createLauncher(listener);        
+            Launcher launcher = nodeIter.createLauncher(listener);
             Server server = createServer(launcher, listener, lastRun);
             try {
                 if (new RemoveWorkspaceAction(configuration.getWorkspaceName()).remove(server)) {
@@ -444,11 +472,11 @@ public class TeamFoundationServerScm extends SCM {
         }
         return true;
     }
-    
-    protected Server createServer(final Launcher launcher, final TaskListener taskListener, Run<?,?> run) throws IOException {
-        final CredentialsConfigurer credentialsConfigurer = getCredentialsConfigurer();
+
+    protected Server createServer(final Launcher launcher, final TaskListener taskListener, final Run<?, ?> run) throws IOException {
+        final CredentialsConfigurer credentialsConfig = getCredentialsConfigurer();
         final String collectionUri = getServerUrl(run);
-        final StandardUsernamePasswordCredentials credentials = credentialsConfigurer.getCredentials(collectionUri);
+        final StandardUsernamePasswordCredentials credentials = credentialsConfig.getCredentials(collectionUri);
         return Server.create(launcher, taskListener, collectionUri, credentials, null, null);
     }
 
@@ -468,7 +496,7 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public FilePath getModuleRoot(FilePath workspace) {
+    public FilePath getModuleRoot(final FilePath workspace) {
         return workspace.child(getLocalPath());
     }
 
@@ -476,14 +504,15 @@ public class TeamFoundationServerScm extends SCM {
     public TeamFoundationServerRepositoryBrowser getBrowser() {
         return repositoryBrowser;
     }
-    
+
     /**
      *
-     * @return a new TeamSystemWebAccessBrowser even if no repository browser (value in UI is Auto) is 
+     * @return a new TeamSystemWebAccessBrowser even if no repository browser (value in UI is Auto) is
      * configured since its the only implementation that exists anyway
      */
     @Override
-    public @CheckForNull RepositoryBrowser<?> guessBrowser() {
+    @CheckForNull
+    public RepositoryBrowser<?> guessBrowser() {
         return new TeamSystemWebAccessBrowser(serverUrl);
     }
 
@@ -492,10 +521,19 @@ public class TeamFoundationServerScm extends SCM {
         this.repositoryBrowser = repositoryBrowser;
     }
 
-    @Override
-    public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
-        super.buildEnvVars(build, env);
 
+    // TODO: 2.60+ Delete this override.
+    @Override
+    public void buildEnvVars(final AbstractBuild<?, ?> build, final Map<String, String> env) {
+        buildEnvironment(build, env);
+    }
+
+    /**
+     * TODO: 2.60+ - add @Override.
+     * Sets the environment variables TFS_WORKSPACE, TFS_WORKFOLDER, TFS_PROJECTPATH, TFS_SERVERURL, TFS_USERNAME, TFS_CHANGESET and
+     * VERSION_SPEC during the build
+     */
+    public void buildEnvironment(final Run<?, ?> build, final Map<String, String> env) {
         final TeamBuildDetailsAction buildDetailsAction = build.getAction(TeamBuildDetailsAction.class);
         if (buildDetailsAction != null) {
             //Add the TFS build variables as environment variables in the Jenkins environment
@@ -532,25 +570,31 @@ public class TeamFoundationServerScm extends SCM {
 
     @Override
     public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl)super.getDescriptor();
+        return (DescriptorImpl) super.getDescriptor();
     }
 
+    /** Descriptor implementation class. Used to create instances of TeamFoundationServerScm. */
     @Extension
     public static class DescriptorImpl extends SCMDescriptor<TeamFoundationServerScm> {
-        
+
         public static final Pattern WORKSPACE_NAME_REGEX = Pattern.compile("[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         public static final Pattern CLOAKED_PATHS_REGEX = Pattern.compile("\\s*\\$[^\\n;]+(\\s*[\\n]\\s*\\$[^\\n;]+){0,}\\s*", Pattern.CASE_INSENSITIVE);
-        
+
+        @Override
+        public boolean isApplicable(final Job project) {
+            return true;
+        }
+
         public DescriptorImpl() {
             super(TeamFoundationServerScm.class, TeamFoundationServerRepositoryBrowser.class);
             load();
         }
 
         @Override
-        public SCM newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public SCM newInstance(final StaplerRequest req, final JSONObject formData) throws FormException {
             TeamFoundationServerScm scm = (TeamFoundationServerScm) super.newInstance(req, formData);
-            scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class,req,formData,"browser");
+            scm.repositoryBrowser = RepositoryBrowsers.createInstance(TeamFoundationServerRepositoryBrowser.class, req, formData,  "browser");
             // TODO: is there a more polymorphic way of doing this?
             if (scm.credentialsConfigurer instanceof ManualCredentialsConfigurer) {
                 // ManualCredentialsConfigurer has its fields "transient"; transfer the values here
@@ -563,9 +607,10 @@ public class TeamFoundationServerScm extends SCM {
         }
 
         private FormValidation doRegexCheck(final Pattern[] regexArray,
-                final String noMatchText, final String nullText, String value) {
-            value = fixEmpty(value);
-            if (value == null) {
+                final String noMatchText, final String nullText, final String value) {
+            String val = value;
+            val = fixEmpty(val);
+            if (val == null) {
                 if (nullText == null) {
                     return FormValidation.ok();
                 } else {
@@ -573,13 +618,14 @@ public class TeamFoundationServerScm extends SCM {
                 }
             }
             for (Pattern regex : regexArray) {
-                if (regex.matcher(value).matches()) {
+                if (regex.matcher(val).matches()) {
                     return FormValidation.ok();
                 }
             }
             return FormValidation.error(noMatchText);
         }
 
+        /** Populates comboBox with detected collections URLs. */
         public ComboBoxModel doFillServerUrlItems() {
             final TeamPluginGlobalConfig pluginGlobalConfig = TeamPluginGlobalConfig.get();
             final List<TeamCollectionConfiguration> collectionConfigurations = pluginGlobalConfig.getCollectionConfigurations();
@@ -590,22 +636,25 @@ public class TeamFoundationServerScm extends SCM {
             return result;
         }
 
+        /** Validates Project path form field. */
         public FormValidation doProjectPathCheck(@QueryParameter final String value) {
             return doRegexCheck(new Pattern[]{PROJECT_PATH_REGEX},
                     "Project path must begin with '$/'.",
-                    "Project path is mandatory.", value );
+                    "Project path is mandatory.", value);
         }
-        
+
+        /** Validates Workspace form field. */
         public FormValidation doWorkspaceNameCheck(@QueryParameter final String value) {
             return doRegexCheck(new Pattern[]{WORKSPACE_NAME_REGEX},
-                    "Workspace name cannot end with a space or period, and cannot contain any of the following characters: \"/:<>|*?", 
+                    "Workspace name cannot end with a space or period, and cannot contain any of the following characters: \"/:<>|*?",
                     "Workspace name is mandatory", value);
         }
 
+        /** Validates Cloaked Paths form field. */
         public FormValidation doCloakedPathsCheck(@QueryParameter final String value) {
             return doRegexCheck(new Pattern[]{CLOAKED_PATHS_REGEX},
                     "Each cloaked path must begin with '$/'. Multiple paths must be separated by blank lines.",
-                    null, value );
+                    null, value);
         }
 
         public List<CredentialsConfigurerDescriptor> getCredentialsConfigurerDescriptors() {
@@ -613,7 +662,7 @@ public class TeamFoundationServerScm extends SCM {
         }
 
         @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+        public boolean configure(final StaplerRequest req, final JSONObject formData) throws FormException {
             save();
             return true;
         }
@@ -625,8 +674,9 @@ public class TeamFoundationServerScm extends SCM {
     }
 
     @Override
-    public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build,
-            Launcher launcher, TaskListener listener) throws IOException,
+    public SCMRevisionState calcRevisionsFromBuild(final Run<?, ?> build,
+            final FilePath workspace,
+            final Launcher launcher, final TaskListener listener) throws IOException,
             InterruptedException {
         /*
          * This method does nothing, since the work has already been done in
@@ -636,31 +686,47 @@ public class TeamFoundationServerScm extends SCM {
          * and add it as an action during check out, in which case this method will not called.
          * """
          */
-        return null;
+        return SCMRevisionState.NONE;
     }
 
     @Override
-    protected PollingResult compareRemoteRevisionWith(
-            AbstractProject<?, ?> project, Launcher launcher,
-            FilePath workspace, TaskListener listener, SCMRevisionState baseline)
+    public PollingResult compareRemoteRevisionWith(
+            final Job<?, ?> project, final Launcher launcher,
+            final FilePath workspace, final TaskListener listener, final SCMRevisionState baseline)
             throws IOException, InterruptedException {
 
         final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
-        if (!(baseline instanceof TFSRevisionState))
-        {
+        Run<?, ?> build = project.getLastBuild();
+        final Server server = createServer(localLauncher, listener, build);
+
+        if (!(baseline instanceof TFSRevisionState)) {
             // This plugin was just upgraded, we don't yet have a new-style baseline,
             // so we perform an old-school poll
-            boolean shouldBuild = pollChanges(project, localLauncher, workspace, listener);
-            return shouldBuild ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
+            if (project instanceof AbstractProject) {
+                boolean shouldBuild = pollChanges((AbstractProject) project, localLauncher, workspace, listener);
+                return shouldBuild ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
+            } else {
+                // On the pipeline case, we can't call pollChanges. Query the TFS Server directly instead
+                if (build == null) {
+                    return PollingResult.BUILD_NOW;
+                } else {
+                    try {
+                        return (server.getProject(getProjectPath(build)).getDetailedHistoryWithoutCloakedPaths(
+                                build.getTimestamp(),
+                                Calendar.getInstance(),
+                                getCloakedPaths(build)
+                        ).size() > 0) ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
+                    } finally {
+                        server.close();
+                    }
+                }
+            }
         }
         final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
-        if (!projectPath.equalsIgnoreCase(tfsBaseline.projectPath))
-        {
+        if (!projectPath.equalsIgnoreCase(tfsBaseline.projectPath)) {
             // There's no PollingResult.INCOMPARABLE, so we use the next closest thing
             return PollingResult.BUILD_NOW;
         }
-        Run<?, ?> build = project.getLastBuild();
-        final Server server = createServer(localLauncher, listener, build);
         final Project tfsProject = server.getProject(projectPath);
         try {
             final ChangeSet latest = tfsProject.getLatestUncloakedChangeset(tfsBaseline.changesetVersion, cloakedPaths);
@@ -671,7 +737,7 @@ public class TeamFoundationServerScm extends SCM {
 
             // TODO: we could return INSIGNIFICANT if all the changesets
             // contain the string "***NO_CI***" at the end of their comment
-            final Change change = 
+            final Change change =
                     tfsBaseline.changesetVersion == tfsRemote.changesetVersion
                     ? Change.NONE
                     : Change.SIGNIFICANT;

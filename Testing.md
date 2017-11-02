@@ -42,6 +42,7 @@ You should also provide the following properties:
 2. tfs_collection_url - set this to the full url of the collection (ex. http://tfs.corp.example.com:8081/tfs/jenkins-tfs-plugin)
 3. tfs_user_name - set this to the test user you gave permissions to above (the default value if not provided is **jenkins-tfs-plugin**)
 4. tfs_user_password - set this to the password of the test user (the default value if not provided is **for-test-only**)
+5. Set the COMPUTERNAME environment variable as the end-to-end tests rely on its presence
 
 Example:
 
