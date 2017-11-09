@@ -61,6 +61,7 @@ public class TeamFoundationServerScmTest {
      This test makes sure a job can be upgraded without loss of the password.
      */
     @Test public void upgradeFromScrambledPassword() {
+        //Only run this test when in a Windows OS
         assumeTrue(SystemUtils.IS_OS_WINDOWS);
         SecretOverride secretOverride = null;
         try {
