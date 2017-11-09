@@ -1,13 +1,22 @@
 package hudson.plugins.tfs;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
+import com.thoughtworks.xstream.XStream;
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Computer;
+import hudson.model.Node;
+import hudson.model.ParametersAction;
+import hudson.plugins.tfs.model.Project;
+import hudson.util.Secret;
+import hudson.util.SecretOverride;
+import hudson.util.XStream2;
+import org.apache.commons.lang.SystemUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,23 +29,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
-import com.thoughtworks.xstream.XStream;
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Computer;
-import hudson.model.Node;
-import hudson.model.ParametersAction;
-
-import hudson.plugins.tfs.model.Project;
-import hudson.util.Secret;
-import hudson.util.SecretOverride;
-import hudson.util.XStream2;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 
 @SuppressWarnings("unchecked")
@@ -57,6 +61,7 @@ public class TeamFoundationServerScmTest {
      This test makes sure a job can be upgraded without loss of the password.
      */
     @Test public void upgradeFromScrambledPassword() {
+        assumeTrue(SystemUtils.IS_OS_WINDOWS);
         SecretOverride secretOverride = null;
         try {
             secretOverride = new SecretOverride();
