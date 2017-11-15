@@ -366,7 +366,7 @@ public class TeamFoundationServerScm extends SCM {
         if (build != null) {
             TFSRevisionState revisionState = null;
             for (final TFSRevisionState tmpRevisionState : build.getActions(TFSRevisionState.class)) {
-                if (tmpRevisionState != null && tmpRevisionState.projectPath == projectPath) {
+                if (tmpRevisionState != null && tmpRevisionState.projectPath.equals(projectPath)) {
                     revisionState = tmpRevisionState;
                     break;
                 }
