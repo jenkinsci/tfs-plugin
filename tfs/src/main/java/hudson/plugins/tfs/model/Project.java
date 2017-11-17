@@ -56,7 +56,7 @@ public class Project {
         (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset, UserLookup userLookup) {
         final String version = Integer.toString(serverChangeset.getChangesetID(), 10);
         final Date date = serverChangeset.getDate().getTime();
-        final String author = serverChangeset.getCommitter();
+        final String author = serverChangeset.getOwner();
         final User authorUser = userLookup.find(author);
         final String comment = serverChangeset.getComment();
 
