@@ -2,13 +2,21 @@
 package hudson.plugins.tfs.rm;
 
 import com.google.gson.Gson;
+import hudson.model.BuildListener;
+import org.apache.commons.io.IOUtils;
 import hudson.util.Secret;
+
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -56,6 +64,29 @@ public class ReleaseManagementHttpClient
         final String body = new Gson().toJson(artifacts);
         String response = this.ExecutePostmethod(url, body);
         return new Gson().fromJson(response, ReleaseArtifactVersionsResponse.class);
+    }
+
+    public void GetReleaseLogs(String project, String releaseId, BuildListener listener) throws ReleaseManagementException
+    {
+        String url = this.accountUrl + project + "/_apis/release/releases/" + "2" + "/logs?api-version=4.0-preview.2";
+        InputStream inputStream = this.ExecuteGetMethodAsStream(url);
+
+        try {
+            FileOutputStream out = new FileOutputStream("/home/chenyl/tmp.zip");
+            IOUtils.copy(inputStream, out);
+            out.close();
+        } catch (Exception e) {
+
+        }
+        return;
+    }
+
+    public List<Project> GetProjectItems() throws ReleaseManagementException
+    {
+        String url = this.accountUrl + "/_apis/projects?api-version=1.0";
+        String response = this.ExecuteGetMethod(url);
+        TeamProject teamProject = new Gson().fromJson(response, TeamProject.class);
+        return teamProject.getValue();
     }
     
     private String ExecutePostmethod(String url, String body) throws ReleaseManagementException
@@ -117,6 +148,36 @@ public class ReleaseManagementHttpClient
             throw new ReleaseManagementException(ex);
         }
         
+        return response;
+    }
+
+    private InputStream ExecuteGetMethodAsStream(String url) throws ReleaseManagementException
+    {
+        GetMethod getMethod = new GetMethod(url);
+        getMethod.addRequestHeader("Authorization", this.basicAuth);
+        InputStream response;
+        try
+        {
+            int status = this.httpClient.executeMethod(getMethod);
+            response = getMethod.getResponseBodyAsStream();
+            if(status >= 300)
+            {
+                throw new ReleaseManagementException("Error occurred.%nStatus: " + status + "%nResponse: " + response + "%n");
+            }
+        }
+        catch(HttpException ex)
+        {
+            throw new ReleaseManagementException(ex);
+        }
+        catch(IOException ex)
+        {
+            throw new ReleaseManagementException(ex);
+        }
+        catch(Exception ex)
+        {
+            throw new ReleaseManagementException(ex);
+        }
+
         return response;
     }
     

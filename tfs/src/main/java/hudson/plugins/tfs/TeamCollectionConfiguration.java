@@ -1,17 +1,17 @@
 //CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
-import com.cloudbees.plugins.credentials.CredentialsMatcher;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.*;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import com.cloudbees.plugins.credentials.domains.*;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import com.microsoft.tfs.core.exceptions.TFSUnauthorizedException;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.plugins.tfs.model.ConnectionParameters;
 import hudson.plugins.tfs.model.ListOfGitRepositories;
 import hudson.plugins.tfs.model.MockableVersionControlClient;
@@ -30,9 +30,7 @@ import org.kohsuke.stapler.QueryParameter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCollectionConfiguration> {
@@ -219,20 +217,36 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         return result;
     }
 
-    static List<StandardUsernamePasswordCredentials> findCredentials(final String hostName) {
+    public static List<StandardUsernamePasswordCredentials> findCredentials(final String hostName) {
         final Jenkins jenkins = Jenkins.getInstance();
+        return findCredentials(hostName, jenkins);
+    }
+
+    public static List<StandardUsernamePasswordCredentials> findCredentials(final String hostName, ItemGroup own) {
         final HostnameRequirement requirement = new HostnameRequirement(hostName);
         final List<StandardUsernamePasswordCredentials> matches =
                 CredentialsProvider.lookupCredentials(
                         StandardUsernamePasswordCredentials.class,
-                        jenkins,
+                        own,
                         ACL.SYSTEM,
                         requirement
                 );
         return matches;
     }
 
-    static StandardUsernamePasswordCredentials findCredentialsById(final String credentialsId) {
+    public static List<StandardUsernamePasswordCredentials> findCredentials(final String hostName, Item own) {
+        final HostnameRequirement requirement = new HostnameRequirement(hostName);
+        final List<StandardUsernamePasswordCredentials> matches =
+                CredentialsProvider.lookupCredentials(
+                        StandardUsernamePasswordCredentials.class,
+                        own,
+                        ACL.SYSTEM,
+                        requirement
+                );
+        return matches;
+    }
+
+    public static StandardUsernamePasswordCredentials findCredentialsById(final String credentialsId) {
         final Jenkins jenkins = Jenkins.getInstance();
         final List<StandardUsernamePasswordCredentials> matches =
                 CredentialsProvider.lookupCredentials(
@@ -244,6 +258,32 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         final CredentialsMatcher matcher = CredentialsMatchers.withId(credentialsId);
         final StandardUsernamePasswordCredentials result = CredentialsMatchers.firstOrNull(matches, matcher);
         return result;
+    }
+
+    public static String setCredentials(final String hostName, String username, String password) {
+        final HostnameRequirement requirement = new HostnameRequirement(hostName);
+
+        if (!SystemCredentialsProvider.getInstance().getDomainCredentialsMap().containsKey(requirement)) {
+            generateDomain(hostName);
+        }
+        String credentialsId;
+        StandardUsernamePasswordCredentials newCredential = new UsernamePasswordCredentialsImpl(
+                CredentialsScope.GLOBAL,
+                credentialsId = UUID.randomUUID().toString(),
+                "",
+                username,
+                password
+        );
+        SystemCredentialsProvider.getInstance().getDomainCredentialsMap().get(requirement).add(newCredential);
+        return credentialsId;
+    }
+
+    static void generateDomain(final String hostName) {
+        List<DomainSpecification> domainSpecifications = new ArrayList<>();
+        domainSpecifications.add(new HostnameSpecification(hostName, null));
+        Domain domain = new Domain("Generated for " + hostName, "", domainSpecifications);
+
+        SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(domain, new ArrayList<Credentials>());
     }
 
     // TODO: we'll probably also want findCredentialsForGitRepo, where we match part of the URL path
