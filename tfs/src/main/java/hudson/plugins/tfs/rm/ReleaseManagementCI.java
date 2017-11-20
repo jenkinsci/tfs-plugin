@@ -1,44 +1,46 @@
 //CHECKSTYLE:OFF
 package hudson.plugins.tfs.rm;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.google.gson.Gson;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
-import hudson.security.ACL;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Notifier;
-import hudson.tasks.Publisher;
+import hudson.tasks.*;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
 import org.json.*;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
  * @author Ankit Goyal
  */
-public class ReleaseManagementCI extends Notifier{
+public class ReleaseManagementCI extends Notifier implements Serializable{
+
+    private static final long serialVersionUID = -760016860995557L;
 
     public final String collectionUrl;
     public final String projectName;
     public final String releaseDefinitionName;
-    public final transient String username;
-    public final transient Secret password;
+    public transient String username;
+    public transient Secret password;
     public String credentialsId;
+    public boolean isArchiveLog;
+
+
+    public String destinationPath;
     
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     public ReleaseManagementCI(String collectionUrl, String projectName, String releaseDefinitionName, String username, Secret password)
@@ -60,7 +62,12 @@ public class ReleaseManagementCI extends Notifier{
     }
 
     @DataBoundConstructor
-    public ReleaseManagementCI(String collectionUrl, String projectName, String releaseDefinitionName, String credentialsId) {
+    public ReleaseManagementCI(String collectionUrl,
+                               String projectName,
+                               String releaseDefinitionName,
+                               String credentialsId,
+                               String destinationPath,
+                               boolean isArchiveLog) {
         if (collectionUrl.endsWith("/"))
         {
             this.collectionUrl = collectionUrl;
@@ -73,9 +80,12 @@ public class ReleaseManagementCI extends Notifier{
         //this.collectionUrl = this.collectionUrl.toLowerCase().replaceFirst(".visualstudio.com", ".vsrm.visualstudio.com");
         this.projectName = projectName;
         this.releaseDefinitionName = releaseDefinitionName;
-        this.username = TeamCollectionConfiguration.findCredentialsById(credentialsId).getUsername();
-        this.password = TeamCollectionConfiguration.findCredentialsById(credentialsId).getPassword();
+        StandardUsernamePasswordCredentials credential = TeamCollectionConfiguration.findCredentialsById(credentialsId);
+        this.username = credential == null ? "" : credential.getUsername();
+        this.password = credential == null ? Secret.fromString("") : credential.getPassword();
         this.credentialsId = credentialsId;
+        this.destinationPath = destinationPath;
+        this.isArchiveLog = isArchiveLog;
     }
 
     private Object readResolve() {
@@ -123,6 +133,10 @@ public class ReleaseManagementCI extends Notifier{
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException
     {
+        StandardUsernamePasswordCredentials credential = TeamCollectionConfiguration.findCredentialsById(credentialsId);
+        this.username = credential == null ? "" : credential.getUsername();
+        this.password = credential == null ? Secret.fromString("") : credential.getPassword();
+
         String jobName = build.getProject().getName();
         int buildId = build.number;
         String buildNumber = build.getDisplayName();
@@ -154,7 +168,7 @@ public class ReleaseManagementCI extends Notifier{
                 }
                 else
                 {
-                    CreateRelease(releaseManagementHttpClient, releaseDefinition, jobName, buildNumber, buildId, listener);
+                    CreateRelease(releaseManagementHttpClient, releaseDefinition, jobName, buildNumber, buildId, listener, build, launcher);
                 }
             }
             catch (ReleaseManagementException ex)
@@ -176,7 +190,9 @@ public class ReleaseManagementCI extends Notifier{
             String jobName,
             String buildNumber,
             int buildId,
-            BuildListener listener) throws ReleaseManagementException, JSONException
+            BuildListener listener,
+            AbstractBuild<?, ?> build,
+            Launcher launcher) throws ReleaseManagementException, JSONException
     {
         Artifact jenkinsArtifact = null;
         for(final Artifact artifact : releaseDefinition.getArtifacts())
@@ -215,7 +231,36 @@ public class ReleaseManagementCI extends Notifier{
             JSONObject object = new JSONObject(response);
             listener.getLogger().printf("Release Name: %s%n", object.getString("name"));
             listener.getLogger().printf("Release id: %s%n", object.getString("id"));
-            releaseManagementHttpClient.GetReleaseLogs(this.projectName, object.getString("id"), listener);
+
+            if (StringUtils.isNotBlank(this.destinationPath)) {
+                listener.getLogger().printf("Waiting for release to be finished...%n");
+                while (true) {
+                    String status = releaseManagementHttpClient.GetReleaseStatus(this.projectName, object.getString("id"));
+                    if (status.equals("finished")) {
+                        break;
+                    }
+                    try {
+                        Thread.sleep(10 * 1000);
+                    } catch (InterruptedException ex) {
+                        throw new ReleaseManagementException(ex);
+                    }
+                }
+                FilePath ws = build.getWorkspace();
+                FilePath logFullPath = new FilePath(ws, this.destinationPath);
+                final String logRelativePath = this.destinationPath;
+                releaseManagementHttpClient.GetReleaseLogs(this.projectName, object.getString("id"), listener, logFullPath);
+                if (isArchiveLog) {
+                    try {
+                        build.pickArtifactManager().archive(build.getWorkspace(), launcher, listener, new HashMap<String, String>() {
+                            {
+                                put(logRelativePath, logRelativePath);
+                            }
+                        });
+                    } catch (Exception ex) {
+                        throw new ReleaseManagementException(ex);
+                    }
+                }
+            }
         }
     }
 
@@ -252,6 +297,14 @@ public class ReleaseManagementCI extends Notifier{
             releaseArtifacts.add(releaseArtifact);
         }
         return releaseArtifacts;
+    }
+
+    public boolean isArchiveLog() {
+        return isArchiveLog;
+    }
+
+    public String getDestinationPath() {
+        return destinationPath;
     }
     
     @Extension
@@ -304,15 +357,22 @@ public class ReleaseManagementCI extends Notifier{
                 return listBoxModel;
             }
 
-            String username = TeamCollectionConfiguration.findCredentialsById(credentialsId).getUsername();
-            Secret password = TeamCollectionConfiguration.findCredentialsById(credentialsId).getPassword();
+            StandardUsernamePasswordCredentials credential
+                    = TeamCollectionConfiguration.findCredentialsById(credentialsId);
+            if (credential == null) {
+                return listBoxModel;
+            }
 
-            ReleaseManagementHttpClient releaseManagementHttpClient =
-                    new ReleaseManagementHttpClient(
-                            collectionUrl.toLowerCase(),
-                            username,
-                            password);
+            String username = credential.getUsername();
+            Secret password = credential.getPassword();
+
             try {
+                ReleaseManagementHttpClient releaseManagementHttpClient =
+                        new ReleaseManagementHttpClient(
+                                collectionUrl.toLowerCase(),
+                                username,
+                                password);
+
                 List<Project> projects = releaseManagementHttpClient.GetProjectItems();
                 for (Project project : projects) {
                     listBoxModel.add(project.getName());
@@ -334,16 +394,21 @@ public class ReleaseManagementCI extends Notifier{
                 return listBoxModel;
             }
 
-            String username = TeamCollectionConfiguration.findCredentialsById(credentialsId).getUsername();
-            Secret password = TeamCollectionConfiguration.findCredentialsById(credentialsId).getPassword();
-
-            ReleaseManagementHttpClient releaseManagementHttpClient =
-                    new ReleaseManagementHttpClient(
-                            collectionUrl.toLowerCase().replaceFirst(".visualstudio.com", ".vsrm.visualstudio.com"),
-                            username,
-                            password);
+            StandardUsernamePasswordCredentials credential
+                    = TeamCollectionConfiguration.findCredentialsById(credentialsId);
+            if (credential == null) {
+                return listBoxModel;
+            }
+            String username = credential.getUsername();
+            Secret password = credential.getPassword();
 
             try {
+                ReleaseManagementHttpClient releaseManagementHttpClient =
+                        new ReleaseManagementHttpClient(
+                                collectionUrl.toLowerCase().replaceFirst(".visualstudio.com", ".vsrm.visualstudio.com"),
+                                username,
+                                password);
+
                 List<ReleaseDefinition> releaseDefinitions = releaseManagementHttpClient.GetReleaseDefinitions(projectName);
                 for (ReleaseDefinition releaseDefinition : releaseDefinitions) {
                     listBoxModel.add(releaseDefinition.getName());

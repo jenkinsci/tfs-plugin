@@ -262,7 +262,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
     public static String setCredentials(final String hostName, String username, String password) {
         final HostnameRequirement requirement = new HostnameRequirement(hostName);
-
+        
         if (!SystemCredentialsProvider.getInstance().getDomainCredentialsMap().containsKey(requirement)) {
             generateDomain(hostName);
         }
@@ -270,7 +270,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         StandardUsernamePasswordCredentials newCredential = new UsernamePasswordCredentialsImpl(
                 CredentialsScope.GLOBAL,
                 credentialsId = UUID.randomUUID().toString(),
-                "",
+                "Generated for " + username,
                 username,
                 password
         );

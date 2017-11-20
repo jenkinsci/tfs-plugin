@@ -2,20 +2,19 @@
 package hudson.plugins.tfs.rm;
 
 import com.google.gson.Gson;
+import hudson.FilePath;
 import hudson.model.BuildListener;
 import org.apache.commons.io.IOUtils;
 import hudson.util.Secret;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
@@ -66,19 +65,32 @@ public class ReleaseManagementHttpClient
         return new Gson().fromJson(response, ReleaseArtifactVersionsResponse.class);
     }
 
-    public void GetReleaseLogs(String project, String releaseId, BuildListener listener) throws ReleaseManagementException
+    public void GetReleaseLogs(String project, String releaseId, BuildListener listener, FilePath filePath) throws ReleaseManagementException
     {
-        String url = this.accountUrl + project + "/_apis/release/releases/" + "2" + "/logs?api-version=4.0-preview.2";
+        String url = this.accountUrl + project + "/_apis/release/releases/" + releaseId + "/logs?api-version=4.0-preview.2";
         InputStream inputStream = this.ExecuteGetMethodAsStream(url);
 
-        try {
-            FileOutputStream out = new FileOutputStream("/home/chenyl/tmp.zip");
+        try (OutputStream out = filePath.write()) {
             IOUtils.copy(inputStream, out);
-            out.close();
         } catch (Exception e) {
-
+            listener.getLogger().printf(e.getMessage());
         }
         return;
+    }
+
+    public String GetReleaseStatus(String project, String releaseId) throws ReleaseManagementException
+    {
+        String url = this.accountUrl + project + "/_apis/release/releases/" + releaseId + "?api-version=4.0-preview.4";
+        String response = this.ExecuteGetMethod(url);
+        ReleaseDetails releaseDetails = new Gson().fromJson(response, ReleaseDetails.class);
+        for (Map<String, Object> env : releaseDetails.getEnvironments())
+        {
+            if (((String) env.get("status")).equals("inProgress"))
+            {
+                return "inProgress";
+            }
+        }
+        return "finished";
     }
 
     public List<Project> GetProjectItems() throws ReleaseManagementException
