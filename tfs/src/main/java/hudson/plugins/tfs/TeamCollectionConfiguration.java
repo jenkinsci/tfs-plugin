@@ -261,11 +261,12 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
     }
 
     public static String setCredentials(final String hostName, String username, String password) {
-        final HostnameRequirement requirement = new HostnameRequirement(hostName);
-        
-        if (!SystemCredentialsProvider.getInstance().getDomainCredentialsMap().containsKey(requirement)) {
-            generateDomain(hostName);
-        }
+        List<DomainSpecification> domainSpecifications = new ArrayList<>();
+        domainSpecifications.add(new HostnameSpecification(hostName, null));
+        Domain domain = new Domain("Generated for " + hostName, "", domainSpecifications);
+
+        SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(domain, new ArrayList<Credentials>());
+
         String credentialsId;
         StandardUsernamePasswordCredentials newCredential = new UsernamePasswordCredentialsImpl(
                 CredentialsScope.GLOBAL,
@@ -274,16 +275,13 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
                 username,
                 password
         );
-        SystemCredentialsProvider.getInstance().getDomainCredentialsMap().get(requirement).add(newCredential);
+        SystemCredentialsProvider.getInstance().getDomainCredentialsMap().get(domain).add(newCredential);
+        try {
+            SystemCredentialsProvider.getInstance().save();
+        } catch (IOException ignore) {
+
+        }
         return credentialsId;
-    }
-
-    static void generateDomain(final String hostName) {
-        List<DomainSpecification> domainSpecifications = new ArrayList<>();
-        domainSpecifications.add(new HostnameSpecification(hostName, null));
-        Domain domain = new Domain("Generated for " + hostName, "", domainSpecifications);
-
-        SystemCredentialsProvider.getInstance().getDomainCredentialsMap().put(domain, new ArrayList<Credentials>());
     }
 
     // TODO: we'll probably also want findCredentialsForGitRepo, where we match part of the URL path
