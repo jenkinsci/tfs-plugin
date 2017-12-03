@@ -322,6 +322,19 @@ public class TeamFoundationServerScmTest {
     }
 
     @Test
+    public void deserializeMappedPathCollectionFromString_tfsPathOnly() {
+        final String input = " $/foo/\n $/bar/\n $/baz/ ";
+
+        final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
+
+        final Map<String, String> expected = new TreeMap<String, String>();
+        expected.put("$/foo/", null);
+        expected.put("$/bar/", null);
+        expected.put("$/baz/", null);
+        areEqual(actual, expected);
+    }
+
+    @Test
     public void deserializeMappedPathCollectionFromString_newlinesWithLiberalSpacing() {
         final String input = " $/foo/ : foo \n $/bar/ : bar \n $/baz/ : baz ";
 
