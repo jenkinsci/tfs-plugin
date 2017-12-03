@@ -381,8 +381,12 @@ public class TeamFoundationServerScm extends SCM {
                     case '\n':
                         if (path.length() > 0) {
                             String[] combinedPaths = splitMappedPath(path.toString());
-                            mappedPathsCollection.put(combinedPaths[0].trim(), combinedPaths[1].trim());
-                            
+                            String localPath = null;
+                            if (combinedPaths.length > 1) {
+                                localPath = combinedPaths[1].trim();
+                            }
+                            mappedPathsCollection.put(combinedPaths[0].trim(), localPath);
+
                             path.setLength(0);
                         }
                         break;
