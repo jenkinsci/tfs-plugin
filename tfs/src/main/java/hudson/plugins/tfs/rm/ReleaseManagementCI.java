@@ -7,27 +7,38 @@ import com.google.gson.Gson;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Item;
+import hudson.model.Result;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
-import hudson.tasks.*;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Notifier;
+import hudson.tasks.Publisher;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
-import org.json.*;
 import org.kohsuke.stapler.QueryParameter;
 
 /**
  * @author Ankit Goyal
  */
-public class ReleaseManagementCI extends Notifier implements Serializable{
+public class ReleaseManagementCI extends Notifier implements Serializable {
 
     private static final long serialVersionUID = -760016860995557L;
 
@@ -41,8 +52,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable{
 
 
     public String destinationPath;
-    
-    // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
+
     public ReleaseManagementCI(String collectionUrl, String projectName, String releaseDefinitionName, String username, Secret password)
     {
         if (collectionUrl.endsWith("/"))
@@ -61,6 +71,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable{
         this.password = password;
     }
 
+    // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public ReleaseManagementCI(String collectionUrl,
                                String projectName,
@@ -77,7 +88,6 @@ public class ReleaseManagementCI extends Notifier implements Serializable{
             this.collectionUrl = collectionUrl + "/";
         }
 
-        //this.collectionUrl = this.collectionUrl.toLowerCase().replaceFirst(".visualstudio.com", ".vsrm.visualstudio.com");
         this.projectName = projectName;
         this.releaseDefinitionName = releaseDefinitionName;
         StandardUsernamePasswordCredentials credential = TeamCollectionConfiguration.findCredentialsById(credentialsId);

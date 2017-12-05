@@ -1,10 +1,19 @@
 //CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
-import com.cloudbees.plugins.credentials.*;
+import com.cloudbees.plugins.credentials.Credentials;
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.*;
+import com.cloudbees.plugins.credentials.domains.Domain;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cloudbees.plugins.credentials.domains.DomainSpecification;
+import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import com.cloudbees.plugins.credentials.domains.HostnameSpecification;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import com.microsoft.tfs.core.exceptions.TFSUnauthorizedException;
 import hudson.Extension;
@@ -30,7 +39,10 @@ import org.kohsuke.stapler.QueryParameter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCollectionConfiguration> {
