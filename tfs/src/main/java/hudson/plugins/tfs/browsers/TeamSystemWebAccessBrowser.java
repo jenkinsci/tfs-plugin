@@ -62,8 +62,6 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
     public URL getChangeSetLink(final ChangeSet changeSet) throws IOException {
         final String baseUrlString = getBaseUrlString(changeSet);
         final URL baseUrl = new URL(baseUrlString);
-        //final QueryString qs = new QueryString();
-        //qs.put("id", changeSet.getVersion());
         return new URL(baseUrl, "_versionControl/changeset/" + changeSet.getVersion());
     }
 
