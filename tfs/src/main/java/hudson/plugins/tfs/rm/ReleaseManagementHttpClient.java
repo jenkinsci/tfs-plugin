@@ -2,6 +2,7 @@
 package hudson.plugins.tfs.rm;
 
 import com.google.gson.Gson;
+import hudson.ProxyConfiguration;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -14,6 +15,12 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.HostConfiguration;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import jenkins.model.Jenkins;
+
 
 /**
  * @author Ankit Goyal
@@ -26,16 +33,29 @@ public class ReleaseManagementHttpClient
     private final Secret password;
     private final String accountUrl;
     private final String basicAuth;
-    
+    private final HostConfiguration config;
+
     ReleaseManagementHttpClient(String accountUrl, String username, Secret password)
     {
         this.accountUrl = accountUrl;
         this.username = username;
         this.password = password;
         this.httpClient = new HttpClient();
+        this.config = httpClient.getHostConfiguration();
+
+        final ProxyConfiguration proxyConfiguration = Jenkins.getInstance().proxy;
+        if (proxyConfiguration != null) {
+            this.config.setProxy(proxyConfiguration.name, proxyConfiguration.port);
+            if (proxyConfiguration.getUserName() != null && proxyConfiguration.getPassword() != null){
+                Credentials credentials = new UsernamePasswordCredentials(proxyConfiguration.getUserName(), proxyConfiguration.getPassword());
+                AuthScope authScope = new AuthScope(proxyConfiguration.name, proxyConfiguration.port);
+                this.httpClient.getState().setProxyCredentials(authScope, credentials);
+            }
+        }
+
         this.basicAuth = "Basic " + new String(Base64.encodeBase64((this.username + ":" + Secret.toString(this.password)).getBytes(Charset.defaultCharset())), Charset.defaultCharset());
     }
-    
+
     public List<ReleaseDefinition> GetReleaseDefinitions(String project) throws ReleaseManagementException
     {
         String url = this.accountUrl + project + "/_apis/release/definitions?$expand=artifacts";
@@ -43,13 +63,13 @@ public class ReleaseManagementHttpClient
         DefinitionResponse definitionResponse = new Gson().fromJson(response, DefinitionResponse.class);
         return definitionResponse.getValue();
     }
-    
+
     public String CreateRelease(String project, String body) throws ReleaseManagementException
     {
         String url = this.accountUrl + project + "/_apis/release/releases?api-version=3.0-preview.2";
         return this.ExecutePostmethod(url, body);
     }
-    
+
     public ReleaseArtifactVersionsResponse GetVersions(String project, List<Artifact> artifacts) throws ReleaseManagementException
     {
         String url = this.accountUrl + project + "/_apis/release/artifacts/versions?api-version=3.0-preview.1";
@@ -57,7 +77,7 @@ public class ReleaseManagementHttpClient
         String response = this.ExecutePostmethod(url, body);
         return new Gson().fromJson(response, ReleaseArtifactVersionsResponse.class);
     }
-    
+
     private String ExecutePostmethod(String url, String body) throws ReleaseManagementException
     {
         PostMethod postMethod = new PostMethod(url);
@@ -86,10 +106,10 @@ public class ReleaseManagementHttpClient
         {
             throw new ReleaseManagementException(ex);
         }
-        
+
         return response;
     }
-    
+
     private String ExecuteGetMethod(String url) throws ReleaseManagementException
     {
         GetMethod getMethod = new GetMethod(url);
@@ -116,10 +136,10 @@ public class ReleaseManagementHttpClient
         {
             throw new ReleaseManagementException(ex);
         }
-        
+
         return response;
     }
-    
+
     private class DefinitionResponse
     {
 
@@ -128,7 +148,7 @@ public class ReleaseManagementHttpClient
         private final Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
         /**
-        * 
+        *
         * @return
         * The count
         */
@@ -138,7 +158,7 @@ public class ReleaseManagementHttpClient
         }
 
         /**
-        * 
+        *
         * @param count
         * The count
         */
@@ -148,7 +168,7 @@ public class ReleaseManagementHttpClient
         }
 
         /**
-        * 
+        *
         * @return
         * The value
         */
@@ -158,7 +178,7 @@ public class ReleaseManagementHttpClient
         }
 
         /**
-        * 
+        *
         * @param value
         * The value
         */
