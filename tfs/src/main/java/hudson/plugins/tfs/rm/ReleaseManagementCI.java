@@ -20,6 +20,7 @@ import hudson.tasks.Publisher;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.kohsuke.stapler.AncestorInPath;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.kohsuke.stapler.QueryParameter;
 
@@ -41,6 +43,8 @@ import org.kohsuke.stapler.QueryParameter;
 public class ReleaseManagementCI extends Notifier implements Serializable {
 
     private static final long serialVersionUID = -760016860995557L;
+
+    private static final long RELEASE_TIMEOUT_MINUTES = 120;
 
     public final String collectionUrl;
     public final String projectName;
@@ -98,9 +102,8 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
         this.isArchiveLog = isArchiveLog;
     }
 
-    private Object readResolve() {
+    protected Object readResolve() {
         if (StringUtils.isNotBlank(collectionUrl)
-                && StringUtils.isNotBlank(username)
                 && password != null
                 && StringUtils.isNotBlank(password.getPlainText())) {
             try {
@@ -108,7 +111,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
                 String hostName = uri.getHost();
                 List<StandardUsernamePasswordCredentials> credentials = TeamCollectionConfiguration.findCredentials(hostName);
                 for (StandardUsernamePasswordCredentials credential : credentials) {
-                    if (credential.getUsername().equals(username)
+                    if ((StringUtils.isBlank(username) || credential.getUsername().equals(username))
                             && credential.getPassword().getPlainText().equals(password.getPlainText())) {
                         this.credentialsId = credential.getId();
                         return this;
@@ -244,9 +247,14 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
 
             if (StringUtils.isNotBlank(this.destinationPath)) {
                 listener.getLogger().printf("Waiting for release to be finished...%n");
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
                 while (true) {
-                    String status = releaseManagementHttpClient.GetReleaseStatus(this.projectName, object.getString("id"));
-                    if (status.equals("finished")) {
+                    if (TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime()) > RELEASE_TIMEOUT_MINUTES) {
+                        listener.getLogger().printf("Getting release logs exceed timeout");
+                        throw new ReleaseManagementException("Cannot get release logs within expected time");
+                    }
+                    if (releaseManagementHttpClient.IsReleaseFinished(this.projectName, object.getString("id"))) {
                         break;
                     }
                     try {
@@ -255,6 +263,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
                         throw new ReleaseManagementException(ex);
                     }
                 }
+                stopWatch.stop();
                 FilePath ws = build.getWorkspace();
                 FilePath logFullPath = new FilePath(ws, this.destinationPath);
                 final String logRelativePath = this.destinationPath;

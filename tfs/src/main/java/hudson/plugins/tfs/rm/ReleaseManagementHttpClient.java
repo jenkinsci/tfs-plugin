@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Ankit Goyal
@@ -78,27 +81,35 @@ public class ReleaseManagementHttpClient
         return;
     }
 
-    public String GetReleaseStatus(String project, String releaseId) throws ReleaseManagementException
+    public boolean IsReleaseFinished(String project, String releaseId) throws ReleaseManagementException
     {
         String url = this.accountUrl + project + "/_apis/release/releases/" + releaseId + "?api-version=4.0-preview.4";
         String response = this.ExecuteGetMethod(url);
         ReleaseDetails releaseDetails = new Gson().fromJson(response, ReleaseDetails.class);
         for (Map<String, Object> env : releaseDetails.getEnvironments())
         {
-            if (((String) env.get("status")).equals("inProgress"))
-            {
-                return "inProgress";
+            String status = (String) env.get("status");
+            if (status.equalsIgnoreCase("canceled")
+                    || status.equalsIgnoreCase("partiallysucceeded")
+                    || status.equalsIgnoreCase("rejected")
+                    || status.equalsIgnoreCase("succeeded")
+                    || status.equalsIgnoreCase("undefined")) {
+                return true;
             }
         }
-        return "finished";
+        return false;
     }
 
     public List<Project> GetProjectItems() throws ReleaseManagementException
     {
         String url = this.accountUrl + "/_apis/projects?api-version=1.0";
         String response = this.ExecuteGetMethod(url);
-        TeamProject teamProject = new Gson().fromJson(response, TeamProject.class);
-        return teamProject.getValue();
+        try {
+            String values = new JSONObject(response).getString("value");
+            return Arrays.asList(new Gson().fromJson(values, Project[].class));
+        } catch (JSONException ex) {
+            throw new ReleaseManagementException(ex);
+        }
     }
     
     private String ExecutePostmethod(String url, String body) throws ReleaseManagementException
@@ -176,14 +187,6 @@ public class ReleaseManagementHttpClient
             {
                 throw new ReleaseManagementException("Error occurred.%nStatus: " + status + "%nResponse: " + response + "%n");
             }
-        }
-        catch(HttpException ex)
-        {
-            throw new ReleaseManagementException(ex);
-        }
-        catch(IOException ex)
-        {
-            throw new ReleaseManagementException(ex);
         }
         catch(Exception ex)
         {
