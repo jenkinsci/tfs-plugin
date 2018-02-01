@@ -288,11 +288,13 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
                 password
         );
         SystemCredentialsProvider.getInstance().getDomainCredentialsMap().get(domain).add(newCredential);
+
         try {
             SystemCredentialsProvider.getInstance().save();
         } catch (IOException ignore) {
 
         }
+
         return credentialsId;
     }
 

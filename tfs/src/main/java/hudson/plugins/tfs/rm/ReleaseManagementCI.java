@@ -4,7 +4,6 @@ package hudson.plugins.tfs.rm;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.google.gson.Gson;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
@@ -20,7 +19,6 @@ import hudson.tasks.Publisher;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.kohsuke.stapler.AncestorInPath;
@@ -31,9 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.kohsuke.stapler.QueryParameter;
 
@@ -52,10 +48,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
     public transient String username;
     public transient Secret password;
     public String credentialsId;
-    public boolean isArchiveLog;
 
-
-    public String destinationPath;
 
     public ReleaseManagementCI(String collectionUrl, String projectName, String releaseDefinitionName, String username, Secret password)
     {
@@ -80,9 +73,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
     public ReleaseManagementCI(String collectionUrl,
                                String projectName,
                                String releaseDefinitionName,
-                               String credentialsId,
-                               String destinationPath,
-                               boolean isArchiveLog) {
+                               String credentialsId) {
         if (collectionUrl.endsWith("/"))
         {
             this.collectionUrl = collectionUrl;
@@ -98,8 +89,6 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
         this.username = credential == null ? "" : credential.getUsername();
         this.password = credential == null ? Secret.fromString("") : credential.getPassword();
         this.credentialsId = credentialsId;
-        this.destinationPath = destinationPath;
-        this.isArchiveLog = isArchiveLog;
     }
 
     protected Object readResolve() {
@@ -244,42 +233,9 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
             JSONObject object = new JSONObject(response);
             listener.getLogger().printf("Release Name: %s%n", object.getString("name"));
             listener.getLogger().printf("Release id: %s%n", object.getString("id"));
-
-            if (StringUtils.isNotBlank(this.destinationPath)) {
-                listener.getLogger().printf("Waiting for release to be finished...%n");
-                StopWatch stopWatch = new StopWatch();
-                stopWatch.start();
-                while (true) {
-                    if (TimeUnit.MILLISECONDS.toMinutes(stopWatch.getTime()) > RELEASE_TIMEOUT_MINUTES) {
-                        listener.getLogger().printf("Getting release logs exceed timeout");
-                        throw new ReleaseManagementException("Cannot get release logs within expected time");
-                    }
-                    if (releaseManagementHttpClient.IsReleaseFinished(this.projectName, object.getString("id"))) {
-                        break;
-                    }
-                    try {
-                        Thread.sleep(10 * 1000);
-                    } catch (InterruptedException ex) {
-                        throw new ReleaseManagementException(ex);
-                    }
-                }
-                stopWatch.stop();
-                FilePath ws = build.getWorkspace();
-                FilePath logFullPath = new FilePath(ws, this.destinationPath);
-                final String logRelativePath = this.destinationPath;
-                releaseManagementHttpClient.GetReleaseLogs(this.projectName, object.getString("id"), listener, logFullPath);
-                if (isArchiveLog) {
-                    try {
-                        build.pickArtifactManager().archive(build.getWorkspace(), launcher, listener, new HashMap<String, String>() {
-                            {
-                                put(logRelativePath, logRelativePath);
-                            }
-                        });
-                    } catch (Exception ex) {
-                        throw new ReleaseManagementException(ex);
-                    }
-                }
-            }
+            String logLink = this.collectionUrl + this.projectName
+                    + "/_release?releaseId=" + object.getString("id") + "&_a=release-logs";
+            build.addAction(new LogSummaryAction(jobName, buildId, logLink));
         }
     }
 
@@ -316,14 +272,6 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
             releaseArtifacts.add(releaseArtifact);
         }
         return releaseArtifacts;
-    }
-
-    public boolean isArchiveLog() {
-        return isArchiveLog;
-    }
-
-    public String getDestinationPath() {
-        return destinationPath;
     }
     
     @Extension

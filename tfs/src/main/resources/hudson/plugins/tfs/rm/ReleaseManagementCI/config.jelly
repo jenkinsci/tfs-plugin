@@ -12,10 +12,4 @@
   <f:entry title="Release definition" field="releaseDefinitionName">
     <f:select />
   </f:entry>
-  <f:entry title="Log file destination path (ZIP file)" field="destinationPath">
-    <f:textbox default="log.zip" />
-  </f:entry>
-  <f:entry title="Archive logs" field="isArchiveLog">
-    <f:checkbox checked="${instance.isArchiveLog()}" />
-  </f:entry>
 </j:jelly>

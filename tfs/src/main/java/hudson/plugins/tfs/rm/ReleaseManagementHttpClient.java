@@ -2,14 +2,8 @@
 package hudson.plugins.tfs.rm;
 
 import com.google.gson.Gson;
-import hudson.FilePath;
-import hudson.model.BuildListener;
-import org.apache.commons.io.IOUtils;
 import hudson.util.Secret;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +13,6 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONException;
@@ -68,38 +61,6 @@ public class ReleaseManagementHttpClient
         return new Gson().fromJson(response, ReleaseArtifactVersionsResponse.class);
     }
 
-    public void GetReleaseLogs(String project, String releaseId, BuildListener listener, FilePath filePath) throws ReleaseManagementException
-    {
-        String url = this.accountUrl + project + "/_apis/release/releases/" + releaseId + "/logs?api-version=4.0-preview.2";
-        InputStream inputStream = this.ExecuteGetMethodAsStream(url);
-
-        try (OutputStream out = filePath.write()) {
-            IOUtils.copy(inputStream, out);
-        } catch (Exception e) {
-            listener.getLogger().printf(e.getMessage());
-        }
-        return;
-    }
-
-    public boolean IsReleaseFinished(String project, String releaseId) throws ReleaseManagementException
-    {
-        String url = this.accountUrl + project + "/_apis/release/releases/" + releaseId + "?api-version=4.0-preview.4";
-        String response = this.ExecuteGetMethod(url);
-        ReleaseDetails releaseDetails = new Gson().fromJson(response, ReleaseDetails.class);
-        for (Map<String, Object> env : releaseDetails.getEnvironments())
-        {
-            String status = (String) env.get("status");
-            if (status.equalsIgnoreCase("canceled")
-                    || status.equalsIgnoreCase("partiallysucceeded")
-                    || status.equalsIgnoreCase("rejected")
-                    || status.equalsIgnoreCase("succeeded")
-                    || status.equalsIgnoreCase("undefined")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public List<Project> GetProjectItems() throws ReleaseManagementException
     {
         String url = this.accountUrl + "/_apis/projects?api-version=1.0";
@@ -128,14 +89,6 @@ public class ReleaseManagementHttpClient
                 throw new ReleaseManagementException("Error occurred.%nStatus: " + status + "%nResponse: " + response + "%n");
             }
         }
-        catch(HttpException ex)
-        {
-            throw new ReleaseManagementException(ex);
-        }
-        catch(IOException ex)
-        {
-            throw new ReleaseManagementException(ex);
-        }
         catch(Exception ex)
         {
             throw new ReleaseManagementException(ex);
@@ -158,41 +111,11 @@ public class ReleaseManagementHttpClient
                 throw new ReleaseManagementException("Error occurred.%nStatus: " + status + "%nResponse: " + response + "%n");
             }
         }
-        catch(HttpException ex)
-        {
-            throw new ReleaseManagementException(ex);
-        }
-        catch(IOException ex)
-        {
-            throw new ReleaseManagementException(ex);
-        }
         catch(Exception ex)
         {
             throw new ReleaseManagementException(ex);
         }
         
-        return response;
-    }
-
-    private InputStream ExecuteGetMethodAsStream(String url) throws ReleaseManagementException
-    {
-        GetMethod getMethod = new GetMethod(url);
-        getMethod.addRequestHeader("Authorization", this.basicAuth);
-        InputStream response;
-        try
-        {
-            int status = this.httpClient.executeMethod(getMethod);
-            response = getMethod.getResponseBodyAsStream();
-            if(status >= 300)
-            {
-                throw new ReleaseManagementException("Error occurred.%nStatus: " + status + "%nResponse: " + response + "%n");
-            }
-        }
-        catch(Exception ex)
-        {
-            throw new ReleaseManagementException(ex);
-        }
-
         return response;
     }
     
