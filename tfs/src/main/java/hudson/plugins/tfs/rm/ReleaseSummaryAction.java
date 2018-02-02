@@ -8,19 +8,19 @@ import org.kohsuke.stapler.export.ExportedBean;
  */
 
 @ExportedBean
-public class LogSummaryAction extends InvisibleAction {
+public class ReleaseSummaryAction extends InvisibleAction {
     private String projectName;
     private int buildNo;
-    private String logLink;
+    private String releaseLink;
 
-    public LogSummaryAction() {
+    public ReleaseSummaryAction() {
 
     }
 
-    public LogSummaryAction(final String projectName, final int buildNo, final String logLink) {
+    public ReleaseSummaryAction(final String projectName, final int buildNo, final String releaseLink) {
         this.projectName = projectName;
         this.buildNo = buildNo;
-        this.logLink = logLink;
+        this.releaseLink = releaseLink;
     }
 
     public String getProjectName() {
@@ -31,7 +31,7 @@ public class LogSummaryAction extends InvisibleAction {
         return buildNo;
     }
 
-    public String getLogLink() {
-        return logLink;
+    public String getReleaseLink() {
+        return releaseLink;
     }
 }

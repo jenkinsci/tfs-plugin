@@ -40,7 +40,6 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
 
     private static final long serialVersionUID = -760016860995557L;
 
-    private static final long RELEASE_TIMEOUT_MINUTES = 120;
 
     public final String collectionUrl;
     public final String projectName;
@@ -233,9 +232,8 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
             JSONObject object = new JSONObject(response);
             listener.getLogger().printf("Release Name: %s%n", object.getString("name"));
             listener.getLogger().printf("Release id: %s%n", object.getString("id"));
-            String logLink = this.collectionUrl + this.projectName
-                    + "/_release?releaseId=" + object.getString("id") + "&_a=release-logs";
-            build.addAction(new LogSummaryAction(jobName, buildId, logLink));
+            build.addAction(new ReleaseSummaryAction(jobName, buildId,
+                    object.getJSONObject("_links").getJSONObject("web").getString("href")));
         }
     }
 
