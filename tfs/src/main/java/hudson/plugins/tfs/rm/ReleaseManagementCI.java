@@ -30,6 +30,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.kohsuke.stapler.QueryParameter;
 
@@ -39,6 +41,7 @@ import org.kohsuke.stapler.QueryParameter;
 public class ReleaseManagementCI extends Notifier implements Serializable {
 
     private static final long serialVersionUID = -760016860995557L;
+    private static final Logger logger = Logger.getLogger(ReleaseManagementCI.class.getName());
 
 
     public final String collectionUrl;
@@ -107,8 +110,10 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
                 }
                 this.credentialsId
                         = TeamCollectionConfiguration.setCredentials(hostName, username, password.getPlainText());
-            } catch (Exception ignore) {
-
+            } catch (Exception ex) {
+                logger.log(Level.WARNING,
+                        String.format("Get or generate credentials for collection url: %s and username: %s failed.", collectionUrl, username),
+                        ex);
             }
         }
         return this;
@@ -342,7 +347,10 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
                 for (Project project : projects) {
                     listBoxModel.add(project.getName());
                 }
-            } catch (ReleaseManagementException ignored) {
+            } catch (ReleaseManagementException ex) {
+                logger.log(Level.WARNING,
+                        String.format("Get team project for collection url: %s failed.", collectionUrl),
+                        ex);
             }
             return listBoxModel;
         }
@@ -378,7 +386,10 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
                 for (ReleaseDefinition releaseDefinition : releaseDefinitions) {
                     listBoxModel.add(releaseDefinition.getName());
                 }
-            } catch (ReleaseManagementException ignore) {
+            } catch (ReleaseManagementException ex) {
+                logger.log(Level.WARNING,
+                        String.format("Get release definition for project: %s failed.", projectName),
+                        ex);
             }
 
             return listBoxModel;

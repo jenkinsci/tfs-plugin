@@ -4,7 +4,7 @@ import hudson.model.InvisibleAction;
 import org.kohsuke.stapler.export.ExportedBean;
 
 /**
- * Show release logs link in build page.
+ * Show release summary link in build page.
  */
 
 @ExportedBean
