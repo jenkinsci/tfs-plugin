@@ -83,7 +83,7 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand<Integ
             final Changeset serverChangeset = serverChangeSets[0];
             changeSetNumber = serverChangeset.getChangesetID();
             final Date changeSetDate = serverChangeset.getDate().getTime();
-            final String author = serverChangeset.getCommitter();
+            final String author = serverChangeset.getOwner();
             final SimpleDateFormat simpleDateFormat = DateUtil.TFS_DATETIME_FORMATTER.get();
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             final String changeSetDateIso8601 = simpleDateFormat.format(changeSetDate);

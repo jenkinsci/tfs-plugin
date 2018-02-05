@@ -34,11 +34,11 @@ public class TfsUserLookup implements UserLookup {
      */
     public User find(final String accountName) {
         final String mappedAccountName = userAccountMapper.mapUserAccount(accountName);
-        logger.log(Level.FINE, "Looking up Jenkins user for account '%s'.", mappedAccountName);
+        logger.log(Level.FINE, String.format("Looking up Jenkins user for account '%s'.", mappedAccountName));
         final User jenkinsUser = User.get(mappedAccountName);
         Mailer.UserProperty mailerProperty = jenkinsUser.getProperty(Mailer.UserProperty.class);
         if (mailerProperty == null || mailerProperty.getAddress() == null || mailerProperty.getAddress().length() == 0) {
-            logger.log(Level.FINE, "No Mailer.UserProperty defined for '%s', looking in TFS", mappedAccountName);
+            logger.log(Level.FINE, String.format("No Mailer.UserProperty defined for '%s', looking in TFS", mappedAccountName));
             final TeamFoundationIdentity tfsUser = ims.readIdentity(
                 IdentitySearchFactor.ACCOUNT_NAME,
                 accountName,

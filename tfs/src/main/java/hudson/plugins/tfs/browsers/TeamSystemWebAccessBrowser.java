@@ -1,4 +1,3 @@
-//CHECKSTYLE:OFF
 package hudson.plugins.tfs.browsers;
 
 import hudson.Extension;
@@ -11,14 +10,15 @@ import hudson.plugins.tfs.util.QueryString;
 import hudson.scm.EditType;
 import hudson.scm.RepositoryBrowser;
 import hudson.scm.SCM;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.apache.commons.io.FilenameUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-
+/**
+ *  Provides information and links back to the TFS/VSTS repository for the current change set.
+ */
 public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBrowser {
 
     private static final long serialVersionUID = 1L;
@@ -26,7 +26,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
     private final String url;
 
     @DataBoundConstructor
-    public TeamSystemWebAccessBrowser(String urlExample) {
+    public TeamSystemWebAccessBrowser(final String urlExample) {
         this.url = Util.fixEmpty(urlExample);
     }
 
@@ -34,7 +34,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         return url;
     }
 
-    private String getServerConfiguration(ChangeSet changeset) {
+    private String getServerConfiguration(final ChangeSet changeset) {
         AbstractProject<?, ?> project = changeset.getParent().build.getProject();
         SCM scm = project.getScm();
         if (scm instanceof TeamFoundationServerScm) {
@@ -46,7 +46,7 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         }
     }
 
-    private String getBaseUrlString(ChangeSet changeSet) throws MalformedURLException {
+    private String getBaseUrlString(final ChangeSet changeSet) throws MalformedURLException {
         String baseUrl = url;
         if (baseUrl == null) {
             baseUrl = getServerConfiguration(changeSet);
@@ -62,13 +62,10 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
     public URL getChangeSetLink(final ChangeSet changeSet) throws IOException {
         final String baseUrlString = getBaseUrlString(changeSet);
         final URL baseUrl = new URL(baseUrlString);
-        final QueryString qs = new QueryString();
-        qs.put("id", changeSet.getVersion());
-        final URL changeSetUrl = new URL(baseUrl, "_versionControl/changeset?" + qs.toString());
-        return changeSetUrl;
+        return new URL(baseUrl, "_versionControl/changeset/" + changeSet.getVersion());
     }
 
-    URL createChangeSetItemLink(final ChangeSet.Item item, final String action) throws IOException {
+    private URL createChangeSetItemLink(final ChangeSet.Item item, final String action) throws IOException {
         final ChangeSet changeSet = item.getParent();
         final URL changeSetUrl = getChangeSetLink(changeSet);
         final QueryString qs = new QueryString();
@@ -95,6 +92,9 @@ public class TeamSystemWebAccessBrowser extends TeamFoundationServerRepositoryBr
         return createChangeSetItemLink(item, "compare");
     }
 
+    /**
+     * Gets the descriptor for the repository.
+     */
     @Extension
     public static final class DescriptorImpl extends Descriptor<RepositoryBrowser<?>> {
 
