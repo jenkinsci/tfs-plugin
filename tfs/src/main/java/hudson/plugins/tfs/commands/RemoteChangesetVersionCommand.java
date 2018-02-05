@@ -129,4 +129,3 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand<Integ
         return StringUtils.EMPTY;
     }
 }
-
