@@ -111,7 +111,8 @@ public class TelemetryContextInitializer implements ContextInitializer {
         final String userName = getSystemProperty(SYS_PROP_USER_NAME);
         final String fakeUserId = MessageFormat.format("{0}@{1}", userName, computerName);
 
-        return DigestUtils.sha1Hex(fakeUserId);
+        //FIXME: was sha1Hex, but this is available only in commons codec 1.7. TFS SDK 14.0.3 bundles older version
+        return DigestUtils.shaHex(fakeUserId);
     }
 
     private String getComputerName() {

@@ -228,7 +228,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
     public static <T extends Trigger> T findTrigger(final Job<?, ?> job, final Class<T> tClass) {
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             final ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
-            for (final Trigger trigger : pJob.getTriggers().values()) {
+            for (final Object trigger : pJob.getTriggers().values()) {
                 if (tClass.isInstance(trigger)) {
                     return tClass.cast(trigger);
                 }
@@ -242,7 +242,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         List<T> triggerList = new ArrayList<>();
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             final ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
-            for (final Trigger trigger : pJob.getTriggers().values()) {
+            for (final Object trigger : pJob.getTriggers().values()) {
                 if (tClass.isInstance(trigger)) {
                     triggerList.add(tClass.cast(trigger));
                 }
