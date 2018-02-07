@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -176,66 +178,186 @@ public class TeamFoundationServerScmTest {
     }
 
     @Test
-    public void serializeCloakedPathCollectionToString_one() {
-        final List<String> cloakedPaths = Collections.singletonList("$/foo");
+    public void assertMappedPathsCheckRegexWorks() {
 
-        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(cloakedPaths);
+        final String shouldNotMatch = "Mapped paths regex matched an invalid mapped path";
+        assertFalse(shouldNotMatch, isMappedPathValid("tfsandbox"));
+        assertFalse(shouldNotMatch, isMappedPathValid("tfsandbox/with/sub/pathes"));
+        assertFalse(shouldNotMatch, isMappedPathValid("tfsandbox$/with/sub/pathes"));
+        assertFalse(shouldNotMatch, isMappedPathValid("$/tfsandbox/path1;$/tfsandbox/path2"));
+        assertFalse(shouldNotMatch, isMappedPathValid("$/tfsandbox/path1 ; $/tfsandbox/path2 ; $/tfsandbox/path3"));
+        assertFalse(shouldNotMatch, isMappedPathValid("$/foo/;$/bar/;$/baz/"));
+        assertFalse(shouldNotMatch, isMappedPathValid("$/foo/;\n$/bar/;\n$/baz/"));
+
+        final String shoudMatch = "Mapped paths regex did not match a valid Mapped path";
+        assertTrue(shoudMatch, isMappedPathValid("$/tfsandbox"));
+        assertTrue(shoudMatch, isMappedPathValid("$/tfsandbox/path with space/subpath"));
+        assertTrue(shoudMatch, isMappedPathValid("$/tfsandbox/with/${parameter}/path"));
+        assertTrue(shoudMatch, isMappedPathValid("$/foo/\n$/bar/\n$/baz/"));
+        assertTrue(shoudMatch, isMappedPathValid(" $/foo/ \n $/bar/ \n $/baz/ "));
+        assertTrue(shoudMatch, isMappedPathValid("\n$/foo/\n\n$/bar/\n\n$/baz/\n"));
+    }
+
+    private static boolean isMappedPathValid(final String path) {
+        return TeamFoundationServerScm.DescriptorImpl.MAPPED_PATHS_REGEX.matcher(path).matches();
+    }
+
+    @Test
+    public void serializeCloakedPathCollectionToString_one() {
+        final List<String> pathCollection = Collections.singletonList("$/foo");
+
+        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(pathCollection);
 
         Assert.assertEquals("$/foo", actual);
     }
 
     @Test
     public void serializeCloakedPathCollectionToString_two() {
-        final List<String> cloakedPaths = Arrays.asList("$/foo", "$/bar");
+        final List<String> pathCollection = Arrays.asList("$/foo", "$/bar");
 
-        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(cloakedPaths);
+        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(pathCollection);
 
         Assert.assertEquals("$/foo\n$/bar", actual);
     }
 
     @Test
     public void serializeCloakedPathCollectionToString_many() {
-        final List<String> cloakedPaths = Arrays.asList("$/foo/", "$/bar/", "$/baz/");
+        final List<String> pathCollection = Arrays.asList("$/foo/", "$/bar/", "$/baz/");
 
-        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(cloakedPaths);
+        final String actual = TeamFoundationServerScm.serializeCloakedPathCollectionToString(pathCollection);
 
         Assert.assertEquals("$/foo/\n$/bar/\n$/baz/", actual);
     }
 
     @Test
-    public void splitCloakedPaths_one() {
+    public void serializeMappedPathCollectionToString_one() {
+        final Map<String, String> pathCollection = Collections.singletonMap("$/foo", "foo");
+
+        final String actual = TeamFoundationServerScm.serializeMappedPathCollectionToString(pathCollection);
+
+        Assert.assertEquals("$/foo : foo", actual);
+    }
+
+    @Test
+    public void serializeMappedPathCollectionToString_two() {
+        final Map<String, String> pathCollection = new TreeMap<String, String>();
+        pathCollection.put("$/foo", "foo");
+        pathCollection.put("$/bar", "bar");
+
+        final String actual = TeamFoundationServerScm.serializeMappedPathCollectionToString(pathCollection);
+
+        Assert.assertEquals("$/bar : bar\n$/foo : foo", actual);
+    }
+
+    @Test
+    public void serializeMappedPathCollectionToString_many() {
+        final Map<String, String> pathCollection = new TreeMap<String, String>();
+        pathCollection.put("$/foo/", "foo");
+        pathCollection.put("$/bar/", "bar");
+        pathCollection.put("$/baz/", "baz");
+
+        final String actual = TeamFoundationServerScm.serializeMappedPathCollectionToString(pathCollection);
+
+        Assert.assertEquals("$/bar/ : bar\n$/baz/ : baz\n$/foo/ : foo", actual);
+    }
+
+    @Test
+    public void deserializeCloakedPathCollectionFromString_one() {
         final String input = "$/foo/";
 
-        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+        final Collection<String> actual = TeamFoundationServerScm.deserializeCloakedPathCollectionFromString(input);
 
         areEqual(actual, input);
     }
 
     @Test
-    public void splitCloakedPaths_newlinesMany() {
+    public void deserializeCloakedPathCollectionFromString_newlinesMany() {
         final String input = "$/foo/\n$/bar/\n$/baz/";
 
-        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+        final Collection<String> actual = TeamFoundationServerScm.deserializeCloakedPathCollectionFromString(input);
 
         areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
     }
 
     @Test
-    public void splitCloakedPaths_newlinesWithLiberalSpacing() {
+    public void deserializeCloakedPathCollectionFromString_newlinesWithLiberalSpacing() {
         final String input = " $/foo/ \n $/bar/ \n $/baz/ ";
 
-        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+        final Collection<String> actual = TeamFoundationServerScm.deserializeCloakedPathCollectionFromString(input);
 
         areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
     }
 
     @Test
-    public void splitCloakedPaths_newlinesWithBlankLines() {
+    public void deserializeCloakedPathCollectionFromString_newlinesWithBlankLines() {
         final String input = "\n$/foo/\n\n$/bar/\n\n$/baz/\n";
 
-        final Collection<String> actual = TeamFoundationServerScm.splitCloakedPaths(input);
+        final Collection<String> actual = TeamFoundationServerScm.deserializeCloakedPathCollectionFromString(input);
 
         areEqual(actual, "$/foo/", "$/bar/", "$/baz/");
+    }
+
+    @Test
+    public void deserializeMappedPathCollectionFromString_one() {
+        final String input = "$/foo/:foo";
+
+        final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
+
+        final Map<String, String> expected = new TreeMap<String, String>();
+        expected.put("$/foo/", "foo");
+        areEqual(actual, expected);
+    }
+
+    @Test
+    public void deserializeMappedPathCollectionFromString_newlinesMany() {
+        final String input = "$/foo/:foo\n$/bar/:bar\n$/baz/:baz";
+
+        final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
+
+        final Map<String, String> expected = new TreeMap<String, String>();
+        expected.put("$/foo/", "foo");
+        expected.put("$/bar/", "bar");
+        expected.put("$/baz/", "baz");
+        areEqual(actual, expected);
+    }
+
+    @Test
+    public void deserializeMappedPathCollectionFromString_tfsPathOnly() {
+        final String input = " $/foo/\n $/bar/\n $/baz/ ";
+
+        final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
+
+        final Map<String, String> expected = new TreeMap<String, String>();
+        expected.put("$/foo/", null);
+        expected.put("$/bar/", null);
+        expected.put("$/baz/", null);
+        areEqual(actual, expected);
+    }
+
+    @Test
+    public void deserializeMappedPathCollectionFromString_newlinesWithLiberalSpacing() {
+        final String input = " $/foo/ : foo \n $/bar/ : bar \n $/baz/ : baz ";
+
+        final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
+
+        final Map<String, String> expected = new TreeMap<String, String>();
+        expected.put("$/foo/", "foo");
+        expected.put("$/bar/", "bar");
+        expected.put("$/baz/", "baz");
+        areEqual(actual, expected);
+    }
+
+    @Test
+    public void deserializeMappedPathCollectionFromString_newlinesWithBlankLines() {
+        final String input = "\n$/foo/:foo\n\n$/bar/:bar\n\n$/baz/:baz\n";
+
+        final Map<String, String> actual = TeamFoundationServerScm.deserializeMappedPathCollectionFromString(input);
+
+        final Map<String, String> expected = new TreeMap<String, String>();
+        expected.put("$/foo/", "foo");
+        expected.put("$/bar/", "bar");
+        expected.put("$/baz/", "baz");
+        areEqual(actual, expected);
     }
 
     private static <T> void areEqual(final Collection<T> actual, T... expected) {
@@ -258,6 +380,33 @@ public class TeamFoundationServerScmTest {
             }
         }
     }
+
+    private static <T> void areEqual(final Map<T, T> actual, Map<T, T> expected) {
+        if (actual.size() > expected.size())
+        {
+            Assert.fail("There were more elements than expected");
+            return;
+        }
+
+        if (actual.size() < expected.size()) {
+            Assert.fail("Some elements were missing from actual.");
+            return;
+        }
+
+        final Iterator<Entry<T, T>> ai = actual.entrySet().iterator();
+        while (ai.hasNext()) {
+            final Entry<T, T> actualItem = ai.next();
+            T key = actualItem.getKey();
+            if (!expected.containsKey(key)) {
+                Assert.fail();
+                continue;
+            }
+
+            final T expectedItem = expected.get(key);
+            Assert.assertEquals(expectedItem, actualItem.getValue());
+        }
+    }
+
     @Test
     public void assertDefaultValueIsUsedForNullLocalPath() {
         TeamFoundationServerScm scm = new TeamFoundationServerScm("serverurl", "projectpath", "workspace");
