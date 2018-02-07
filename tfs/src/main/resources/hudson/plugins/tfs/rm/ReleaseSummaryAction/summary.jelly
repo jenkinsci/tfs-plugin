@@ -1,0 +1,6 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <t:summary icon="/plugin/tfs/48x48/logo.png">
+        Release summary: <a href="${it.releaseLink}">${it.releaseLink}</a>
+    </t:summary>
+</j:jelly>
