@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCollectionConfiguration> {
@@ -291,8 +292,8 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
 
         try {
             SystemCredentialsProvider.getInstance().save();
-        } catch (IOException ignore) {
-
+        } catch (IOException ex) {
+            LOGGER.log(Level.WARNING, "SystemCredentialsProvider instance save failed: ", ex);
         }
 
         return credentialsId;
