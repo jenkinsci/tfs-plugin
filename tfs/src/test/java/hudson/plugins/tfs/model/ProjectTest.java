@@ -112,41 +112,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/foo");
         final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
 
-        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, null, changeSets);
-
-        Assert.assertEquals("44", actual.getVersion());
-    }
-
-    @Test
-    public void findLatestUncloakedChangeset_latestIsUncloakedBelowACloakedFolder() {
-        final List<String> cloakedPaths = Arrays.asList("$/MyProject/A/2", "$/MyProject/B");
-        final List<String> mappedPaths = Arrays.asList("$/MyProject/A/2/foo", "$/MyProject/B/bar");
-        final ChangeSet changeSet42 = createChangeSet(42, "$/MyProject/A/foo", "$/MyProject/A/bar");
-        final ChangeSet changeSet43 = createChangeSet(43, "$/MyProject/A/bar");
-        final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/foo");
-        final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
-
-        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, mappedPaths, changeSets);
-
-        Assert.assertEquals("44", actual.getVersion());
-    }
-
-    @Test
-    public void findLatestUncloakedChangeset_latestIsUncloakedBelowSeveralCloakedFolders() {
-        final List<String> cloakedPaths = Arrays.asList(
-            "$/MyProject/A/2",
-            "$/MyProject/A/2/foo/bar",
-            "$/MyProject/B");
-        final List<String> mappedPaths = Arrays.asList(
-            "$/MyProject/A/2/foo",
-            "$/MyProject/A/2/foo/bar/baz",
-            "$/MyProject/B/bar");
-        final ChangeSet changeSet42 = createChangeSet(42, "$/MyProject/A/foo", "$/MyProject/A/bar");
-        final ChangeSet changeSet43 = createChangeSet(43, "$/MyProject/A/bar");
-        final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/foo/bar/baz/foo");
-        final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
-
-        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, mappedPaths, changeSets);
+        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, changeSets);
 
         Assert.assertEquals("44", actual.getVersion());
     }
@@ -159,46 +125,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/2/foo");
         final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
 
-        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, null, changeSets);
-
-        Assert.assertEquals("43", actual.getVersion());
-    }
-
-    @Test
-    public void findLatestUncloakedChangeset_latestIsCloakedWithMappedFolders() {
-        final List<String> cloakedPaths = Arrays.asList(
-            "$/MyProject/A/1",
-            "$/MyProject/A/2",
-            "$/MyProject/B");
-        final List<String> mappedPaths = Arrays.asList(
-            "$/MyProject/A/1/foo",
-            "$/MyProject/B/bar");
-        final ChangeSet changeSet42 = createChangeSet(42, "$/MyProject/A/foo", "$/MyProject/A/bar");
-        final ChangeSet changeSet43 = createChangeSet(43, "$/MyProject/A/bar");
-        final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/2/foo");
-        final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
-
-        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, null, changeSets);
-
-        Assert.assertEquals("43", actual.getVersion());
-    }
-
-    @Test
-    public void findLatestUncloakedChangeset_latestIsCloakedBelowSeveralMappedFolders() {
-        final List<String> cloakedPaths = Arrays.asList(
-            "$/MyProject/A/2",
-            "$/MyProject/A/2/foo/bar",
-            "$/MyProject/B");
-        final List<String> mappedPaths = Arrays.asList(
-            "$/MyProject/A/2/foo",
-            "$/MyProject/A/2/foo/bar/baz",
-            "$/MyProject/B/bar");
-        final ChangeSet changeSet42 = createChangeSet(42, "$/MyProject/A/foo", "$/MyProject/A/bar");
-        final ChangeSet changeSet43 = createChangeSet(43, "$/MyProject/A/bar");
-        final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/2/foo/bar/foo");
-        final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
-
-        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, mappedPaths, changeSets);
+        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, changeSets);
 
         Assert.assertEquals("43", actual.getVersion());
     }
@@ -211,7 +138,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final ChangeSet changeSet44 = createChangeSet(44, "$/MyProject/A/2/foo");
         final List<ChangeSet> changeSets = Arrays.asList(changeSet44, changeSet43, changeSet42);
 
-        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, null, changeSets);
+        final ChangeSet actual = Project.findLatestUncloakedChangeset(cloakedPaths, changeSets);
 
         Assert.assertEquals(null, actual);
     }
@@ -234,7 +161,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
     public void isChangesetFullyCloaked_nullCloakedPaths() {
         final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
 
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, null, null);
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, null);
 
         Assert.assertEquals(false, actual);
     }
@@ -245,7 +172,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
         final List<String> cloakedPaths = Arrays.asList("$/fizz", "$/fizz/FizzBuzz.java");
 
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, null);
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
 
         Assert.assertEquals(false, actual);
     }
@@ -255,20 +182,9 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final List<String> changesetPaths = Arrays.asList("$/foo/bar/test.baz");
         final List<String> cloakedPaths = Arrays.asList("$/fOo/bAr/");
 
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, null);
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
 
         Assert.assertEquals(true, actual);
-    }
-
-    @Test
-    public void isChangesetFullyCloaked_caseInsensitiveMappedPaths() {
-        final List<String> changesetPaths = Arrays.asList("$/foo/bar/baz/test.baz");
-        final List<String> cloakedPaths = Arrays.asList("$/fOo/bAr/");
-        final List<String> mappedPaths = Arrays.asList("$/fOo/bAr/BaZ");
-
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, mappedPaths);
-
-        Assert.assertEquals(false, actual);
     }
 
     @Test
@@ -276,18 +192,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
         final List<String> cloakedPaths = Collections.singletonList("$/foo/bar.baz");
 
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, null);
-
-        Assert.assertEquals(false, actual);
-    }
-
-    @Test
-    public void isChangesetFullyCloaked_mappingChild() {
-        final List<String> changesetPaths = Arrays.asList("$/foo/bar", "$/foo/bar/baz/fizz.buzz");
-        final List<String> cloakedPaths = Collections.singletonList("$/foo/bar");
-        final List<String> mappedPaths = Arrays.asList("$/foo/bar/baz");
-
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, mappedPaths);
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
 
         Assert.assertEquals(false, actual);
     }
@@ -297,7 +202,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final List<String> changesetPaths = Arrays.asList("$/foo", "$/bar");
         final List<String> cloakedPaths = Collections.singletonList("$/foo");
 
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, null);
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
 
         Assert.assertEquals(false, actual);
     }
@@ -307,23 +212,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final List<String> changesetPaths = Arrays.asList("$/foo", "$/foo/bar.baz");
         final List<String> cloakedPaths = Collections.singletonList("$/foo");
 
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, null);
-
-        Assert.assertEquals(true, actual);
-    }
-
-    @Test
-    public void isChangesetFullyCloaked_fullyCloakedPathWithMappedPaths() {
-        final List<String> changesetPaths = Arrays.asList(
-            "$/foo",
-             "$/foo/bar/baz",
-             "$/foo/bar/baz/fizz");
-        final List<String> cloakedPaths = Arrays.asList(
-            "$/foo",
-            "$/foo/bar/baz");
-        final List<String> mappedPaths = Arrays.asList("$/foo/bar");
-
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, mappedPaths);
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
 
         Assert.assertEquals(true, actual);
     }
@@ -333,7 +222,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final List<String> changesetPaths = Collections.singletonList("$/foo/bar.baz");
         final List<String> cloakedPaths = Arrays.asList("$/foo", "$/bar");
 
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, null);
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
 
         Assert.assertEquals(true, actual);
     }
@@ -343,7 +232,7 @@ public class ProjectTest extends SwedishLocaleTestCase {
         final List<String> changesetPaths = Arrays.asList("$/foo/bar.baz", "$/bar/foo.baz");
         final List<String> cloakedPaths = Arrays.asList("$/foo", "$/bar");
 
-        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths, null);
+        final boolean actual = Project.isChangesetFullyCloaked(changesetPaths, cloakedPaths);
 
         Assert.assertEquals(true, actual);
     }
