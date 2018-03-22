@@ -20,23 +20,20 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 public class CheckoutAction {
 
     private final String workspaceName;
     private final String projectPath;
     private final Collection<String> cloakedPaths;
-    private final Map<String, String> mappedPaths;
     private final String localFolder;
     private final boolean useUpdate;
     private final boolean useOverwrite;
 
-    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakedPaths, Map<String, String> mappedPaths, String localFolder, boolean useUpdate, boolean useOverwrite) {
+    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakedPaths, String localFolder, boolean useUpdate, boolean useOverwrite) {
         this.workspaceName = workspaceName;
         this.projectPath = projectPath;
         this.cloakedPaths = cloakedPaths;
-        this.mappedPaths = mappedPaths;
         this.localFolder = localFolder;
         this.useUpdate = useUpdate;
         this.useOverwrite = useOverwrite;
@@ -66,7 +63,7 @@ public class CheckoutAction {
         project.getFiles(normalizedFolder, versionSpecString, useOverwrite);
 
         if (lastBuildVersionSpec != null) {
-            return project.getDetailedHistoryWithoutCloakedPaths(lastBuildVersionSpec, currentBuildVersionSpec, cloakedPaths, mappedPaths.keySet());
+            return project.getDetailedHistoryWithoutCloakedPaths(lastBuildVersionSpec, currentBuildVersionSpec, cloakedPaths);
         }
 
         return new ArrayList<ChangeSet>();
@@ -144,7 +141,7 @@ public class CheckoutAction {
                 localFolderPath.deleteContents();
             }
             final String serverPath = project.getProjectPath();
-            workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakedPaths, mappedPaths, localPath);
+            workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakedPaths, localPath);
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }

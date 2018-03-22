@@ -7,8 +7,6 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Node;
@@ -23,14 +21,13 @@ import org.jvnet.hudson.test.Bug;
 public class BuildWorkspaceConfigurationRetrieverTest {
 
     private static final List<String> EMPTY_CLOAKED_PATHS_LIST = Collections.emptyList();
-    private static final Map<String, String> EMPTY_MAPPING_PATHS_LIST = new TreeMap<String, String>();
 
     @Test
     public void assertGetLatestConfgiurationOnNode() {
         AbstractBuild build = mock(AbstractBuild.class);
         Node node = mock(Node.class);
         Node needleNode = mock(Node.class);
-        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", "projectPath", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPING_PATHS_LIST, "workfolder");
+        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", "projectPath", EMPTY_CLOAKED_PATHS_LIST, "workfolder");
         when(build.getPreviousBuild()).thenReturn(build).thenReturn(null);
         when(build.getBuiltOn()).thenReturn(node, node, null);
         when(node.getNodeName()).thenReturn("node1", "needleNode");
@@ -101,7 +98,7 @@ public class BuildWorkspaceConfigurationRetrieverTest {
         when(build.getPreviousBuild()).thenReturn(build);
         when(build.getBuiltOn()).thenReturn(node);
         when(node.getNodeName()).thenReturn("needleNode");
-        when(build.getAction(WorkspaceConfiguration.class)).thenReturn(new WorkspaceConfiguration("serverUrl", "workspaceName", "projectPath", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPING_PATHS_LIST, "workfolder"));
+        when(build.getAction(WorkspaceConfiguration.class)).thenReturn(new WorkspaceConfiguration("serverUrl", "workspaceName", "projectPath", EMPTY_CLOAKED_PATHS_LIST, "workfolder"));
         
         BuildWorkspaceConfiguration configuration = new BuildWorkspaceConfigurationRetriever().getLatestForNode(node, build);
         assertThat( configuration.getWorkspaceName(), is("workspaceName"));
@@ -116,7 +113,7 @@ public class BuildWorkspaceConfigurationRetrieverTest {
         AbstractBuild build = mock(AbstractBuild.class);
         Node node = mock(Node.class);
         Node needleNode = mock(Node.class);
-        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", "projectPath", EMPTY_CLOAKED_PATHS_LIST, EMPTY_MAPPING_PATHS_LIST, "workfolder");
+        WorkspaceConfiguration configuration = new WorkspaceConfiguration("serverUrl", "workspaceName", "projectPath", EMPTY_CLOAKED_PATHS_LIST, "workfolder");
         when(build.getPreviousBuild()).thenReturn(build).thenReturn(null);
         when(build.getBuiltOn()).thenReturn(null);
 

@@ -1,4 +1,3 @@
-//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
@@ -58,12 +57,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -90,7 +85,6 @@ public class TeamFoundationServerScm extends SCM {
     private final String serverUrl;
     private final String projectPath;
     private Collection<String> cloakedPaths;
-    private Map<String, String> mappedPaths;
     private String localPath;
     private final String workspaceName;
     @Deprecated private String userPassword;
@@ -236,48 +230,13 @@ public class TeamFoundationServerScm extends SCM {
 
     @DataBoundSetter
     public void setCloakedPaths(final String cloakedPaths) {
-        this.cloakedPaths = deserializeCloakedPathCollectionFromString(cloakedPaths);
-    }
-
-    public String getMappedPaths() {
-        return serializeMappedPathCollectionToString(this.mappedPaths);
-    }
-
-    @DataBoundSetter
-    public void setMappedPaths(final String mappedPaths) {
-        this.mappedPaths = deserializeMappedPathCollectionFromString(mappedPaths);
+        this.cloakedPaths = splitCloakedPaths(cloakedPaths);
     }
 
     // Bean properties END
 
     static String serializeCloakedPathCollectionToString(final Collection<String> cloakedPaths) {
         return cloakedPaths == null ? StringUtils.EMPTY : StringUtils.join(cloakedPaths, "\n");
-    }
-
-    static String serializeMappedPathCollectionToString(final Map<String, String> mappedPaths) {
-        if (mappedPaths == null) {
-            return StringUtils.EMPTY;
-        }
-
-        Map<String, String> sortedPaths = new TreeMap<String, String>(mappedPaths);
-        Iterator<Entry<String, String>> iter = sortedPaths.entrySet().iterator();
-
-        StringBuilder sb = new StringBuilder();
-        while (iter.hasNext()) {
-            Entry<String, String> entry = iter.next();
-            sb.append(entry.getKey());
-            
-            final String mappedPath = entry.getValue();
-            if (mappedPath != null) {
-                sb.append(' ').append(':').append(' ');
-                sb.append(entry.getValue());
-            }
-            if (iter.hasNext()) {
-                sb.append('\n');
-            }
-        }
-
-        return sb.toString();
     }
 
     String getWorkspaceName(final Run<?, ?> build, final Computer computer) {
@@ -315,29 +274,6 @@ public class TeamFoundationServerScm extends SCM {
         return paths;
     }
 
-    Map<String, String> getMappedPaths(final Run<?, ?> run) {
-        final Map<String, String> paths = new TreeMap<String, String>();
-        if (mappedPaths != null) {
-            final BuildVariableResolver resolver = new BuildVariableResolver(run.getParent());
-            
-            Iterator<Entry<String, String>> iter = mappedPaths.entrySet().iterator();
-            while (iter.hasNext()) {
-                Entry<String, String> entry = iter.next();
-                final String serverPath = Util.replaceMacro(substituteBuildParameter(run, entry.getKey()), resolver);
-
-                String localPath = null;
-                String storedLocalPath = entry.getValue();
-                if (storedLocalPath != null) {
-                    localPath = Util.replaceMacro(substituteBuildParameter(run, storedLocalPath), resolver);
-                }
-
-                paths.put(serverPath, localPath);
-            }
-        }
-
-        return paths;
-    }
-
     private String substituteBuildParameter(final Run<?, ?> run, final String text) {
         if (run instanceof AbstractBuild<?, ?>) {
             AbstractBuild<?, ?> build = (AbstractBuild<?, ?>) run;
@@ -348,7 +284,7 @@ public class TeamFoundationServerScm extends SCM {
         return text;
     }
 
-    static Collection<String> deserializeCloakedPathCollectionFromString(final String cloakedPaths) {
+    static Collection<String> splitCloakedPaths(final String cloakedPaths) {
         final List<String> cloakedPathsList = new ArrayList<String>();
         if (cloakedPaths != null && cloakedPaths.length() > 0) {
             final StringBuilder cloakedPath = new StringBuilder(cloakedPaths.length());
@@ -372,53 +308,11 @@ public class TeamFoundationServerScm extends SCM {
         return cloakedPathsList;
     }
 
-    static Map<String, String> deserializeMappedPathCollectionFromString(final String mappedPaths){
-        final Map<String, String> mappedPathsCollection = new HashMap<String, String>();
-        if (mappedPaths != null && mappedPaths.length() > 0) {
-            final StringBuilder path = new StringBuilder(mappedPaths.length());
-            for (final char character : mappedPaths.toCharArray()) {
-                switch (character) {
-                    case '\n':
-                        if (path.length() > 0) {
-                            String[] combinedPaths = splitMappedPath(path.toString());
-                            String localPath = null;
-                            if (combinedPaths.length > 1) {
-                                localPath = combinedPaths[1].trim();
-                            }
-                            mappedPathsCollection.put(combinedPaths[0].trim(), localPath);
-
-                            path.setLength(0);
-                        }
-                        break;
-                    default:
-                        path.append(character);
-                        break;
-                }
-            }
-
-            if (path.length() > 0) {
-                String[] combinedPaths = splitMappedPath(path.toString());
-
-                final String serverPath = combinedPaths[0].trim();
-                String localPath = null;
-                if (combinedPaths.length > 1) {
-                    localPath = combinedPaths[1].trim();
-                }
-                mappedPathsCollection.put(serverPath, localPath);
-            }
-        }
-        return mappedPathsCollection;
-    }
-
-    static String[] splitMappedPath(final String mappedPath) {
-        return mappedPath.split(":", 2);
-    }
-
     @Override
     public void checkout(final Run<?, ?> build, final Launcher launcher, final FilePath workspaceFilePath, final TaskListener listener, final File changelogFile, final SCMRevisionState baseline) throws IOException, InterruptedException {
         Server server = createServer(launcher, listener, build);
         try {
-            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, workspaceFilePath.toComputer()), getProjectPath(build), getCloakedPaths(build), getMappedPaths(build), getLocalPath());
+            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, workspaceFilePath.toComputer()), getProjectPath(build), getCloakedPaths(build), getLocalPath());
             final Run<?, ?> previousBuild = build.getPreviousBuild();
             // Check if the configuration has changed
             if (previousBuild != null) {
@@ -448,7 +342,7 @@ public class TeamFoundationServerScm extends SCM {
             final Project project = server.getProject(projPath);
             final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projPath, singleVersionSpec);
 
-            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getMappedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
             List<ChangeSet> list;
             if (StringUtils.isNotEmpty(singleVersionSpec)) {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);
@@ -521,8 +415,7 @@ public class TeamFoundationServerScm extends SCM {
                 return (server.getProject(getProjectPath(lastRun)).getDetailedHistoryWithoutCloakedPaths(
                             lastRun.getTimestamp(),
                             Calendar.getInstance(),
-                            getCloakedPaths(lastRun),
-                            getMappedPaths(lastRun).keySet()
+                            getCloakedPaths(lastRun)
                         ).size() > 0);
             } finally {
                 server.close();
@@ -687,7 +580,6 @@ public class TeamFoundationServerScm extends SCM {
         public static final Pattern WORKSPACE_NAME_REGEX = Pattern.compile("[^\"/:<>\\|\\*\\?]+[^\\s\\.\"/:<>\\|\\*\\?]$", Pattern.CASE_INSENSITIVE);
         public static final Pattern PROJECT_PATH_REGEX = Pattern.compile("^\\$\\/.*", Pattern.CASE_INSENSITIVE);
         public static final Pattern CLOAKED_PATHS_REGEX = Pattern.compile("\\s*\\$[^\\n;]+(\\s*[\\n]\\s*\\$[^\\n;]+){0,}\\s*", Pattern.CASE_INSENSITIVE);
-        public static final Pattern MAPPED_PATHS_REGEX = Pattern.compile("\\s*\\$[^\\n;]+(\\s*[\\n]\\s*\\$[^\\n;]+){0,}\\s*", Pattern.CASE_INSENSITIVE);
 
         @Override
         public boolean isApplicable(final Job project) {
@@ -762,12 +654,6 @@ public class TeamFoundationServerScm extends SCM {
         public FormValidation doCloakedPathsCheck(@QueryParameter final String value) {
             return doRegexCheck(new Pattern[]{CLOAKED_PATHS_REGEX},
                     "Each cloaked path must begin with '$/'. Multiple paths must be separated by blank lines.",
-                    null, value );
-        }
-
-        public FormValidation doMappedPathsCheck(@QueryParameter final String value) {
-            return doRegexCheck(new Pattern[]{MAPPED_PATHS_REGEX},
-                    "Each mapped path must begin with '$/'. Multiple paths must be separated by blank lines.",
                     null, value);
         }
 
@@ -828,8 +714,7 @@ public class TeamFoundationServerScm extends SCM {
                         return (server.getProject(getProjectPath(build)).getDetailedHistoryWithoutCloakedPaths(
                                 build.getTimestamp(),
                                 Calendar.getInstance(),
-                                getCloakedPaths(build),
-                                getMappedPaths(build).keySet()
+                                getCloakedPaths(build)
                         ).size() > 0) ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
                     } finally {
                         server.close();
@@ -844,7 +729,7 @@ public class TeamFoundationServerScm extends SCM {
         }
         final Project tfsProject = server.getProject(projectPath);
         try {
-            final ChangeSet latest = tfsProject.getLatestUncloakedChangeset(tfsBaseline.changesetVersion, cloakedPaths, mappedPaths.keySet());
+            final ChangeSet latest = tfsProject.getLatestUncloakedChangeset(tfsBaseline.changesetVersion, cloakedPaths);
             final TFSRevisionState tfsRemote =
                     (latest != null)
                     ? new TFSRevisionState(latest.getVersion(), projectPath)
