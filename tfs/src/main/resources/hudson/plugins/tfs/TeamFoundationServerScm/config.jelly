@@ -38,10 +38,6 @@
         <f:entry field="cloakedPaths" title="Cloaked paths" description="A collection of server paths to cloak to exclude from the workspace and from the build trigger.  Multiple entries must be placed onto separate lines.">
             <f:textarea checkUrl="'${rootURL}/scm/TeamFoundationServerScm/cloakedPathsCheck?value='+escape(this.value)"/>
         </f:entry>
-
-        <f:entry field="mappedPaths" title="Mapped paths" description="A collection of server paths that should be mapped even if their parent paths are cloaked.  Multiple entries must be placed onto separate lines.">
-            <f:textarea checkUrl="'${rootURL}/scm/TeamFoundationServerScm/mappedPathsCheck?value='+escape(this.value)"/>
-        </f:entry>
     </f:advanced>
     
     <t:listScmBrowsers name="tfs.browser" />

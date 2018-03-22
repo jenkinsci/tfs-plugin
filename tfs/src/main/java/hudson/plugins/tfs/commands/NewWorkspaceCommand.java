@@ -14,17 +14,11 @@ import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.remoting.Callable;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
 
 
 public class NewWorkspaceCommand extends AbstractCallableCommand<Void, Exception> {
@@ -38,15 +32,13 @@ public class NewWorkspaceCommand extends AbstractCallableCommand<Void, Exception
     private final String workspaceName;
     private final String serverPath;
     private final Collection<String> cloakedPaths;
-    private final Map<String, String> mappedPaths;
     private final String localPath;
 
-    public NewWorkspaceCommand(final ServerConfigurationProvider server, final String workspaceName, final String serverPath, Collection<String> cloakedPaths, Map<String, String> mappedPaths, final String localPath) {
+    public NewWorkspaceCommand(final ServerConfigurationProvider server, final String workspaceName, final String serverPath, Collection<String> cloakedPaths, final String localPath) {
         super(server);
         this.workspaceName = workspaceName;
         this.serverPath = serverPath;
         this.cloakedPaths = cloakedPaths;
-        this.mappedPaths = mappedPaths;
         this.localPath = localPath;
     }
 
@@ -67,7 +59,7 @@ public class NewWorkspaceCommand extends AbstractCallableCommand<Void, Exception
         
         WorkingFolder[] foldersToMap = null;
         if (serverPath != null && localPath != null) {
-            String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
+            final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
             logger.println(mappingMessage);
 
             final List<WorkingFolder> folderList = new ArrayList<WorkingFolder>();
@@ -80,26 +72,6 @@ public class NewWorkspaceCommand extends AbstractCallableCommand<Void, Exception
                 logger.println(cloakingMessage);
 
                 folderList.add(new WorkingFolder(cloakedPath, null, WorkingFolderType.CLOAK));
-            }
-
-            Iterator<Entry<String, String>> iter = mappedPaths.entrySet().iterator();
-            while (iter.hasNext()) {
-                Entry<String, String> entry = iter.next();
-                final String mappedServerPath = entry.getKey();
-                final String storedMappedLocalPath = entry.getValue();
-                String mappedLocalPath = null;
-                if (storedMappedLocalPath != null) {
-                    mappedLocalPath = Paths.get(localPath, storedMappedLocalPath).toString().replaceAll(Matcher.quoteReplacement(File.separator), "/");
-                }
-                else {
-                    final String relativePath = mappedServerPath.substring(serverPath.length());
-                    mappedLocalPath = Paths.get(localPath, relativePath).toString().replaceAll(Matcher.quoteReplacement(File.separator), "/");
-                }
-                
-                mappingMessage = String.format(MappingTemplate, mappedServerPath, mappedLocalPath, workspaceName);
-                logger.println(mappingMessage);
-
-                folderList.add(new WorkingFolder(mappedServerPath, LocalPath.canonicalize(mappedLocalPath), WorkingFolderType.MAP, RecursionType.FULL));
             }
             foldersToMap = folderList.toArray(EMPTY_WORKING_FOLDER_ARRAY);
         }

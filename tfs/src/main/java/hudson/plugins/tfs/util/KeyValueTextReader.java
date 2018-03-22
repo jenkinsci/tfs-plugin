@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * This is used when reading text files that contains keys and value pairs where the
  * value can be in one or several rows. First used when doing some more intelligent parsing
  * of the output from the tfs history command.
- * 
+ *
  * @author redsolo
  */
 public class KeyValueTextReader {
