@@ -244,10 +244,10 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
 
     private List<ReleaseArtifact> PrepareReleaseArtifacts(ReleaseDefinition releaseDefinition, Artifact jenkinsArtifact, String buildNumber, int buildId, BuildListener listener, ReleaseManagementHttpClient releaseManagementHttpClient) throws ReleaseManagementException {
         List<ReleaseArtifact> releaseArtifacts = new ArrayList<ReleaseArtifact>();
-        InstanceReference instanceReference = new InstanceReference();
         for(final Artifact artifact : releaseDefinition.getArtifacts())
         {
             ReleaseArtifact releaseArtifact = new ReleaseArtifact();
+            InstanceReference instanceReference = new InstanceReference();
             if(artifact == jenkinsArtifact)
             {
                 instanceReference.setName(buildNumber);
