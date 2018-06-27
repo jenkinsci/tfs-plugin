@@ -45,7 +45,7 @@
       <id>jenkinssriramb</id>
       <name>Sriram Balasubramaniyan</name>
       <email>sriramb@microsoft.com</email>
-      <timezone>-5</timezone>
+      <timezone>+5</timezone>
     </developer>
     <developer>
       <id>kalyan</id>
