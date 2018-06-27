@@ -42,6 +42,18 @@
       <timezone>-5</timezone>
     </developer>
     <developer>
+      <id>jenkinssriramb</id>
+      <name>Sriram Balasubramaniyan</name>
+      <email>sriramb@microsoft.com</email>
+      <timezone>+5</timezone>
+    </developer>
+    <developer>
+      <id>kalyan</id>
+      <name>Kalyan</name>
+      <email>kasubram@microsoft.com</email>
+      <timezone>+5</timezone>
+    </developer>
+    <developer>
       <id>kelliejos</id>
       <name>Kellie Jos</name>
       <email>kej@microsoft.com</email>
