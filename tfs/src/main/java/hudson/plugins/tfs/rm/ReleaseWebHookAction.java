@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -83,23 +84,28 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
             nameToWebHookMap.put(webHook.getWebHookName(), webHook);
         }
 
+        List<ReleaseWebHookStatus> webHookStatus = new ArrayList<ReleaseWebHookStatus>();
+        ReleaseWebHook webHook = null;
         for (ReleaseWebHookName webHookName : webHookNames) {
             if (nameToWebHookMap.containsKey(webHookName.getWebHookName())) {
                 try {
-                    ReleaseWebHook webHook = nameToWebHookMap.get(webHookName.getWebHookName());
-                    sendJobCompletedEvent(json, webHook);
-                } catch (NoSuchAlgorithmException | InvalidKeyException ex) {
-                    logger.log(Level.SEVERE, null, ex);
-                }
+                    webHook = nameToWebHookMap.get(webHookName.getWebHookName());
+                    logger.fine(String.format("Sending payload event to %s", webHook.getPayloadUrl()));
+                    ReleaseWebHookStatus status = sendJobCompletedEvent(json, webHook);
 
-                break;
+                    webHookStatus.add(status);
+                } catch (Exception ex) {
+                    logger.log(Level.SEVERE, null, ex);
+                    webHookStatus.add(new ReleaseWebHookStatus(webHook.getPayloadUrl(), HttpURLConnection.HTTP_NOT_FOUND, ex.toString()));
+                }
             }
         }
 
+        build.addAction(new ReleaseWebHookSummaryAction((webHookStatus)));
         return true;
     }
 
-    private void sendJobCompletedEvent(final JSONObject json, final ReleaseWebHook webHook) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+    private ReleaseWebHookStatus sendJobCompletedEvent(final JSONObject json, final ReleaseWebHook webHook) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         HttpClient client = HttpClientBuilder.create().build();
         final HttpPost request = new HttpPost(webHook.getPayloadUrl());
         final String payload = json.toString();
@@ -116,13 +122,18 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
         final HttpResponse response = client.execute(request);
         final int statusCode = response.getStatusLine().getStatusCode();
 
+        ReleaseWebHookStatus status = null;
         if (statusCode == HttpURLConnection.HTTP_OK) {
             logger.log(Level.INFO, "sent event payload successfully");
+            status = new ReleaseWebHookStatus(webHook.getPayloadUrl(), statusCode);
         } else {
             HttpEntity entity = response.getEntity();
             String content = EntityUtils.toString(entity);
             logger.log(Level.WARNING, "Cannot send the event to webhook. Content:" + content);
+            status = new ReleaseWebHookStatus(webHook.getPayloadUrl(), statusCode, content);
         }
+
+        return status;
     }
 
     /**
