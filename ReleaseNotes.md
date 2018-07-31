@@ -1,4 +1,4 @@
-These notes are for release **5.133.1**.
+These notes are for release **5.139.0**.
 Other releases and their notes can be found at the [tfs-plugin GitHub Releases](https://github.com/jenkinsci/tfs-plugin/releases) page.
  
 * Minor:
