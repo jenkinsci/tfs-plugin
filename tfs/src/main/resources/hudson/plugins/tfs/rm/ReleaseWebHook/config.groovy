@@ -1,4 +1,4 @@
-package hudson.plugins.tfs.rm.ReleaseWebhook;
+package hudson.plugins.tfs.rm.ReleaseWebHook;
 
 def f = namespace(lib.FormTagLib);
 
