@@ -164,7 +164,7 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
 
     private void deleteReleaseWebHook(final ReleaseWebHookResource resource) {
         if (resource == null) {
-            throw new InvalidParameterException("event parameter is null");
+            throw new InvalidParameterException("resource is null");
         }
 
         final TeamPluginGlobalConfig config = TeamPluginGlobalConfig.get();
@@ -214,7 +214,7 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
 
     private void linkWebHook(final ReleaseWebHookResource resource) {
         if (resource == null) {
-            throw new InvalidParameterException("event parameter is null");
+            throw new InvalidParameterException("resource is null");
         }
 
         AbstractProject project = validateAndGetJenkinsProject(resource);
