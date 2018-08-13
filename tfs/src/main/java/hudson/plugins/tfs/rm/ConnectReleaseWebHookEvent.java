@@ -48,7 +48,7 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
                  + "    \"eventType\": rmwebhook-create\n"
                  + "    \"resource\": {"
                  + "       \"webhookName\": \"webhook name\"\n"
-                 + "       \"payloadUrl\": \"https://xplatalm.vsrm.visualstudio.com/_apis/Release/receiveExternalEvent/wenhookId\"\n"
+                 + "       \"payloadUrl\": \"https://vsrm.dev.azure.com/xplatalm/_apis/Release/receiveExternalEvent/wenhookId\"\n"
                  + "       \"secret\": \"secret\"\n"
                  + "     }"
                  + "}";
@@ -81,7 +81,7 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
         String payloadUrl = parameters.getPayloadUrl();
 
         if (StringUtils.isBlank(payloadUrl)) {
-            throw new InvalidParameterException("pyaloadUrl is empty");
+            throw new InvalidParameterException("PayloadUrl is empty");
         }
 
         final URI uri;
@@ -93,24 +93,26 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
 
         final String hostName = uri.getHost();
         if (StringUtils.isBlank(hostName)) {
-            throw new InvalidParameterException("Malformed Payload URL");
+            throw new InvalidParameterException("Payload URL is empty");
         }
 
         return StringUtils.stripEnd(StringUtils.trim(payloadUrl), "/");
     }
 
     private AbstractProject validateAndGetJenkinsProject(final ReleaseWebHookResource resource) {
-        if (StringUtils.isEmpty(resource.getProjectName())) {
+        String projectName = resource.getProjectName();
+
+        if (StringUtils.isBlank(projectName)) {
             throw new InvalidParameterException("Project name is empty");
         }
 
         for (final Item project : Jenkins.getActiveInstance().getAllItems()) {
-            if (project instanceof AbstractProject && project.getName().equalsIgnoreCase(resource.getProjectName())) {
+            if (project instanceof AbstractProject && project.getName().equalsIgnoreCase(projectName)) {
                 return (AbstractProject) project;
             }
         }
 
-        throw new InvalidParameterException("Cannot find Jenkins Job with the name " + resource.getProjectName());
+        throw new InvalidParameterException("Cannot find Jenkins Project with the name " + resource.getProjectName());
     }
 
     private ReleaseWebHook validateAndGetReleaseWebHookByName(final String webHookName) {
@@ -132,22 +134,26 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
 
     private void createReleaseWebHook(final ReleaseWebHookResource resource) {
         if (resource == null) {
-            throw new InvalidParameterException("event parameter is null");
+            throw new InvalidParameterException("resource is null");
         }
 
         String payloadUrl = validateAndGetPayloadUrl(resource);
         String secret = resource.getSecret();
         String webHookName = resource.getWebHookName();
 
-        if (webHookName == null || webHookName.isEmpty()) {
+        if (StringUtils.isBlank(webHookName)) {
             throw new InvalidParameterException("webhook name is empty");
         }
 
         List<ReleaseWebHook> releaseWebHooks = ReleaseWebHookHelper.getReleaseWebHookConfigurations();
         for (ReleaseWebHook webHook : releaseWebHooks) {
-            if (webHook.getPayloadUrl().equalsIgnoreCase(payloadUrl)) {
-                logger.fine(String.format("WebHook found for payloadUrl %s already exists", payloadUrl));
-                return;
+            if (webHook.getWebHookName().equalsIgnoreCase(webHookName)) {
+                if (webHook.getPayloadUrl().equalsIgnoreCase(payloadUrl)) {
+                    logger.fine(String.format("WebHook with the name %s and payloadUrl %s already exists", webHookName, payloadUrl));
+                    return;
+                } else {
+                    throw new InvalidParameterException(String.format("WebHook with the name %s already exists. Provide a unique name for the ReleaseWebHook", webHookName));
+                }
             }
         }
 
@@ -175,10 +181,9 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
 
                 ReleaseWebHookAction action = getReleaseWebHookActionFromProject(project);
                 if (action != null) {
-                    for (ReleaseWebHookName webHookName : action.getWebHookNames()) {
+                    for (ReleaseWebHookReference webHookName : action.getWebHookNames()) {
                         if (webHookName.getWebHookName().equalsIgnoreCase(webHookNameToDelete)) {
-                            logger.fine(String.format("WebHook %s is referenced in project %s. Cannot delete until all the references are removed.", webHookNameToDelete, project.getName()));
-                            return;
+                            throw new UnsupportedOperationException(String.format("WebHook %s is referenced in project %s. Cannot delete until all the references are removed.", webHookNameToDelete, project.getName()));
                         }
                     }
                 }
@@ -221,7 +226,7 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
         ReleaseWebHookAction action = getReleaseWebHookActionFromProject(project);
 
         if (action != null && action.getWebHookNames() != null) {
-            for (ReleaseWebHookName webHookName : action.getWebHookNames()) {
+            for (ReleaseWebHookReference webHookName : action.getWebHookNames()) {
                 if (webHookName.getWebHookName().equalsIgnoreCase(webHookNameToLink)) {
                     logger.fine(String.format("WebHook %s already added in the project %s", webHookNameToLink, project.getName()));
                     return;
@@ -229,22 +234,25 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
             }
         }
 
-        ReleaseWebHookName webHookName = new ReleaseWebHookName(webHookNameToLink);
+        ReleaseWebHookReference webHookName = new ReleaseWebHookReference(webHookNameToLink);
 
         if (action == null) {
-            List<ReleaseWebHookName> webHookNames = new ArrayList<ReleaseWebHookName>();
+            List<ReleaseWebHookReference> webHookNames = new ArrayList<ReleaseWebHookReference>();
             webHookNames.add(webHookName);
 
             action = new ReleaseWebHookAction(webHookNames);
             DescribableList<Publisher, Descriptor<Publisher>> publishersList = project.getPublishersList();
             publishersList.add(action);
         } else {
-            List<ReleaseWebHookName> webHookNames = action.getWebHookNames() != null
-                    ? action.getWebHookNames()
-                    : new ArrayList<ReleaseWebHookName>();
+            List<ReleaseWebHookReference> webHookNames = action.getWebHookNames();
+            if (webHookNames == null) {
+                webHookNames = new ArrayList<ReleaseWebHookReference>();
+            }
 
             webHookNames.add(webHookName);
             action.setWebHookNames(webHookNames);
+
+            logger.fine(String.format("WebHook %s is linked to project %s", webHookName, project));
         }
 
         saveProject(project);
@@ -252,13 +260,13 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
 
     private void unlinkWebHook(final ReleaseWebHookResource resource) {
         if (resource == null) {
-            throw new InvalidParameterException("event parameter is null");
+            throw new InvalidParameterException("resource is null");
         }
 
         AbstractProject project = validateAndGetJenkinsProject(resource);
         String webHookNameToUnlink = resource.getWebHookName();
 
-        if (webHookNameToUnlink == null || webHookNameToUnlink.isEmpty()) {
+        if (StringUtils.isBlank(webHookNameToUnlink)) {
             throw new InvalidParameterException("webhook name is empty");
         }
 
@@ -269,8 +277,8 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
             return;
         }
 
-        List<ReleaseWebHookName> webHookNames = action.getWebHookNames();
-        for (ReleaseWebHookName webHookName : webHookNames) {
+        List<ReleaseWebHookReference> webHookNames = action.getWebHookNames();
+        for (ReleaseWebHookReference webHookName : webHookNames) {
             if (webHookName.getWebHookName().equalsIgnoreCase(webHookNameToUnlink)) {
                 logger.fine(String.format("Found webhook %s in project %s. Removing it", webHookNameToUnlink, project.getName()));
 

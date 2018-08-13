@@ -8,8 +8,8 @@
             <j:forEach var="status" items="${it.webHookStatus}">
                 <tr>
                     <td align="center">
-                        <j:if test="${status.status == 200}"><img src="${resURL}/images/16x16/blue.png" alt="Success" tooltip="Success" style="width: 16px; height: 16px; " class="icon-green icon-xlg" /></j:if>
-                        <j:if test="${status.status != 200}"><img src="${resURL}/images/16x16/red.png" alt="Failure" tooltip="Failure" style="width: 16px; height: 16px; " class="icon-red icon-xlg" /></j:if>
+                        <j:if test="${status.statusCode == 200}"><img src="${resURL}/images/16x16/blue.png" alt="Success" tooltip="Success" style="width: 16px; height: 16px; " class="icon-green icon-xlg" /></j:if>
+                        <j:if test="${status.statusCode != 200}"><img src="${resURL}/images/16x16/red.png" alt="Failure" tooltip="Failure" style="width: 16px; height: 16px; " class="icon-red icon-xlg" /></j:if>
                     </td>
                     <td width="100%" style="white-space: nowrap">
                         <b>${status.payloadUrl}</b>
@@ -17,10 +17,10 @@
                 </tr>
                 <tr>
                     <td/>
-                    <j:if test="${status.status != 200}">
+                    <j:if test="${status.statusCode != 200}">
                         <td width="100%"><b>Failure reason:</b> ${endIndex} ${status.errorMessage.substring(0, status.errorMessage.length() > 3000 ? 3000 : status.errorMessage.length())}</td>
                     </j:if>
-                    <j:if test="${status.status == 200}">
+                    <j:if test="${status.statusCode == 200}">
                         <td width="100%" style="white-space: nowrap"><b>Succeeded</b></td>
                     </j:if>
                 </tr>

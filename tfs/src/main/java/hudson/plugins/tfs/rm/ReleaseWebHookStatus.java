@@ -11,12 +11,12 @@ public class ReleaseWebHookStatus {
 
     private final String payloadUrl;
     private final String timeStamp;
-    private final int status;
+    private final int statusCode;
     private String errorMessage;
 
     public ReleaseWebHookStatus(final String payloadUrl, final int status) {
         this.payloadUrl = payloadUrl;
-        this.status = status;
+        this.statusCode = status;
         this.timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
     }
 
@@ -29,8 +29,8 @@ public class ReleaseWebHookStatus {
         return this.payloadUrl;
     }
 
-    public int getStatus() {
-        return this.status;
+    public int getStatusCode() {
+        return this.statusCode;
     }
 
     public String getErrorMessage() {

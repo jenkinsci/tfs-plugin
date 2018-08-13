@@ -98,7 +98,12 @@ public class ReleaseWebHook extends AbstractDescribableImpl<ReleaseWebHook> {
         @SuppressWarnings("unused")
         public FormValidation doCheckWebHookName(@QueryParameter final String value) {
             if (StringUtils.isBlank(value)) {
-                return FormValidation.warning("Please provide a value");
+                return FormValidation.error("Please provide a value");
+            }
+
+            String pattern = "^[A-Za-z0-9_-]+$";
+            if (!value.matches(pattern)) {
+                return FormValidation.error("Only allowed characters are alphaphetic, numeric, hypen and underscore");
             }
 
             return FormValidation.ok();

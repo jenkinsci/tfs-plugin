@@ -39,11 +39,11 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class ReleaseWebHookAction extends Notifier implements Serializable {
 
     private static final Logger logger = Logger.getLogger(ReleaseWebHookAction.class.getName());
-    private List<ReleaseWebHookName> webHookNames;
+    private List<ReleaseWebHookReference> webHookNames;
     private final String apiVersion = "5.0-preview";
 
     @DataBoundConstructor
-    public ReleaseWebHookAction(final List<ReleaseWebHookName> webHookNames) {
+    public ReleaseWebHookAction(final List<ReleaseWebHookReference> webHookNames) {
         this.webHookNames = webHookNames;
     }
 
@@ -52,11 +52,11 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
         return BuildStepMonitor.NONE;
     }
 
-    public List<ReleaseWebHookName> getWebHookNames() {
+    public List<ReleaseWebHookReference> getWebHookNames() {
         return this.webHookNames;
     }
 
-    public void setWebHookNames(final List<ReleaseWebHookName> webHookNames) {
+    public void setWebHookNames(final List<ReleaseWebHookReference> webHookNames) {
         this.webHookNames = webHookNames;
     }
 
@@ -81,7 +81,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
 
         List<ReleaseWebHookStatus> webHookStatus = new ArrayList<ReleaseWebHookStatus>();
         ReleaseWebHook webHook = null;
-        for (ReleaseWebHookName webHookName : webHookNames) {
+        for (ReleaseWebHookReference webHookName : webHookNames) {
             if (nameToWebHookMap.containsKey(webHookName.getWebHookName())) {
                 try {
                     webHook = nameToWebHookMap.get(webHookName.getWebHookName());
@@ -90,8 +90,8 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
 
                     webHookStatus.add(status);
                 } catch (Exception ex) {
-                    logger.log(Level.SEVERE, null, ex);
-                    webHookStatus.add(new ReleaseWebHookStatus(webHook.getPayloadUrl(), HttpURLConnection.HTTP_NOT_FOUND, ex.toString()));
+                    logger.log(Level.SEVERE, StringUtils.EMPTY, ex);
+                    webHookStatus.add(new ReleaseWebHookStatus(webHook.getPayloadUrl(), HttpURLConnection.HTTP_INTERNAL_ERROR, ex.toString()));
                 }
             }
         }
@@ -144,7 +144,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
 
         @Override
         public String getDisplayName() {
-            return "TFS/Team Services Release Webhook";
+            return "Azure DevOps Services Release Webhook";
         }
     }
 

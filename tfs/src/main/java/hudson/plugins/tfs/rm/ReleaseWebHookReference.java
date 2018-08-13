@@ -13,13 +13,13 @@ import java.util.logging.Logger;
  *
  * @author Kalyan
  */
-public class ReleaseWebHookName extends AbstractDescribableImpl<ReleaseWebHookName> {
-    private static final Logger logger = Logger.getLogger(ReleaseWebHookName.class.getName());
+public class ReleaseWebHookReference extends AbstractDescribableImpl<ReleaseWebHookReference> {
+    private static final Logger logger = Logger.getLogger(ReleaseWebHookReference.class.getName());
 
     private final String webHookName;
 
     @DataBoundConstructor
-    public ReleaseWebHookName(final String webHookName) {
+    public ReleaseWebHookReference(final String webHookName) {
         this.webHookName = webHookName;
     }
 
@@ -36,7 +36,7 @@ public class ReleaseWebHookName extends AbstractDescribableImpl<ReleaseWebHookNa
      * DescriptorImpl.
      */
     @Extension
-    public static class DescriptorImpl extends Descriptor<ReleaseWebHookName> {
+    public static class DescriptorImpl extends Descriptor<ReleaseWebHookReference> {
 
         @Override
         public String getDisplayName() {
