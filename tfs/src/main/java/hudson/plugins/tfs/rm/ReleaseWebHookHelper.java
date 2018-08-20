@@ -1,7 +1,10 @@
 package hudson.plugins.tfs.rm;
 
+import hudson.plugins.tfs.JenkinsEventNotifier;
 import hudson.plugins.tfs.TeamPluginGlobalConfig;
-import java.util.ArrayList;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -22,8 +25,7 @@ public final class ReleaseWebHookHelper {
             throw new InternalError("Cannot load TFS global configuration");
         }
 
-        //return config.getReleaseWebHookConfigurations();
-        return new ArrayList<ReleaseWebHook>();
+        return config.getReleaseWebHookConfigurations();
     }
 
     /**
@@ -36,7 +38,7 @@ public final class ReleaseWebHookHelper {
             throw new InternalError("Cannot load TFS global configuration");
         }
 
-        //config.setReleaseWebHookConfigurations(releaseWebHooks);
+        config.setReleaseWebHookConfigurations(releaseWebHooks);
         config.save();
     }
 
@@ -46,8 +48,7 @@ public final class ReleaseWebHookHelper {
      * @param payload
      * @return
      */
-    public static String getPayloadSignature(final String secret, final String payload) {
-        //JenkinsEventNotifier.getPayloadSignature(secret payload);
-        return null;
+    public static String getPayloadSignature(final String secret, final String payload) throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+        return JenkinsEventNotifier.getPayloadSignature(secret, payload);
     }
 }

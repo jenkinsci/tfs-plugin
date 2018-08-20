@@ -33,4 +33,9 @@ f.section(title: descriptor.displayName) {
             f.checkbox (default: false)
         }
     }
+    f.entry(title: _("Release WebHooks"),
+            field: "releaseWebHookConfigurations") {
+
+        f.repeatableProperty(field: "releaseWebHookConfigurations")
+    }
 }

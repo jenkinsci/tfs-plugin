@@ -6,6 +6,7 @@ import hudson.ExtensionList;
 import hudson.plugins.tfs.model.DomainUserAccountMapper;
 import hudson.plugins.tfs.model.UserAccountMapper;
 import hudson.plugins.tfs.model.UserAccountMapperDescriptor;
+import hudson.plugins.tfs.rm.ReleaseWebHook;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -27,7 +28,8 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
     public static final TeamPluginGlobalConfig DEFAULT_CONFIG = new TeamPluginGlobalConfig(false);
 
     private List<TeamCollectionConfiguration> collectionConfigurations = new ArrayList<TeamCollectionConfiguration>();
-
+    private List<ReleaseWebHook> releaseWebHookConfigurations = new ArrayList<ReleaseWebHook>();
+    
     private boolean configFolderPerNode;
     private boolean enableTeamPushTriggerForAllJobs;
     private boolean enableTeamStatusForAllJobs;
@@ -63,6 +65,14 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
 
     public void setCollectionConfigurations(final List<TeamCollectionConfiguration> collectionConfigurations) {
         this.collectionConfigurations = collectionConfigurations;
+    }
+    
+    public List<ReleaseWebHook> getReleaseWebHookConfigurations() {
+        return this.releaseWebHookConfigurations;
+    }
+    
+    public void setReleaseWebHookConfigurations(final List<ReleaseWebHook> releaseWebHookConfigurations) {
+        this.releaseWebHookConfigurations = releaseWebHookConfigurations;
     }
 
     public boolean isConfigFolderPerNode() {
@@ -108,6 +118,9 @@ public class TeamPluginGlobalConfig extends GlobalConfiguration {
     public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
         try {
             req.bindJSON(this, json);
+            
+            // stapler oddity, empty lists are not set on bean by  "req.bindJSON(this, json)"
+            this.releaseWebHookConfigurations = req.bindJSONToList(ReleaseWebHook.class, json.get("releaseWebHookConfigurations"));
         }
         catch (final Exception e) {
             final String message = "Configuration error: " + e.getMessage();
