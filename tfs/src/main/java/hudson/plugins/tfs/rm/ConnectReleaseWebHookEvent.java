@@ -48,7 +48,7 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
                  + "    \"eventType\": rmwebhook-create\n"
                  + "    \"resource\": {"
                  + "       \"webhookName\": \"webhook name\"\n"
-                 + "       \"payloadUrl\": \"https://vsrm.dev.azure.com/xplatalm/_apis/Release/receiveExternalEvent/wenhookId\"\n"
+                 + "       \"payloadUrl\": \"https://xplatalm.visualstudio.com/_apis/Release/receiveExternalEvent/wenhookId\"\n"
                  + "       \"secret\": \"secret\"\n"
                  + "     }"
                  + "}";
@@ -181,8 +181,8 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
 
                 ReleaseWebHookAction action = getReleaseWebHookActionFromProject(project);
                 if (action != null) {
-                    for (ReleaseWebHookReference webHookName : action.getWebHookNames()) {
-                        if (webHookName.getWebHookName().equalsIgnoreCase(webHookNameToDelete)) {
+                    for (ReleaseWebHookReference webHookReference : action.getWebHookReferences()) {
+                        if (webHookReference.getWebHookName().equalsIgnoreCase(webHookNameToDelete)) {
                             throw new UnsupportedOperationException(String.format("WebHook %s is referenced in project %s. Cannot delete until all the references are removed.", webHookNameToDelete, project.getName()));
                         }
                     }
@@ -225,34 +225,34 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
 
         ReleaseWebHookAction action = getReleaseWebHookActionFromProject(project);
 
-        if (action != null && action.getWebHookNames() != null) {
-            for (ReleaseWebHookReference webHookName : action.getWebHookNames()) {
-                if (webHookName.getWebHookName().equalsIgnoreCase(webHookNameToLink)) {
+        if (action != null && action.getWebHookReferences() != null) {
+            for (ReleaseWebHookReference webHookReference : action.getWebHookReferences()) {
+                if (webHookReference.getWebHookName().equalsIgnoreCase(webHookNameToLink)) {
                     logger.fine(String.format("WebHook %s already added in the project %s", webHookNameToLink, project.getName()));
                     return;
                 }
             }
         }
 
-        ReleaseWebHookReference webHookName = new ReleaseWebHookReference(webHookNameToLink);
+        ReleaseWebHookReference webHookReference = new ReleaseWebHookReference(webHookNameToLink);
 
         if (action == null) {
-            List<ReleaseWebHookReference> webHookNames = new ArrayList<ReleaseWebHookReference>();
-            webHookNames.add(webHookName);
+            List<ReleaseWebHookReference> webHookReferences = new ArrayList<ReleaseWebHookReference>();
+            webHookReferences.add(webHookReference);
 
-            action = new ReleaseWebHookAction(webHookNames);
+            action = new ReleaseWebHookAction(webHookReferences);
             DescribableList<Publisher, Descriptor<Publisher>> publishersList = project.getPublishersList();
             publishersList.add(action);
         } else {
-            List<ReleaseWebHookReference> webHookNames = action.getWebHookNames();
-            if (webHookNames == null) {
-                webHookNames = new ArrayList<ReleaseWebHookReference>();
+            List<ReleaseWebHookReference> webHookReferences = action.getWebHookReferences();
+            if (webHookReferences == null) {
+                webHookReferences = new ArrayList<ReleaseWebHookReference>();
             }
 
-            webHookNames.add(webHookName);
-            action.setWebHookNames(webHookNames);
+            webHookReferences.add(webHookReference);
+            action.setWebHookReferences(webHookReferences);
 
-            logger.fine(String.format("WebHook %s is linked to project %s", webHookName, project));
+            logger.fine(String.format("WebHook %s is linked to project %s", webHookReference, project));
         }
 
         saveProject(project);
@@ -277,13 +277,13 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
             return;
         }
 
-        List<ReleaseWebHookReference> webHookNames = action.getWebHookNames();
-        for (ReleaseWebHookReference webHookName : webHookNames) {
-            if (webHookName.getWebHookName().equalsIgnoreCase(webHookNameToUnlink)) {
+        List<ReleaseWebHookReference> webHookReferences = action.getWebHookReferences();
+        for (ReleaseWebHookReference webHookReference : webHookReferences) {
+            if (webHookReference.getWebHookName().equalsIgnoreCase(webHookNameToUnlink)) {
                 logger.fine(String.format("Found webhook %s in project %s. Removing it", webHookNameToUnlink, project.getName()));
 
-                webHookNames.remove(webHookName);
-                if (webHookNames.isEmpty()) {
+                webHookReferences.remove(webHookReference);
+                if (webHookReferences.isEmpty()) {
                     // no webhook exists, removing the post build action itself
                     logger.fine(String.format("ReleaseWebHook post build action is empty, removing the post build action from project"));
                     DescribableList<Publisher, Descriptor<Publisher>> publishersList = project.getPublishersList();

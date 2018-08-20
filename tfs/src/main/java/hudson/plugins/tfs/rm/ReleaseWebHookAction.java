@@ -39,12 +39,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class ReleaseWebHookAction extends Notifier implements Serializable {
 
     private static final Logger logger = Logger.getLogger(ReleaseWebHookAction.class.getName());
-    private List<ReleaseWebHookReference> webHookNames;
+    private List<ReleaseWebHookReference> webHookReferences;
     private final String apiVersion = "5.0-preview";
 
     @DataBoundConstructor
-    public ReleaseWebHookAction(final List<ReleaseWebHookReference> webHookNames) {
-        this.webHookNames = webHookNames;
+    public ReleaseWebHookAction(final List<ReleaseWebHookReference> webHookReferences) {
+        this.webHookReferences = webHookReferences;
     }
 
     @Override
@@ -52,12 +52,12 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
         return BuildStepMonitor.NONE;
     }
 
-    public List<ReleaseWebHookReference> getWebHookNames() {
-        return this.webHookNames;
+    public List<ReleaseWebHookReference> getWebHookReferences() {
+        return this.webHookReferences;
     }
 
-    public void setWebHookNames(final List<ReleaseWebHookReference> webHookNames) {
-        this.webHookNames = webHookNames;
+    public void setWebHookReferences(final List<ReleaseWebHookReference> webHookReferences) {
+        this.webHookReferences = webHookReferences;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
 
         List<ReleaseWebHookStatus> webHookStatus = new ArrayList<ReleaseWebHookStatus>();
         ReleaseWebHook webHook = null;
-        for (ReleaseWebHookReference webHookName : webHookNames) {
+        for (ReleaseWebHookReference webHookName : webHookReferences) {
             if (nameToWebHookMap.containsKey(webHookName.getWebHookName())) {
                 try {
                     webHook = nameToWebHookMap.get(webHookName.getWebHookName());
@@ -108,7 +108,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
         request.addHeader("Content-Type", "application/json");
         request.addHeader("Accept", "application/json; api-version=" + apiVersion);
 
-        if (!StringUtils.isEmpty(webHook.getSecret())) {
+        if (!StringUtils.isBlank(webHook.getSecret())) {
             String signature = ReleaseWebHookHelper.getPayloadSignature(webHook.getSecret(), payload);
             request.addHeader("X-Jenkins-Signature", signature);
         }
@@ -144,7 +144,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
 
         @Override
         public String getDisplayName() {
-            return "Azure DevOps Services Release Webhook";
+            return "TFS/Team Services Release Webhook";
         }
     }
 
