@@ -63,7 +63,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         eventMap.put("gitPullRequestMerged", new GitPullRequestMergedEvent.Factory());
         eventMap.put("gitPush", new GitPushEvent.Factory());
         eventMap.put("connect", new ConnectHookEvent.Factory());
-        eventMap.put("rmwebhook", new ConnectReleaseWebHookEvent.Factory());
+        eventMap.put("rmWebhook", new ConnectReleaseWebHookEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
     }
 
