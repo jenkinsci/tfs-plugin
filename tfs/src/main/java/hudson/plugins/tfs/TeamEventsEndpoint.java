@@ -12,6 +12,7 @@ import hudson.plugins.tfs.model.GitPullRequestMergedEvent;
 import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
 import hudson.plugins.tfs.model.servicehooks.Event;
+import hudson.plugins.tfs.rm.ConnectReleaseWebHookEvent;
 import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
@@ -62,6 +63,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         eventMap.put("gitPullRequestMerged", new GitPullRequestMergedEvent.Factory());
         eventMap.put("gitPush", new GitPushEvent.Factory());
         eventMap.put("connect", new ConnectHookEvent.Factory());
+        eventMap.put("rmWebhook", new ConnectReleaseWebHookEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
     }
 
@@ -222,6 +224,16 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         // Send telemetry
         TelemetryHelper.sendEvent("team-events-connect", new TelemetryHelper.PropertyMapBuilder()
                 .build());
+        dispatch(request, response, body);
+    }
+
+    @RequirePOST
+    public void doRmwebhook(
+            final StaplerRequest request,
+            final StaplerResponse response,
+            @StringBodyParameter @Nonnull final String body) {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-events-rmwebhook", new TelemetryHelper.PropertyMapBuilder().build());
         dispatch(request, response, body);
     }
 

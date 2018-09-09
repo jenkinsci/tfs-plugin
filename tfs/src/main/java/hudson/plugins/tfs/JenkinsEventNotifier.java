@@ -60,7 +60,7 @@ public final class JenkinsEventNotifier {
                 final JobCompletionEventArgs args = new JobCompletionEventArgs(
                         connectionParameters.getConnectionKey(),
                         jsonPayload,
-                        getPayloadSignature(connectionParameters, jsonPayload));
+                        getPayloadSignature(connectionParameters.getConnectionSignature(), jsonPayload));
                 client.sendJobCompletionEvent(args);
             } catch (final Exception e) {
                 log.warning("ERROR: sendJobCompletionEvent: (collection=" + c.getCollectionUrl() + ") " + e.getMessage());
@@ -154,6 +154,23 @@ public final class JenkinsEventNotifier {
         }
     }
 
+    /**
+     * Calculates the payload hash.
+     * @param secret
+     * @param payload
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws UnsupportedEncodingException
+     */
+    public static String getPayloadSignature(final String secret, final String payload)
+            throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+        final SecretKeySpec signingKey = new SecretKeySpec(secret.getBytes(ENCODING), "HmacSHA1");
+        final Mac mac = Mac.getInstance("HmacSHA1");
+        mac.init(signingKey);
+        return toHexString(mac.doFinal(payload.getBytes(ENCODING)));
+    }
+
     private static String urlCombine(final String url, final String... parts) {
         final StringBuilder sb = new StringBuilder();
         if (url != null) {
@@ -168,15 +185,6 @@ public final class JenkinsEventNotifier {
             }
         }
         return sb.toString();
-    }
-
-    private static String getPayloadSignature(final ConnectionParameters connectionParameters, final String payload)
-            throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
-        final String key = connectionParameters.getConnectionSignature();
-        final SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(ENCODING), "HmacSHA1");
-        final Mac mac = Mac.getInstance("HmacSHA1");
-        mac.init(signingKey);
-        return toHexString(mac.doFinal(payload.getBytes(ENCODING)));
     }
 
     private static String toHexString(final byte[] bytes) {
