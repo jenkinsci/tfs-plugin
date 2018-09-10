@@ -150,7 +150,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
         {
             ReleaseManagementHttpClient releaseManagementHttpClient = 
                     new ReleaseManagementHttpClient(
-                            this.collectionUrl.toLowerCase().replaceFirst(".visualstudio.com", ".vsrm.visualstudio.com"),
+                            GetReleaseServiceCollectionUrl(this.collectionUrl),
                             this.username,
                             this.password);
             
@@ -276,7 +276,16 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
         }
         return releaseArtifacts;
     }
-    
+
+    public static String GetReleaseServiceCollectionUrl(final String collectionUrl) {
+            String result = collectionUrl.toLowerCase();
+            return result.replaceFirst(".visualstudio.com", ".vsrm.visualstudio.com")
+                    .replaceFirst("codedev.ms", "vsrm.codedev.ms")
+                    .replaceFirst("codeapp.ms", "vsrm.codeapp.ms")
+                    .replaceFirst("devppe.azure.com", "vsrm.devppe.azure.com")
+                    .replaceFirst("dev.azure.com", "vsrm.dev.azure.com");
+    }
+
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher>
     {
@@ -378,7 +387,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
             try {
                 ReleaseManagementHttpClient releaseManagementHttpClient =
                         new ReleaseManagementHttpClient(
-                                collectionUrl.toLowerCase().replaceFirst(".visualstudio.com", ".vsrm.visualstudio.com"),
+                                GetReleaseServiceCollectionUrl(collectionUrl),
                                 username,
                                 password);
 
@@ -394,6 +403,5 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
 
             return listBoxModel;
         }
-
     }
 }
