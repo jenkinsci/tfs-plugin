@@ -16,7 +16,6 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.git.UserRemoteConfig;
 import hudson.plugins.git.extensions.impl.IgnoreNotifyCommit;
-import hudson.plugins.tfs.JenkinsEventNotifier;
 import hudson.plugins.tfs.SafeParametersAction;
 import hudson.plugins.tfs.TeamEventsEndpoint;
 import hudson.plugins.tfs.TeamGlobalStatusAction;
@@ -26,6 +25,7 @@ import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.TeamPushTrigger;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ActionHelper;
+import hudson.plugins.tfs.util.TeamStatus;
 import hudson.plugins.tfs.util.UriHelper;
 import hudson.scm.SCM;
 import hudson.security.ACL;
@@ -43,6 +43,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.flow.FlowDefinition;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -145,7 +146,11 @@ public abstract class AbstractHookEvent {
                     final Action[] actionArray = ActionHelper.create(actionsWithSafeParams, causeAction);
                     scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
                     if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
-                        JenkinsEventNotifier.sendPullRequestBuildStatusEvent((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, GitStatusState.Pending, "Jenkins PR build queued", targetUrl, job.getAbsoluteUrl());
+                        try {
+                            TeamStatus.createFromJob((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, job);
+                        } catch (IOException ex) {
+                            LOGGER.warning("Could not create TeamStatus: " + ex.toString());
+                        }
                     }
 
                     return new TeamEventsEndpoint.ScheduledResponseContributor(project);

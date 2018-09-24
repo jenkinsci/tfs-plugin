@@ -1,5 +1,6 @@
 package hudson.plugins.tfs.util;
 
+import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.CommitParameterAction;
@@ -38,6 +39,7 @@ public final class TeamStatus {
         final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
         final GitCodePushedEventArgs gitCodePushedEventArgs;
         final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs;
+
         if (commitParameter != null) {
             gitCodePushedEventArgs = commitParameter.getGitCodePushedEventArgs();
             if (commitParameter instanceof PullRequestParameterAction) {
@@ -52,8 +54,6 @@ public final class TeamStatus {
         }
 
         final URI collectionUri = gitCodePushedEventArgs.collectionUri;
-        final TeamRestClient client = new TeamRestClient(collectionUri);
-
         final TeamGitStatus status = TeamGitStatus.fromRun(run);
 
         // Send telemetry
@@ -62,6 +62,30 @@ public final class TeamStatus {
                 .pair("feature", featureDisplayName)
                 .pair("status", status.state.toString())
                 .build());
+
+        addStatus(pullRequestMergeCommitCreatedEventArgs, status);
+    }
+
+    /**
+     * Create status for a (queued) Job.
+     */
+    public static void createFromJob(final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs, final Job job) throws IOException {
+        final TeamGitStatus status = TeamGitStatus.fromJob(job);
+
+        addStatus(pullRequestMergeCommitCreatedEventArgs, status);
+    }
+
+    private static void addStatus(final PullRequestMergeCommitCreatedEventArgs gitCodePushedEventArgs, final TeamGitStatus status) throws IOException {
+        final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs;
+
+        if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
+            pullRequestMergeCommitCreatedEventArgs = (PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs;
+        } else {
+            pullRequestMergeCommitCreatedEventArgs = null;
+        }
+
+        final URI collectionUri = gitCodePushedEventArgs.collectionUri;
+        final TeamRestClient client = new TeamRestClient(collectionUri);
 
         // TODO: when code is pushed and polling happens, are we sure we built against the requested commit?
         if (pullRequestMergeCommitCreatedEventArgs != null) {
