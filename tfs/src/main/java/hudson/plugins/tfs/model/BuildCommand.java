@@ -226,7 +226,8 @@ public class BuildCommand extends AbstractCommand {
         for (Run run : allBuilds) {
             TeamPullRequestMergedDetailsAction cause = run.getAction(TeamPullRequestMergedDetailsAction.class);
             if (cause != null && run.isBuilding()) {
-                if (pullReqeuestMergedDetails instanceof TeamPullRequestMergedDetailsAction) {
+                if (cause instanceof TeamPullRequestMergedDetailsAction &&
+                        cause.gitPullRequest.getPullRequestId() == pullReqeuestMergedDetails.gitPullRequest.getPullRequestId()) {
                     LOGGER.info("Canceling previously triggered Job: " + run.getFullDisplayName());
 
                     Executor executor = run.getExecutor();
