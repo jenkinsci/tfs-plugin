@@ -20,6 +20,7 @@ public class TeamGitStatusTest {
 
         final String expected =
             "{" +
+                "\"iterationId\":0," +
                 "\"state\":\"Pending\"," +
                 "\"description\":\"The build is in progress\"," +
                 "\"targetUrl\":\"https://ci.fabrikam.com/my-project/build/124\"," +
