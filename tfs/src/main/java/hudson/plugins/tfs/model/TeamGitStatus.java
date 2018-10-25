@@ -62,7 +62,7 @@ public class TeamGitStatus {
         final String instanceUrl = StringUtils.stripEnd(Jenkins.getInstance().getRootUrl(), "/");
         final String parent = job.getParent().getFullName(); 
         String projectDisplayName = job.getDisplayName();
-        if(parent != null && parent.isEmpty()){
+        if(parent != null && !parent.isEmpty()){
             projectDisplayName = parent + "/" + job.getDisplayName();
         }
         return new GitStatusContext(projectDisplayName, instanceUrl);
