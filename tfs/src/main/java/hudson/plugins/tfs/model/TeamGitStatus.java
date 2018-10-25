@@ -47,7 +47,7 @@ public class TeamGitStatus {
         status.description = job.getDisplayName() + run.getDisplayName() + ": " + status.description;
         status.targetUrl = run.getAbsoluteUrl();
         status.context = getStatusContext(job);
-        status.iterationId = 9;
+        status.iterationId = 1;
         return status;
     }
 
@@ -57,7 +57,7 @@ public class TeamGitStatus {
         status.description = "Jenkins Job " + job.getDisplayName() + " queued";
         status.targetUrl = job.getAbsoluteUrl();
         status.context = getStatusContext(job);
-        status.iterationId = 9;
+        status.iterationId = 1;
         return status;
     }
 
