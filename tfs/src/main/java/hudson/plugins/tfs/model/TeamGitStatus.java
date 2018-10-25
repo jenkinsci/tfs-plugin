@@ -27,6 +27,7 @@ public class TeamGitStatus {
         RESULT_TO_STATE = Collections.unmodifiableMap(resultToStatus);
     }
 
+    public Integer iterationId;
     public GitStatusState state;
     public String description;
     public String targetUrl;
@@ -55,6 +56,7 @@ public class TeamGitStatus {
         status.description = "Jenkins Job " + job.getDisplayName() + " queued";
         status.targetUrl = job.getAbsoluteUrl();
         status.context = getStatusContext(job);
+        status.iterationId = 9;
         return status;
     }
 
