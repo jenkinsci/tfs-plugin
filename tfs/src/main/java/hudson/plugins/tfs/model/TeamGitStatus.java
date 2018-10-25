@@ -60,9 +60,13 @@ public class TeamGitStatus {
 
     private static GitStatusContext getStatusContext(@Nonnull final Job job) {
         final String instanceUrl = StringUtils.stripEnd(Jenkins.getInstance().getRootUrl(), "/");
-        final String projectDisplayName = job.getParent().getFullName() + "/" + job.getDisplayName();
+        final Boolean parent = job.getParent().getFullName(); 
+        String projectDisplayName = job.getDisplayName();
+        if(parent != ""){
+            projectDisplayName = parent + "/" + job.getDisplayName();
+        }
         return new GitStatusContext(projectDisplayName, instanceUrl);
-    }
+     }
 
     public String toJson() {
         final JSONObject jsonObject = JSONObject.fromObject(this);
