@@ -1,6 +1,7 @@
 //CHECKSTYLE:OFF
 package hudson.plugins.tfs.actions;
 
+import com.microsoft.tfs.core.clients.versioncontrol.WorkspaceLocation;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.DateVersionSpec;
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.VersionSpec;
 import hudson.FilePath;
@@ -29,14 +30,16 @@ public class CheckoutAction {
     private final String localFolder;
     private final boolean useUpdate;
     private final boolean useOverwrite;
+    private final boolean isLocalWorkspace;
 
-    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakedPaths, String localFolder, boolean useUpdate, boolean useOverwrite) {
+    public CheckoutAction(String workspaceName, String projectPath, Collection<String> cloakedPaths, String localFolder, boolean useUpdate, boolean useOverwrite, boolean isLocalWorkspace) {
         this.workspaceName = workspaceName;
         this.projectPath = projectPath;
         this.cloakedPaths = cloakedPaths;
         this.localFolder = localFolder;
         this.useUpdate = useUpdate;
         this.useOverwrite = useOverwrite;
+        this.isLocalWorkspace = isLocalWorkspace;
     }
 
     public List<ChangeSet> checkout(Server server, FilePath workspacePath, Calendar lastBuildTimestamp, Calendar currentBuildTimestamp) throws IOException, InterruptedException, ParseException {
@@ -102,6 +105,12 @@ public class CheckoutAction {
                 logger.println("Warning: Although the server thinks the workspace exists, no mapping was found.");
                 workspaceNamesToDelete.add(workspaceName);
             }
+            else if (isLocalWorkspace != workspaces.getWorkspace(workspaceName).isLocalWorkspace() ) {
+                final String template = "Warning: The workspace changed from %s to %s";
+                final String message = String.format(template, (isLocalWorkspace) ? "local" : "server", (!isLocalWorkspace) ? "local" : "server");
+                logger.println(message);
+                workspaceNamesToDelete.add(workspaceName);
+            }
             else if (existingWorkspaceName.equalsIgnoreCase(workspaceName)) {
                 // workspace exists and "localPath" is mapped there: everything is fine.
             }
@@ -141,7 +150,7 @@ public class CheckoutAction {
                 localFolderPath.deleteContents();
             }
             final String serverPath = project.getProjectPath();
-            workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakedPaths, localPath);
+            workspace = workspaces.newWorkspace(workspaceName, serverPath, cloakedPaths, localPath, isLocalWorkspace);
         } else {
             workspace = workspaces.getWorkspace(workspaceName);
         }

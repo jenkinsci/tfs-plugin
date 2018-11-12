@@ -28,7 +28,7 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 isA(String.class),
                 isA(WorkspaceLocation.class),
                 isA(WorkspaceOptions.class))).thenReturn(null);
-        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, EMPTY_CLOAKED_PATHS, null) {
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", null, EMPTY_CLOAKED_PATHS, null, false) {
             @Override
             public Server createServer() {
                 return server;
@@ -60,7 +60,7 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
                 isA(String.class),
                 isA(WorkspaceLocation.class),
                 isA(WorkspaceOptions.class))).thenReturn(null);
-        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", cloakedPaths, "/home/jenkins/jobs/stuff/workspace") {
+        final NewWorkspaceCommand command = new NewWorkspaceCommand(server, "TheWorkspaceName", "$/Stuff", cloakedPaths, "/home/jenkins/jobs/stuff/workspace", false) {
             @Override
             public Server createServer() {
                 return server;
@@ -84,6 +84,6 @@ public class NewWorkspaceCommandTest extends AbstractCallableCommandTest {
     }
 
     @Override protected AbstractCallableCommand createCommand(final ServerConfigurationProvider serverConfig) {
-        return new NewWorkspaceCommand(serverConfig, "workspaceName", "$/serverPath", EMPTY_CLOAKED_PATHS, "local/path");
+        return new NewWorkspaceCommand(serverConfig, "workspaceName", "$/serverPath", EMPTY_CLOAKED_PATHS, "local/path", false);
     }
 }

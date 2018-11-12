@@ -15,15 +15,16 @@ public class WorkspaceConfigurationTest {
     @Test public void assertConfigurationsEquals() {
         final List<String> cloakList = Collections.singletonList("cloak");
 
-        WorkspaceConfiguration one = new WorkspaceConfiguration("server", "workspace", "project", cloakList, "workfolder");
-        WorkspaceConfiguration two = new WorkspaceConfiguration("server", "workspace", "project", cloakList, "workfolder");
+        WorkspaceConfiguration one = new WorkspaceConfiguration("server", "workspace", "project", cloakList, "workfolder", false);
+        WorkspaceConfiguration two = new WorkspaceConfiguration("server", "workspace", "project", cloakList, "workfolder", false);
         assertThat(one, is(two));
         assertThat(two, is(one));
         assertThat(one, is(one));
-        assertThat(one, not(new WorkspaceConfiguration("aserver", "workspace", "project", cloakList, "workfolder")));
-        assertThat(one, not(new WorkspaceConfiguration("server", "aworkspace", "project", cloakList, "workfolder")));
-        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "aproject", cloakList, "workfolder")));
-        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", cloakList, "aworkfolder")));
-        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", EMPTY_CLOAKED_PATHS_LIST, "workfolder")));
+        assertThat(one, not(new WorkspaceConfiguration("aserver", "workspace", "project", cloakList, "workfolder", false)));
+        assertThat(one, not(new WorkspaceConfiguration("server", "aworkspace", "project", cloakList, "workfolder", false)));
+        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "aproject", cloakList, "workfolder", false)));
+        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", cloakList, "aworkfolder", false)));
+        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", EMPTY_CLOAKED_PATHS_LIST, "workfolder", false)));
+        assertThat(one, not(new WorkspaceConfiguration("server", "workspace", "project", cloakList, "aworkfolder", true)));
     }
 }

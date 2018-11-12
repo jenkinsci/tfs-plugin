@@ -1,6 +1,7 @@
 //CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
+
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -12,7 +13,6 @@ import hudson.model.InvisibleAction;
  * @author Erik Ramfelt, redsolo
  */
 public class WorkspaceConfiguration extends InvisibleAction implements Serializable {
-
     private static final long serialVersionUID = 1L;
     
     private final String workspaceName;
@@ -21,14 +21,16 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
     private final String serverUrl;
     private boolean workspaceExists;
     private Collection<String> cloakedPaths;
+    private final boolean isLocalWorkspace;
 
-    public WorkspaceConfiguration(String serverUrl, String workspaceName, String projectPath, Collection<String> cloakedPaths, String workfolder) {
+    public WorkspaceConfiguration(String serverUrl, String workspaceName, String projectPath, Collection<String> cloakedPaths, String workfolder, boolean isLocalWorkspace) {
         this.workspaceName = workspaceName;
         this.workfolder = workfolder;
         this.projectPath = projectPath;
         this.serverUrl = serverUrl;
         this.workspaceExists = true;
         this.cloakedPaths = cloakedPaths;
+        this.isLocalWorkspace = isLocalWorkspace;
     }
 
     public WorkspaceConfiguration(WorkspaceConfiguration configuration) {
@@ -38,6 +40,7 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
         this.serverUrl = configuration.serverUrl;
         this.workspaceExists = configuration.workspaceExists;
         this.cloakedPaths = configuration.cloakedPaths;
+        this.isLocalWorkspace = configuration.isLocalWorkspace;
     }
 
     public String getWorkspaceName() {
@@ -68,6 +71,10 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
         return cloakedPaths;
     }
 
+    public boolean isLocalWorkspace() {
+        return isLocalWorkspace;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -78,6 +85,7 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
         result = prime * result + (workspaceExists ? 1231 : 1237);
         result = prime * result + ((workspaceName == null) ? 0 : workspaceName.hashCode());
         result = prime * result + ((cloakedPaths == null) ? 0 : cloakedPaths.hashCode());
+        result = prime * result + (isLocalWorkspace ? 1231 : 1237);
         return result;
     }
 
@@ -121,12 +129,14 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
             return false;
         else if (!cloakedPaths.containsAll(other.cloakedPaths))
             return false;
+        if (isLocalWorkspace != other.isLocalWorkspace)
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return String.format("WorkspaceConfiguration [projectPath=%s, serverUrl=%s, workfolder=%s, workspaceExists=%s, workspaceName=%s]", 
-                projectPath, serverUrl, workfolder, workspaceExists, workspaceName);
-    }    
+        return String.format("WorkspaceConfiguration [projectPath=%s, serverUrl=%s, workfolder=%s, workspaceExists=%s, workspaceName=%s, workspaceLocation=%s]", 
+                projectPath, serverUrl, workfolder, workspaceExists, workspaceName, isLocalWorkspace);
+    }
 }

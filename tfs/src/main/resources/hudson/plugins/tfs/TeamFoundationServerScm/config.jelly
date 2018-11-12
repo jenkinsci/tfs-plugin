@@ -25,6 +25,10 @@
 			<f:checkbox default="true"/>
 		</f:entry>
 
+		<f:entry field="isLocalWorkspace" title="Use local workspace" description="If checked, the workspace will be 'local'.">
+			<f:checkbox default="true"/>
+		</f:entry>
+
 	    <f:entry field="localPath" title="Local workfolder">
 	        <f:textbox default="."
 	             clazz="required" checkMessage="${%Local workfolder is mandatory, empty field will use job workspace as workfolder.}"/>
