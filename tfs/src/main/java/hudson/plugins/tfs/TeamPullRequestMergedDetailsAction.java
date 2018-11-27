@@ -7,7 +7,8 @@ import com.microsoft.visualstudio.services.webapi.model.ResourceRef;
 import hudson.model.Action;
 import hudson.model.Run;
 import hudson.plugins.tfs.model.GitPullRequestEx;
-import hudson.plugins.tfs.model.GitPushEvent;
+import hudson.plugins.tfs.model.GitPullRequestWrapper;
+import hudson.plugins.tfs.model.GitRepositoryWrapper;
 import hudson.plugins.tfs.util.UriHelper;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -29,6 +30,7 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
     public String message;
     public String detailedMessage;
     public String collectionUri;
+    public GitPullRequestWrapper gitPullRequestWrapper;
 
     public TeamPullRequestMergedDetailsAction() {
 
@@ -39,6 +41,7 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
         this.message = message;
         this.detailedMessage = detailedMessage;
         this.collectionUri = collectionUri;
+        this.gitPullRequestWrapper = new GitPullRequestWrapper(gitPullRequest);
     }
 
     public static URI addWorkItemsForRun(final Run<?, ?> run, final List<ResourceRef> destination) {
@@ -81,6 +84,9 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
 
     @Exported
     public ResourceRef[] getWorkItems() {
+        if (gitPullRequest == null)
+            return null;
+
         return gitPullRequest.getWorkItemRefs();
     }
 
@@ -92,15 +98,14 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
 
     @Exported
     public String getPullRequestUrl() {
-        final GitRepository repository = gitPullRequest.getRepository();
+        final GitRepositoryWrapper repository = gitPullRequestWrapper.repository;
         final URI collectionUri = URI.create(this.collectionUri);
-        final TeamProjectReference project = repository.getProject();
         final URI pullRequestUrl = UriHelper.join(collectionUri,
-                project.getName(),
+                repository.projectName,
                 "_git",
-                repository.getName(),
+                repository.name,
                 "pullrequest",
-                gitPullRequest.getPullRequestId()
+                gitPullRequestWrapper.pullRequestId
         );
         final String result = pullRequestUrl.toString();
         return result;

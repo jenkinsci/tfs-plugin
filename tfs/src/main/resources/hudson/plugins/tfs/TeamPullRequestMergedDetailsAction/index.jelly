@@ -6,19 +6,19 @@
 
         <dl>
             <dt>Pull request</dt>
-            <dd><a href="${it.pullRequestUrl}">#${it.gitPullRequest.pullRequestId}</a>: '${it.gitPullRequest.title}', created by ${it.gitPullRequest.createdBy.displayName}</dd>
+            <dd><a href="${it.pullRequestUrl}">#${it.gitPullRequestWrapper.pullRequestId}</a>: '${it.gitPullRequestWrapper.title}', created by ${it.gitPullRequestWrapper.createdBy}</dd>
 
             <dt>Description</dt>
-            <dd><pre>${it.gitPullRequest.description}</pre></dd>
+            <dd><pre>${it.gitPullRequestWrapper.description}</pre></dd>
 
             <dt>Message</dt>
             <dd><pre>${it.detailedMessage}</pre></dd>
 
             <dt>Git repository</dt>
-            <dd><a href="${it.gitPullRequest.repository.remoteUrl}">${it.gitPullRequest.repository.name}</a></dd>
+            <dd><a href="${it.gitPullRequestWrapper.repository.remoteUrl}">${it.gitPullRequestWrapper.repository.name}</a></dd>
 
             <dt>Project</dt>
-            <dd>${it.gitPullRequest.repository.project.name}</dd>
+            <dd>${it.gitPullRequestWrapper.repository.projectName}</dd>
 
             <j:if test="${it.hasWorkItems()}">
                 <dt>Associated work items</dt>
