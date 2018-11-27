@@ -1,4 +1,3 @@
-//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
 import hudson.Extension;
@@ -37,19 +36,20 @@ public class TeamCompletedStatusPostBuildAction extends Notifier implements Simp
             @Nonnull final Launcher launcher,
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
-        if (!TeamGlobalStatusAction.isApplicable(run)){
+        if (!TeamGlobalStatusAction.isApplicable(run)) {
             perform(run, listener);
         }
     }
 
-    public void perform(final @Nonnull Run<?, ?> run, final @Nonnull TaskListener listener) {
+    /**
+     * Perform the build step.
+     */
+    public void perform(@Nonnull final Run<?, ?> run, @Nonnull final TaskListener listener) {
         try {
             TeamStatus.createFromRun(run, listener, getDisplayName());
-        }
-        catch (final IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             listener.error(e.getMessage());
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace(listener.error("Error while trying to update completion status in TFS/Team Services"));
         }
     }
@@ -59,12 +59,17 @@ public class TeamCompletedStatusPostBuildAction extends Notifier implements Simp
         return descriptor.getDisplayName();
     }
 
+    /**
+     * We don't need the outcome of any previous builds for this step.
+     */
     @Override
     public BuildStepMonitor getRequiredMonitorService() {
-        // we don't need the outcome of any previous builds for this step
         return BuildStepMonitor.NONE;
     }
 
+    /**
+     * Class descriptor.
+     */
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
