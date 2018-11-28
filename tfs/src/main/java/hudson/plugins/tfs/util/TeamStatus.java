@@ -4,7 +4,6 @@ import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.CommitParameterAction;
-import hudson.plugins.tfs.PullRequestParameterAction;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
@@ -38,18 +37,14 @@ public final class TeamStatus {
 
         final CommitParameterAction commitParameter = run.getAction(CommitParameterAction.class);
         final GitCodePushedEventArgs gitCodePushedEventArgs;
-        final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs;
 
-        if (commitParameter != null) {
-            gitCodePushedEventArgs = commitParameter.getGitCodePushedEventArgs();
-            if (commitParameter instanceof PullRequestParameterAction) {
-                final PullRequestParameterAction prpa = (PullRequestParameterAction) commitParameter;
-                pullRequestMergeCommitCreatedEventArgs = prpa.getPullRequestMergeCommitCreatedEventArgs();
-            } else {
-                pullRequestMergeCommitCreatedEventArgs = null;
-            }
-        } else {
+        if (commitParameter == null) {
             // TODO: try to guess based on what we _do_ have (i.e. RevisionParameterAction)
+            return;
+        }
+
+        gitCodePushedEventArgs = commitParameter.getGitCodePushedEventArgs();
+        if (gitCodePushedEventArgs == null) {
             return;
         }
 
@@ -63,19 +58,19 @@ public final class TeamStatus {
                 .pair("status", status.state.toString())
                 .build());
 
-        addStatus(pullRequestMergeCommitCreatedEventArgs, status);
+        addStatus(gitCodePushedEventArgs, status);
     }
 
     /**
      * Create status for a (queued) Job.
      */
-    public static void createFromJob(final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs, final Job job) throws IOException {
+    public static void createFromJob(final GitCodePushedEventArgs gitCodePushedEventArgs, final Job job) throws IOException {
         final TeamGitStatus status = TeamGitStatus.fromJob(job);
 
-        addStatus(pullRequestMergeCommitCreatedEventArgs, status);
+        addStatus(gitCodePushedEventArgs, status);
     }
 
-    private static void addStatus(final PullRequestMergeCommitCreatedEventArgs gitCodePushedEventArgs, final TeamGitStatus status) throws IOException {
+    private static void addStatus(final GitCodePushedEventArgs gitCodePushedEventArgs, final TeamGitStatus status) throws IOException {
         final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs;
 
         if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
