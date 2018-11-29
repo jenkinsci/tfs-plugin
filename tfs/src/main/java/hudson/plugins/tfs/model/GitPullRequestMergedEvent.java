@@ -110,6 +110,8 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         final String pushedBy = determineCreatedBy(gitPullRequest);
         final int pullRequestId = gitPullRequest.getPullRequestId();
         final String targetBranch = determineTargetBranch(gitPullRequest);
+        final String targetCommit = gitPullRequest.getLastMergeTargetCommit().getCommitId();
+        final String sourceCommit = gitPullRequest.getLastMergeSourceCommit().getCommitId();
 
         final PullRequestMergeCommitCreatedEventArgs args = new PullRequestMergeCommitCreatedEventArgs();
         args.collectionUri = collectionUri;
@@ -120,6 +122,8 @@ public class GitPullRequestMergedEvent extends GitPushEvent {
         args.pushedBy = pushedBy;
         args.pullRequestId = pullRequestId;
         args.targetBranch = targetBranch;
+        args.targetCommit = targetCommit;
+        args.sourceCommit = sourceCommit;
         return args;
     }
 }

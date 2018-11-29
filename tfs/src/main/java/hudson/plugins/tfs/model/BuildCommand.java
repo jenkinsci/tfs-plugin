@@ -27,6 +27,7 @@ import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ActionHelper;
 import hudson.plugins.tfs.util.MediaType;
+import hudson.plugins.tfs.util.TeamRestClient;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
@@ -143,6 +144,14 @@ public class BuildCommand extends AbstractCommand {
                 final String message = event.getMessage().getText();
                 final String detailedMessage = event.getDetailedMessage().getText();
                 final Action teamPullRequestMergedDetailsAction = new TeamPullRequestMergedDetailsAction(gitPullRequest, message, detailedMessage, args.collectionUri.toString());
+                if (gitPullRequest.getSupportsIterations()) {
+                    try {
+                        final TeamRestClient client = new TeamRestClient(args.collectionUri);
+                        args.iterationId = client.getPullRequestIteration(args);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 actions.add(teamPullRequestMergedDetailsAction);
                 TeamGlobalStatusAction.addIfApplicable(actions);
             }
