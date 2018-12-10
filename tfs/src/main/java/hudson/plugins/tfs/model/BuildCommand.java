@@ -3,6 +3,7 @@ package hudson.plugins.tfs.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
+import com.microsoft.teamfoundation.sourcecontrol.webapi.model.PullRequestStatus;
 import hudson.model.Action;
 import hudson.model.BuildableItem;
 import hudson.model.Cause;
@@ -135,6 +136,11 @@ public class BuildCommand extends AbstractCommand {
             else if ("git.pullrequest.merged".equals(eventType)) {
                 final GitPullRequestEx gitPullRequest = mapper.convertValue(resource, GitPullRequestEx.class);
                 final PullRequestMergeCommitCreatedEventArgs args = GitPullRequestMergedEvent.decodeGitPullRequest(gitPullRequest, event);
+
+                // only build active pull-requests.
+                if (gitPullRequest.getStatus() == PullRequestStatus.ACTIVE)
+                    return new JSONObject();
+
                 // record the values for the special optional parameters
                 commitId = args.commit;
                 pullRequestId = Integer.toString(args.pullRequestId, 10);
