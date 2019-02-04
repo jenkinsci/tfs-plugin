@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.runner.Description;
 
-import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.codec.binary.Base64; // This was replaced with Apache Commons and not java.util.Base64 because the encode function there requires compilation with java 8 and the library is currently on java 7.
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -169,7 +169,7 @@ public class IntegrationTestHelper {
     }
 
     public static String formatFriendlyName(final byte[] addressBytes) {
-        final String base64 = DatatypeConverter.printBase64Binary(addressBytes);
+        final String base64 = Base64.encodeBase64String(addressBytes);
         final String slashToMinus = base64.replace('/', '-');
         return slashToMinus;
     }
