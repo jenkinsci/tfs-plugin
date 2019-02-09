@@ -24,6 +24,7 @@ public class SafeParametersAction extends ParametersAction {
     private List<ParameterValue> parameters;
 
     public SafeParametersAction(final List<ParameterValue> parameters) {
+        super(parameters);
         this.parameters = parameters;
     }
 
