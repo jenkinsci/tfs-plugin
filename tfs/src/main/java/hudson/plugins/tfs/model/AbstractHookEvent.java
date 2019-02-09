@@ -304,7 +304,7 @@ public abstract class AbstractHookEvent {
                                     repositoryMatches = true;
                                     break;
                                 }
-                            }catch (Exception e) {
+                            } catch (Exception e) {
                                 LOGGER.fine("Error parsing " + remoteURL.toString() + " into URI");
                                 continue;
                             }
