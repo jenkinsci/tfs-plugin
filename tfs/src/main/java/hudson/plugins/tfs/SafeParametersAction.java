@@ -24,12 +24,32 @@ public class SafeParametersAction extends ParametersAction {
     private List<ParameterValue> parameters;
 
     public SafeParametersAction(final List<ParameterValue> parameters) {
-        super(parameters);
         this.parameters = parameters;
     }
 
     public SafeParametersAction(final ParameterValue... parameters) {
         this(Arrays.asList(parameters));
+    }
+
+    /**
+     * Will be called when the object is unmarshalled.  Because the normal
+     * constructors are not called in such a case, things may not be initialized
+     * correctly.  This will check that ParametersAction.parameters is not null
+     * @return Correctly initialized SafeParametersAction
+     */
+    protected Object readResolve() {
+        try {
+            // if ParametersAction is not a null everything is ok
+            if (super.getParameters() != null) {
+                return this;
+            }
+        } catch (NullPointerException npe) {
+        }
+
+        // Either super.getParameters was null or threw a NPE
+        // so create a new SafeParametersAction that initializes
+        // everything correctly.  This should rarely happen
+        return new SafeParametersAction(this.getParameters());
     }
 
     @Override
