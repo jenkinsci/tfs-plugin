@@ -172,7 +172,7 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
     }
 
     static FormValidation checkTeamServices(final URI uri) {
-        if (UriHelper.hasPath(uri)) {
+        if (uri.getHost().contains(".visualstudio.com") && UriHelper.hasPath(uri)) {
             return FormValidation.error("A Team Services collection URL must have an empty path.");
         }
         return FormValidation.ok();
@@ -196,7 +196,8 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
     }
 
     public static boolean isTeamServices(final String hostName) {
-        return StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com");
+        return StringHelper.endsWithIgnoreCase(hostName, ".visualstudio.com") ||
+            hostName.toLowerCase().contains("dev.azure.com");
     }
 
     static FormValidation testConnection(final String collectionUri, final StandardUsernamePasswordCredentials credentials) throws IOException {

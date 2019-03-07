@@ -91,4 +91,11 @@ public class TeamCollectionConfigurationTest {
         Assert.assertEquals(FormValidation.Kind.ERROR, actual.kind);
     }
 
+    @Test public void checkTeamServices_azdoUrl() throws Exception {
+        final URI input = URI.create("https://dev.azure.com/fabrikam-fiber-inc");
+
+        final FormValidation actual = TeamCollectionConfiguration.checkTeamServices(input);
+
+        Assert.assertEquals(FormValidation.Kind.OK, actual.kind);
+    }
 }
