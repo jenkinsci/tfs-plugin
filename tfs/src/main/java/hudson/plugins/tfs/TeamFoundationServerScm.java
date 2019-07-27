@@ -14,6 +14,7 @@ import hudson.model.Job;
 import hudson.model.Computer;
 import hudson.model.Node;
 import hudson.model.ParametersAction;
+import hudson.model.ParameterValue;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.actions.CheckoutAction;
@@ -46,6 +47,7 @@ import hudson.util.Secret;
 import hudson.util.VariableResolver;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -336,6 +338,15 @@ public class TeamFoundationServerScm extends SCM {
             if (build instanceof AbstractBuild) {
                 VariableResolver<String> buildVariableResolver = ((AbstractBuild<?, ?>) build).getBuildVariableResolver();
                 singleVersionSpec = buildVariableResolver.resolve(VERSION_SPEC);
+            } else if (build instanceof WorkflowRun) {
+                List<ParametersAction> actions = build.getActions(ParametersAction.class);
+                for (ParametersAction pa : actions) {
+                    for (ParameterValue pv : pa.getParameters()) {
+                        if (pv.getName().equals(VERSION_SPEC)) {
+                            singleVersionSpec = pv.getValue().toString();
+                        }
+                    }
+                }
             }
 
             final String projPath = workspaceConfiguration.getProjectPath();
