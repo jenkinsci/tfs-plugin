@@ -28,7 +28,7 @@ You'll need to be (or involve) an administrator.  It is assumed your TFS server 
     4. Confirm you can browse to the **FunctionalTests** team project.
 
 
-How to configure your Team Services account
+How to configure your Azure DevOps account
 -------------------------------------------
 TODO: write this
 
