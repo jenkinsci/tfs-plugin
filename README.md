@@ -53,7 +53,7 @@ There are two possibilities to trigger a build with SCM Changeset:
 
 The following sub-sections list the various versions of software that were tested and are thus supported.  The plugin might work with other versions, they just haven't been tested.
 
-## Team Foundation Server (TFS) / Azure DevOps (Azure DevOps)
+## Team Foundation Server (TFS) / Azure DevOps
 
 The following table indicates compatibility and support for versions of TFS and Azure DevOps.
 
@@ -198,7 +198,7 @@ For \[on-premises\] Team Foundation Server, the _User name_ can be specified in 
 1. `EXAMPLE-DOMAIN\user`
 2. `user@domain.example.com`
 
-#### Azure DevOps (Azure DevOps, previously known as Visual Studio Online)
+#### Azure DevOps (previously known as Visual Studio Team Services or VSTS)
 
 For Azure DevOps, there are also two options:
 
