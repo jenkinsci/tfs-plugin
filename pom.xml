@@ -30,7 +30,7 @@
       <timezone>-5</timezone>
     </developer>
     <developer>
-      <id>jpricketmsft</id>
+      <id>jpricket</id>
       <name>Jason Prickett</name>
       <email>jpricket@microsoft.com</email>
       <timezone>-5</timezone>
@@ -54,7 +54,7 @@
       <timezone>+5</timezone>
     </developer>
     <developer>
-      <id>kelliejos</id>
+      <id>keljos</id>
       <name>Kellie Jos</name>
       <email>kej@microsoft.com</email>
       <timezone>-5</timezone>
