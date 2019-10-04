@@ -13,7 +13,7 @@
   <properties>
     <!-- Version is required to be compatible with current Pipeline plugin dependencies -->
     <jenkins.version>1.642.3</jenkins.version>
-    <java.level>7</java.level>
+    <java.level>8</java.level>
     <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
     <!--  overriding old version from parent to be consistent with the above in this project -->
     <maven-surefire-report-plugin.version>${maven-surefire-plugin.version}</maven-surefire-report-plugin.version>

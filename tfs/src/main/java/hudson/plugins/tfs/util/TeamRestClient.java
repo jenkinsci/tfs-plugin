@@ -24,13 +24,13 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.util.Base64;
 
 public class TeamRestClient {
 
@@ -70,7 +70,7 @@ public class TeamRestClient {
         final String password = secretPassword.getPlainText();
         final String credPair = username + ":" + password;
         final byte[] credBytes = credPair.getBytes(MediaType.UTF_8);
-        final String base64enc = DatatypeConverter.printBase64Binary(credBytes);
+        final String base64enc = Base64.getEncoder().encodeToString(credBytes);
         final String result = "Basic " + base64enc;
         return result;
     }
