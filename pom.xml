@@ -65,6 +65,12 @@
       <email>manfred@simpligility.com</email>
       <timezone>-8</timezone>
     </developer>
+    <developer>
+      <id>leantk</id>
+      <name>Leah Antkiewicz</name>
+      <email>leantk@microsoft.com</email>
+      <timezone>-5</timezone>
+    </developer>
   </developers>
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/tfs-plugin.git</connection>
