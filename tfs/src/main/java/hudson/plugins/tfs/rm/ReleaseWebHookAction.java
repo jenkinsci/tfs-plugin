@@ -70,7 +70,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
             json = JSONObject.fromObject(payload);
         }
 
-        json.put("name", build.getProject().getName());
+        json.put("name", build.getProject().getFullName());
         json.put("id", build.getNumber());
         json.put("startedBy", getStartedBy(build));
 
@@ -144,7 +144,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
 
         @Override
         public String getDisplayName() {
-            return "TFS/Team Services Release Webhook";
+            return "Azure Devops Server/Services Release Webhook";
         }
     }
 
