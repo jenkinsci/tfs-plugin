@@ -113,7 +113,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
             request.addHeader("X-Jenkins-Signature", signature);
         }
 
-        request.setEntity(new StringEntity(payload));
+        request.setEntity(new StringEntity(new String(payload.getBytes("UTF-8"))));
         final HttpResponse response = client.execute(request);
         final int statusCode = response.getStatusLine().getStatusCode();
 
