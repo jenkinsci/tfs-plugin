@@ -85,18 +85,18 @@ public final class TeamStatus {
         }
 
         final URI collectionUri = gitCodePushedEventArgs.collectionUri;
-        final TeamRestClient client = new TeamRestClient(collectionUri);
+        try (final TeamRestClient client = new TeamRestClient(collectionUri)) {
 
-        // TODO: when code is pushed and polling happens, are we sure we built against the requested commit?
-        if (pullRequestMergeCommitCreatedEventArgs != null) {
-            if (pullRequestMergeCommitCreatedEventArgs.iterationId == -1) {
-                client.addPullRequestStatus(pullRequestMergeCommitCreatedEventArgs, status);
-            } else {
-                client.addPullRequestIterationStatus(pullRequestMergeCommitCreatedEventArgs, status);
+            // TODO: when code is pushed and polling happens, are we sure we built against the requested commit?
+            if (pullRequestMergeCommitCreatedEventArgs != null) {
+                if (pullRequestMergeCommitCreatedEventArgs.iterationId == -1) {
+                    client.addPullRequestStatus(pullRequestMergeCommitCreatedEventArgs, status);
+                } else {
+                    client.addPullRequestIterationStatus(pullRequestMergeCommitCreatedEventArgs, status);
+                }
             }
+            client.addCommitStatus(gitCodePushedEventArgs, status);
+            // TODO: we could contribute an Action to the run, recording the ID of the status we created
         }
-        client.addCommitStatus(gitCodePushedEventArgs, status);
-
-        // TODO: we could contribute an Action to the run, recording the ID of the status we created
     }
 }

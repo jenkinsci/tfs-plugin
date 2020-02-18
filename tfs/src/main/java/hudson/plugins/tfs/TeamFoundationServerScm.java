@@ -699,52 +699,50 @@ public class TeamFoundationServerScm extends SCM {
         Run<?, ?> build = project.getLastBuild();
         final Server server = createServer(localLauncher, listener, build);
 
-        if (!(baseline instanceof TFSRevisionState)) {
-            // This plugin was just upgraded, we don't yet have a new-style baseline,
-            // so we perform an old-school poll
-            if (project instanceof AbstractProject) {
-                boolean shouldBuild = pollChanges((AbstractProject) project, localLauncher, workspace, listener);
-                return shouldBuild ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
-            } else {
-                // On the pipeline case, we can't call pollChanges. Query the TFS Server directly instead
-                if (build == null) {
-                    return PollingResult.BUILD_NOW;
+        try {
+            if (!(baseline instanceof TFSRevisionState)) {
+                // This plugin was just upgraded, we don't yet have a new-style baseline,
+                // so we perform an old-school poll
+                if (project instanceof AbstractProject) {
+                    boolean shouldBuild = pollChanges((AbstractProject) project, localLauncher, workspace, listener);
+                    return shouldBuild ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
                 } else {
-                    try {
+                    // On the pipeline case, we can't call pollChanges. Query the TFS Server directly instead
+                    if (build == null) {
+                        return PollingResult.BUILD_NOW;
+                    } else {
                         return (server.getProject(getProjectPath(build)).getDetailedHistoryWithoutCloakedPaths(
                                 build.getTimestamp(),
                                 Calendar.getInstance(),
                                 getCloakedPaths(build)
                         ).size() > 0) ? PollingResult.BUILD_NOW : PollingResult.NO_CHANGES;
-                    } finally {
-                        server.close();
                     }
                 }
             }
-        }
-        final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
-        if (!projectPath.equalsIgnoreCase(tfsBaseline.projectPath)) {
-            // There's no PollingResult.INCOMPARABLE, so we use the next closest thing
-            return PollingResult.BUILD_NOW;
-        }
-        final Project tfsProject = server.getProject(projectPath);
-        try {
-            final ChangeSet latest = tfsProject.getLatestUncloakedChangeset(tfsBaseline.changesetVersion, cloakedPaths);
-            final TFSRevisionState tfsRemote =
-                    (latest != null)
-                    ? new TFSRevisionState(latest.getVersion(), projectPath)
-                    : tfsBaseline;
+            final TFSRevisionState tfsBaseline = (TFSRevisionState) baseline;
+            if (!projectPath.equalsIgnoreCase(tfsBaseline.projectPath)) {
+                // There's no PollingResult.INCOMPARABLE, so we use the next closest thing
+                return PollingResult.BUILD_NOW;
+            }
+            final Project tfsProject = server.getProject(projectPath);
+            try {
+                final ChangeSet latest = tfsProject.getLatestUncloakedChangeset(tfsBaseline.changesetVersion, cloakedPaths);
+                final TFSRevisionState tfsRemote =
+                        (latest != null)
+                                ? new TFSRevisionState(latest.getVersion(), projectPath)
+                                : tfsBaseline;
 
-            // TODO: we could return INSIGNIFICANT if all the changesets
-            // contain the string "***NO_CI***" at the end of their comment
-            final Change change =
-                    tfsBaseline.changesetVersion == tfsRemote.changesetVersion
-                    ? Change.NONE
-                    : Change.SIGNIFICANT;
-            return new PollingResult(tfsBaseline, tfsRemote, change);
-        } catch (final Exception e) {
-            e.printStackTrace(listener.fatalError(e.getMessage()));
-            return PollingResult.NO_CHANGES;
+                // TODO: we could return INSIGNIFICANT if all the changesets
+                // contain the string "***NO_CI***" at the end of their comment
+                final Change change =
+                        tfsBaseline.changesetVersion == tfsRemote.changesetVersion
+                                ? Change.NONE
+                                : Change.SIGNIFICANT;
+                return new PollingResult(tfsBaseline, tfsRemote, change);
+            } catch (final Exception e) {
+                e.printStackTrace(listener.fatalError(e.getMessage()));
+                return PollingResult.NO_CHANGES;
+            }
         } finally {
             server.close();
         }

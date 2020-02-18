@@ -52,28 +52,32 @@ public class LabelCommand extends AbstractCallableCommand<Void, Exception> {
 
     public Void call() throws Exception {
         final Server server = createServer();
-        final MockableVersionControlClient vcc = server.getVersionControlClient();
-        final TaskListener listener = server.getListener();
-        final PrintStream logger = listener.getLogger();
-        final String userName = VersionControlConstants.AUTHENTICATED_USER;
+        try {
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            final TaskListener listener = server.getListener();
+            final PrintStream logger = listener.getLogger();
+            final String userName = VersionControlConstants.AUTHENTICATED_USER;
 
-        final String creatingMessage = String.format(CreatingTemplate, labelName, projectPath, workspaceName);
-        logger.println(creatingMessage);
+            final String creatingMessage = String.format(CreatingTemplate, labelName, projectPath, workspaceName);
+            logger.println(creatingMessage);
 
-        final VersionControlLabel versionControlLabel = new VersionControlLabel(labelName, userName, userName, null, getLabelComment());
-        final ItemSpec itemSpec = new ItemSpec(projectPath, RecursionType.FULL);
-        final WorkspaceVersionSpec workspaceVersionSpec = new WorkspaceVersionSpec(workspaceName, userName, userName);
-        final LabelItemSpec labelItemSpec = new LabelItemSpec(itemSpec, workspaceVersionSpec, false);
-        final LabelItemSpec[] items = {labelItemSpec};
-        final LabelResult[] labelResults = vcc.createLabel(versionControlLabel, items, LabelChildOption.FAIL);
+            final VersionControlLabel versionControlLabel = new VersionControlLabel(labelName, userName, userName, null, getLabelComment());
+            final ItemSpec itemSpec = new ItemSpec(projectPath, RecursionType.FULL);
+            final WorkspaceVersionSpec workspaceVersionSpec = new WorkspaceVersionSpec(workspaceName, userName, userName);
+            final LabelItemSpec labelItemSpec = new LabelItemSpec(itemSpec, workspaceVersionSpec, false);
+            final LabelItemSpec[] items = {labelItemSpec};
+            final LabelResult[] labelResults = vcc.createLabel(versionControlLabel, items, LabelChildOption.FAIL);
 
-        if (labelResults == null || labelResults.length == 0) {
-            throw new RuntimeException("Label creation failed.");
-        } else {
-            final String createdMessage = String.format(CreatedTemplate, labelName);
-            logger.println(createdMessage);
+            if (labelResults == null || labelResults.length == 0) {
+                throw new RuntimeException("Label creation failed.");
+            } else {
+                final String createdMessage = String.format(CreatedTemplate, labelName);
+                logger.println(createdMessage);
+            }
+
+            return null;
+        } finally {
+            server.close();
         }
-
-        return null;
     }
 }

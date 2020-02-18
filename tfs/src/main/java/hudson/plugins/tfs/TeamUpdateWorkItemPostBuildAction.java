@@ -45,17 +45,18 @@ public class TeamUpdateWorkItemPostBuildAction extends Notifier implements Simpl
             final ArrayList<ResourceRef> workItems = new ArrayList<ResourceRef>();
             final URI collectionUri = TeamPullRequestMergedDetailsAction.addWorkItemsForRun(run, workItems);
             if (collectionUri != null) {
-                final TeamRestClient client = new TeamRestClient(collectionUri);
-                for (final ResourceRef workItem : workItems) {
-                    final String workItemIdString = workItem.getId();
-                    final Integer workItemId = Integer.valueOf(workItemIdString, 10);
-                    client.addHyperlinkToWorkItem(workItemId, absoluteUrl);
-                }
+                try (final TeamRestClient client = new TeamRestClient(collectionUri)) {
+                    for (final ResourceRef workItem : workItems) {
+                        final String workItemIdString = workItem.getId();
+                        final Integer workItemId = Integer.valueOf(workItemIdString, 10);
+                        client.addHyperlinkToWorkItem(workItemId, absoluteUrl);
+                    }
 
-                // Send telemetry
-                TelemetryHelper.sendEvent("team-workitem-update", new TelemetryHelper.PropertyMapBuilder()
-                        .serverContext(collectionUri.toString(), collectionUri.toString())
-                        .build());
+                    // Send telemetry
+                    TelemetryHelper.sendEvent("team-workitem-update", new TelemetryHelper.PropertyMapBuilder()
+                            .serverContext(collectionUri.toString(), collectionUri.toString())
+                            .build());
+                }
             }
         } catch (final IllegalArgumentException e) {
             listener.error(e.getMessage());

@@ -52,28 +52,32 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand<Void, E
 
     public Void call() throws Exception {
         final Server server = createServer();
-        final MockableVersionControlClient vcc = server.getVersionControlClient();
-        final TaskListener listener = server.getListener();
-        logger = listener.getLogger();
+        try {
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            final TaskListener listener = server.getListener();
+            logger = listener.getLogger();
 
-        final VersionSpec getVersionSpec;
-        if (versionSpec != null) {
-            getVersionSpec = VersionSpec.parseSingleVersionFromSpec(versionSpec, null);
-        } else {
-            getVersionSpec = LatestVersionSpec.INSTANCE;
+            final VersionSpec getVersionSpec;
+            if (versionSpec != null) {
+                getVersionSpec = VersionSpec.parseSingleVersionFromSpec(versionSpec, null);
+            } else {
+                getVersionSpec = LatestVersionSpec.INSTANCE;
+            }
+            final String versionSpecString = RemoteChangesetVersionCommand.toString(getVersionSpec);
+            final String gettingMessage = String.format(GettingTemplate, versionSpecString, workFolder);
+            logger.println(gettingMessage);
+
+            final Workspace workspace = vcc.getWorkspace(workFolder);
+            final VersionControlEventEngine eventEngine = vcc.getEventEngine();
+            eventEngine.addGetListener(this);
+            workspace.get(getVersionSpec, useOverwrite ? GetOptions.OVERWRITE : GetOptions.NONE);
+            eventEngine.removeGetListener(this);
+
+            final String gotMessage = String.format(GotTemplate, versionSpecString, getCount);
+            logger.println(gotMessage);
+        } finally {
+            server.close();
         }
-        final String versionSpecString = RemoteChangesetVersionCommand.toString(getVersionSpec);
-        final String gettingMessage = String.format(GettingTemplate, versionSpecString, workFolder);
-        logger.println(gettingMessage);
-
-        final Workspace workspace = vcc.getWorkspace(workFolder);
-        final VersionControlEventEngine eventEngine = vcc.getEventEngine();
-        eventEngine.addGetListener(this);
-        workspace.get(getVersionSpec, useOverwrite ? GetOptions.OVERWRITE : GetOptions.NONE);
-        eventEngine.removeGetListener(this);
-
-        final String gotMessage = String.format(GotTemplate, versionSpecString, getCount);
-        logger.println(gotMessage);
 
         return null;
     }

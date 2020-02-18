@@ -45,10 +45,9 @@ public final class JenkinsEventNotifier {
     public static void sendJobCompletionEvent(final JSONObject payload) {
         final List<TeamCollectionConfiguration> connectedCollections = TeamCollectionConfiguration.getConnectedCollections();
         for (final TeamCollectionConfiguration c : connectedCollections) {
-            try {
-                // Check to see if there are any collections "connected" to this Jenkins server
-                final ConnectionParameters connectionParameters = c.getConnectionParameters();
-                final TeamRestClient client = new TeamRestClient(URI.create(c.getCollectionUrl()));
+            // Check to see if there are any collections "connected" to this Jenkins server
+            final ConnectionParameters connectionParameters = c.getConnectionParameters();
+            try (final TeamRestClient client = new TeamRestClient(URI.create(c.getCollectionUrl()))) {
                 payload.put("server", connectionParameters.getConnectionKey());
                 final String jsonPayload = payload.toString();
                 final JobCompletionEventArgs args = new JobCompletionEventArgs(

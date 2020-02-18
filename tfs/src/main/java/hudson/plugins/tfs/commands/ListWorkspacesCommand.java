@@ -47,42 +47,46 @@ public class ListWorkspacesCommand extends AbstractCallableCommand<List<Workspac
 
     public List<Workspace> call() throws Exception {
         final Server server = createServer();
-        final MockableVersionControlClient vcc = server.getVersionControlClient();
-        final TaskListener listener = server.getListener();
-        final PrintStream logger = listener.getLogger();
-        final String computerName = (computer != null) ? computer : LocalHost.getShortName();
+        try {
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            final TaskListener listener = server.getListener();
+            final PrintStream logger = listener.getLogger();
+            final String computerName = (computer != null) ? computer : LocalHost.getShortName();
 
-        final String listWorkspacesMessage = String.format(ListingWorkspacesTemplate, server.getUrl());
-        logger.println(listWorkspacesMessage);
+            final String listWorkspacesMessage = String.format(ListingWorkspacesTemplate, server.getUrl());
+            logger.println(listWorkspacesMessage);
 
-        final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace[] sdkWorkspaces
-                = vcc.queryWorkspaces(
-                null,
-                null,
-                computerName,
-                WorkspacePermissions.NONE_OR_NOT_SUPPORTED
-        );
+            final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace[] sdkWorkspaces
+                    = vcc.queryWorkspaces(
+                    null,
+                    null,
+                    computerName,
+                    WorkspacePermissions.NONE_OR_NOT_SUPPORTED
+            );
 
-        final List<Workspace> result = new ArrayList<Workspace>(sdkWorkspaces.length);
-        for (final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace sdkWorkspace : sdkWorkspaces) {
-            final String name = sdkWorkspace.getName();
-            final String computer = sdkWorkspace.getComputer();
-            final String ownerName = sdkWorkspace.getOwnerName();
-            final String comment = Util.fixNull(sdkWorkspace.getComment());
+            final List<Workspace> result = new ArrayList<Workspace>(sdkWorkspaces.length);
+            for (final com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Workspace sdkWorkspace : sdkWorkspaces) {
+                final String name = sdkWorkspace.getName();
+                final String computer = sdkWorkspace.getComputer();
+                final String ownerName = sdkWorkspace.getOwnerName();
+                final String comment = Util.fixNull(sdkWorkspace.getComment());
 
-            final Workspace workspace = new Workspace(
-                    name,
-                    computer,
-                    ownerName,
-                    comment);
-            result.add(workspace);
+                final Workspace workspace = new Workspace(
+                        name,
+                        computer,
+                        ownerName,
+                        comment);
+                result.add(workspace);
+            }
+
+            if (shouldLogWorkspaces) {
+                log(result, logger);
+            }
+
+            return result;
+        } finally {
+            server.close();
         }
-
-        if (shouldLogWorkspaces) {
-            log(result, logger);
-        }
-
-        return result;
     }
 
     public List<Workspace> parse(Reader consoleReader) throws IOException {
