@@ -70,7 +70,7 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand<Integ
                 RecursionType.FULL,
                 null /* user */,
                 null,
-                null,
+                versionSpec,
                 1     /* maxCount */,
                 false /* includeFileDetails */,
                 true  /* slotMode */,

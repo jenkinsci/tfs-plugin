@@ -65,7 +65,7 @@ public class RemoteChangesetVersionCommandTest extends AbstractCallableCommandTe
                 isA(RecursionType.class),
                 (String) isNull(),
                 (VersionSpec) isNull(),
-                (VersionSpec) isNull(),
+                isA(VersionSpec.class),
                 anyInt(),
                 anyBoolean(),
                 anyBoolean(),
