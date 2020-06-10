@@ -299,9 +299,14 @@ public abstract class AbstractHookEvent {
                     for (final RemoteConfig repository : git.getRepositories()) {
                         boolean repositoryMatches = false;
                         for (final URIish remoteURL : repository.getURIs()) {
-                            if (UriHelper.areSameGitRepo(uri, remoteURL)) {
-                                repositoryMatches = true;
-                                break;
+                            try {
+                                if (UriHelper.areSameGitRepo(uri, remoteURL)) {
+                                    repositoryMatches = true;
+                                    break;
+                                }
+                            } catch (Exception e) {
+                                LOGGER.fine("Error parsing " + remoteURL.toString() + " into URI");
+                                continue;
                             }
                         }
 
