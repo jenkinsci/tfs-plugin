@@ -145,12 +145,10 @@ public abstract class AbstractHookEvent {
                     final CauseAction causeAction = new CauseAction(cause);
                     final Action[] actionArray = ActionHelper.create(actionsWithSafeParams, causeAction);
                     scmTriggerItem.scheduleBuild2(quietPeriod, actionArray);
-                    if (gitCodePushedEventArgs instanceof PullRequestMergeCommitCreatedEventArgs) {
-                        try {
-                            TeamStatus.createFromJob((PullRequestMergeCommitCreatedEventArgs) gitCodePushedEventArgs, job);
-                        } catch (IOException ex) {
-                            LOGGER.warning("Could not create TeamStatus: " + ex.toString());
-                        }
+                    try {
+                        TeamStatus.createFromJob(gitCodePushedEventArgs, job);
+                    } catch (IOException ex) {
+                        LOGGER.warning("Could not create TeamStatus: " + ex.toString());
                     }
 
                     return new TeamEventsEndpoint.ScheduledResponseContributor(project);

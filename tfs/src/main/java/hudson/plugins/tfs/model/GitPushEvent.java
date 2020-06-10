@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.teamfoundation.core.webapi.model.TeamProjectReference;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitCommitRef;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitPush;
+import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRefUpdate;
 import com.microsoft.teamfoundation.sourcecontrol.webapi.model.GitRepository;
 import com.microsoft.visualstudio.services.webapi.model.IdentityRef;
 import hudson.model.Action;
@@ -102,11 +103,18 @@ public class GitPushEvent extends AbstractHookEvent {
 
     static String determineCommit(final GitPush gitPush) {
         final List<GitCommitRef> commits = gitPush.getCommits();
-        if (commits == null || commits.size() < 1) {
-            return null;
+        if (commits != null && commits.size() > 0) {
+            final GitCommitRef commit = commits.get(0);
+            return commit.getCommitId();
         }
-        final GitCommitRef commit = commits.get(0);
-        return commit.getCommitId();
+
+        final List<GitRefUpdate> refs = gitPush.getRefUpdates();
+        if (refs != null && refs.size() > 0) {
+            final GitRefUpdate ref = refs.get(0);
+            return ref.getNewObjectId();
+        }
+
+        return null;
     }
 
     static String determinePushedBy(final GitPush gitPush) {
