@@ -40,6 +40,13 @@ public class TeamUpdateWorkItemPostBuildAction extends Notifier implements Simpl
             @Nonnull final Launcher launcher,
             @Nonnull final TaskListener listener
     ) throws InterruptedException, IOException {
+        perform(run, listener);
+    }
+
+    /**
+     * Perform the build step.
+     */
+    public void perform(@Nonnull final Run<?, ?> run, final TaskListener listener) {
         try {
             final String absoluteUrl = run.getAbsoluteUrl();
             final ArrayList<ResourceRef> workItems = new ArrayList<ResourceRef>();

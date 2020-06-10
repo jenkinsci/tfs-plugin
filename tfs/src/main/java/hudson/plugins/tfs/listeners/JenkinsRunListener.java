@@ -7,6 +7,7 @@ import hudson.model.listeners.RunListener;
 
 import hudson.plugins.tfs.TeamCompletedStatusPostBuildAction;
 import hudson.plugins.tfs.TeamPendingStatusBuildStep;
+import hudson.plugins.tfs.TeamUpdateWorkItemPostBuildAction;
 import hudson.plugins.tfs.UnsupportedIntegrationAction;
 
 import javax.annotation.Nonnull;
@@ -44,8 +45,10 @@ public class JenkinsRunListener extends RunListener<Run> {
     public void onCompleted(final Run run, @Nonnull final TaskListener listener) {
         log.info("onCompleted: " + run.toString());
         if (UnsupportedIntegrationAction.isSupported(run, listener)) {
-            final TeamCompletedStatusPostBuildAction step = new TeamCompletedStatusPostBuildAction();
-            step.perform(run, listener);
+            final TeamUpdateWorkItemPostBuildAction updateWorkItemStep = new TeamUpdateWorkItemPostBuildAction();
+            updateWorkItemStep.perform(run, listener);
+            final TeamCompletedStatusPostBuildAction completedStep = new TeamCompletedStatusPostBuildAction();
+            completedStep.perform(run, listener);
         }
     }
 }
