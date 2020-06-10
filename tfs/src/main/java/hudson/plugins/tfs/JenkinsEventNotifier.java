@@ -1,11 +1,7 @@
 package hudson.plugins.tfs;
 
 import hudson.plugins.tfs.model.ConnectionParameters;
-import hudson.plugins.tfs.model.GitStatusContext;
-import hudson.plugins.tfs.model.GitStatusState;
 import hudson.plugins.tfs.model.JobCompletionEventArgs;
-import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
-import hudson.plugins.tfs.model.TeamGitStatus;
 import hudson.plugins.tfs.util.TeamRestClient;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -19,11 +15,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -60,52 +54,12 @@ public final class JenkinsEventNotifier {
                 final JobCompletionEventArgs args = new JobCompletionEventArgs(
                         connectionParameters.getConnectionKey(),
                         jsonPayload,
-                        getPayloadSignature(connectionParameters, jsonPayload));
+                        getPayloadSignature(connectionParameters.getConnectionSignature(), jsonPayload));
                 client.sendJobCompletionEvent(args);
             } catch (final Exception e) {
                 log.warning("ERROR: sendJobCompletionEvent: (collection=" + c.getCollectionUrl() + ") " + e.getMessage());
             }
         }
-    }
-
-    /**
-     * Send the build status of VSTS pull request back to connected TFS/VSTS servers only for those jobs kicked off by PRs.
-     */
-    public static void sendPullRequestBuildStatusEvent(final CommitParameterAction commitParameter, final GitStatusState buildState, final String buildDescription, final String targetUrl, final String jobFullPath) {
-        try {
-            if (commitParameter != null) {
-                if (commitParameter instanceof PullRequestParameterAction) {
-                    final PullRequestParameterAction prpa = (PullRequestParameterAction) commitParameter;
-                    final PullRequestMergeCommitCreatedEventArgs pullRequestMergeCommitCreatedEventArgs = prpa.getPullRequestMergeCommitCreatedEventArgs();
-                    sendPullRequestBuildStatusEvent(pullRequestMergeCommitCreatedEventArgs, buildState, buildDescription, targetUrl, jobFullPath);
-                }
-            }
-        } catch (final Exception e) {
-            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to exception: " + e.getMessage());
-        }
-        return;
-    }
-
-    /**
-     * Send the build status of VSTS pull request back to connected TFS/VSTS servers.
-     */
-    public static void sendPullRequestBuildStatusEvent(final PullRequestMergeCommitCreatedEventArgs gitCodePushedEventArgs, final GitStatusState buildState, final String buildDescription, final String targetUrl, final String jobFullPath) {
-        try {
-            final TeamGitStatus status = new TeamGitStatus();
-            status.state = buildState;
-            status.description = buildDescription;
-            status.targetUrl = targetUrl;
-            status.context = new GitStatusContext(" ", StringUtils.stripEnd(jobFullPath, "/"));
-
-            final URI collectionUri = gitCodePushedEventArgs.collectionUri;
-            final TeamRestClient client = new TeamRestClient(collectionUri);
-            client.addPullRequestStatus(gitCodePushedEventArgs, status);
-        } catch (MalformedURLException e) {
-            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to MalformedURLException: " + e.getMessage());
-        } catch (IOException e) {
-            log.warning("ERROR: sendPullRequestBuildStatusEvent fails due to IOException: " + e.getMessage());
-        }
-        return;
     }
 
     /**
@@ -154,6 +108,23 @@ public final class JenkinsEventNotifier {
         }
     }
 
+    /**
+     * Calculates the payload hash.
+     * @param secret
+     * @param payload
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws UnsupportedEncodingException
+     */
+    public static String getPayloadSignature(final String secret, final String payload)
+            throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+        final SecretKeySpec signingKey = new SecretKeySpec(secret.getBytes(ENCODING), "HmacSHA1");
+        final Mac mac = Mac.getInstance("HmacSHA1");
+        mac.init(signingKey);
+        return toHexString(mac.doFinal(payload.getBytes(ENCODING)));
+    }
+
     private static String urlCombine(final String url, final String... parts) {
         final StringBuilder sb = new StringBuilder();
         if (url != null) {
@@ -170,15 +141,6 @@ public final class JenkinsEventNotifier {
         return sb.toString();
     }
 
-    private static String getPayloadSignature(final ConnectionParameters connectionParameters, final String payload)
-            throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
-        final String key = connectionParameters.getConnectionSignature();
-        final SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(ENCODING), "HmacSHA1");
-        final Mac mac = Mac.getInstance("HmacSHA1");
-        mac.init(signingKey);
-        return toHexString(mac.doFinal(payload.getBytes(ENCODING)));
-    }
-
     private static String toHexString(final byte[] bytes) {
         final Formatter formatter = new Formatter();
         for (final byte b : bytes) {
@@ -187,6 +149,4 @@ public final class JenkinsEventNotifier {
 
         return formatter.toString();
     }
-
-
 }

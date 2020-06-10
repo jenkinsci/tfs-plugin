@@ -7,12 +7,14 @@ import hudson.model.Action;
 import hudson.model.BuildableItem;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import hudson.model.Executor;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue;
+import hudson.model.Run;
 import hudson.model.SimpleParameterDefinition;
 import hudson.model.queue.ScheduleResult;
 import hudson.plugins.tfs.CommitParameterAction;
@@ -25,6 +27,7 @@ import hudson.plugins.tfs.UnsupportedIntegrationAction;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.plugins.tfs.util.ActionHelper;
 import hudson.plugins.tfs.util.MediaType;
+import hudson.util.RunList;
 import jenkins.model.Jenkins;
 import jenkins.util.TimeDuration;
 import net.sf.json.JSONArray;
@@ -83,7 +86,7 @@ public class BuildCommand extends AbstractCommand {
         }
     }
 
-    protected JSONObject innerPerform(final BuildableItem buildableItem, final TimeDuration delay, final List<Action> extraActions) {
+    protected JSONObject innerPerform(final Job job, final BuildableItem buildableItem, final TimeDuration delay, final List<Action> extraActions) {
         final JSONObject result = new JSONObject();
 
         final Jenkins jenkins = Jenkins.getActiveInstance();
@@ -91,6 +94,11 @@ public class BuildCommand extends AbstractCommand {
         final Cause cause = new Cause.UserIdCause();
         final CauseAction causeAction = new CauseAction(cause);
         final Action[] actionArray = ActionHelper.create(extraActions, causeAction);
+        for (Action a : extraActions) {
+            if (a instanceof TeamPullRequestMergedDetailsAction) {
+                cancelPreviousPullRequestBuilds(job, (TeamPullRequestMergedDetailsAction) a, queue);
+            }
+        }
         final ScheduleResult scheduleResult = queue.schedule2(buildableItem, delay.getTime(), actionArray);
         final Queue.Item item = scheduleResult.getItem();
         if (item != null) {
@@ -209,7 +217,29 @@ public class BuildCommand extends AbstractCommand {
             actions.add(action);
         }
 
-        return innerPerform(buildableItem, delay, actions);
+        return innerPerform(job, buildableItem, delay, actions);
+    }
+
+    private void cancelPreviousPullRequestBuilds(Job job, TeamPullRequestMergedDetailsAction pullReqeuestMergedDetails, Queue queue) {
+        RunList<?> allBuilds = job.getBuilds();
+
+        for (Run run : allBuilds) {
+            TeamPullRequestMergedDetailsAction cause = run.getAction(TeamPullRequestMergedDetailsAction.class);
+            if (cause != null && run.isBuilding()) {
+                if (cause instanceof TeamPullRequestMergedDetailsAction &&
+                        cause.gitPullRequest.getPullRequestId() == pullReqeuestMergedDetails.gitPullRequest.getPullRequestId()) {
+                    LOGGER.info("Canceling previously triggered Job: " + run.getFullDisplayName());
+
+                    Executor executor = run.getExecutor();
+                    if (executor != null)
+                        executor.doStop();
+
+                    Queue.Item item = queue.getItem(run.getQueueId());
+                    if (item != null)
+                        queue.cancel(item);
+                }
+            }
+        }
     }
 
     static void contributeTeamBuildParameterActions(final Map<String, String> teamBuildParameters, final List<Action> actions) {

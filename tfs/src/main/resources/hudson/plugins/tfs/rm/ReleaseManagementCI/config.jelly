@@ -1,18 +1,15 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
   <f:entry title="Collection url" field="collectionUrl">
     <f:textbox field="collectionUrl" />
   </f:entry>
+  <f:entry title="Credentials" field="credentialsId">
+    <c:select expressionAllowed="false" />
+  </f:entry>
   <f:entry title="Team project" field="projectName">
-    <f:textbox field="projectName"/>
+    <f:select />
   </f:entry>
   <f:entry title="Release definition" field="releaseDefinitionName">
-    <f:textbox field="releaseDefinitionName"/>
-  </f:entry>
-  <f:entry title="Username" field="username">
-    <f:textbox field="username"/>
-  </f:entry>
-  <f:entry title="Password or PAT" field="password">
-    <f:password field="password"/>
+    <f:select />
   </f:entry>
 </j:jelly>

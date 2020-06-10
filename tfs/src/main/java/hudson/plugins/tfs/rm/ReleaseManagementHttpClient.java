@@ -3,17 +3,20 @@ package hudson.plugins.tfs.rm;
 
 import com.google.gson.Gson;
 import hudson.util.Secret;
-import java.io.IOException;
+
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Ankit Goyal
@@ -57,6 +60,18 @@ public class ReleaseManagementHttpClient
         String response = this.ExecutePostmethod(url, body);
         return new Gson().fromJson(response, ReleaseArtifactVersionsResponse.class);
     }
+
+    public List<Project> GetProjectItems() throws ReleaseManagementException
+    {
+        String url = this.accountUrl + "/_apis/projects?api-version=1.0";
+        String response = this.ExecuteGetMethod(url);
+        try {
+            String values = new JSONObject(response).getString("value");
+            return Arrays.asList(new Gson().fromJson(values, Project[].class));
+        } catch (JSONException ex) {
+            throw new ReleaseManagementException(ex);
+        }
+    }
     
     private String ExecutePostmethod(String url, String body) throws ReleaseManagementException
     {
@@ -73,14 +88,6 @@ public class ReleaseManagementHttpClient
             {
                 throw new ReleaseManagementException("Error occurred.%nStatus: " + status + "%nResponse: " + response + "%n");
             }
-        }
-        catch(HttpException ex)
-        {
-            throw new ReleaseManagementException(ex);
-        }
-        catch(IOException ex)
-        {
-            throw new ReleaseManagementException(ex);
         }
         catch(Exception ex)
         {
@@ -103,14 +110,6 @@ public class ReleaseManagementHttpClient
             {
                 throw new ReleaseManagementException("Error occurred.%nStatus: " + status + "%nResponse: " + response + "%n");
             }
-        }
-        catch(HttpException ex)
-        {
-            throw new ReleaseManagementException(ex);
-        }
-        catch(IOException ex)
-        {
-            throw new ReleaseManagementException(ex);
         }
         catch(Exception ex)
         {

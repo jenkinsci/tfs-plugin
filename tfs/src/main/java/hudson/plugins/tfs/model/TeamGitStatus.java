@@ -4,7 +4,9 @@ package hudson.plugins.tfs.model;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -36,17 +38,30 @@ public class TeamGitStatus {
         if (result == null) {
             status.state = GitStatusState.Pending;
             status.description = status.state.toString();
-        }
-        else {
+        } else {
             status.state = RESULT_TO_STATE.get(result);
             status.description = result.toString();
         }
+        final Job<?, ?> job = run.getParent();
+        status.description = job.getDisplayName() + run.getDisplayName() + ": " + status.description;
         status.targetUrl = run.getAbsoluteUrl();
-        final Job<?, ?> project = run.getParent();
-        final String runDisplayName = run.getDisplayName();
-        final String projectDisplayName = project.getDisplayName();
-        status.context = new GitStatusContext(runDisplayName, projectDisplayName);
+        status.context = getStatusContext(job);
         return status;
+    }
+
+    public static TeamGitStatus fromJob(@Nonnull final Job job) {
+        final TeamGitStatus status = new TeamGitStatus();
+        status.state = GitStatusState.Pending;
+        status.description = "Jenkins Job " + job.getDisplayName() + " queued";
+        status.targetUrl = job.getAbsoluteUrl();
+        status.context = getStatusContext(job);
+        return status;
+    }
+
+    private static GitStatusContext getStatusContext(@Nonnull final Job job) {
+        final String instanceUrl = StringUtils.stripEnd(Jenkins.getInstance().getRootUrl(), "/");
+        final String projectDisplayName = job.getParent().getFullName() + "/" + job.getDisplayName();
+        return new GitStatusContext(projectDisplayName, instanceUrl);
     }
 
     public String toJson() {
