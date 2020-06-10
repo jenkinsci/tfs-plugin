@@ -5,7 +5,6 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.runner.Description;
 
-import javax.xml.bind.DatatypeConverter;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -14,6 +13,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Base64;
 import java.util.Enumeration;
 
 public class IntegrationTestHelper {
@@ -169,7 +169,7 @@ public class IntegrationTestHelper {
     }
 
     public static String formatFriendlyName(final byte[] addressBytes) {
-        final String base64 = DatatypeConverter.printBase64Binary(addressBytes);
+        final String base64 = Base64.getEncoder().encodeToString(addressBytes);
         final String slashToMinus = base64.replace('/', '-');
         return slashToMinus;
     }
