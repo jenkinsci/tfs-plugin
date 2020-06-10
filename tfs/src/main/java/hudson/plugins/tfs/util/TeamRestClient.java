@@ -9,10 +9,12 @@ import com.microsoft.visualstudio.services.webapi.patch.Operation;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.plugins.tfs.TeamCollectionConfiguration;
 import hudson.plugins.tfs.model.GitCodePushedEventArgs;
+import hudson.plugins.tfs.model.GitPullRequestIteration;
 import hudson.plugins.tfs.model.HttpMethod;
 import hudson.plugins.tfs.model.JobCompletionEventArgs;
 import hudson.plugins.tfs.model.JsonPatchOperation;
 import hudson.plugins.tfs.model.Link;
+import hudson.plugins.tfs.model.ListOfGitPullRequestIteration;
 import hudson.plugins.tfs.model.ListOfGitRepositories;
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 import hudson.plugins.tfs.model.Server;
@@ -329,4 +331,24 @@ public class TeamRestClient {
         request(Void.class, HttpMethod.POST, requestUri, json, headers);
     }
 
+    public int getPullRequestIteration(PullRequestMergeCommitCreatedEventArgs args) throws IOException {
+        final QueryString qs = new QueryString(API_VERSION, "4.1");
+        final URI requestUri = UriHelper.join(
+                collectionUri, args.projectId,
+                "_apis", "git",
+                "repositories", args.repoId,
+                "pullRequests", args.pullRequestId,
+                "iterations",
+                qs);
+
+        ListOfGitPullRequestIteration list = request(ListOfGitPullRequestIteration.class, HttpMethod.GET, requestUri, null);
+
+        for (GitPullRequestIteration iteration : list.value) {
+            if (iteration.sourceRefCommit.getCommitId().equals(args.sourceCommit)) {
+                return iteration.id;
+            }
+        }
+
+        return -1;
+    }
 }

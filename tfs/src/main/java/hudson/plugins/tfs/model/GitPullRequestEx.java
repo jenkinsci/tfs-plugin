@@ -10,7 +10,22 @@ import java.util.Arrays;
  * by extending {@link GitPullRequest}.
  */
 public class GitPullRequestEx extends GitPullRequest {
+    private boolean supportsIterations;
     private ResourceRef[] workItemRefs;
+
+    /**
+     * Returns iteration support.
+     */
+    public boolean getSupportsIterations() {
+        return supportsIterations;
+    }
+
+    /**
+     * Sets if iterations are supported.
+     */
+    public void setSupportsIterations(final boolean supportsIterations) {
+        this.supportsIterations = supportsIterations;
+    }
 
     /**
      * Returns the work item references.
