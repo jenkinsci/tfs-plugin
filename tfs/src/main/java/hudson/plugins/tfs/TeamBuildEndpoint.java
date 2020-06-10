@@ -262,6 +262,10 @@ public class TeamBuildEndpoint implements UnprotectedRootAction {
                         break;
                     }
                 }
+
+                if (job == null) {
+                    throw new IllegalArgumentException("Job " + jobName + " found but branch " + sourceBranch + " is missing");
+                }
             }
         }
 
