@@ -24,7 +24,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 
-import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.codec.binary.Base64; // This was replaced with Apache Commons and not java.util.Base64 because the encode function there requires compilation with java 8 and the library is currently on java 7.
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +70,7 @@ public class TeamRestClient {
         final String password = secretPassword.getPlainText();
         final String credPair = username + ":" + password;
         final byte[] credBytes = credPair.getBytes(MediaType.UTF_8);
-        final String base64enc = DatatypeConverter.printBase64Binary(credBytes);
+        final String base64enc = Base64.encodeBase64String(credBytes);
         final String result = "Basic " + base64enc;
         return result;
     }
