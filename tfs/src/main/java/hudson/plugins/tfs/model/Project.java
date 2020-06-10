@@ -175,16 +175,17 @@ public class Project {
      * Gets the latest changeset that isn't in a cloaked path.
      * @param fromChangeset the changeset that was last seen, as a point of reference
      * @param cloakedPaths the list of cloaked paths in the project
+     * @param mappedPaths the list of server paths that are explicitly mapped in the project
      * @return the {@link ChangeSet} instance representing the last entry in the history for the path
      */
-    public ChangeSet getLatestUncloakedChangeset(final int fromChangeset, final Collection<String> cloakedPaths) {
+    public ChangeSet getLatestUncloakedChangeset(final int fromChangeset, final Collection<String> cloakedPaths, final Collection<String> mappedPaths) {
         final ChangesetVersionSpec fromVersion = new ChangesetVersionSpec(fromChangeset);
         final List<ChangeSet> changeSets = getVCCHistory(fromVersion, LatestVersionSpec.INSTANCE, true, Integer.MAX_VALUE);
-        final ChangeSet result = findLatestUncloakedChangeset(cloakedPaths, changeSets);
+        final ChangeSet result = findLatestUncloakedChangeset(cloakedPaths, mappedPaths, changeSets);
         return result;
     }
 
-    static ChangeSet findLatestUncloakedChangeset(final Collection<String> cloakedPaths, final List<ChangeSet> changeSets) {
+    static ChangeSet findLatestUncloakedChangeset(final Collection<String> cloakedPaths, final Collection<String> mappedPaths, final List<ChangeSet> changeSets) {
         ChangeSet result = null;
 
         // We need to search from latest to earliest, otherwise an incorrect result is produced
@@ -198,7 +199,7 @@ public class Project {
             lastChangeSetNumber = changeSetNumber;
             final Collection<String> changes = s.getAffectedPaths();
 
-            final boolean fullyCloaked = isChangesetFullyCloaked(changes, cloakedPaths);
+            final boolean fullyCloaked = isChangesetFullyCloaked(changes, cloakedPaths, mappedPaths);
             if (!fullyCloaked) {
                 result = s;
                 break;
@@ -215,18 +216,18 @@ public class Project {
      *                     changesets that are fully covered by one or more of these paths
      * @return a list of change sets
      */
-    public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final Calendar fromTimestamp, final Calendar toTimestamp, final Collection<String> cloakedPaths) {
+    public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final Calendar fromTimestamp, final Calendar toTimestamp, final Collection<String> cloakedPaths, final Collection<String> mappedPaths) {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
-        return getDetailedHistoryWithoutCloakedPaths(fromVersion, toVersion, cloakedPaths);
+        return getDetailedHistoryWithoutCloakedPaths(fromVersion, toVersion, cloakedPaths, mappedPaths);
     }
 
-    public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final VersionSpec fromVersion, final VersionSpec toVersion, final Collection<String> cloakedPaths) {
+    public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final VersionSpec fromVersion, final VersionSpec toVersion, final Collection<String> cloakedPaths, final Collection<String> mappedPaths) {
         final List<ChangeSet> changeSets = getVCCHistory(fromVersion, toVersion, true, Integer.MAX_VALUE);
         final ArrayList<ChangeSet> changeSetNoCloaked = new ArrayList<ChangeSet>();
         for (final ChangeSet changeset : changeSets) {
             final Collection<String> affectedPaths = changeset.getAffectedPaths();
-            final boolean fullyCloaked = isChangesetFullyCloaked(affectedPaths, cloakedPaths);
+            final boolean fullyCloaked = isChangesetFullyCloaked(affectedPaths, cloakedPaths, mappedPaths);
             if (!fullyCloaked) {
                 changeSetNoCloaked.add(changeset);
             }
@@ -234,19 +235,32 @@ public class Project {
         return changeSetNoCloaked;
     }
 
-    static boolean isChangesetFullyCloaked(final Collection<String> changesetPaths, final Collection<String> cloakedPaths) {
+    static boolean isChangesetFullyCloaked(final Collection<String> changesetPaths, final Collection<String> cloakedPaths, final Collection<String> mappedPaths) {
         if (cloakedPaths == null) {
             return false;
         }
         for (final String tfsPath : changesetPaths) {
-            boolean isPathCloaked = false;
+            String mostSpecificCloakedPath = null;
             for (final String cloakedPath : cloakedPaths) {
                 if (tfsPath.regionMatches(true, 0, cloakedPath, 0, cloakedPath.length())) {
-                    isPathCloaked = true;
-                    break;
+                    
+                    if ((mostSpecificCloakedPath == null) || (mostSpecificCloakedPath.length() < cloakedPath.length())) {
+                        mostSpecificCloakedPath = cloakedPath;
+                    }
                 }
             }
-            if (!isPathCloaked) {
+
+            if (mostSpecificCloakedPath != null) {
+                if (mappedPaths != null) {
+                    for (final String mappedPath : mappedPaths) {
+                        if ((mappedPath.regionMatches(true, 0, mostSpecificCloakedPath, 0, mostSpecificCloakedPath.length())) &&
+                            (tfsPath.regionMatches(true, 0, mappedPath, 0, mappedPath.length()))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else {
                 return false;
             }
         }

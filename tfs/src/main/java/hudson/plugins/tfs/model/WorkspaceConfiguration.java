@@ -3,6 +3,9 @@ package hudson.plugins.tfs.model;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import hudson.model.InvisibleAction;
 
@@ -21,14 +24,16 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
     private final String serverUrl;
     private boolean workspaceExists;
     private Collection<String> cloakedPaths;
+    private Map<String, String> mappedPaths;
 
-    public WorkspaceConfiguration(String serverUrl, String workspaceName, String projectPath, Collection<String> cloakedPaths, String workfolder) {
+    public WorkspaceConfiguration(String serverUrl, String workspaceName, String projectPath, Collection<String> cloakedPaths, Map<String, String> mappedPaths, String workfolder) {
         this.workspaceName = workspaceName;
         this.workfolder = workfolder;
         this.projectPath = projectPath;
         this.serverUrl = serverUrl;
         this.workspaceExists = true;
         this.cloakedPaths = cloakedPaths;
+        this.mappedPaths = mappedPaths;
     }
 
     public WorkspaceConfiguration(WorkspaceConfiguration configuration) {
@@ -38,6 +43,7 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
         this.serverUrl = configuration.serverUrl;
         this.workspaceExists = configuration.workspaceExists;
         this.cloakedPaths = configuration.cloakedPaths;
+        this.mappedPaths = configuration.mappedPaths;
     }
 
     public String getWorkspaceName() {
@@ -68,6 +74,10 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
         return cloakedPaths;
     }
 
+    public Map<String, String> getMappedPaths() {
+        return mappedPaths;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -78,6 +88,7 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
         result = prime * result + (workspaceExists ? 1231 : 1237);
         result = prime * result + ((workspaceName == null) ? 0 : workspaceName.hashCode());
         result = prime * result + ((cloakedPaths == null) ? 0 : cloakedPaths.hashCode());
+        result = prime * result + ((mappedPaths == null) ? 0 : mappedPaths.hashCode());
         return result;
     }
 
@@ -121,6 +132,35 @@ public class WorkspaceConfiguration extends InvisibleAction implements Serializa
             return false;
         else if (!cloakedPaths.containsAll(other.cloakedPaths))
             return false;
+        if (mappedPaths == null) {
+            if (other.mappedPaths != null)
+                return false;
+        } else if (other.mappedPaths == null)
+            return false;
+        else if (mappedPaths.size() != other.mappedPaths.size())
+            return false;
+        else {
+            final Iterator<Entry<String, String>> localPaths = mappedPaths.entrySet().iterator();
+            while (localPaths.hasNext()) {
+                final Entry<String, String> actualItem = localPaths.next();
+                String key = actualItem.getKey();
+                if (!other.mappedPaths.containsKey(key)) {
+                    return false;
+                }
+
+                final String expectedItem = other.mappedPaths.get(key);
+                final String actualMappedPath = actualItem.getValue();
+                if (actualMappedPath == null) {
+                    if (expectedItem != null)
+                        return false;
+                }
+                else {
+                    if (!actualMappedPath.equals(expectedItem)) {
+                        return false;
+                    }
+                }
+            }
+        }
         return true;
     }
 
