@@ -54,46 +54,50 @@ public class RemoteChangesetVersionCommand extends AbstractCallableCommand<Integ
 
     public Integer call() throws Exception {
         final Server server = createServer();
-        final MockableVersionControlClient vcc = server.getVersionControlClient();
-        final TaskListener listener = server.getListener();
-        final PrintStream logger = listener.getLogger();
-        final VersionSpec versionSpec = VersionSpec.parseSingleVersionFromSpec(versionSpecString, VersionControlConstants.AUTHENTICATED_USER);
+        try {
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            final TaskListener listener = server.getListener();
+            final PrintStream logger = listener.getLogger();
+            final VersionSpec versionSpec = VersionSpec.parseSingleVersionFromSpec(versionSpecString, VersionControlConstants.AUTHENTICATED_USER);
 
-        final String specString = RemoteChangesetVersionCommand.toString(versionSpec);
-        final String queryingMessage = String.format(QueryingTemplate, path, specString);
-        logger.println(queryingMessage);
+            final String specString = RemoteChangesetVersionCommand.toString(versionSpec);
+            final String queryingMessage = String.format(QueryingTemplate, path, specString);
+            logger.println(queryingMessage);
 
-        final Changeset[] serverChangeSets = vcc.queryHistory(
-                path,
-                versionSpec,
-                0 /* deletionId */,
-                RecursionType.FULL,
-                null /* user */,
-                null,
-                null,
-                1     /* maxCount */,
-                false /* includeFileDetails */,
-                true  /* slotMode */,
-                false /* includeDownloadInfo */,
-                false /* sortAscending */
-        );
-        Integer changeSetNumber = null;
-        final String resultMessage;
-        if (serverChangeSets != null && serverChangeSets.length >= 1) {
-            final Changeset serverChangeset = serverChangeSets[0];
-            changeSetNumber = serverChangeset.getChangesetID();
-            final Date changeSetDate = serverChangeset.getDate().getTime();
-            final String author = serverChangeset.getOwner();
-            final SimpleDateFormat simpleDateFormat = DateUtil.TFS_DATETIME_FORMATTER.get();
-            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            final String changeSetDateIso8601 = simpleDateFormat.format(changeSetDate);
-            resultMessage = String.format(ResultTemplate, changeSetNumber, author, changeSetDateIso8601);
-        } else {
-            resultMessage = FailedTemplate;
+            final Changeset[] serverChangeSets = vcc.queryHistory(
+                    path,
+                    versionSpec,
+                    0 /* deletionId */,
+                    RecursionType.FULL,
+                    null /* user */,
+                    null,
+                    null,
+                    1     /* maxCount */,
+                    false /* includeFileDetails */,
+                    true  /* slotMode */,
+                    false /* includeDownloadInfo */,
+                    false /* sortAscending */
+            );
+            Integer changeSetNumber = null;
+            final String resultMessage;
+            if (serverChangeSets != null && serverChangeSets.length >= 1) {
+                final Changeset serverChangeset = serverChangeSets[0];
+                changeSetNumber = serverChangeset.getChangesetID();
+                final Date changeSetDate = serverChangeset.getDate().getTime();
+                final String author = serverChangeset.getOwner();
+                final SimpleDateFormat simpleDateFormat = DateUtil.TFS_DATETIME_FORMATTER.get();
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                final String changeSetDateIso8601 = simpleDateFormat.format(changeSetDate);
+                resultMessage = String.format(ResultTemplate, changeSetNumber, author, changeSetDateIso8601);
+            } else {
+                resultMessage = FailedTemplate;
+            }
+            logger.println(resultMessage);
+
+            return changeSetNumber;
+        } finally {
+            server.close();
         }
-        logger.println(resultMessage);
-
-        return changeSetNumber;
     }
 
     public static String toString(final VersionSpec versionSpec) {

@@ -48,49 +48,53 @@ public class NewWorkspaceCommand extends AbstractCallableCommand<Void, Exception
 
     public Void call() throws IOException {
         final Server server = createServer();
-        final MockableVersionControlClient vcc = server.getVersionControlClient();
-        final TFSTeamProjectCollection connection = vcc.getConnection();
-        final TaskListener listener = server.getListener();
-        final PrintStream logger = listener.getLogger();
-        final String userName = server.getUserName();
+        try {
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            final TFSTeamProjectCollection connection = vcc.getConnection();
+            final TaskListener listener = server.getListener();
+            final PrintStream logger = listener.getLogger();
+            final String userName = server.getUserName();
 
-        final String creatingMessage = String.format(CreatingTemplate, workspaceName, userName);
-        logger.println(creatingMessage);
-        
-        WorkingFolder[] foldersToMap = null;
-        if (serverPath != null && localPath != null) {
-            final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
-            logger.println(mappingMessage);
+            final String creatingMessage = String.format(CreatingTemplate, workspaceName, userName);
+            logger.println(creatingMessage);
 
-            final List<WorkingFolder> folderList = new ArrayList<WorkingFolder>();
+            WorkingFolder[] foldersToMap = null;
+            if (serverPath != null && localPath != null) {
+                final String mappingMessage = String.format(MappingTemplate, serverPath, localPath, workspaceName);
+                logger.println(mappingMessage);
 
-            folderList.add(new WorkingFolder(serverPath, LocalPath.canonicalize(localPath), WorkingFolderType.MAP, RecursionType.FULL));
+                final List<WorkingFolder> folderList = new ArrayList<WorkingFolder>();
+
+                folderList.add(new WorkingFolder(serverPath, LocalPath.canonicalize(localPath), WorkingFolderType.MAP, RecursionType.FULL));
 
 
-            for (final String cloakedPath : cloakedPaths) {
-                final String cloakingMessage = String.format(CloakingTemplate, cloakedPath, workspaceName);
-                logger.println(cloakingMessage);
+                for (final String cloakedPath : cloakedPaths) {
+                    final String cloakingMessage = String.format(CloakingTemplate, cloakedPath, workspaceName);
+                    logger.println(cloakingMessage);
 
-                folderList.add(new WorkingFolder(cloakedPath, null, WorkingFolderType.CLOAK));
+                    folderList.add(new WorkingFolder(cloakedPath, null, WorkingFolderType.CLOAK));
+                }
+                foldersToMap = folderList.toArray(EMPTY_WORKING_FOLDER_ARRAY);
             }
-            foldersToMap = folderList.toArray(EMPTY_WORKING_FOLDER_ARRAY);
+
+            updateCache(connection);
+            // TODO: we might need to delete a previous workspace that had another name
+            vcc.createWorkspace(
+                    foldersToMap,
+                    workspaceName,
+                    VersionControlConstants.AUTHENTICATED_USER,
+                    VersionControlConstants.AUTHENTICATED_USER,
+                    null /* TODO: set comment to something nice/useful */,
+                    WorkspaceLocation.SERVER /* TODO: pull request #33 adds LOCAL support */,
+                    WorkspaceOptions.NONE
+            );
+
+            final String createdMessage = String.format(CreatedTemplate, workspaceName);
+            logger.println(createdMessage);
+
+            return null;
+        } finally {
+            server.close();
         }
-
-        updateCache(connection);
-        // TODO: we might need to delete a previous workspace that had another name
-        vcc.createWorkspace(
-                foldersToMap,
-                workspaceName,
-                VersionControlConstants.AUTHENTICATED_USER,
-                VersionControlConstants.AUTHENTICATED_USER,
-                null /* TODO: set comment to something nice/useful */,
-                WorkspaceLocation.SERVER /* TODO: pull request #33 adds LOCAL support */,
-                WorkspaceOptions.NONE
-        );
-
-        final String createdMessage = String.format(CreatedTemplate, workspaceName);
-        logger.println(createdMessage);
-
-        return null;
     }
 }

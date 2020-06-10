@@ -74,13 +74,12 @@ public class TFSLabeler extends Notifier {
 
             final Launcher localLauncher = launcher != null ? launcher : new Launcher.LocalLauncher(listener);
             Server server = tfsScm.createServer(localLauncher, listener, build.getRootBuild());
-
-            Computer computer = Computer.currentComputer();
-            String normalizedLabelName = computeDynamicValue(build, getLabelName());
-            String tfsWorkspace = tfsScm.getWorkspaceName(build.getRootBuild(), computer);
-            String tfsProjectPath = computeDynamicValue(build, tfsScm.getProjectPath());
-            
             try {
+                Computer computer = Computer.currentComputer();
+                String normalizedLabelName = computeDynamicValue(build, getLabelName());
+                String tfsWorkspace = tfsScm.getWorkspaceName(build.getRootBuild(), computer);
+                String tfsProjectPath = computeDynamicValue(build, tfsScm.getProjectPath());
+                
                 logger.info(String.format("Create label '%s' on workspace '%s' with project path '%s' ", normalizedLabelName, tfsWorkspace, tfsProjectPath));
                 LabelCommand labelCommand = new LabelCommand(server, normalizedLabelName, tfsWorkspace, tfsProjectPath);
                 server.execute(labelCommand.getCallable());
@@ -89,7 +88,6 @@ public class TFSLabeler extends Notifier {
                 TelemetryHelper.sendEvent("team-label", new TelemetryHelper.PropertyMapBuilder()
                         .serverContext(server.getUrl(), server.getUrl())
                         .build());
-
             } finally {
                 server.close();
             }

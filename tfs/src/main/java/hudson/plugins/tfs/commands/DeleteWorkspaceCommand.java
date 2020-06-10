@@ -41,37 +41,41 @@ public class DeleteWorkspaceCommand extends AbstractCallableCommand<Void, IOExce
 
     public Void call() throws IOException {
         final Server server = createServer();
-        final MockableVersionControlClient vcc = server.getVersionControlClient();
-        final TaskListener listener = server.getListener();
-        final PrintStream logger = listener.getLogger();
+        try {
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            final TaskListener listener = server.getListener();
+            final PrintStream logger = listener.getLogger();
 
-        final String computerName = (DeleteWorkspaceCommand.this.computerName == null)
-                ? LocalHost.getShortName()
-                : DeleteWorkspaceCommand.this.computerName;
-        final String deletingMessage = String.format(DeletingTemplate, workspaceName, computerName);
-        logger.println(deletingMessage);
+            final String computerName = (DeleteWorkspaceCommand.this.computerName == null)
+                    ? LocalHost.getShortName()
+                    : DeleteWorkspaceCommand.this.computerName;
+            final String deletingMessage = String.format(DeletingTemplate, workspaceName, computerName);
+            logger.println(deletingMessage);
 
-        final WorkspacePermissions filter = WorkspacePermissions.NONE_OR_NOT_SUPPORTED;
-        final Workspace[] workspaces = vcc.queryWorkspaces(workspaceName, null, computerName, filter);
-        int numDeletions = 0;
-        for (final Workspace innerWorkspace : workspaces) {
-            vcc.deleteWorkspace(innerWorkspace);
+            final WorkspacePermissions filter = WorkspacePermissions.NONE_OR_NOT_SUPPORTED;
+            final Workspace[] workspaces = vcc.queryWorkspaces(workspaceName, null, computerName, filter);
+            int numDeletions = 0;
+            for (final Workspace innerWorkspace : workspaces) {
+                vcc.deleteWorkspace(innerWorkspace);
 
-            // work around a defect in the TFS SDK for Java
-            // TODO: check if this workaround is still necessary after upgrading
-            final WorkspaceInfo workspaceInfo = vcc.removeCachedWorkspace(workspaceName, VersionControlConstants.AUTHENTICATED_USER);
-            if (workspaceInfo != null) {
-                final TFSTeamProjectCollection tpc = vcc.getConnection();
-                final PersistenceStoreProvider provider = tpc.getPersistenceStoreProvider();
-                final Workstation currentWorkstation = Workstation.getCurrent(provider);
-                currentWorkstation.saveConfigIfDirty();
+                // work around a defect in the TFS SDK for Java
+                // TODO: check if this workaround is still necessary after upgrading
+                final WorkspaceInfo workspaceInfo = vcc.removeCachedWorkspace(workspaceName, VersionControlConstants.AUTHENTICATED_USER);
+                if (workspaceInfo != null) {
+                    final TFSTeamProjectCollection tpc = vcc.getConnection();
+                    final PersistenceStoreProvider provider = tpc.getPersistenceStoreProvider();
+                    final Workstation currentWorkstation = Workstation.getCurrent(provider);
+                    currentWorkstation.saveConfigIfDirty();
+                }
+
+                numDeletions++;
             }
 
-            numDeletions++;
+            final String deletedMessage = String.format(DeletedTemplate, numDeletions, workspaceName);
+            logger.println(deletedMessage);
+        } finally {
+            server.close();
         }
-
-        final String deletedMessage = String.format(DeletedTemplate, numDeletions, workspaceName);
-        logger.println(deletedMessage);
 
         return null;
     }

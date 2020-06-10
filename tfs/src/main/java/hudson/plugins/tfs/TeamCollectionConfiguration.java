@@ -209,16 +209,13 @@ public class TeamCollectionConfiguration extends AbstractDescribableImpl<TeamCol
         catch (final TFSUnauthorizedException e) {
             // performing TFVC requires All Scopes and someone might be setting up for Git only; ignore
         }
-        final TeamRestClient client = new TeamRestClient(collectionUri, credentials);
-
-        try {
+        try (final TeamRestClient client = new TeamRestClient(collectionUri, credentials)) {
             final ListOfGitRepositories repositories = client.getRepositories();
             if (repositories.count < 1) {
                 return FormValidation.warning("There does not seem to be any Git repositories");
             }
             return FormValidation.ok("Success via REST API.");
-        }
-        catch (final IOException e) {
+        } catch (final IOException e) {
             return FormValidation.error("Error: " + e.getMessage());
         }
     }

@@ -26,13 +26,14 @@ import org.apache.commons.io.IOUtils;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 
-public class TeamRestClient {
+public class TeamRestClient implements Closeable {
 
     private static final String AUTHORIZATION = "Authorization";
     private static final String API_VERSION = "api-version";
@@ -329,4 +330,10 @@ public class TeamRestClient {
         request(Void.class, HttpMethod.POST, requestUri, json, headers);
     }
 
+    @Override
+    public void close() {
+        if(server != null) {
+            server.close();
+        }
+    }
 }

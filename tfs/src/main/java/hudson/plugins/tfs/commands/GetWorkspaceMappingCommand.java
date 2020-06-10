@@ -30,23 +30,27 @@ public class GetWorkspaceMappingCommand extends AbstractCallableCommand<String, 
     @Override
     public String call() throws Exception {
         final Server server = createServer();
-        final MockableVersionControlClient vcc = server.getVersionControlClient();
-        final TFSTeamProjectCollection connection = vcc.getConnection();
-        updateCache(connection);
-        final TaskListener listener = server.getListener();
-        final PrintStream logger = listener.getLogger();
+        try {
+            final MockableVersionControlClient vcc = server.getVersionControlClient();
+            final TFSTeamProjectCollection connection = vcc.getConnection();
+            updateCache(connection);
+            final TaskListener listener = server.getListener();
+            final PrintStream logger = listener.getLogger();
 
-        final String checkingMessage = String.format(CheckingMappingTemplate, localPath);
-        logger.print(checkingMessage);
+            final String checkingMessage = String.format(CheckingMappingTemplate, localPath);
+            logger.print(checkingMessage);
 
-        final Workspace workspace = vcc.tryGetWorkspace(localPath);
-        final boolean existsMapping = workspace != null;
-        final String result = existsMapping ? workspace.getName() : null;
+            final Workspace workspace = vcc.tryGetWorkspace(localPath);
+            final boolean existsMapping = workspace != null;
+            final String result = existsMapping ? workspace.getName() : null;
 
-        final String resultMessage = existsMapping ? String.format(FoundResultTemplate, result) : "no.";
-        logger.println(resultMessage);
+            final String resultMessage = existsMapping ? String.format(FoundResultTemplate, result) : "no.";
+            logger.println(resultMessage);
 
-        return result;
+            return result;
+        } finally {
+            server.close();
+        }
     }
 
 }
