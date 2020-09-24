@@ -10,6 +10,7 @@
   <packaging>pom</packaging>
   <name>Team Foundation Server Plug-in parent</name>
   <version>5.157.1-SNAPSHOT</version>
+  <url>https://github.com/jenkinsci/mailer-plugin</url>
   <properties>
     <!-- Version is required to be compatible with current Pipeline plugin dependencies -->
     <jenkins.version>1.642.3</jenkins.version>
