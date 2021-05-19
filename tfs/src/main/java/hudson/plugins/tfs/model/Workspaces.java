@@ -104,8 +104,8 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
      * @param localPath the path in the local filesystem to map
      * @return a workspace
      */
-    public Workspace newWorkspace(final String workspaceName, final String serverPath, Collection<String> cloakedPaths, final String localPath) {
-        NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, cloakedPaths, localPath);
+    public Workspace newWorkspace(final String workspaceName, final String serverPath, Collection<String> cloakedPaths, final String localPath, boolean isLocalWorkspace) {
+        NewWorkspaceCommand command = new NewWorkspaceCommand(server, workspaceName, serverPath, cloakedPaths, localPath, isLocalWorkspace);
         server.execute(command.getCallable());
         Workspace workspace = new Workspace(workspaceName);
         workspaces.put(workspaceName, workspace);
@@ -122,7 +122,7 @@ public class Workspaces implements ListWorkspacesCommand.WorkspaceFactory {
         server.execute(command.getCallable());
     }
 
-    public Workspace createWorkspace(String name, String computer, String owner, String comment) {
-        return new Workspace(name, computer, owner, comment);
+    public Workspace createWorkspace(String name, String computer, String owner, String comment, boolean isLocalWorkspace) {
+        return new Workspace(name, computer, owner, comment, isLocalWorkspace);
     }
 }

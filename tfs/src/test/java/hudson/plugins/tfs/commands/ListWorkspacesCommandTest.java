@@ -215,8 +215,8 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     @Test public void logWithManyWorkspaces() throws IOException {
 
         final ArrayList<Workspace> workspaces = new ArrayList<Workspace>();
-        workspaces.add(new Workspace("Hudson.JOBXXXXXXXXXXXXXX", "XXXX-XXXX-007", "First.LastXX", "This is a comment"));
-        workspaces.add(new Workspace("Hudson-newJob-MASTER", "COMPUTER", "jenkins-tfs-plugin", "Created by the Jenkins tfs-plugin functional tests."));
+        workspaces.add(new Workspace("Hudson.JOBXXXXXXXXXXXXXX", "XXXX-XXXX-007", "First.LastXX", "This is a comment", false));
+        workspaces.add(new Workspace("Hudson-newJob-MASTER", "COMPUTER", "jenkins-tfs-plugin", "Created by the Jenkins tfs-plugin functional tests.", false));
 
         ListWorkspacesCommand.log(workspaces, listener.getLogger());
 
@@ -231,7 +231,7 @@ public class ListWorkspacesCommandTest extends AbstractCallableCommandTest {
     @Test public void logWithOneWorkspace() throws IOException {
 
         final ArrayList<Workspace> workspaces = new ArrayList<Workspace>(1);
-        workspaces.add(new Workspace("asterix", "ASTERIX", "redsolo_cp", "This is a comment"));
+        workspaces.add(new Workspace("asterix", "ASTERIX", "redsolo_cp", "This is a comment", false));
 
         ListWorkspacesCommand.log(workspaces, listener.getLogger());
 

@@ -86,6 +86,7 @@ public class TeamFoundationServerScm extends SCM {
     private final String projectPath;
     private Collection<String> cloakedPaths;
     private String localPath;
+    private boolean isLocalWorkspace;
     private final String workspaceName;
     @Deprecated private String userPassword;
     private Secret password;
@@ -169,6 +170,10 @@ public class TeamFoundationServerScm extends SCM {
         this.localPath = localPath;
     }
 
+    public boolean isLocalWorkspace() {
+        return isLocalWorkspace;
+    }
+
     public String getVersionSpec() {
         return versionSpec;
     }
@@ -231,6 +236,11 @@ public class TeamFoundationServerScm extends SCM {
     @DataBoundSetter
     public void setCloakedPaths(final String cloakedPaths) {
         this.cloakedPaths = splitCloakedPaths(cloakedPaths);
+    }
+
+    @DataBoundSetter
+    public void setIsLocalWorkspace(final boolean isLocalWorkspace) {
+        this.isLocalWorkspace = isLocalWorkspace;
     }
 
     // Bean properties END
@@ -312,7 +322,7 @@ public class TeamFoundationServerScm extends SCM {
     public void checkout(final Run<?, ?> build, final Launcher launcher, final FilePath workspaceFilePath, final TaskListener listener, final File changelogFile, final SCMRevisionState baseline) throws IOException, InterruptedException {
         Server server = createServer(launcher, listener, build);
         try {
-            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, workspaceFilePath.toComputer()), getProjectPath(build), getCloakedPaths(build), getLocalPath());
+            WorkspaceConfiguration workspaceConfiguration = new WorkspaceConfiguration(server.getUrl(), getWorkspaceName(build, workspaceFilePath.toComputer()), getProjectPath(build), getCloakedPaths(build), getLocalPath(), isLocalWorkspace());
             final Run<?, ?> previousBuild = build.getPreviousBuild();
             // Check if the configuration has changed
             if (previousBuild != null) {
@@ -342,7 +352,7 @@ public class TeamFoundationServerScm extends SCM {
             final Project project = server.getProject(projPath);
             final int changeSet = recordWorkspaceChangesetVersion(build, listener, project, projPath, singleVersionSpec);
 
-            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite());
+            CheckoutAction action = new CheckoutAction(workspaceConfiguration.getWorkspaceName(), workspaceConfiguration.getProjectPath(), workspaceConfiguration.getCloakedPaths(), workspaceConfiguration.getWorkfolder(), isUseUpdate(), isUseOverwrite(), workspaceConfiguration.isLocalWorkspace());
             List<ChangeSet> list;
             if (StringUtils.isNotEmpty(singleVersionSpec)) {
                 list = action.checkoutBySingleVersionSpec(server, workspaceFilePath, singleVersionSpec);

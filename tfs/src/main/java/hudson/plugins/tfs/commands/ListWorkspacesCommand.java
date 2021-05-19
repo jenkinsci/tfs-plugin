@@ -26,7 +26,7 @@ public class ListWorkspacesCommand extends AbstractCallableCommand<List<Workspac
     private final boolean shouldLogWorkspaces;
 
     public interface WorkspaceFactory {
-        Workspace createWorkspace(String name, String computer, String owner, String comment);
+        Workspace createWorkspace(String name, String computer, String owner, String comment, boolean isLocalWorkspace);
     }
     
     public ListWorkspacesCommand(final ServerConfigurationProvider server) {
@@ -69,12 +69,14 @@ public class ListWorkspacesCommand extends AbstractCallableCommand<List<Workspac
             final String computer = sdkWorkspace.getComputer();
             final String ownerName = sdkWorkspace.getOwnerName();
             final String comment = Util.fixNull(sdkWorkspace.getComment());
+            final boolean isLocalWorkspace = sdkWorkspace.isLocalWorkspace();
 
             final Workspace workspace = new Workspace(
                     name,
                     computer,
                     ownerName,
-                    comment);
+                    comment,
+                    isLocalWorkspace);
             result.add(workspace);
         }
 
@@ -94,7 +96,8 @@ public class ListWorkspacesCommand extends AbstractCallableCommand<List<Workspac
                 parser.getColumn(0), 
                 parser.getColumn(2),
                 parser.getColumn(1),
-                Util.fixNull(parser.getColumn(3)));
+                Util.fixNull(parser.getColumn(3)),
+                false);
             list.add(workspace);            
         }
         return list;

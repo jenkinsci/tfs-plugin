@@ -33,13 +33,15 @@ public class NewWorkspaceCommand extends AbstractCallableCommand<Void, Exception
     private final String serverPath;
     private final Collection<String> cloakedPaths;
     private final String localPath;
+    private final boolean isLocalWorkspace;
 
-    public NewWorkspaceCommand(final ServerConfigurationProvider server, final String workspaceName, final String serverPath, Collection<String> cloakedPaths, final String localPath) {
+    public NewWorkspaceCommand(final ServerConfigurationProvider server, final String workspaceName, final String serverPath, Collection<String> cloakedPaths, final String localPath, boolean isLocalWorkspace) {
         super(server);
         this.workspaceName = workspaceName;
         this.serverPath = serverPath;
         this.cloakedPaths = cloakedPaths;
         this.localPath = localPath;
+        this.isLocalWorkspace = isLocalWorkspace;
     }
 
     public Callable<Void, Exception> getCallable() {
@@ -84,7 +86,7 @@ public class NewWorkspaceCommand extends AbstractCallableCommand<Void, Exception
                 VersionControlConstants.AUTHENTICATED_USER,
                 VersionControlConstants.AUTHENTICATED_USER,
                 null /* TODO: set comment to something nice/useful */,
-                WorkspaceLocation.SERVER /* TODO: pull request #33 adds LOCAL support */,
+                (isLocalWorkspace) ? WorkspaceLocation.LOCAL : WorkspaceLocation.SERVER,
                 WorkspaceOptions.NONE
         );
 
