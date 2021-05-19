@@ -9,7 +9,7 @@
   <artifactId>tfs-parent</artifactId>
   <packaging>pom</packaging>
   <name>Team Foundation Server Plug-in parent</name>
-  <version>5.142.0-SNAPSHOT</version>
+  <version>5.157.1-SNAPSHOT</version>
   <properties>
     <!-- Version is required to be compatible with current Pipeline plugin dependencies -->
     <jenkins.version>1.642.3</jenkins.version>
@@ -30,7 +30,7 @@
       <timezone>-5</timezone>
     </developer>
     <developer>
-      <id>jpricketmsft</id>
+      <id>jpricket</id>
       <name>Jason Prickett</name>
       <email>jpricket@microsoft.com</email>
       <timezone>-5</timezone>
@@ -54,7 +54,7 @@
       <timezone>+5</timezone>
     </developer>
     <developer>
-      <id>kelliejos</id>
+      <id>keljos</id>
       <name>Kellie Jos</name>
       <email>kej@microsoft.com</email>
       <timezone>-5</timezone>
@@ -64,6 +64,12 @@
       <name>Manfred Moser</name>
       <email>manfred@simpligility.com</email>
       <timezone>-8</timezone>
+    </developer>
+    <developer>
+      <id>leantk</id>
+      <name>Leah Antkiewicz</name>
+      <email>leantk@microsoft.com</email>
+      <timezone>-5</timezone>
     </developer>
   </developers>
   <scm>

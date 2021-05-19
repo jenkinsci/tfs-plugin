@@ -300,7 +300,7 @@ public class ReleaseManagementCI extends Notifier implements Serializable {
         @Override
         public String getDisplayName() 
         {
-            return "Trigger release in TFS/Team Services";
+            return "Trigger release in Azure Devops Server/Services";
         }
 
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item owner,

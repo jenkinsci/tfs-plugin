@@ -107,7 +107,7 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
         }
 
         for (final Item project : Jenkins.getActiveInstance().getAllItems()) {
-            if (project instanceof AbstractProject && project.getName().equalsIgnoreCase(projectName)) {
+            if (project instanceof AbstractProject && project.getFullName().equalsIgnoreCase(projectName)) {
                 return (AbstractProject) project;
             }
         }

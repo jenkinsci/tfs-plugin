@@ -70,7 +70,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
             json = JSONObject.fromObject(payload);
         }
 
-        json.put("name", build.getProject().getName());
+        json.put("name", build.getProject().getFullName());
         json.put("id", build.getNumber());
         json.put("startedBy", getStartedBy(build));
 
@@ -113,7 +113,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
             request.addHeader("X-Jenkins-Signature", signature);
         }
 
-        request.setEntity(new StringEntity(payload));
+        request.setEntity(new StringEntity(new String(payload.getBytes("UTF-8"))));
         final HttpResponse response = client.execute(request);
         final int statusCode = response.getStatusLine().getStatusCode();
 
@@ -144,7 +144,7 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
 
         @Override
         public String getDisplayName() {
-            return "TFS/Team Services Release Webhook";
+            return "Azure Devops Server/Services Release Webhook";
         }
     }
 

@@ -26,7 +26,7 @@ Pre-requisites
     ```
     2. A great test is to try to perform a `mvn deploy`, which should attempt to upload some files to the snapshot repo and will need those credentials.
 	3. If you're worried about putting your "Jenkins infrastructure" password  in plain-text in that file, Maven has a password encryption facility that relies on a master password in another file.  Presumably, you secure access to the 2nd file by placing it on a thumbdrive that you carry with you when you're not at your computer, etc.
-1. A TFS server or a VSTS account, configured as per `Testing.md`
+1. A TFS server or a Azure DevOps account, configured as per `Testing.md`
 
 Release
 =======
@@ -34,7 +34,7 @@ Release
 1. Pre-release.  Perform these manual steps on your workstation:
     1. Run a full build, with all its end-to-end tests; it takes about 5 minutes:
     ```
-    mvn clean verify --batch-mode -Dtfs_server_name=&lt;TFS host name or VSTS account host name> -Dtfs_user_name=&lt;user> -Dtfs_user_password=&lt;password>
+    mvn clean verify --batch-mode -Dtfs_server_name=&lt;TFS host name or Azure DevOps account host name> -Dtfs_user_name=&lt;user> -Dtfs_user_password=&lt;password>
     ```
     2. Look at the commits since the last release by going to https://github.com/jenkinsci/tfs-plugin/releases and clicking the "XX commits to master since this release" link.  It will be easiest to surf the associated pull requests, so hit Ctrl+F, search for "Merge pull request" and Ctrl+click every #XXX link to the right of the highlights.
     3. Fill in the categories of the `ReleaseNotes.md` template, usually in one of the following formats:
@@ -64,7 +64,7 @@ Release
 		1. Add timestamps to the Console Output
 		2. Inject environment variables to the build process
 		    1. **COMPUTERNAME** (the host name of the Jenkins node that will run the job)
-            2. **TFS_SERVER_NAME** (the TFS host name or VSTS account host name)
+            2. **TFS_SERVER_NAME** (the TFS host name or Azure DevOps account host name)
         3. Use secret text(s) or file(s)
 			1. **TFS_USER_NAME** and **TFS_USER_PASSWORD** are initialized from a credential
     4. Build. Add the following steps:
