@@ -192,7 +192,7 @@
       <!-- Used for configuring collections globally -->
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>credentials</artifactId>
-      <version>1.25</version>
+      <version>2.3.19</version>
     </dependency>
     <dependency>
       <!-- Used for configuring collections globally -->
