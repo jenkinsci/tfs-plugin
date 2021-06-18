@@ -534,6 +534,10 @@ public class TeamFoundationServerScm extends SCM {
      * VERSION_SPEC during the build
      */
     public void buildEnvironment(final Run<?, ?> build, final Map<String, String> env) {
+		// catch null on pipeline fail
+		if(null == build) {
+			return;
+		}
         final TeamBuildDetailsAction buildDetailsAction = build.getAction(TeamBuildDetailsAction.class);
         if (buildDetailsAction != null) {
             //Add the TFS build variables as environment variables in the Jenkins environment
