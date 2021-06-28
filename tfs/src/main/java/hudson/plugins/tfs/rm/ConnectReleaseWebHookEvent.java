@@ -9,6 +9,7 @@ import hudson.plugins.tfs.model.AbstractHookEvent;
 import hudson.plugins.tfs.model.servicehooks.Event;
 import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
+import hudson.util.Secret;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -138,7 +139,7 @@ public class ConnectReleaseWebHookEvent extends AbstractHookEvent {
         }
 
         String payloadUrl = validateAndGetPayloadUrl(resource);
-        String secret = resource.getSecret();
+        Secret secret = resource.getSecret();
         String webHookName = resource.getWebHookName();
 
         if (StringUtils.isBlank(webHookName)) {
