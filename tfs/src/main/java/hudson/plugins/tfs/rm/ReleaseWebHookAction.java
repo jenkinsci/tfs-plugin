@@ -108,8 +108,9 @@ public class ReleaseWebHookAction extends Notifier implements Serializable {
         request.addHeader("Content-Type", "application/json");
         request.addHeader("Accept", "application/json; api-version=" + apiVersion);
 
-        if (!StringUtils.isBlank(webHook.getSecret())) {
-            String signature = ReleaseWebHookHelper.getPayloadSignature(webHook.getSecret(), payload);
+        String password = webHook.getSecret().getPlainText();
+        if (!StringUtils.isBlank(password)) {
+            String signature = ReleaseWebHookHelper.getPayloadSignature(password, payload);
             request.addHeader("X-Jenkins-Signature", signature);
         }
 

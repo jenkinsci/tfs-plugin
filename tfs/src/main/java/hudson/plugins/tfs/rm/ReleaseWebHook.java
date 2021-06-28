@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -21,10 +22,10 @@ public class ReleaseWebHook extends AbstractDescribableImpl<ReleaseWebHook> {
 
     private final String webHookName;
     private final String payloadUrl;
-    private final String secret;
+    private final Secret secret;
 
     @DataBoundConstructor
-    public ReleaseWebHook(final String webHookName, final String payloadUrl, final String secret) {
+    public ReleaseWebHook(final String webHookName, final String payloadUrl, final Secret secret) {
         this.webHookName = webHookName;
         this.payloadUrl = payloadUrl;
         this.secret = secret;
@@ -33,7 +34,7 @@ public class ReleaseWebHook extends AbstractDescribableImpl<ReleaseWebHook> {
     public ReleaseWebHook(final String webHookName, final String payloadUrl) {
         this.webHookName = webHookName;
         this.payloadUrl = payloadUrl;
-        this.secret = StringUtils.EMPTY;
+        this.secret = Secret.fromString("");
     }
 
     public String getWebHookName() {
@@ -44,7 +45,7 @@ public class ReleaseWebHook extends AbstractDescribableImpl<ReleaseWebHook> {
         return this.payloadUrl;
     }
 
-    public String getSecret() {
+    public Secret getSecret() {
         return this.secret;
     }
 

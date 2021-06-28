@@ -1,5 +1,7 @@
 package hudson.plugins.tfs.rm;
 
+import hudson.util.Secret;
+
 /**
  * Implements ReleaseWebHookResource. Model to represent webHook register event.
  * @author Kalyan
@@ -9,7 +11,7 @@ public class ReleaseWebHookResource {
     private String webHookName;
     private String projectName;
     private String payloadUrl;
-    private String secret;
+    private Secret secret;
 
     public String getOperationType() {
         return this.operationType;
@@ -43,11 +45,11 @@ public class ReleaseWebHookResource {
         this.payloadUrl = payloadUrl;
     }
 
-    public String getSecret() {
+    public Secret getSecret() {
         return this.secret;
     }
 
-    public void setSecret(final String secret) {
+    public void setSecret(final Secret secret) {
         this.secret = secret;
     }
 }
