@@ -375,7 +375,7 @@ Details about previous releases can be found on the [Releases page](https://gith
 [Jenkins JIRA]: http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?mode=hide&reset=true&jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27tfs-plugin%27
 [Team Foundation Version Control]: https://msdn.microsoft.com/en-us/library/ms181237.aspx
 [Azure DevOps]: https://www.visualstudio.com/products/visual-studio-team-services-vs
-[TFS SDK for Java]: http://blogs.msdn.com/b/bharry/archive/2011/05/16/announcing-a-java-sdk-for-tfs.aspx
+[TFS SDK for Java]: https://github.com/microsoft/team-explorer-everywhere/releases
 [Microsoft Team Explorer Everywhere]: http://www.microsoft.com/en-us/download/details.aspx?id=40785
 [JENKINS-4021]: https://issues.jenkins-ci.org/browse/JENKINS-4021
 [JENKINS-4184]: https://issues.jenkins-ci.org/browse/JENKINS-4184
