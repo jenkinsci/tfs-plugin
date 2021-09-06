@@ -9,7 +9,7 @@
   <artifactId>tfs</artifactId>
   <packaging>hpi</packaging>
   <name>Team Foundation Server Plug-in</name>
-  <version>5.157.1-SNAPSHOT</version>
+  <version>5.666.1-SNAPSHOT</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Team+Foundation+Server+Plugin</url>
 
   <properties>
@@ -279,5 +279,13 @@
         <artifactId>json</artifactId>
         <version>20090211</version>
     </dependency>
+	
+	<dependency>
+  <groupId>org.apache.commons</groupId>
+  <artifactId>commons-digester3</artifactId>
+  <version>3.2</version>
+  <classifier>with-deps</classifier>
+</dependency>
+	
   </dependencies>
 </project>
