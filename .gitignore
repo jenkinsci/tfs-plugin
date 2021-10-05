@@ -6,3 +6,6 @@
 .classpath
 /.idea
 **/*.iml
+/tfs - Shortcut.lnk
+/buildlog.log
+/.vs
