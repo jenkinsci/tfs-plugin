@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.commands;
 
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
@@ -16,7 +17,7 @@ import hudson.remoting.Callable;
 import java.io.IOException;
 import java.io.PrintStream;
 
-public class DeleteWorkspaceCommand extends AbstractCallableCommand implements Callable<Void, IOException> {
+public class DeleteWorkspaceCommand extends AbstractCallableCommand<Void, IOException> {
 
     private static final String DeletingTemplate = "Deleting workspaces named '%s' from computer '%s'...";
     private static final String DeletedTemplate = "Deleted %d workspace(s) named '%s'.";

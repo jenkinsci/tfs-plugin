@@ -7,9 +7,15 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.net.URI;
 
+/**
+ * Finds credentials in the TeamCollectionConfiguration.
+ */
 public class AutomaticCredentialsConfigurer extends CredentialsConfigurer {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Constructor for use with data binding.
+     */
     @DataBoundConstructor
     public AutomaticCredentialsConfigurer() {
 
@@ -21,6 +27,9 @@ public class AutomaticCredentialsConfigurer extends CredentialsConfigurer {
         return TeamCollectionConfiguration.findCredentialsForCollection(collectionUri);
     }
 
+    /**
+     * Class descriptor.
+     */
     @Extension
     public static final class DescriptorImpl extends CredentialsConfigurerDescriptor {
 

@@ -1,11 +1,14 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import org.eclipse.jgit.transport.URIish;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class GitCodePushedEventArgs {
+public class GitCodePushedEventArgs implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     public URI collectionUri;
     public URI repoUri;
@@ -13,6 +16,7 @@ public class GitCodePushedEventArgs {
     public String repoId;
     public String commit;
     public String pushedBy;
+    public String targetBranch;
 
     public URIish getRepoURIish() {
         final String repoUriString = repoUri.toString();

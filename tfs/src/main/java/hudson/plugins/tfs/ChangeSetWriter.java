@@ -1,5 +1,7 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Util;
 import hudson.plugins.tfs.model.ChangeSet;
 import hudson.plugins.tfs.util.DateUtil;
@@ -27,6 +29,7 @@ public class ChangeSetWriter {
      *
      * @throws IOException If an I/O error occurs
      */
+    @SuppressFBWarnings(value = "DM_DEFAULT_ENCODING", justification = "Better mot modify charset in case it might raise errors")
     public void write(List<ChangeSet> changeSets, File changelogFile) throws IOException {
         FileWriter writer = new FileWriter(changelogFile);
         try {

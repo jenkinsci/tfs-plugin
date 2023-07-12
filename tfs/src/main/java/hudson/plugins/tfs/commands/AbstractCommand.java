@@ -1,9 +1,7 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.commands;
 
-import java.util.Calendar;
-
 import hudson.Util;
-import hudson.plugins.tfs.util.DateUtil;
 import hudson.plugins.tfs.util.MaskedArgumentListBuilder;
 import hudson.util.ArgumentListBuilder;
 

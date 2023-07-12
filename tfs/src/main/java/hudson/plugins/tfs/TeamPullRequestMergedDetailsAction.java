@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
 import com.microsoft.teamfoundation.core.webapi.model.TeamProjectReference;
@@ -24,7 +25,7 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
     private static final long serialVersionUID = 1L;
     private static final String URL_NAME = "team-pullRequestMergedDetails";
 
-    public GitPullRequestEx gitPullRequest;
+    public transient GitPullRequestEx gitPullRequest;
     public String message;
     public String detailedMessage;
     public String collectionUri;
@@ -45,7 +46,6 @@ public class TeamPullRequestMergedDetailsAction implements Action, Serializable 
         if (action != null && action.hasWorkItems()) {
             Collections.addAll(destination, action.getWorkItems());
             final GitPullRequestEx gitPullRequest = action.gitPullRequest;
-            final GitRepository repository = gitPullRequest.getRepository();
             final URI collectionUri = URI.create(action.collectionUri);
             return collectionUri;
         }

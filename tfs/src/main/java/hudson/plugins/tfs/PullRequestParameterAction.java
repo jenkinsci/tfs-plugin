@@ -2,6 +2,9 @@ package hudson.plugins.tfs;
 
 import hudson.plugins.tfs.model.PullRequestMergeCommitCreatedEventArgs;
 
+/**
+ * Action that adds the pull request merge event args to the build information.
+ */
 public class PullRequestParameterAction extends CommitParameterAction {
 
     private final PullRequestMergeCommitCreatedEventArgs args;

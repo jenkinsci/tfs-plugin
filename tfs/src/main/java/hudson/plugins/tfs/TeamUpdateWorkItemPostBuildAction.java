@@ -7,6 +7,7 @@ import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.plugins.tfs.util.TeamRestClient;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -50,12 +51,15 @@ public class TeamUpdateWorkItemPostBuildAction extends Notifier implements Simpl
                     final Integer workItemId = Integer.valueOf(workItemIdString, 10);
                     client.addHyperlinkToWorkItem(workItemId, absoluteUrl);
                 }
+
+                // Send telemetry
+                TelemetryHelper.sendEvent("team-workitem-update", new TelemetryHelper.PropertyMapBuilder()
+                        .serverContext(collectionUri.toString(), collectionUri.toString())
+                        .build());
             }
-        }
-        catch (final IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             listener.error(e.getMessage());
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace(listener.error("Error while trying to update associated work items in TFS/Team Services"));
         }
     }
@@ -66,6 +70,9 @@ public class TeamUpdateWorkItemPostBuildAction extends Notifier implements Simpl
         return BuildStepMonitor.NONE;
     }
 
+    /**
+     * Class descriptor.
+     */
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 

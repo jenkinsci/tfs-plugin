@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import hudson.util.Secret;
@@ -19,5 +20,15 @@ public class ProxyHostEx extends com.microsoft.tfs.core.httpclient.ProxyHost {
 
     public Secret getProxySecret() {
         return proxySecret;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

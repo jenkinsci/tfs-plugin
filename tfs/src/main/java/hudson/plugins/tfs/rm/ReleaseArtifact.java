@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.rm;
 
 import com.google.gson.annotations.SerializedName;

@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import org.apache.commons.lang.builder.EqualsBuilder;

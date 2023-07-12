@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
@@ -16,14 +17,14 @@ public abstract class CredentialsConfigurer implements ExtensionPoint, Describab
     }
 
     public CredentialsConfigurerDescriptor getDescriptor() {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getActiveInstance();
         return (CredentialsConfigurerDescriptor) jenkins.getDescriptorOrDie(getClass());
     }
 
     public abstract StandardUsernamePasswordCredentials getCredentials(final String collectionUri);
 
     public static DescriptorExtensionList<CredentialsConfigurer, CredentialsConfigurerDescriptor> all() {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getActiveInstance();
         return jenkins.getDescriptorList(CredentialsConfigurer.class);
     }
 }

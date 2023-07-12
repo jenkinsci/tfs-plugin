@@ -16,16 +16,25 @@ public class CommitParameterAction extends RevisionParameterAction {
 
     private final GitCodePushedEventArgs gitCodePushedEventArgs;
 
+    /**
+     * Saves the repo uri and GitCodePushedEventArgs.
+     */
     public CommitParameterAction(final GitCodePushedEventArgs e) {
         super(e.commit, e.getRepoURIish());
 
         this.gitCodePushedEventArgs = e;
     }
 
+    /**
+     * Returns the GitCodePushedEventArgs.
+     */
     public GitCodePushedEventArgs getGitCodePushedEventArgs() {
         return gitCodePushedEventArgs;
     }
 
+    /**
+     * Returns true if the git repo uri can originate from any of the remotes passed in.
+     */
     @Override
     public boolean canOriginateFrom(final Iterable<RemoteConfig> remotes) {
         final URI repoUri = gitCodePushedEventArgs.repoUri;

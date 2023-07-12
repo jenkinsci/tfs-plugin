@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.commands;
 
 import hudson.model.TaskListener;

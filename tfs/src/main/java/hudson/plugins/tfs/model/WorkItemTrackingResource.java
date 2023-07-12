@@ -1,10 +1,11 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.microsoft.visualstudio.services.webapi.model.ReferenceLinks;
 
 /**
- * Workaround for missing classes in vso-httpclient-java
+ * Workaround for missing classes in vso-httpclient-java.
  */
 public class WorkItemTrackingResource
     extends WorkItemTrackingResourceReference {

@@ -6,8 +6,14 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Used for builds with parameters.
+ */
 public class BuildWithParametersCommand extends BuildCommand {
 
+    /**
+     * Factory for creating BuildWithParametersCommand instances.
+     */
     public static class Factory implements AbstractCommand.Factory {
 
         @Override
@@ -21,11 +27,9 @@ public class BuildWithParametersCommand extends BuildCommand {
             final InputStream stream = me.getResourceAsStream("BuildWithParametersCommand.json");
             try {
                 return IOUtils.toString(stream, MediaType.UTF_8);
-            }
-            catch (final IOException e) {
+            } catch (final IOException e) {
                 throw new Error(e);
-            }
-            finally {
+            } finally {
                 IOUtils.closeQuietly(stream);
             }
         }

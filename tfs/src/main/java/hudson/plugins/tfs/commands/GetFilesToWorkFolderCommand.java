@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.commands;
 
 import java.io.PrintStream;
@@ -14,27 +15,29 @@ import hudson.plugins.tfs.model.MockableVersionControlClient;
 import hudson.plugins.tfs.model.Server;
 import hudson.remoting.Callable;
 
-public class GetFilesToWorkFolderCommand extends AbstractCallableCommand implements Callable<Void, Exception>, GetListener {
+public class GetFilesToWorkFolderCommand extends AbstractCallableCommand<Void, Exception> implements GetListener {
 
     private static final String GettingTemplate = "Getting version '%s' to '%s'...";
     private static final String GotTemplate = "Finished getting version '%s'. Retrieved %d resources.";
 
     private final String workFolder;
     private final String versionSpec;
+    private final boolean useOverwrite;
     private final boolean shouldLogEachGet;
     private PrintStream logger;
     private int getCount = 0;
 
-    public GetFilesToWorkFolderCommand(final ServerConfigurationProvider server, final String workFolder, final String versionSpec) {
-        this(server, workFolder, versionSpec, false);
+    public GetFilesToWorkFolderCommand(final ServerConfigurationProvider server, final String workFolder, final String versionSpec, boolean useOverwrite) {
+        this(server, workFolder, versionSpec, useOverwrite, false);
         // using shouldLogEachGet false as default, could be controlled by a config option at a later stage if desired, just adds noise to log though
     }
 
-    public GetFilesToWorkFolderCommand(final ServerConfigurationProvider server, final String workFolder, final String versionSpec, 
+    public GetFilesToWorkFolderCommand(final ServerConfigurationProvider server, final String workFolder, final String versionSpec, boolean useOverwrite,
         final boolean shouldLogEachGet) {
         super(server);
         this.workFolder = workFolder;
         this.versionSpec = versionSpec;
+        this.useOverwrite = useOverwrite;
         this.shouldLogEachGet = shouldLogEachGet;
     }
 
@@ -66,7 +69,7 @@ public class GetFilesToWorkFolderCommand extends AbstractCallableCommand impleme
         final Workspace workspace = vcc.getWorkspace(workFolder);
         final VersionControlEventEngine eventEngine = vcc.getEventEngine();
         eventEngine.addGetListener(this);
-        workspace.get(getVersionSpec, GetOptions.NONE);
+        workspace.get(getVersionSpec, useOverwrite ? GetOptions.OVERWRITE : GetOptions.NONE);
         eventEngine.removeGetListener(this);
 
         final String gotMessage = String.format(GotTemplate, versionSpecString, getCount);

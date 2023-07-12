@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import java.text.ParseException;
@@ -32,19 +33,19 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
     
     public ChangeSet(String version, Date date, String userString, String comment) {
         this.version = version;
-        this.date = date;
+        this.date = (date != null) ? new Date(date.getTime()) : null;
         this.comment = comment;
-        items = new ArrayList<Item>();
+        items = new ArrayList<>();
         setUser(userString);
     }
     
     public ChangeSet(String version, Date date, User author, String comment) {
         this.version = version;
-        this.date = date;
+        this.date = (date != null) ? new Date(date.getTime()) : null;
         this.authorUser = author;
         this.userString = author.getId();
         this.comment = comment;
-        items = new ArrayList<Item>();
+        items = new ArrayList<>();
     }
     
     @Override
@@ -122,7 +123,10 @@ public class ChangeSet extends hudson.scm.ChangeLogSet.Entry {
 
     @Exported
     public Date getDate() {
-        return date;
+        if (date != null) {
+            return new Date(date.getTime());
+        }
+        return null;
     }
     
     public void setDateStr(String dateStr) throws ParseException {

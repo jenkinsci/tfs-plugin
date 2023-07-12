@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
 import hudson.Extension;
@@ -6,10 +7,13 @@ import hudson.model.Job;
 import hudson.model.UnprotectedRootAction;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.tfs.model.AbstractHookEvent;
+import hudson.plugins.tfs.model.ConnectHookEvent;
 import hudson.plugins.tfs.model.GitPullRequestMergedEvent;
 import hudson.plugins.tfs.model.GitPushEvent;
 import hudson.plugins.tfs.model.PingHookEvent;
 import hudson.plugins.tfs.model.servicehooks.Event;
+import hudson.plugins.tfs.rm.ConnectReleaseWebHookEvent;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.plugins.tfs.util.EndpointHelper;
 import hudson.plugins.tfs.util.MediaType;
 import hudson.plugins.tfs.util.StringBodyParameter;
@@ -31,7 +35,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -56,6 +62,8 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         eventMap.put("ping", new PingHookEvent.Factory());
         eventMap.put("gitPullRequestMerged", new GitPullRequestMergedEvent.Factory());
         eventMap.put("gitPush", new GitPushEvent.Factory());
+        eventMap.put("connect", new ConnectHookEvent.Factory());
+        eventMap.put("rmWebhook", new ConnectReleaseWebHookEvent.Factory());
         HOOK_EVENT_FACTORIES_BY_NAME = Collections.unmodifiableMap(eventMap);
     }
 
@@ -80,7 +88,7 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
     public HttpResponse doIndex(final HttpServletRequest request) throws IOException {
         final Class<? extends TeamEventsEndpoint> me = this.getClass();
         final InputStream stream = me.getResourceAsStream("TeamEventsEndpoint.html");
-        final Jenkins instance = Jenkins.getInstance();
+        final Jenkins instance = Jenkins.getActiveInstance();
         final String rootUrl = instance.getRootUrl();
         final String eventRows = describeEvents(HOOK_EVENT_FACTORIES_BY_NAME, URL_NAME);
         try {
@@ -157,8 +165,8 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
         }
         final AbstractHookEvent.Factory factory = factoriesByName.get(eventName);
         final Event serviceHookEvent = deserializeEvent(body);
-        final String message = serviceHookEvent.getMessage().getText();
-        final String detailedMessage = serviceHookEvent.getDetailedMessage().getText();
+        final String message = serviceHookEvent.getMessage() != null ? serviceHookEvent.getMessage().getText() : "";
+        final String detailedMessage = serviceHookEvent.getDetailedMessage() != null ? serviceHookEvent.getDetailedMessage().getText() : "";
         final AbstractHookEvent hookEvent = factory.create();
         return hookEvent.perform(EndpointHelper.MAPPER, serviceHookEvent, message, detailedMessage);
     }
@@ -190,6 +198,10 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
             final StaplerRequest request,
             final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-events-git-pr-merged", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+
         dispatch(request, response, body);
     }
 
@@ -198,19 +210,57 @@ public class TeamEventsEndpoint implements UnprotectedRootAction {
             final StaplerRequest request,
             final StaplerResponse response,
             @StringBodyParameter @Nonnull final String body) {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-events-git-push", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+        dispatch(request, response, body);
+    }
+
+    @RequirePOST
+    public void doConnect(
+            final StaplerRequest request,
+            final StaplerResponse response,
+            @StringBodyParameter @Nonnull final String body) {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-events-connect", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+        dispatch(request, response, body);
+    }
+
+    @RequirePOST
+    public void doRmwebhook(
+            final StaplerRequest request,
+            final StaplerResponse response,
+            @StringBodyParameter @Nonnull final String body) {
+        // Send telemetry
+        TelemetryHelper.sendEvent("team-events-rmwebhook", new TelemetryHelper.PropertyMapBuilder().build());
         dispatch(request, response, body);
     }
 
     public static <T extends Trigger> T findTrigger(final Job<?, ?> job, final Class<T> tClass) {
         if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
             final ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
-            for (final Trigger trigger : pJob.getTriggers().values()) {
+            for (final Object trigger : pJob.getTriggers().values()) {
                 if (tClass.isInstance(trigger)) {
                     return tClass.cast(trigger);
                 }
             }
         }
         return null;
+    }
+
+    // A job may have multiple triggers of the same type. For example, both TeamPRPushTrigger and TeamPushTrigger are TeamPushTrigger type.
+    public static <T extends Trigger> List<T> findTriggers(final Job<?, ?> job, final Class<T> tClass) {
+        List<T> triggerList = new ArrayList<>();
+        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+            final ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
+            for (final Object trigger : pJob.getTriggers().values()) {
+                if (tClass.isInstance(trigger)) {
+                    triggerList.add(tClass.cast(trigger));
+                }
+            }
+        }
+        return triggerList;
     }
 
     /**

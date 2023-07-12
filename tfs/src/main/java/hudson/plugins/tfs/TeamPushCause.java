@@ -12,19 +12,22 @@ import java.io.IOException;
 public class TeamPushCause extends SCMTriggerCause {
 
     private final String pushedBy;
+    private final String context;
 
-    public TeamPushCause(final String pushedBy) {
-        this("", pushedBy);
+    public TeamPushCause(final String pushedBy, final String context) {
+        this("", pushedBy, context);
     }
 
-    public TeamPushCause(final File logFile, final String pushedBy) throws IOException {
+    public TeamPushCause(final File logFile, final String pushedBy, final String context) throws IOException {
         super(logFile);
         this.pushedBy = pushedBy;
+        this.context = context;
     }
 
-    public TeamPushCause(final String pollingLog, final String pushedBy) {
+    public TeamPushCause(final String pollingLog, final String pushedBy, final String context) {
         super(pollingLog);
         this.pushedBy = pushedBy;
+        this.context = context;
     }
 
     @Override
@@ -32,5 +35,19 @@ public class TeamPushCause extends SCMTriggerCause {
         final String template = "Started by TFS/Team Services push by %s";
         final String message = String.format(template, StringUtils.trimToEmpty(pushedBy));
         return message;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    public String getRunContext() {
+        return this.context;
     }
 }

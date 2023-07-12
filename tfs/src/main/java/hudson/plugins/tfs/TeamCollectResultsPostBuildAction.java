@@ -1,3 +1,4 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs;
 
 import hudson.Extension;
@@ -8,6 +9,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.tfs.model.TeamRequestedResult;
 import hudson.plugins.tfs.model.TeamResultType;
+import hudson.plugins.tfs.telemetry.TelemetryHelper;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -18,7 +20,6 @@ import hudson.util.io.ArchiverFactory;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -27,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +59,9 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             @Nonnull final FilePath workspace,
             @Nonnull final Launcher launcher,
             @Nonnull final TaskListener listener) throws InterruptedException, IOException {
+        TelemetryHelper.sendEvent("team-collect-results", new TelemetryHelper.PropertyMapBuilder()
+                .build());
+
         // TODO: do we want to emit an error or warning like the following?
         /*
         if (requestedResults == null || requestedResults.size() == 0) {
@@ -76,8 +81,7 @@ public class TeamCollectResultsPostBuildAction extends Recorder implements Simpl
             final String folderName = teamResultType.getFolderName();
             logger.print(" " + teamResultType.getDisplayName());
             final File resultFolder = new File(resultsRoot, folderName);
-            //noinspection ResultOfMethodCallIgnored
-            resultFolder.mkdirs();
+            Files.createDirectories(resultFolder.toPath());
             final String includes = requestedResult.getIncludes();
             final FilePath resultPath = new FilePath(resultFolder);
             final int numCopied = workspace.copyRecursiveTo(includes, resultPath);

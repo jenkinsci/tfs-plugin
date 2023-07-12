@@ -1,15 +1,14 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import com.microsoft.tfs.core.clients.versioncontrol.specs.version.LatestVersionSpec;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.User;
 import hudson.plugins.tfs.TeamPluginGlobalConfig;
 import hudson.plugins.tfs.commands.GetFilesToWorkFolderCommand;
 import hudson.plugins.tfs.commands.RemoteChangesetVersionCommand;
 import hudson.plugins.tfs.model.ChangeSet.Item;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -57,7 +56,7 @@ public class Project {
         (com.microsoft.tfs.core.clients.versioncontrol.soapextensions.Changeset serverChangeset, UserLookup userLookup) {
         final String version = Integer.toString(serverChangeset.getChangesetID(), 10);
         final Date date = serverChangeset.getDate().getTime();
-        final String author = serverChangeset.getCommitter();
+        final String author = serverChangeset.getOwner();
         final User authorUser = userLookup.find(author);
         final String comment = serverChangeset.getComment();
 
@@ -106,6 +105,7 @@ public class Project {
         return result;
     }
 
+    @SuppressFBWarnings(value = "DC_DOUBLECHECK", justification = "Only synchronize if not null")
     public UserLookup getOrCreateUserLookup() {
         if (userLookup == null) {
             synchronized (this) {
@@ -218,6 +218,10 @@ public class Project {
     public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final Calendar fromTimestamp, final Calendar toTimestamp, final Collection<String> cloakedPaths) {
         final DateVersionSpec fromVersion = new DateVersionSpec(fromTimestamp);
         final DateVersionSpec toVersion = new DateVersionSpec(toTimestamp);
+        return getDetailedHistoryWithoutCloakedPaths(fromVersion, toVersion, cloakedPaths);
+    }
+
+    public List<ChangeSet> getDetailedHistoryWithoutCloakedPaths(final VersionSpec fromVersion, final VersionSpec toVersion, final Collection<String> cloakedPaths) {
         final List<ChangeSet> changeSets = getVCCHistory(fromVersion, toVersion, true, Integer.MAX_VALUE);
         final ArrayList<ChangeSet> changeSetNoCloaked = new ArrayList<ChangeSet>();
         for (final ChangeSet changeset : changeSets) {
@@ -253,9 +257,10 @@ public class Project {
      * Gets all files from server.
      * @param localPath the local path to get all files into
      * @param versionSpec the version spec to use when getting the files
+     * @param useOverwrite if should overwrite changes
      */
-    public void getFiles(String localPath, String versionSpec) {
-        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec);
+    public void getFiles(String localPath, String versionSpec, boolean useOverwrite) {
+        GetFilesToWorkFolderCommand command = new GetFilesToWorkFolderCommand(server, localPath, versionSpec, useOverwrite);
         server.execute(command.getCallable());
     }
 

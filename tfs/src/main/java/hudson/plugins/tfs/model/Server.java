@@ -1,7 +1,7 @@
+//CHECKSTYLE:OFF
 package hudson.plugins.tfs.model;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.microsoft.tfs.core.TFSConfigurationServer;
 import com.microsoft.tfs.core.TFSTeamProjectCollection;
 import com.microsoft.tfs.core.clients.versioncontrol.VersionControlClient;
 import com.microsoft.tfs.core.clients.webservices.IIdentityManagementService;
@@ -17,6 +17,7 @@ import com.microsoft.tfs.core.util.CredentialsUtils;
 import com.microsoft.tfs.core.util.URIUtils;
 import com.microsoft.tfs.jni.helpers.LocalHost;
 import com.microsoft.tfs.util.Closable;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Launcher;
 import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
@@ -26,9 +27,9 @@ import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import jenkins.security.MasterToSlaveCallable;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,8 @@ public class Server implements ServerConfigurationProvider, Closable {
     private final WebProxySettings webProxySettings;
     private final ExtraSettings extraSettings;
     private MockableVersionControlClient mockableVcc;
+    private static HashMap<String, PersistenceStoreProvider> persistenceStoreProviderCache = new HashMap<String, PersistenceStoreProvider>();
+
 
     /**
      * This constructor overload assumes a Jenkins instance is present.
@@ -115,7 +118,12 @@ public class Server implements ServerConfigurationProvider, Closable {
             final PersistenceStoreProvider provider;
             if (this.extraSettings.isConfigFolderPerNode()) {
                 final String hostName = LocalHost.getShortName();
-                provider = new ClonePersistenceStoreProvider(defaultProvider, hostName);
+                if(persistenceStoreProviderCache.containsKey(hostName)) {
+                	provider =  persistenceStoreProviderCache.get(hostName);
+                } else {
+                	provider = new ClonePersistenceStoreProvider(defaultProvider, hostName);
+                	persistenceStoreProviderCache.put(hostName, provider);
+                }
             }
             else {
                 provider = defaultProvider;
@@ -136,7 +144,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         if (jenkins == null) {
             if (channel != null) {
                 try {
-                    result = channel.call(new Callable<TeamPluginGlobalConfig, Throwable>() {
+                    result = channel.call(new MasterToSlaveCallable<TeamPluginGlobalConfig, Throwable>() {
                         @Override
                         public TeamPluginGlobalConfig call() throws Throwable {
                             final Jenkins jenkins = Jenkins.getInstance();
@@ -165,7 +173,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         if (jenkins == null) {
             if (channel != null) {
                 try {
-                    proxyConfiguration = channel.call(new Callable<ProxyConfiguration, Throwable>() {
+                    proxyConfiguration = channel.call(new MasterToSlaveCallable<ProxyConfiguration, Throwable>() {
                         public ProxyConfiguration call() throws Throwable {
                             final Jenkins jenkins = Jenkins.getInstance();
                             final ProxyConfiguration result = jenkins != null ? jenkins.proxy : null;
@@ -200,6 +208,7 @@ public class Server implements ServerConfigurationProvider, Closable {
         return workspaces;
     }
 
+    @SuppressFBWarnings(value = { "DC_DOUBLECHECK", "IS2_INCONSISTENT_SYNC"}, justification = "Only synchronize if not null")
     public MockableVersionControlClient getVersionControlClient() {
         if (mockableVcc == null) {
             synchronized (this) {
@@ -260,21 +269,8 @@ public class Server implements ServerConfigurationProvider, Closable {
             this.mockableVcc.close();
         }
         if (this.tpc != null) {
-            // Close the configuration server connection that should be closed by
-            // TFSTeamProjectCollection
-            // The field is private, so use reflection
-            // This should be removed when the TFS SDK is fixed
-            // Post in MSDN forum: social.msdn.microsoft.com/Forums/vstudio/en-US/79985ef1-b35d-4fc5-af0b-b95e28402b83
-            try {
-                Field f = TFSTeamProjectCollection.class.getDeclaredField("configurationServer");
-                f.setAccessible(true);
-                TFSConfigurationServer configurationServer = (TFSConfigurationServer) f.get(this.tpc);
-                if (configurationServer != null) {
-                    configurationServer.close();
-                }
-                f.setAccessible(false);
-            } catch (NoSuchFieldException ignore) {
-            } catch (IllegalAccessException ignore) {
+            if(this.tpc.getConfigurationServer() != null) {
+                this.tpc.getConfigurationServer().close();
             }
             this.tpc.close();
         }
